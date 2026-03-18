@@ -1,6 +1,6 @@
 # REVORY MVP
 
-Setup inicial do projeto `revory-mvp`, construído com Next.js, TypeScript e Tailwind.
+Setup inicial do projeto `revory-mvp`, construido com Next.js, TypeScript e Tailwind.
 
 ## Foco do projeto
 
@@ -33,7 +33,7 @@ npm run lint
 npm run typecheck
 ```
 
-## Variáveis de ambiente
+## Variaveis de ambiente
 
 Copie `.env.example` para `.env.local` e ajuste os valores conforme o ambiente.
 
@@ -41,16 +41,16 @@ Copie `.env.example` para `.env.local` e ajuste os valores conforme o ambiente.
 
 ```text
 .
-├── src/
-│   └── app/
-│       ├── globals.css
-│       ├── layout.tsx
-│       └── page.tsx
-├── .env.example
-├── .gitignore
-├── eslint.config.mjs
-├── next.config.ts
-├── package.json
-├── postcss.config.mjs
-└── tsconfig.json
+|-- src/
+|   `-- app/
+|       |-- globals.css
+|       |-- layout.tsx
+|       `-- page.tsx
+|-- .env.example
+|-- .gitignore
+|-- eslint.config.mjs
+|-- next.config.ts
+|-- package.json
+|-- postcss.config.mjs
+`-- tsconfig.json
 ```
