@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -13,7 +14,9 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ClerkProvider>{children}</ClerkProvider>
+      </body>
     </html>
   );
 }
