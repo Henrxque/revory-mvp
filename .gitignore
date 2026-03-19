@@ -4,6 +4,7 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+.tools/
 
 .env
 .env.local

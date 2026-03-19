@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+enum WorkspaceStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+}
+
+enum FlowModeKey {
+  MODE_A
+  MODE_B
+  MODE_C
+}
+
+enum CommunicationChannel {
+  EMAIL
+  SMS
+}
+
+enum DataSourceType {
+  GOOGLE_CALENDAR
+  OUTLOOK_CALENDAR
+  APPOINTMENTS_CSV
+  CLIENTS_CSV
+  MANUAL_IMPORT
+}
+
+enum DataSourceStatus {
+  PENDING
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum AutomationJobType {
+  CONFIRMATION
+  REMINDER
+  REBOOKING
+  REVIEW_REQUEST
+  SYNC
+}
+
+enum AutomationRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum RecoveryOpportunityStatus {
+  OPEN
+  CONTACTED
+  RECOVERED
+  CLOSED
+}
+
+enum ReviewRequestStatus {
+  PENDING
+  SENT
+  DELIVERED
+  COMPLETED
+  FAILED
+}
+
+enum MetricsPeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model User {
+  id              String          @id @default(cuid())
+  clerkUserId     String          @unique
+  email           String          @unique
+  fullName        String?
+  status          UserStatus      @default(ACTIVE)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  ownedWorkspaces Workspace[]
+  triggeredRuns   AutomationRun[] @relation("AutomationTriggeredBy")
+
+  @@map("users")
+}
+
+model Workspace {
+  id                    String                @id @default(cuid())
+  name                  String
+  slug                  String                @unique
+  ownerUserId           String
+  status                WorkspaceStatus       @default(DRAFT)
+  // Active mode effectively used by the workspace after activation.
+  activeModeKey         FlowModeKey           @default(MODE_A)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  owner                 User                  @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  medSpaProfile         MedSpaProfile?
+  activationSetup       ActivationSetup?
+  dataSources           DataSource[]
+  clients               Client[]
+  appointments          Appointment[]
+  automationRuns        AutomationRun[]
+  recoveryOpportunities RecoveryOpportunity[]
+  reviewRequests        ReviewRequest[]
+  metricsSnapshots      MetricsSnapshot[]
+
+  @@map("workspaces")
+}
+
+model MedSpaProfile {
+  id           String    @id @default(cuid())
+  workspaceId   String    @unique
+  brandName    String
+  businessType String?
+  timezone     String
+  phone        String?
+  addressLine  String?
+  city         String?
+  state        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("med_spa_profiles")
+}
+
+model ActivationSetup {
+  id                 String               @id @default(cuid())
+  workspaceId         String               @unique
+  currentStep         String               @default("profile")
+  selectedTemplate    String?
+  primaryChannel      CommunicationChannel @default(EMAIL)
+  googleReviewsUrl    String?
+  // Recommended mode suggested by the onboarding wizard before activation.
+  recommendedModeKey  FlowModeKey?
+  isCompleted         Boolean              @default(false)
+  activatedAt         DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("activation_setups")
+}
+
+model DataSource {
+  id           String           @id @default(cuid())
+  workspaceId   String
+  type         DataSourceType
+  name         String
+  status       DataSourceStatus @default(PENDING)
+  lastSyncAt   DateTime?
+  configJson   Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clients      Client[]
+  appointments Appointment[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, type])
+  @@map("data_sources")
+}
+
+model Client {
+  id                    String                @id @default(cuid())
+  workspaceId           String
+  dataSourceId          String?
+  externalId            String?
+  firstName             String?
+  lastName              String?
+  email                 String?
+  phone                 String?
+  birthDate             DateTime?
+  lastVisitAt           DateTime?
+  tagsJson              Json?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dataSource            DataSource?           @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+  appointments          Appointment[]
+  recoveryOpportunities RecoveryOpportunity[]
+  reviewRequests        ReviewRequest[]
+
+  // Application rule for the MVP: at least one of externalId, email, or phone must be present.
+  @@index([workspaceId])
+  @@index([workspaceId, email])
+  @@index([workspaceId, phone])
+  // Effective uniqueness applies when externalId is present.
+  @@unique([workspaceId, externalId])
+  @@map("clients")
+}
+
+model Appointment {
+  id                    String                @id @default(cuid())
+  workspaceId           String
+  clientId              String
+  dataSourceId          String?
+  externalId            String?
+  status                AppointmentStatus
+  serviceName           String?
+  scheduledAt           DateTime
+  completedAt           DateTime?
+  canceledAt            DateTime?
+  providerName          String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client                Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  dataSource            DataSource?           @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+  recoveryOpportunities RecoveryOpportunity[]
+  reviewRequests        ReviewRequest[]
+
+  @@index([workspaceId, clientId])
+  @@index([workspaceId, scheduledAt])
+  // Effective uniqueness applies when externalId is present.
+  @@unique([workspaceId, externalId])
+  @@map("appointments")
+}
+
+model AutomationRun {
+  id                String              @id @default(cuid())
+  workspaceId       String
+  triggeredByUserId String?
+  jobType           AutomationJobType
+  status            AutomationRunStatus @default(PENDING)
+  modeKey           FlowModeKey?
+  payloadJson       Json?
+  resultJson        Json?
+  scheduledFor      DateTime?
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  errorMessage      String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  triggeredByUser   User?               @relation("AutomationTriggeredBy", fields: [triggeredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, scheduledFor])
+  @@index([workspaceId, jobType])
+  @@map("automation_runs")
+}
+
+model RecoveryOpportunity {
+  id             String                    @id @default(cuid())
+  workspaceId    String
+  clientId       String
+  appointmentId  String?
+  modeKey        FlowModeKey?
+  status         RecoveryOpportunityStatus @default(OPEN)
+  reason         String
+  estimatedValue Decimal?                  @db.Decimal(10, 2)
+  detectedAt     DateTime                  @default(now())
+  resolvedAt     DateTime?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  workspace      Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client         Client                    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  appointment    Appointment?              @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, detectedAt])
+  @@index([clientId])
+  @@map("recovery_opportunities")
+}
+
+model ReviewRequest {
+  id            String                @id @default(cuid())
+  workspaceId   String
+  clientId      String
+  appointmentId String?
+  modeKey       FlowModeKey?
+  status        ReviewRequestStatus   @default(PENDING)
+  channel       CommunicationChannel  @default(EMAIL)
+  requestedAt   DateTime              @default(now())
+  deliveredAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client        Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  appointment   Appointment?          @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, requestedAt])
+  @@index([clientId])
+  @@map("review_requests")
+}
+
+model MetricsSnapshot {
+  id                        String            @id @default(cuid())
+  workspaceId               String
+  periodType                MetricsPeriodType
+  periodStart               DateTime
+  periodEnd                 DateTime
+  totalClients              Int               @default(0)
+  totalAppointments         Int               @default(0)
+  completedAppointments     Int               @default(0)
+  appointmentsMonitored     Int               @default(0)
+  confirmationRate          Decimal?          @db.Decimal(5, 4)
+  estimatedNoShowsPrevented Int               @default(0)
+  emptySlotsRecovered       Int               @default(0)
+  recoveryOpportunities     Int               @default(0)
+  googleReviewsRequested    Int               @default(0)
+  reviewRequestsSent        Int               @default(0)
+  reviewConversionRate      Decimal?          @db.Decimal(5, 4)
+  estimatedRevenueProtected Decimal?          @db.Decimal(10, 2)
+  estimatedRevenueRecovered Decimal?          @db.Decimal(10, 2)
+  createdAt                 DateTime          @default(now())
+  workspace                 Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, periodType, periodStart, periodEnd])
+  @@index([workspaceId, periodStart, periodEnd])
+  @@map("metrics_snapshots")
+}
