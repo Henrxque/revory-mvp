@@ -1,0 +1,65 @@
+
+> revory-mvp@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.15.7:3000
+- Environments: .env.local, .env
+✓ Ready in 515ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[browser] Clerk: Structural CSS detected that may break on updates.
+
+Found:
+  - CSS ".cl-internal-go4bxw:has(button:focus-visible)"
+  - CSS "button:hover .cl-internal-gxb76v"
+  - CSS ".cl-internal-o2kwkh ul"
+  - CSS ".cl-internal-o2kwkh p"
+  - CSS ".cl-internal-o2kwkh li"
+  (+3 more)
+
+These selectors depend on the internal DOM structure of Clerk's components, which may change when Clerk deploys component updates.
+To prevent breaking changes, install @clerk/ui and pass it to ClerkProvider:
+
+  import { ui } from '@clerk/ui'
+  <ClerkProvider ui={ui}>
+
+Learn more: https://clerk.com/docs/reference/components/versioning
+(code=structural_css_pin_clerk_ui) (https://touched-albacore-54.clerk.accounts.dev/npm/@clerk/ui@1/dist/ui.browser.js:15:683)
+
+[35m
+[Clerk]:[0m You are running in keyless mode.
+You can [35mclaim your keys[0m by visiting https://dashboard.clerk.com/apps/claim?framework=nextjs&token=jpjwynm3pe6e7rfpp4apzva0vf69sa8l2eikgvqw&return_url=http%3A%2F%2Flocalhost%3A3000%2F
+
+ GET /app 307 in 1390ms (next.js: 234ms, proxy.ts: 450ms, application-code: 706ms)
+ GET /app/setup/template 200 in 1443ms (next.js: 1096ms, proxy.ts: 26ms, application-code: 321ms)
+ POST /app/setup/template 200 in 73ms (next.js: 21ms, proxy.ts: 20ms, application-code: 32ms)
+  └─ ƒ syncKeylessConfigAction({"apiKeysUrl":"https://dashboard.clerk.com/apps/app_3BBbykNhG16Q7loVQeV06nT85Dg/instances/ins_3BBbyjpYwyWYb6MnyWFZyYQ6PLA/api-keys","claimUrl":"https://dashboard.clerk.com/apps/claim?framework=nextjs&token=jpjwynm3pe6e7rfpp4apzva0vf69sa8l2eikgvqw","...":"3 items not stringified"}) in 20ms node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js
+[browser] Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview (https://touched-albacore-54.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js:12:3226)
+[browser] Clerk: Structural CSS detected that may break on updates.
+
+Found:
+  - CSS ".cl-internal-go4bxw:has(button:focus-visible)"
+  - CSS "button:hover .cl-internal-gxb76v"
+  - CSS ".cl-internal-o2kwkh ul"
+  - CSS ".cl-internal-o2kwkh p"
+  - CSS ".cl-internal-o2kwkh li"
+  (+3 more)
+
+These selectors depend on the internal DOM structure of Clerk's components, which may change when Clerk deploys component updates.
+To prevent breaking changes, install @clerk/ui and pass it to ClerkProvider:
+
+  import { ui } from '@clerk/ui'
+  <ClerkProvider ui={ui}>
+
+Learn more: https://clerk.com/docs/reference/components/versioning
+(code=structural_css_pin_clerk_ui) (https://touched-albacore-54.clerk.accounts.dev/npm/@clerk/ui@1/dist/ui.browser.js:15:683)
+ GET / 200 in 121ms (next.js: 40ms, proxy.ts: 5ms, application-code: 76ms)
+ GET /app 307 in 199ms (next.js: 9ms, proxy.ts: 6ms, application-code: 183ms)
+ GET /app/setup/template 307 in 233ms (next.js: 85ms, proxy.ts: 19ms, application-code: 129ms)
+ GET /sign-in 200 in 1466ms (next.js: 1405ms, proxy.ts: 7ms, application-code: 53ms)
+ HEAD / 200 in 59ms (next.js: 5ms, proxy.ts: 6ms, application-code: 49ms)
+ HEAD /app/setup/template 307 in 162ms (next.js: 64ms, proxy.ts: 4ms, application-code: 95ms)
+ HEAD /app 307 in 120ms (next.js: 34ms, proxy.ts: 12ms, application-code: 74ms)
+ HEAD /sign-in 200 in 250ms (next.js: 138ms, proxy.ts: 13ms, application-code: 100ms)

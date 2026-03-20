@@ -63,7 +63,7 @@ export const onboardingSteps = [
     fieldLabel: "Final check before activation logic",
     helperText:
       "This sprint delivers the guided structure and step persistence. The next step connects the real saved values behind each screen.",
-    ctaLabel: "Continue to dashboard",
+    ctaLabel: "Activate REVORY",
   },
 ] as const;
 

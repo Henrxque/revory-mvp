@@ -3,6 +3,8 @@ import type { OnboardingStep, OnboardingStepKey } from "@/services/onboarding/wi
 type OnboardingStepLayoutProps = Readonly<{
   children?: React.ReactNode;
   currentStepKey: OnboardingStepKey;
+  formAction?: (formData: FormData) => void | Promise<void>;
+  formFields?: React.ReactNode;
   nextAction?: React.ReactNode;
   previousAction?: React.ReactNode;
   step: OnboardingStep;
@@ -31,6 +33,8 @@ function getStepState(
 export function OnboardingStepLayout({
   children,
   currentStepKey,
+  formAction,
+  formFields,
   nextAction,
   previousAction,
   step,
@@ -71,7 +75,9 @@ export function OnboardingStepLayout({
         </div>
       </aside>
 
-      <div className="space-y-6">
+      <form action={formAction} className="space-y-6">
+        {formFields}
+
         <div className="rounded-[24px] border border-[color:var(--border)] bg-white/80 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.28em] text-[color:var(--accent)]">
             {step.eyebrow}
@@ -110,7 +116,7 @@ export function OnboardingStepLayout({
           <div>{previousAction}</div>
           <div>{nextAction}</div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
