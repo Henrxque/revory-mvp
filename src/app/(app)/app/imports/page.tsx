@@ -11,8 +11,12 @@ import {
 
 function toUploadSummary(
   source: {
+    lastImportCompletedAt: Date | null;
+    lastImportErrorRowCount: number;
     lastImportFileName: string | null;
     lastImportedAt: Date | null;
+    lastImportSuccessRowCount: number;
+    lastImportRowCount: number;
     status: string;
   } | null,
 ) {
@@ -21,9 +25,13 @@ function toUploadSummary(
   }
 
   return {
+    completedAt: source.lastImportCompletedAt?.toISOString() ?? null,
+    errorRows: source.lastImportErrorRowCount,
     fileName: source.lastImportFileName,
     receivedAt: source.lastImportedAt?.toISOString() ?? null,
+    successRows: source.lastImportSuccessRowCount,
     status: source.status,
+    totalRows: source.lastImportRowCount,
   };
 }
 
@@ -55,9 +63,9 @@ export default async function ImportsPage() {
           templates.
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-black/70 md:text-base">
-          This step receives the CSV file, validates the basics, and registers
-          the initial upload metadata. Parsing, row mapping, and import results
-          land next.
+          This step now receives the CSV file, validates the official
+          structure, persists the supported rows, and keeps the import outcome
+          explicit for the next correction pass.
         </p>
       </section>
 
@@ -80,11 +88,11 @@ export default async function ImportsPage() {
             Validation
           </p>
           <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-            Front and server
+            Front, server, and persistence
           </p>
           <p className="mt-2 text-sm leading-6 text-black/65">
-            File presence, extension, and size are checked before metadata is
-            registered.
+            File presence, extension, structure, and row normalization are
+            checked before rows reach the database.
           </p>
         </div>
 
@@ -93,11 +101,11 @@ export default async function ImportsPage() {
             Current scope
           </p>
           <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-            Upload metadata only
+            MVP import persistence
           </p>
           <p className="mt-2 text-sm leading-6 text-black/65">
-            Parsing and row-level import logic stay out of this stage on
-            purpose.
+            Supported rows are persisted now, while deeper deduplication and
+            automation behavior stay out of scope on purpose.
           </p>
         </div>
       </div>

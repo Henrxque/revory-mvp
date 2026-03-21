@@ -21,18 +21,41 @@ const csvImportSourceTypes: Record<RevoryCsvTemplateKey, DataSourceType> = {
 };
 
 type RegisterCsvUploadInput = {
+  errorMessage?: string | null;
+  errorRowCount?: number;
   fileName: string;
   fileSizeBytes: number;
+  importCompletedAt?: Date | null;
   mimeType: string | null;
+  parseSummary?: {
+    invalidRowCount: number;
+    validRowCount: number;
+    warnings: readonly string[];
+  };
+  rowCount?: number;
+  successRowCount?: number;
+  status?: DataSourceStatus;
   templateKey: RevoryCsvTemplateKey;
+  validationSummary?: {
+    errors: readonly string[];
+    warnings: readonly string[];
+  };
   workspaceId: string;
 };
 
 export async function registerCsvUploadMetadata({
+  errorMessage = null,
+  errorRowCount = 0,
   fileName,
   fileSizeBytes,
+  importCompletedAt = null,
   mimeType,
+  parseSummary,
+  rowCount = 0,
+  successRowCount = 0,
+  status = DataSourceStatus.PENDING,
   templateKey,
+  validationSummary,
   workspaceId,
 }: RegisterCsvUploadInput): Promise<DataSource> {
   const receivedAt = new Date();
@@ -41,8 +64,10 @@ export async function registerCsvUploadMetadata({
       fileName,
       fileSizeBytes,
       mimeType,
+      parseSummary,
       receivedAt: receivedAt.toISOString(),
       templateKey,
+      validationSummary,
     },
   };
 
@@ -55,22 +80,28 @@ export async function registerCsvUploadMetadata({
     },
     update: {
       type: csvImportSourceTypes[templateKey],
-      status: DataSourceStatus.PENDING,
+      status,
       lastImportedAt: receivedAt,
+      lastImportCompletedAt: importCompletedAt,
       lastImportFileName: fileName,
-      lastImportRowCount: 0,
-      lastImportError: null,
+      lastImportRowCount: rowCount,
+      lastImportSuccessRowCount: successRowCount,
+      lastImportErrorRowCount: errorRowCount,
+      lastImportError: errorMessage,
       configJson,
     },
     create: {
       workspaceId,
       name: csvImportSourceNames[templateKey],
       type: csvImportSourceTypes[templateKey],
-      status: DataSourceStatus.PENDING,
+      status,
       lastImportedAt: receivedAt,
+      lastImportCompletedAt: importCompletedAt,
       lastImportFileName: fileName,
-      lastImportRowCount: 0,
-      lastImportError: null,
+      lastImportRowCount: rowCount,
+      lastImportSuccessRowCount: successRowCount,
+      lastImportErrorRowCount: errorRowCount,
+      lastImportError: errorMessage,
       configJson,
     },
   });

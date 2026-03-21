@@ -170,8 +170,11 @@ model DataSource {
   status             DataSourceStatus @default(PENDING)
   lastSyncAt         DateTime?
   lastImportedAt     DateTime?
+  lastImportCompletedAt DateTime?
   lastImportFileName String?
   lastImportRowCount Int              @default(0)
+  lastImportSuccessRowCount Int       @default(0)
+  lastImportErrorRowCount Int         @default(0)
   lastImportError    String?
   configJson         Json?
   createdAt          DateTime         @default(now())

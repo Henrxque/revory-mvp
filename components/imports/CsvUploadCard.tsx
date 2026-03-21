@@ -22,8 +22,12 @@ import type {
 type CsvUploadCardProps = Readonly<{
   helperText: string;
   lastUpload: {
+    completedAt: string | null;
+    errorRows: number;
     fileName: string | null;
     receivedAt: string | null;
+    successRows: number;
+    totalRows: number;
     status: string;
   } | null;
   templateHref: string;
@@ -160,9 +164,17 @@ export function CsvUploadCard({
             {lastUpload?.status ?? "PENDING"}
           </p>
           <p className="mt-2 text-sm leading-6 text-black/65">
-            Upload metadata is recorded now. Parsing and row processing land in
-            the next import step.
+            The latest import source keeps aggregate progress for received,
+            persisted, and rejected rows.
           </p>
+          {lastUpload ? (
+            <p className="mt-2 text-sm leading-6 text-black/55">
+              {lastUpload.successRows} persisted of {lastUpload.totalRows} rows.
+              {lastUpload.errorRows > 0
+                ? ` ${lastUpload.errorRows} row(s) still need correction.`
+                : " No rejected rows in the latest pass."}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -189,10 +201,27 @@ export function CsvUploadCard({
           </span>
         </label>
 
-        {statusState.status === "success" ? (
+        {statusState.status === "imported" ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-800">
             {statusState.message}
             {statusState.fileName ? ` File: ${statusState.fileName}.` : ""}
+            {statusState.importSummary ? (
+              <span>
+                {" "}
+                Persisted rows: {statusState.importSummary.successRows} of{" "}
+                {statusState.importSummary.totalRows}. Rows needing correction:{" "}
+                {statusState.importSummary.errorRows}.
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        {statusState.importSummary ? (
+          <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm leading-6 text-black/70">
+            Clients created: {statusState.importSummary.createdClientCount}. Clients updated:{" "}
+            {statusState.importSummary.updatedClientCount}. Appointments created:{" "}
+            {statusState.importSummary.createdAppointmentCount}. Appointments updated:{" "}
+            {statusState.importSummary.updatedAppointmentCount}.
           </div>
         ) : null}
 
@@ -202,9 +231,34 @@ export function CsvUploadCard({
           </div>
         ) : null}
 
+        {statusState.warnings && statusState.warnings.length > 0 ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-800">
+            <p className="font-medium">Warnings to review in this import:</p>
+            <ul className="mt-2 space-y-1">
+              {statusState.warnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {statusState.failedRows && statusState.failedRows.length > 0 ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm leading-6 text-red-700">
+            <p className="font-medium">Rows still needing correction:</p>
+            <ul className="mt-2 space-y-2">
+              {statusState.failedRows.map((row) => (
+                <li key={row.lineNumber}>
+                  Line {row.lineNumber}: {row.reasons.join(" ")}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm leading-6 text-black/60">
-            The upload is accepted now and tracked for the next parsing stage.
+            The import validates the file, persists the supported rows, and
+            keeps the rejected rows visible for the next correction pass.
           </p>
           <UploadSubmitButton />
         </div>

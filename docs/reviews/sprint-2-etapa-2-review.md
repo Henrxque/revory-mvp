@@ -33,6 +33,12 @@ O desenho permaneceu enxuto:
 - `totalVisits Int?`
 - `notes String?`
 
+Observacao importante:
+
+- `Client.fullName` aparece como opcional no schema nesta etapa por uma decisao transitória de modelagem e compatibilidade com a base atual.
+- O contrato aprovado da Etapa 1 continua tratando `full_name` como central para o CSV oficial de clients.
+- A obrigatoriedade de negocio sera aplicada na validacao, parsing e importacao, e nao necessariamente como `NOT NULL` no banco nesta etapa.
+
 ### Appointment
 
 - `bookedAt DateTime?`
@@ -72,6 +78,9 @@ O desenho permaneceu enxuto:
 - `Client.totalVisits` e `Client.notes` entram como campos diretos do template oficial, sem invencao de estrutura adicional.
 - `Appointment` ganhou apenas os campos necessarios para refletir o contrato atual do CSV oficial, inclusive valor estimado e metadados leves de contexto.
 - Os indices focam em consultas por `workspaceId`, origem e datas principais, que sao os acessos mais previsiveis para importacao e listagem inicial.
+- Esta etapa ainda nao fecha a politica final de unicidade para `Client` e `Appointment`.
+- Os indices adicionados ajudam consulta, organizacao e filtros por workspace e origem.
+- A estrategia real de deduplicacao, upsert e idempotencia sera definida nas etapas 6 e 7 da Sprint 2.
 
 ## Migration gerada
 
@@ -89,5 +98,7 @@ O desenho permaneceu enxuto:
 
 - `fullName` em `Client` convive com `firstName` e `lastName`, o que exige criterio claro de preenchimento na etapa de parsing.
 - `lastImportRowCount` registra volume agregado da ultima importacao, nao historico detalhado por execucao.
-- O enum `DataSourceStatus` continua servindo tanto para fontes conectadas quanto para CSV, o que e suficiente agora, mas pode exigir refinamento no futuro se os fluxos divergirem muito.
+- O enum `DataSourceStatus`, incluindo `IMPORTED`, representa nesta etapa um estado agregado e minimalista da fonte ou da importacao mais recente.
+- `IMPORTED` ainda nao modela historico detalhado nem ciclo de vida completo por execucao de importacao.
+- O enum continua servindo tanto para fontes conectadas quanto para CSV, o que e suficiente agora, mas pode exigir refinamento no futuro se os fluxos divergirem muito.
 - O Prisma `generate` padrao encontrou lock do engine DLL no Windows durante a migration, entao a atualizacao do client foi finalizada com `prisma generate --no-engine`.
