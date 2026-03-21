@@ -40,6 +40,7 @@ enum DataSourceType {
 
 enum DataSourceStatus {
   PENDING
+  IMPORTED
   CONNECTED
   DISCONNECTED
   ERROR
@@ -162,21 +163,27 @@ model ActivationSetup {
 }
 
 model DataSource {
-  id           String           @id @default(cuid())
-  workspaceId   String
-  type         DataSourceType
-  name         String
-  status       DataSourceStatus @default(PENDING)
-  lastSyncAt   DateTime?
-  configJson   Json?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  clients      Client[]
-  appointments Appointment[]
+  id                 String           @id @default(cuid())
+  workspaceId        String
+  type               DataSourceType
+  name               String
+  status             DataSourceStatus @default(PENDING)
+  lastSyncAt         DateTime?
+  lastImportedAt     DateTime?
+  lastImportFileName String?
+  lastImportRowCount Int              @default(0)
+  lastImportError    String?
+  configJson         Json?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  workspace          Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clients            Client[]
+  appointments       Appointment[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId, type])
+  @@index([workspaceId, status])
+  @@index([workspaceId, lastImportedAt])
   @@map("data_sources")
 }
 
@@ -185,13 +192,16 @@ model Client {
   workspaceId           String
   dataSourceId          String?
   externalId            String?
+  fullName              String?
   firstName             String?
   lastName              String?
   email                 String?
   phone                 String?
   birthDate             DateTime?
   lastVisitAt           DateTime?
+  totalVisits           Int?
   tagsJson              Json?
+  notes                 String?
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -202,8 +212,10 @@ model Client {
 
   // Application rule for the MVP: at least one of externalId, email, or phone must be present.
   @@index([workspaceId])
+  @@index([workspaceId, dataSourceId])
   @@index([workspaceId, email])
   @@index([workspaceId, phone])
+  @@index([workspaceId, lastVisitAt])
   // Effective uniqueness applies when externalId is present.
   @@unique([workspaceId, externalId])
   @@map("clients")
@@ -218,9 +230,13 @@ model Appointment {
   status                AppointmentStatus
   serviceName           String?
   scheduledAt           DateTime
+  bookedAt              DateTime?
   completedAt           DateTime?
   canceledAt            DateTime?
   providerName          String?
+  locationName          String?
+  sourceNotes           String?
+  estimatedRevenue      Decimal?                  @db.Decimal(10, 2)
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -230,7 +246,9 @@ model Appointment {
   reviewRequests        ReviewRequest[]
 
   @@index([workspaceId, clientId])
+  @@index([workspaceId, dataSourceId])
   @@index([workspaceId, scheduledAt])
+  @@index([workspaceId, status, scheduledAt])
   // Effective uniqueness applies when externalId is present.
   @@unique([workspaceId, externalId])
   @@map("appointments")

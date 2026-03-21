@@ -1,6 +1,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const pillars = [
   "Premium by default",
@@ -10,6 +11,10 @@ const pillars = [
 
 export default async function HomePage() {
   const { userId } = await auth();
+
+  if (userId) {
+    redirect("/app");
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-6 py-16">
