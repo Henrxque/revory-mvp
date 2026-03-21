@@ -1,13 +1,68 @@
-import { UserButton } from "@clerk/nextjs";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { auth } from "@clerk/nextjs/server";
+import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { redirect } from "next/navigation";
 
-const pillars = [
-  "Premium by default",
-  "Self-service operations",
-  "MedSpa-first positioning",
-];
+const LANDING_REFERENCE_PATH = path.join(
+  process.cwd(),
+  "src",
+  "content",
+  "revory-landing-reference.html",
+);
+
+function extractBetween(content: string, startMarker: string, endMarker: string) {
+  const startIndex = content.indexOf(startMarker);
+
+  if (startIndex < 0) {
+    return "";
+  }
+
+  const contentStart = startIndex + startMarker.length;
+  const endIndex = content.indexOf(endMarker, contentStart);
+
+  if (endIndex < 0) {
+    return content.slice(contentStart);
+  }
+
+  return content.slice(contentStart, endIndex);
+}
+
+function extractLandingMarkup(content: string) {
+  const startIndex = content.indexOf("<nav");
+  const footerIndex = content.indexOf("<footer");
+
+  if (startIndex < 0) {
+    return "";
+  }
+
+  if (footerIndex < 0) {
+    return content.slice(startIndex);
+  }
+
+  return content.slice(startIndex, footerIndex);
+}
+
+function adaptReferenceCss(css: string) {
+  return css
+    .replace(/body\s*\{/g, ".revory-landing-page {")
+    .replace(/html\s*\{/g, ".revory-landing-page-root {")
+    .replace(/nav\s*\{/g, ".revory-landing-page nav {")
+    .replace(/section\s*\{/g, ".revory-landing-page section {")
+    .replace(/footer\s*\{/g, ".revory-landing-page-root footer {");
+}
+
+function adaptReferenceMarkup(markup: string) {
+  return markup
+    .replaceAll('href="#pricing" class="btn-primary"', 'href="/sign-up" class="btn-primary"')
+    .replaceAll('href="#pricing" class="nav-cta"', 'href="/sign-up" class="nav-cta"')
+    .replaceAll('href="#" class="btn-primary"', 'href="/sign-up" class="btn-primary"')
+    .replaceAll('href="#"', 'href="/"')
+    .replaceAll("Â©", "©");
+}
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -16,75 +71,58 @@ export default async function HomePage() {
     redirect("/app");
   }
 
+  const referenceHtml = await readFile(LANDING_REFERENCE_PATH, "utf8");
+  const rawCss = extractBetween(referenceHtml, "<style>", "</style>");
+  const landingCss = adaptReferenceCss(rawCss);
+  const landingMarkup = adaptReferenceMarkup(extractLandingMarkup(referenceHtml));
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-6 py-16">
-      <section className="grid w-full gap-8 rounded-[32px] border border-[color:var(--border)] bg-[color:var(--surface)] p-8 shadow-[0_24px_80px_rgba(32,26,24,0.08)] backdrop-blur md:grid-cols-[1.3fr_0.7fr] md:p-12">
-        <div className="space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="inline-flex rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--accent-strong)]">
-              REVORY MVP
+    <>
+      <style dangerouslySetInnerHTML={{ __html: landingCss }} />
+      <Script id="revory-landing-faq" strategy="afterInteractive">
+        {`
+          window.toggleFaq = function toggleFaq(element) {
+            const item = element && element.closest ? element.closest('.faq-item') : null;
+            if (!item) return;
+            item.classList.toggle('open');
+          };
+        `}
+      </Script>
+
+      <main className="revory-landing-page-root">
+        <div
+          className="revory-landing-page"
+          dangerouslySetInnerHTML={{ __html: landingMarkup }}
+        />
+
+        <footer>
+          <div className="footer-logo">
+            <div className="logo-icon">
+              <Image
+                alt="REVORY"
+                height={36}
+                src="/brand/revory-logo-mark.png"
+                width={53}
+              />
             </div>
-
-            <div className="flex items-center gap-3">
-              {userId ? (
-                <>
-                  <Link
-                    href="/app"
-                    prefetch={false}
-                    className="rounded-full bg-[color:var(--accent-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                  >
-                    Open app
-                  </Link>
-                  <UserButton />
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/sign-in"
-                    className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-black/70 transition hover:bg-white/80"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="rounded-full bg-[color:var(--accent-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                  >
-                    Create account
-                  </Link>
-                </>
-              )}
-            </div>
+            <span className="logo-wordmark">REVORY</span>
           </div>
-
-          <div className="space-y-4">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-[color:var(--accent)]">
-              Official auth configured
-            </p>
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
-              Clean entry point for a premium, self-service, MedSpa-first MVP.
-            </h1>
-            <p className="max-w-2xl text-base leading-7 text-black/70 md:text-lg">
-              Sign in and sign up now happen before the product flow starts. The
-              authenticated app shell is protected and ready for workspace
-              creation in the next step.
-            </p>
-          </div>
-        </div>
-
-        <aside className="rounded-[28px] bg-[color:var(--accent-strong)] p-6 text-white">
-          <p className="text-sm uppercase tracking-[0.28em] text-white/60">Focus</p>
-          <ul className="mt-6 space-y-4">
-            {pillars.map((pillar) => (
-              <li
-                key={pillar}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-lg"
-              >
-                {pillar}
-              </li>
-            ))}
+          <span className="footer-copy">
+            © 2025 REVORY. Appointment recovery software for modern businesses.
+          </span>
+          <ul className="footer-links">
+            <li>
+              <Link href="/">Privacy</Link>
+            </li>
+            <li>
+              <Link href="/">Terms</Link>
+            </li>
+            <li>
+              <Link href="/sign-in">Sign in</Link>
+            </li>
           </ul>
-        </aside>
-      </section>
-    </main>
+        </footer>
+      </main>
+    </>
   );
 }

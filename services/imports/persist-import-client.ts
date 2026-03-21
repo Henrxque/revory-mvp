@@ -2,8 +2,6 @@ import "server-only";
 
 import { Prisma, type Client } from "@prisma/client";
 
-import { prisma } from "@/db/prisma";
-
 type PersistImportedClientInput = {
   dataSourceId: string;
   email: string | null;
@@ -188,10 +186,4 @@ export async function persistImportedClient(
     client,
     operation: "created",
   };
-}
-
-export async function persistImportedClientWithTransaction(
-  input: PersistImportedClientInput,
-): Promise<PersistImportedClientResult> {
-  return prisma.$transaction((tx) => persistImportedClient(tx, input));
 }

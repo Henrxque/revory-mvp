@@ -1,6 +1,6 @@
 export type RevoryCsvTemplateKey = "appointments" | "clients";
 
-export type RevoryCsvUploadStatus = "idle" | "received" | "imported" | "error";
+export type RevoryCsvUploadStatus = "idle" | "imported" | "error";
 export type RevoryCsvValidationSeverity = "error" | "warning";
 export type RevoryCsvValidationIssueCode =
   | "file_empty"
@@ -123,7 +123,7 @@ export type RevoryCsvUploadActionState = {
     updatedClientCount: number;
   };
   message?: string;
-  receivedAt?: string;
+  importedAt?: string;
   warnings?: string[];
   status: RevoryCsvUploadStatus;
 };

@@ -4,10 +4,6 @@ import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayo
 import { getAppContext } from "@/services/app/get-app-context";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
-  goToPreviousOnboardingStep,
-  submitOnboardingStep,
-} from "../actions";
-import {
   getNextOnboardingStepKey,
   getOnboardingStep,
   getOnboardingStepPath,
@@ -16,6 +12,10 @@ import {
   onboardingSteps,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
+import {
+  goToPreviousOnboardingStep,
+  submitOnboardingStep,
+} from "../actions";
 
 type OnboardingStepPageProps = Readonly<{
   params: Promise<{
@@ -89,6 +89,9 @@ const stepBody: Record<
   },
 };
 
+const optionCardClassName =
+  "flex cursor-pointer items-start gap-3 rounded-[22px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4 transition hover:border-[color:var(--border-accent)] hover:bg-[color:var(--background-card-hover)]";
+
 export default async function OnboardingStepPage({
   params,
   searchParams,
@@ -138,19 +141,21 @@ export default async function OnboardingStepPage({
       previousAction={
         previousStepKey ? (
           <button
+            className="rev-button-secondary"
             formAction={goToPreviousOnboardingStep}
-            className="rounded-full border border-[color:var(--border)] px-5 py-3 text-sm font-medium text-black/70 transition hover:bg-white"
             type="submit"
           >
             Back
           </button>
         ) : (
-          <span className="text-sm text-black/45">This is the first step.</span>
+          <span className="text-sm text-[color:var(--text-muted)]">
+            This is the first step.
+          </span>
         )
       }
       nextAction={
         <button
-          className="rounded-full bg-[color:var(--accent-strong)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          className="rev-button-primary"
           type="submit"
         >
           {nextStepKey ? step.ctaLabel : "Continue to dashboard"}
@@ -158,11 +163,11 @@ export default async function OnboardingStepPage({
       }
     >
       <div className="space-y-5">
-        <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-5">
-          <p className="text-xs uppercase tracking-[0.24em] text-black/45">
+        <div className="rev-card rounded-[24px] p-5">
+          <p className="rev-label">
             Step intent
           </p>
-          <p className="mt-3 text-sm leading-7 text-black/70">
+          <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
             {currentStepBody.summary}
           </p>
         </div>
@@ -171,7 +176,7 @@ export default async function OnboardingStepPage({
           {currentStepBody.checklist.map((item) => (
             <div
               key={item}
-              className="rounded-2xl border border-[color:var(--border)] bg-white px-4 py-4 text-sm leading-6 text-black/75"
+              className="rev-card-soft rounded-[22px] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]"
             >
               {item}
             </div>
@@ -179,15 +184,15 @@ export default async function OnboardingStepPage({
         </div>
 
         {hasError ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm leading-6 text-red-700">
+          <div className="rev-feedback-error">
             Check the value for this step and try again.
           </div>
         ) : null}
 
-        <div className="rounded-2xl border border-[color:var(--border)] bg-white px-4 py-4 text-sm leading-6 text-black/75">
+        <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
           {currentStepKey === "template" ? (
             <div className="space-y-3">
-              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
+              <label className={optionCardClassName}>
                 <input
                   defaultChecked={selectedTemplate === "MEDSPA"}
                   name="selectedTemplate"
@@ -198,7 +203,7 @@ export default async function OnboardingStepPage({
                   <span className="block font-medium text-[color:var(--foreground)]">
                     MedSpa
                   </span>
-                  <span className="block text-sm text-black/65">
+                  <span className="block text-sm text-[color:var(--text-muted)]">
                     Premium, self-service setup for appointments, recovery,
                     reviews, and ROI visibility.
                   </span>
@@ -236,10 +241,7 @@ export default async function OnboardingStepPage({
                   note: "Keep a simple fallback path for MVP setup.",
                 },
               ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4"
-                >
+                <label key={option.value} className={optionCardClassName}>
                   <input
                     defaultChecked={selectedDataSourceType === option.value}
                     name="selectedDataSourceType"
@@ -250,7 +252,7 @@ export default async function OnboardingStepPage({
                     <span className="block font-medium text-[color:var(--foreground)]">
                       {option.label}
                     </span>
-                    <span className="block text-sm text-black/65">
+                    <span className="block text-sm text-[color:var(--text-muted)]">
                       {option.note}
                     </span>
                   </span>
@@ -273,10 +275,7 @@ export default async function OnboardingStepPage({
                   note: "Structural option only. The MVP still operates email-first.",
                 },
               ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4"
-                >
+                <label key={option.value} className={optionCardClassName}>
                   <input
                     defaultChecked={selectedPrimaryChannel === option.value}
                     name="primaryChannel"
@@ -287,7 +286,7 @@ export default async function OnboardingStepPage({
                     <span className="block font-medium text-[color:var(--foreground)]">
                       {option.label}
                     </span>
-                    <span className="block text-sm text-black/65">
+                    <span className="block text-sm text-[color:var(--text-muted)]">
                       {option.note}
                     </span>
                   </span>
@@ -303,14 +302,14 @@ export default async function OnboardingStepPage({
                   Google Reviews URL
                 </span>
                 <input
-                  className="w-full rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none"
+                  className="rev-input-field"
                   defaultValue={selectedGoogleReviewsUrl}
                   name="googleReviewsUrl"
                   placeholder="https://g.page/r/your-google-reviews-link"
                   type="url"
                 />
               </label>
-              <p className="text-sm text-black/65">
+              <p className="text-sm text-[color:var(--text-muted)]">
                 Save the destination only. Review requests and delivery logic
                 are still out of scope for this sprint.
               </p>
@@ -336,10 +335,7 @@ export default async function OnboardingStepPage({
                   note: "More assertive starting path while keeping the setup closed.",
                 },
               ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4"
-                >
+                <label key={option.value} className={optionCardClassName}>
                   <input
                     defaultChecked={selectedRecommendedModeKey === option.value}
                     name="recommendedModeKey"
@@ -350,7 +346,7 @@ export default async function OnboardingStepPage({
                     <span className="block font-medium text-[color:var(--foreground)]">
                       {option.label}
                     </span>
-                    <span className="block text-sm text-black/65">
+                    <span className="block text-sm text-[color:var(--text-muted)]">
                       {option.note}
                     </span>
                   </span>
@@ -362,42 +358,37 @@ export default async function OnboardingStepPage({
           {currentStepKey === "activation" ? (
             <div className="space-y-4">
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-                    Template
-                  </p>
-                  <p className="mt-2 font-medium text-[color:var(--foreground)]">
-                    {selectedTemplate || "Not selected"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-                    Source type
-                  </p>
-                  <p className="mt-2 font-medium text-[color:var(--foreground)]">
-                    {selectedDataSourceType || "Not selected"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-                    Primary channel
-                  </p>
-                  <p className="mt-2 font-medium text-[color:var(--foreground)]">
-                    {selectedPrimaryChannel}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-                    Recommended mode
-                  </p>
-                  <p className="mt-2 font-medium text-[color:var(--foreground)]">
-                    {selectedRecommendedModeKey || "Not selected"}
-                  </p>
-                </div>
+                {[
+                  { label: "Template", value: selectedTemplate || "Not selected" },
+                  {
+                    label: "Source type",
+                    value: selectedDataSourceType || "Not selected",
+                  },
+                  {
+                    label: "Primary channel",
+                    value: selectedPrimaryChannel || "Not selected",
+                  },
+                  {
+                    label: "Recommended mode",
+                    value: selectedRecommendedModeKey || "Not selected",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rev-card rounded-[22px] p-4"
+                  >
+                    <p className="rev-label">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 font-medium text-[color:var(--foreground)]">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
 
-              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
-                <p className="text-xs uppercase tracking-[0.24em] text-black/45">
+              <div className="rev-card rounded-[22px] p-4">
+                <p className="rev-label">
                   Google Reviews URL
                 </p>
                 <p className="mt-2 break-all font-medium text-[color:var(--foreground)]">
@@ -405,7 +396,7 @@ export default async function OnboardingStepPage({
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              <div className="rev-feedback-warning">
                 If the required setup values are present, activation will mark
                 this workspace as completed, apply the active mode, and
                 redirect to the dashboard placeholder.

@@ -185,9 +185,9 @@ export async function uploadCsvFile(
       updatedClientCount: persistenceResult.updatedClientCount,
     },
     message: hasPartialErrors
-      ? "File received, validated, and imported with partial row rejection. Review the rows that still need correction."
-      : "File received, validated, and persisted successfully for this REVORY import source.",
-    receivedAt: dataSource.lastImportedAt?.toISOString() ?? new Date().toISOString(),
+      ? "CSV imported with partial row rejection. Review the rows that still need correction."
+      : "CSV imported successfully for this REVORY source.",
+    importedAt: dataSource.lastImportedAt?.toISOString() ?? new Date().toISOString(),
     status: persistenceResult.finalStatus,
     warnings: combinedWarnings,
   };

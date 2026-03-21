@@ -17,7 +17,10 @@ import {
 } from "@/services/imports/normalize-import-values";
 import { readCsvDocument } from "@/services/imports/read-csv";
 
-function buildWarning(message: string, lineNumber: number): RevoryCsvParserWarning {
+function buildNameNormalizationWarning(
+  message: string,
+  lineNumber: number,
+): RevoryCsvParserWarning {
   return {
     code: "normalized_name",
     lineNumber,
@@ -100,7 +103,7 @@ export function parseAppointmentsCsv(
     } else if (parsedRow.clientFullName && parsedRow.clientFullName !== clientFullName) {
       const message = `Line ${row.lineNumber} had client_full_name normalized for whitespace consistency.`;
       rowWarnings.push(message);
-      warnings.push(buildWarning(message, row.lineNumber));
+      warnings.push(buildNameNormalizationWarning(message, row.lineNumber));
     }
 
     if (!scheduledAt) {

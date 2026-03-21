@@ -53,6 +53,7 @@ Aplicar a politica minima de idempotencia e reimportacao segura da Sprint 2, evi
 - essas contagens representam apenas a execucao atual da importacao ou reimportacao
 - elas nao representam historico consolidado de execucoes anteriores
 - historico detalhado por execucao ainda nao existe nesta etapa
+- Ainda nao existe historico detalhado por execucao de importacao. As contagens e sinais desta etapa representam apenas o resultado da execucao atual e/ou o ultimo estado agregado salvo no `DataSource`, nao uma trilha historica consolidada de execucoes anteriores. Isso e aceitavel para o MVP da Sprint 2, mas deve voltar a mesa quando a REVORY evoluir a observabilidade e o import history.
 
 ## Exemplos de reimport
 ### Reimport de clients sem `externalId`, usando fallback por `email`

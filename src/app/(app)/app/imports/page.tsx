@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { CsvUploadCard } from "@/components/imports/CsvUploadCard";
+import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { revoryCsvTemplateDefinitions } from "@/lib/imports/csv-template-definitions";
 import { getAppContext } from "@/services/app/get-app-context";
 import { getCsvUploadSources } from "@/services/imports/get-csv-upload-sources";
@@ -11,7 +12,6 @@ import {
 
 function toUploadSummary(
   source: {
-    lastImportCompletedAt: Date | null;
     lastImportErrorRowCount: number;
     lastImportFileName: string | null;
     lastImportedAt: Date | null;
@@ -25,10 +25,9 @@ function toUploadSummary(
   }
 
   return {
-    completedAt: source.lastImportCompletedAt?.toISOString() ?? null,
     errorRows: source.lastImportErrorRowCount,
     fileName: source.lastImportFileName,
-    receivedAt: source.lastImportedAt?.toISOString() ?? null,
+    importedAt: source.lastImportedAt?.toISOString() ?? null,
     successRows: source.lastImportSuccessRowCount,
     status: source.status,
     totalRows: source.lastImportRowCount,
@@ -54,60 +53,52 @@ export default async function ImportsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-[color:var(--border)] bg-white/85 p-6 shadow-[0_18px_50px_rgba(32,26,24,0.05)]">
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-[color:var(--accent)]">
-          CSV Imports
-        </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-semibold text-[color:var(--foreground)] md:text-4xl">
-          Bring appointments and clients into REVORY with the official CSV
-          templates.
-        </h1>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-black/70 md:text-base">
-          This step now receives the CSV file, validates the official
-          structure, persists the supported rows, and keeps the import outcome
-          explicit for the next correction pass.
-        </p>
+      <section className="rev-shell-hero rounded-[30px] p-6">
+        <RevorySectionHeader
+          badgeLabel="Official templates only"
+          badgeTone="accent"
+          description="This step now receives the CSV file, validates the official structure, persists the supported rows, and keeps the import outcome explicit for the next correction pass."
+          eyebrow="CSV Imports"
+          title="Bring appointments and clients into REVORY with the official CSV templates."
+        />
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-[color:var(--border)] bg-white/85 p-5">
-          <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-            Accepted file
-          </p>
-          <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-            CSV only
-          </p>
-          <p className="mt-2 text-sm leading-6 text-black/65">
-            The upload flow is intentionally strict and aligned to the official
-            REVORY templates.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[color:var(--border)] bg-white/85 p-5">
-          <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-            Validation
-          </p>
-          <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-            Front, server, and persistence
-          </p>
-          <p className="mt-2 text-sm leading-6 text-black/65">
-            File presence, extension, structure, and row normalization are
-            checked before rows reach the database.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[color:var(--border)] bg-white/85 p-5">
-          <p className="text-xs uppercase tracking-[0.24em] text-black/45">
-            Current scope
-          </p>
-          <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-            MVP import persistence
-          </p>
-          <p className="mt-2 text-sm leading-6 text-black/65">
-            Supported rows are persisted now, while deeper deduplication and
-            automation behavior stay out of scope on purpose.
-          </p>
-        </div>
+        {[
+          {
+            description:
+              "The upload flow is intentionally strict and aligned to the official REVORY templates.",
+            label: "Accepted file",
+            title: "CSV only",
+          },
+          {
+            description:
+              "File presence, extension, structure, and row normalization are checked before rows reach the database.",
+            label: "Validation",
+            title: "Front, server, and persistence",
+          },
+          {
+            description:
+              "Supported rows are persisted now, while deeper deduplication and automation behavior stay out of scope on purpose.",
+            label: "Current scope",
+            title: "MVP import persistence",
+          },
+        ].map((card) => (
+          <div
+            key={card.label}
+            className="rev-card-soft rounded-[24px] px-5 py-5"
+          >
+            <p className="rev-label">
+              {card.label}
+            </p>
+            <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
+              {card.title}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              {card.description}
+            </p>
+          </div>
+        ))}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
