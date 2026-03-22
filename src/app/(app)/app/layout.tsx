@@ -2,8 +2,10 @@ import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/app/AppSidebar";
+import { PrivateAppSessionResync } from "@/components/auth/PrivateAppSessionResync";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
+import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import {
   getOnboardingStep,
   resolveOnboardingStepKey,
@@ -19,7 +21,7 @@ export default async function PrivateAppLayout({
   const appContext = await getAppContext();
 
   if (!appContext) {
-    redirect("/sign-in");
+    redirect(buildSignInRedirectPath("/app"));
   }
 
   const { activationSetup, user, workspace } = appContext;
@@ -35,8 +37,9 @@ export default async function PrivateAppLayout({
 
   return (
     <main className="min-h-screen bg-[color:var(--background)] px-4 py-4 lg:px-5 lg:py-5">
-      <div className="mx-auto grid max-w-[1440px] gap-4 lg:grid-cols-[200px_1fr]">
-        <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
+      <PrivateAppSessionResync />
+      <div className="mx-auto grid max-w-[1440px] gap-4 lg:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="relative z-50 shrink-0 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
           <AppSidebar
             activationLabel={activationSetup.isCompleted ? "Active" : "Setup"}
             currentStepTitle={currentStepTitle}
@@ -46,7 +49,7 @@ export default async function PrivateAppLayout({
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4 overflow-x-clip">
           <header className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.94)] px-5 py-4 shadow-[0_16px_60px_rgba(0,0,0,0.22)]">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -76,7 +79,7 @@ export default async function PrivateAppLayout({
             </div>
           </header>
 
-          <section className="rounded-[28px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.82)] p-5 shadow-[0_20px_70px_rgba(0,0,0,0.2)] md:p-6">
+          <section className="min-w-0 overflow-x-clip rounded-[28px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.82)] p-5 shadow-[0_20px_70px_rgba(0,0,0,0.2)] md:p-6">
             {children}
           </section>
         </div>

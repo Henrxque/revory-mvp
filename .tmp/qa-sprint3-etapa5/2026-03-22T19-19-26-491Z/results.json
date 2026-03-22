@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-sprint3-qa-1774207167225+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-22T19:19:50.164Z",
+  "startedAt": "2026-03-22T19:19:26.491Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "auth.sign-up-page",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "page.goto: Navigation to \"http://localhost:3000/sign-in\" is interrupted by another navigation to \"https://touched-albacore-54.accounts.dev/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fapp%3F__clerk_db_jwt%3Ddvb_3BJVUUXOAmJ77jbC3Moe8kOhxb8&__clerk_db_jwt=dvb_3BJVUUXOAmJ77jbC3Moe8kOhxb8\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/sign-in\", waiting until \"domcontentloaded\"\u001b[22m\n",
+        "stack": "page.goto: Navigation to \"http://localhost:3000/sign-in\" is interrupted by another navigation to \"https://touched-albacore-54.accounts.dev/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fapp%3F__clerk_db_jwt%3Ddvb_3BJVUUXOAmJ77jbC3Moe8kOhxb8&__clerk_db_jwt=dvb_3BJVUUXOAmJ77jbC3Moe8kOhxb8\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/sign-in\", waiting until \"domcontentloaded\"\u001b[22m\n\n    at performUiSignIn (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:383:14)\n    at C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:699:11"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

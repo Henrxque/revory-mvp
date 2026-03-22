@@ -1,0 +1,2 @@
+appointment_external_id,client_full_name,scheduled_at,status,client_email
+qa_malformed_apt_001,"Gabriela Broken,2026-12-31T10:00:00Z,SCHEDULED,qa-malformed-gabi@example.com

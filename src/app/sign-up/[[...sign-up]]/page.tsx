@@ -3,8 +3,10 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthRecoveryBridge } from "@/components/auth/AuthRecoveryBridge";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { normalizeAuthRedirectTarget } from "@/services/auth/redirects";
 
 const signUpHighlights = [
   "MedSpa-first onboarding",
@@ -30,15 +32,24 @@ const signUpSteps = [
   },
 ];
 
-export default async function SignUpPage() {
+type SignUpPageProps = Readonly<{
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}>;
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const { userId } = await auth();
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const redirectTarget = normalizeAuthRedirectTarget(
+    resolvedSearchParams.redirect_url ?? resolvedSearchParams.redirectUrl,
+  );
 
   if (userId) {
-    redirect("/app");
+    redirect(redirectTarget);
   }
 
   return (
     <main className="min-h-screen px-6 py-10 md:px-8 md:py-14">
+      <AuthRecoveryBridge redirectTarget={redirectTarget} />
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_0.85fr] lg:items-stretch">
         <section className="rev-shell-hero flex flex-col rounded-[36px] p-7 md:p-9">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -120,7 +131,10 @@ export default async function SignUpPage() {
             </div>
 
             <div className="rev-auth-clerk rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5 md:p-6">
-              <SignUp fallbackRedirectUrl="/app" forceRedirectUrl="/app" />
+              <SignUp
+                fallbackRedirectUrl={redirectTarget}
+                forceRedirectUrl={redirectTarget}
+              />
             </div>
           </div>
         </section>

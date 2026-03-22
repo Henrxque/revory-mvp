@@ -4,6 +4,7 @@ export type RevoryCsvUploadStatus = "idle" | "imported" | "error";
 export type RevoryCsvValidationSeverity = "error" | "warning";
 export type RevoryCsvValidationIssueCode =
   | "file_empty"
+  | "invalid_structure"
   | "missing_required_columns"
   | "missing_required_value"
   | "missing_identifier"
@@ -119,6 +120,47 @@ export type RevoryAssistedImportPreview = {
   unmappedHeaders: string[];
 };
 
+export type RevoryAssistedImportDecisionState =
+  | "kept_confident_match"
+  | "suggested_pending_confirmation"
+  | "mapped_by_user"
+  | "unmapped";
+
+export type RevoryAssistedImportDecision = {
+  decisionState: RevoryAssistedImportDecisionState;
+  finalTargetColumn: RevoryCsvColumn | null;
+  normalizedSourceHeader: string;
+  sourceHeader: string;
+  systemConfidence: RevoryAssistedImportConfidence;
+  systemMatchStatus: RevoryAssistedImportMatchStatus;
+  systemReason: string;
+  systemReasonCode: RevoryAssistedImportReasonCode;
+  systemSuggestedColumn: RevoryCsvColumn | null;
+};
+
+export type RevoryAssistedImportConfirmationDraft = {
+  canProceed: boolean;
+  decisions: RevoryAssistedImportDecision[];
+  duplicateSourceHeaders: string[];
+  duplicateTargets: RevoryCsvColumn[];
+  keptConfidentMatchCount: number;
+  mappedByUserCount: number;
+  missingIdentityPath: boolean;
+  missingRequiredColumns: RevoryCsvColumn[];
+  requiredMatchedCount: number;
+  requiredTotalCount: number;
+  suggestedPendingConfirmationCount: number;
+  templateKey: RevoryCsvTemplateKey;
+  unmappedCount: number;
+};
+
+export type RevoryAssistedImportExecutionMappingSummary = {
+  keptConfidentMatchCount: number;
+  mappedByUserCount: number;
+  suggestedPendingConfirmationCount: number;
+  unmappedCount: number;
+};
+
 export type RevoryAssistedImportPayload = {
   detectedHeaders: string[];
   mapping: RevoryAssistedImportMapping;
@@ -184,8 +226,10 @@ export type RevoryCsvUploadActionState = {
     updatedAppointmentCount: number;
     updatedClientCount: number;
   };
+  mappingExecutionSummary?: RevoryAssistedImportExecutionMappingSummary;
   message?: string;
   importedAt?: string;
+  requiresReauth?: boolean;
   warnings?: string[];
   status: RevoryCsvUploadStatus;
 };

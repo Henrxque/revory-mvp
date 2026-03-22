@@ -1,0 +1,60 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-sprint3-qa-1774207273644+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-22T19:21:57.538Z",
+  "startedAt": "2026-03-22T19:21:12.842Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "auth.sign-up-page",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app/setup/template"
+      },
+      "name": "auth.sign-up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn257y5u0019bm90wp216tjj",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn257y5y001bbm90f9edwdh0",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "auth.workspace-created",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "Expected onboarding step channel, but current URL is http://localhost:3000/app/setup/source.",
+        "stack": "Error: Expected onboarding step channel, but current URL is http://localhost:3000/app/setup/source.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:98:11)\n    at waitForStepPage (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:288:3)\n    at async performOnboarding (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:417:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:732:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

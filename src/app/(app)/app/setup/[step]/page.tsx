@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayout";
 import { getAppContext } from "@/services/app/get-app-context";
+import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
   getOnboardingStep,
@@ -145,7 +146,7 @@ export default async function OnboardingStepPage({
   const appContext = await getAppContext();
 
   if (!appContext) {
-    redirect("/sign-in");
+    redirect(buildSignInRedirectPath(`/app/setup/${stepParam}`));
   }
 
   if (appContext.activationSetup.isCompleted) {

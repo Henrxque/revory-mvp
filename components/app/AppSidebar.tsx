@@ -186,7 +186,7 @@ export function AppSidebar({
   const workspaceInitials = getWorkspaceInitials(workspaceName);
 
   return (
-    <aside className="flex h-full flex-col rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,#111018,#0d0c11)] shadow-[0_30px_90px_rgba(0,0,0,0.34)]">
+    <aside className="relative z-50 flex h-full pointer-events-auto flex-col rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,#111018,#0d0c11)] shadow-[0_30px_90px_rgba(0,0,0,0.34)]">
       <div className="border-b border-[color:var(--border)] px-5 py-5">
         <RevoryLogo compact />
         <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
@@ -240,7 +240,12 @@ export function AppSidebar({
               }
 
               return (
-                <Link key={item.href} className={itemClassName} href={item.href}>
+                <Link
+                  key={item.href}
+                  className={itemClassName}
+                  href={item.href}
+                  prefetch={false}
+                >
                   {content}
                 </Link>
               );

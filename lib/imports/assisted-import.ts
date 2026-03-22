@@ -1,4 +1,5 @@
 export {
+  buildAssistedImportConfirmationDraft,
   buildAssistedImportPayloadFromCsv,
   buildAssistedImportPreview,
   buildAssistedImportSuggestions,
@@ -9,7 +10,10 @@ export {
 } from "@/services/imports/build-assisted-import-payload";
 
 export type {
+  RevoryAssistedImportConfirmationDraft as AssistedImportConfirmationDraft,
   RevoryAssistedImportConfidence as AssistedImportConfidence,
+  RevoryAssistedImportDecision as AssistedImportDecision,
+  RevoryAssistedImportDecisionState as AssistedImportDecisionState,
   RevoryAssistedImportMapping as AssistedImportMapping,
   RevoryAssistedImportPayload as AssistedImportPayload,
   RevoryAssistedImportPreview as AssistedImportPreview,

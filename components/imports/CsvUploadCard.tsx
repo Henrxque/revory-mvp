@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useActionState, useMemo, useRef, useState } from "react";
-
 import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { AssistedImportMappingPreview } from "@/components/imports/AssistedImportMappingPreview";
+import {
+  buildAssistedImportConfirmationDraft,
   buildAssistedImportPayloadFromCsv,
   buildAssistedImportPreview,
-  createMappedCsvText,
   formatImportColumnLabel,
   getAssistedImportTargetOptions,
-  type AssistedImportConfidence,
+  type AssistedImportPayload,
   type AssistedImportPreview,
 } from "@/lib/imports/assisted-import";
 import {
@@ -18,16 +26,14 @@ import {
   REVORY_CSV_MAX_FILE_SIZE_BYTES,
   formatUploadSizeLimit,
 } from "@/lib/imports/csv-upload";
-import {
-  uploadCsvFile,
-} from "@/src/app/(app)/app/imports/actions";
+import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { validateCsvStructure } from "@/services/imports/validate-csv-structure";
+import { uploadCsvFile } from "@/src/app/(app)/app/imports/actions";
 import {
   initialRevoryCsvUploadActionState,
-} from "@/types/imports";
-import type {
-  RevoryCsvColumn,
-  RevoryCsvTemplateKey,
-  RevoryCsvUploadActionState,
+  type RevoryCsvColumn,
+  type RevoryCsvTemplateKey,
+  type RevoryCsvUploadActionState,
 } from "@/types/imports";
 
 type CsvUploadCardProps = Readonly<{
@@ -40,6 +46,7 @@ type CsvUploadCardProps = Readonly<{
     totalRows: number;
     status: string;
   } | null;
+  onActivityChange?: (isActive: boolean) => void;
   templateHref: string;
   templateKey: RevoryCsvTemplateKey;
   templateName: string;
@@ -131,6 +138,51 @@ function ButtonArrowIcon() {
   );
 }
 
+type FlowStepState = "complete" | "current" | "upcoming";
+type StatusTone = "accent" | "danger" | "neutral" | "success" | "warning";
+
+function getStatusToneClassName(tone: StatusTone) {
+  switch (tone) {
+    case "accent":
+      return "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.09)] text-[color:var(--accent-light)]";
+    case "success":
+      return "border-[rgba(46,204,134,0.24)] bg-[rgba(46,204,134,0.1)] text-[color:var(--success)]";
+    case "warning":
+      return "border-[rgba(245,166,35,0.26)] bg-[rgba(245,166,35,0.1)] text-[color:var(--warning)]";
+    case "danger":
+      return "border-[rgba(255,114,141,0.34)] bg-[rgba(255,114,141,0.1)] text-[color:var(--danger)]";
+    default:
+      return "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]";
+  }
+}
+
+function getHistoricalStatusTone(status: string | null | undefined): StatusTone {
+  switch (status?.toLowerCase()) {
+    case "imported":
+    case "completed":
+    case "active":
+      return "success";
+    case "warning":
+      return "warning";
+    case "error":
+    case "failed":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+function getFlowStepToneClassName(state: FlowStepState) {
+  switch (state) {
+    case "complete":
+      return "border-[rgba(46,204,134,0.2)] bg-[rgba(46,204,134,0.08)] text-[color:var(--foreground)]";
+    case "current":
+      return "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] text-[color:var(--foreground)]";
+    default:
+      return "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] text-[color:var(--text-muted)]";
+  }
+}
+
 function formatImportedAt(value: string | null | undefined) {
   if (!value) {
     return "No CSV imported yet";
@@ -162,35 +214,9 @@ function getCoveragePercent(lastUpload: CsvUploadCardProps["lastUpload"]) {
   return (lastUpload.successRows / lastUpload.totalRows) * 100;
 }
 
-function getConfidenceLabel(confidence: AssistedImportConfidence) {
-  switch (confidence) {
-    case "high":
-      return "Strong match";
-    case "medium":
-      return "Likely match";
-    case "low":
-      return "Review";
-    default:
-      return "Unmapped";
-  }
-}
-
-function getConfidenceClassName(confidence: AssistedImportConfidence) {
-  switch (confidence) {
-    case "high":
-      return "border-[rgba(46,204,134,0.25)] bg-[rgba(46,204,134,0.12)] text-[color:var(--success)]";
-    case "medium":
-      return "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] text-[color:var(--accent-light)]";
-    case "low":
-      return "border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.12)] text-[color:var(--warning)]";
-    default:
-      return "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]";
-  }
-}
-
 function buildPreviewBlockingMessage(preview: AssistedImportPreview | null) {
   if (!preview) {
-    return "Select a CSV file so REVORY can read the headers before importing.";
+    return "Select a CSV file so REVORY can review the headers before importing.";
   }
 
   if (preview.duplicateSourceHeaders.length > 0) {
@@ -201,7 +227,7 @@ function buildPreviewBlockingMessage(preview: AssistedImportPreview | null) {
 
   if (preview.duplicateTargets.length > 0) {
     return `Choose only one source column for ${preview.duplicateTargets
-      .map((target) => formatImportColumnLabel(target))
+      .map((column) => formatImportColumnLabel(column))
       .join(", ")}.`;
   }
 
@@ -212,17 +238,20 @@ function buildPreviewBlockingMessage(preview: AssistedImportPreview | null) {
   }
 
   if (preview.missingIdentityPath) {
-    return `Map at least one client identifier: ${preview.identityColumns
-      .map((column) => formatImportColumnLabel(column))
-      .join(", ")}.`;
+    return "Map at least one client identifier before importing.";
   }
 
   return null;
 }
 
+function formatPreviewValidationMessage(messages: readonly string[]) {
+  return [...new Set(messages)].slice(0, 2).join(" ");
+}
+
 export function CsvUploadCard({
   helperText,
   lastUpload,
+  onActivityChange,
   templateHref,
   templateKey,
   templateName,
@@ -235,14 +264,12 @@ export function CsvUploadCard({
   const [clientError, setClientError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [rawFileText, setRawFileText] = useState<string | null>(null);
+  const [assistedPayload, setAssistedPayload] = useState<AssistedImportPayload | null>(null);
   const [mapping, setMapping] = useState<Record<string, RevoryCsvColumn | null>>({});
-  const [mappingPreview, setMappingPreview] = useState<AssistedImportPreview | null>(null);
+  const [isConfirmationStepVisible, setIsConfirmationStepVisible] = useState(false);
   const [showServerState, setShowServerState] = useState(false);
-  const targetOptions = useMemo(
-    () => getAssistedImportTargetOptions(templateKey),
-    [templateKey],
-  );
   const state = showServerState ? serverState : initialRevoryCsvUploadActionState;
+  const coveragePercent = getCoveragePercent(lastUpload);
   const statusState = useMemo<RevoryCsvUploadActionState>(() => {
     if (clientError) {
       return {
@@ -253,16 +280,100 @@ export function CsvUploadCard({
 
     return state;
   }, [clientError, state]);
-  const coveragePercent = getCoveragePercent(lastUpload);
+  const currentPreview = useMemo(() => {
+    if (!assistedPayload) {
+      return null;
+    }
+
+    return buildAssistedImportPreview(
+      templateKey,
+      assistedPayload.detectedHeaders,
+      mapping,
+    );
+  }, [assistedPayload, mapping, templateKey]);
+  const confirmationDraft = useMemo(() => {
+    if (!assistedPayload || !currentPreview) {
+      return null;
+    }
+
+    return buildAssistedImportConfirmationDraft(assistedPayload.preview, currentPreview);
+  }, [assistedPayload, currentPreview]);
+  const targetOptions = useMemo(
+    () => getAssistedImportTargetOptions(templateKey),
+    [templateKey],
+  );
+  const blockingMessage = useMemo(
+    () => buildPreviewBlockingMessage(currentPreview),
+    [currentPreview],
+  );
+  const canSubmit = Boolean(
+    currentPreview && confirmationDraft && confirmationDraft.canProceed && !blockingMessage,
+  );
+  const canOpenConfirmation = Boolean(
+    currentPreview && confirmationDraft && confirmationDraft.canProceed,
+  );
   const cardTitle =
     templateKey === "appointments" ? "Appointments import" : "Clients import";
   const processSteps = [
-    { detail: "Bring the CSV", step: "01" },
-    { detail: "Confirm columns", step: "02" },
+    { detail: "Read headers", step: "01" },
+    { detail: "Review mapping", step: "02" },
     { detail: "Run import", step: "03" },
   ];
+  const sessionStage = (() => {
+    if (isPending) {
+      return { label: "Importing", tone: "accent" as const };
+    }
+
+    if (statusState.status === "imported") {
+      return { label: "Imported", tone: "success" as const };
+    }
+
+    if (statusState.status === "error") {
+      return { label: "Needs attention", tone: "danger" as const };
+    }
+
+    if (isConfirmationStepVisible) {
+      return { label: "Final confirmation", tone: "accent" as const };
+    }
+
+    if (currentPreview && canSubmit) {
+      return { label: "Ready to confirm", tone: "success" as const };
+    }
+
+    if (currentPreview) {
+      return { label: "Review mapping", tone: "warning" as const };
+    }
+
+    if (selectedFileName) {
+      return { label: "Reading file", tone: "accent" as const };
+    }
+
+    return { label: "Awaiting file", tone: "neutral" as const };
+  })();
+  const hasImportResult = Boolean(statusState.importSummary);
+  const hasUploadContext = Boolean(selectedFileName || currentPreview);
+  const isFlowActive = Boolean(
+    selectedFileName ||
+      currentPreview ||
+      isConfirmationStepVisible ||
+      isPending ||
+      hasImportResult,
+  );
+  const uploadPanelClassName = hasUploadContext
+    ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))]"
+    : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]";
   const primaryActionLabel =
-    mappingPreview?.exactTemplateMatch ? "Import official CSV" : "Confirm mapping and import";
+    currentPreview?.exactTemplateMatch
+      ? "Review final confirmation"
+      : "Continue to final confirmation";
+  const confirmationActionLabel =
+    currentPreview?.exactTemplateMatch
+      ? "Confirm official mapping and import"
+      : "Confirm mapping and import";
+
+  useEffect(() => {
+    onActivityChange?.(isFlowActive);
+  }, [isFlowActive, onActivityChange]);
 
   function validateSelectedFile(file: File | null) {
     if (!file) {
@@ -282,11 +393,22 @@ export function CsvUploadCard({
 
   async function buildPreview(file: File) {
     const fileText = await file.text();
+    const validationResult = validateCsvStructure(fileText, templateKey);
+    const blockingPreviewMessages = validationResult.errors
+      .filter(
+        (issue) => issue.code === "file_empty" || issue.code === "invalid_structure",
+      )
+      .map((issue) => issue.message);
+
+    if (blockingPreviewMessages.length > 0) {
+      throw new Error(formatPreviewValidationMessage(blockingPreviewMessages));
+    }
+
     const nextPayload = buildAssistedImportPayloadFromCsv(templateKey, fileText);
 
     setRawFileText(fileText);
+    setAssistedPayload(nextPayload);
     setMapping(nextPayload.mapping);
-    setMappingPreview(nextPayload.preview);
   }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -295,39 +417,53 @@ export function CsvUploadCard({
 
     setSelectedFileName(file?.name ?? null);
     setClientError(validationError);
+    setIsConfirmationStepVisible(false);
     setShowServerState(false);
 
     if (!file || validationError) {
       setRawFileText(null);
+      setAssistedPayload(null);
       setMapping({});
-      setMappingPreview(null);
       return;
     }
 
     try {
       await buildPreview(file);
       setClientError(null);
-    } catch {
+    } catch (error) {
       setRawFileText(null);
+      setAssistedPayload(null);
       setMapping({});
-      setMappingPreview(null);
-      setClientError("REVORY could not read this CSV file. Try exporting it again.");
+      setClientError(
+        error instanceof Error && error.message
+          ? error.message
+          : "REVORY could not read this CSV file. Try exporting it again.",
+      );
     }
   }
 
   function handleMappingChange(sourceHeader: string, targetColumnValue: string) {
-    const nextMapping = {
-      ...mapping,
+    setClientError(null);
+    setIsConfirmationStepVisible(false);
+    setMapping((currentMapping) => ({
+      ...currentMapping,
       [sourceHeader]: targetColumnValue ? (targetColumnValue as RevoryCsvColumn) : null,
-    };
+    }));
+  }
 
-    setMapping(nextMapping);
-
-    if (mappingPreview) {
-      setMappingPreview(
-        buildAssistedImportPreview(templateKey, mappingPreview.detectedHeaders, nextMapping),
-      );
+  function handleOpenConfirmation() {
+    if (blockingMessage) {
+      setClientError(blockingMessage);
+      return;
     }
+
+    if (!canOpenConfirmation) {
+      setClientError("Resolve the mapping blockers before moving to final confirmation.");
+      return;
+    }
+
+    setClientError(null);
+    setIsConfirmationStepVisible(true);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -341,28 +477,24 @@ export function CsvUploadCard({
       return;
     }
 
-    const blockingMessage = buildPreviewBlockingMessage(mappingPreview);
-
     if (blockingMessage) {
       setClientError(blockingMessage);
       return;
     }
 
-    if (!rawFileText || !file || !mappingPreview) {
-      setClientError("Select a CSV file so REVORY can prepare the import.");
+    if (!rawFileText || !file || !currentPreview || !confirmationDraft) {
+      setClientError("Select a CSV file so REVORY can prepare the mapping preview.");
       return;
     }
 
-    const mappedCsvText = createMappedCsvText(templateKey, rawFileText, mapping);
-    const mappedFile = new File([mappedCsvText], file.name, {
-      type: file.type || "text/csv",
-    });
     const formData = new FormData();
 
     formData.append("templateKey", templateKey);
-    formData.append("file", mappedFile);
+    formData.append("file", file);
+    formData.append("mappingDecisionDraft", JSON.stringify(confirmationDraft));
 
     setClientError(null);
+    setIsConfirmationStepVisible(false);
     setShowServerState(true);
 
     startTransition(() => {
@@ -371,7 +503,7 @@ export function CsvUploadCard({
   }
 
   return (
-    <section className="rev-shell-panel relative overflow-hidden rounded-[34px] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.2)] md:p-7">
+    <section className="rev-shell-panel relative max-w-full min-w-0 overflow-hidden rounded-[34px] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.2)] md:p-7">
       <div
         className={`pointer-events-none absolute top-0 h-40 w-40 rounded-full blur-3xl ${
           templateKey === "appointments"
@@ -393,8 +525,12 @@ export function CsvUploadCard({
                 <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)]">
                   {cardTitle}
                 </h2>
-                <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
-                  {formatStatus(lastUpload?.status)}
+                <span
+                  className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${getStatusToneClassName(
+                    sessionStage.tone,
+                  )}`}
+                >
+                  {sessionStage.label}
                 </span>
               </div>
               <p className="text-sm leading-6 text-[color:var(--text-muted)]">
@@ -419,13 +555,29 @@ export function CsvUploadCard({
           <div className="flex flex-wrap items-center gap-2">
             {processSteps.map((item, index) => (
               <div key={item.step} className="flex items-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+                <div
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-2.5 ${getFlowStepToneClassName(
+                    index === 0
+                      ? currentPreview || isConfirmationStepVisible || isPending || hasImportResult
+                        ? "complete"
+                        : "current"
+                      : index === 1
+                        ? isConfirmationStepVisible || isPending || hasImportResult
+                          ? "complete"
+                          : currentPreview
+                            ? "current"
+                            : "upcoming"
+                        : hasImportResult
+                          ? "complete"
+                          : isConfirmationStepVisible || isPending
+                            ? "current"
+                            : "upcoming",
+                  )}`}
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">
                     {item.step}
                   </span>
-                  <span className="text-sm font-medium text-[color:var(--foreground)]">
-                    {item.detail}
-                  </span>
+                  <span className="text-sm font-medium">{item.detail}</span>
                 </div>
                 {index < processSteps.length - 1 ? (
                   <span className="text-[color:var(--text-subtle)]">/</span>
@@ -436,14 +588,23 @@ export function CsvUploadCard({
         </div>
 
         <div className="overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)]">
-          <div className="px-4 py-4 sm:px-5">
-            <p className="rev-label">Last import</p>
-            <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-              {lastUpload?.fileName ?? "Awaiting first import"}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-[color:var(--text-muted)]">
-              {formatImportedAt(lastUpload?.importedAt)}
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-5">
+            <div>
+              <p className="rev-label">Last import</p>
+              <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
+                {lastUpload?.fileName ?? "Awaiting first import"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[color:var(--text-muted)]">
+                {formatImportedAt(lastUpload?.importedAt)}
+              </p>
+            </div>
+            <span
+              className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${getStatusToneClassName(
+                getHistoricalStatusTone(lastUpload?.status),
+              )}`}
+            >
+              Latest saved result: {formatStatus(lastUpload?.status)}
+            </span>
           </div>
 
           <div className="grid grid-cols-3 border-t border-[color:var(--border)] bg-[rgba(255,255,255,0.015)]">
@@ -484,13 +645,14 @@ export function CsvUploadCard({
       </div>
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <div className="rounded-[30px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))] p-5">
+        <div className={`rounded-[30px] border p-5 transition ${uploadPanelClassName}`}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
               <p className="rev-label">Choose CSV file</p>
               <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
-                Drop in the exported file or choose it manually. REVORY checks the
-                headers before the final import.
+                Bring the export you already have. REVORY reads the headers
+                first, suggests the best matching REVORY fields, and waits for your
+                final confirmation before import.
               </p>
             </div>
             <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
@@ -511,7 +673,11 @@ export function CsvUploadCard({
 
           <div className="mt-5 grid gap-3 md:grid-cols-[auto_1fr]">
             <button
-              className="inline-flex h-14 items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.18)] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(194,9,90,0.14)] transition hover:border-[rgba(224,16,106,0.42)] hover:bg-[rgba(194,9,90,0.28)] hover:shadow-[0_18px_38px_rgba(194,9,90,0.2)]"
+              className={`inline-flex h-14 items-center justify-center gap-2 rounded-[18px] border px-5 text-sm font-semibold transition ${
+                hasUploadContext
+                  ? "border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.16)] text-white shadow-[0_12px_28px_rgba(194,9,90,0.14)] hover:border-[rgba(224,16,106,0.42)] hover:bg-[rgba(194,9,90,0.24)] hover:shadow-[0_18px_38px_rgba(194,9,90,0.2)]"
+                  : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--foreground)] hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.05)]"
+              }`}
               onClick={() => {
                 fileInputRef.current?.click();
               }}
@@ -523,240 +689,176 @@ export function CsvUploadCard({
 
             <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(12,11,15,0.42)] px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                Selected file
+                {currentPreview ? "Current file" : "Selected file"}
               </p>
               <p className="mt-1 truncate text-sm font-medium text-[color:var(--foreground)]">
                 {selectedFileName ?? "No file selected yet"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
+                {currentPreview
+                  ? `${currentPreview.totalHeaderCount} header${
+                      currentPreview.totalHeaderCount === 1 ? "" : "s"
+                    } detected for review.`
+                  : "The file stays local until you confirm the import."}
               </p>
             </div>
           </div>
         </div>
 
-        {mappingPreview ? (
-          <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="space-y-4">
-              <div className="rev-card rounded-[24px] p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="rev-label">Header review</p>
-                    <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-                      {mappingPreview.exactTemplateMatch
-                        ? "Official structure detected"
-                        : "Assisted mapping ready for review"}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${
-                      mappingPreview.canImport
-                        ? "border-[rgba(46,204,134,0.25)] bg-[rgba(46,204,134,0.12)] text-[color:var(--success)]"
-                        : "border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.12)] text-[color:var(--warning)]"
-                    }`}
-                  >
-                    {mappingPreview.canImport ? "Ready to import" : "Needs confirmation"}
-                  </span>
-                </div>
+        {assistedPayload && currentPreview && confirmationDraft ? (
+          <AssistedImportMappingPreview
+            confirmationDraft={confirmationDraft}
+            currentPreview={currentPreview}
+            initialPreview={assistedPayload.preview}
+            onMappingChange={handleMappingChange}
+            selectedFileName={selectedFileName}
+            targetOptions={targetOptions}
+          />
+        ) : null}
 
+        {currentPreview && confirmationDraft && isConfirmationStepVisible ? (
+          <div className="rev-card rounded-[28px] p-5 md:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="max-w-3xl">
+                <p className="rev-label">Final confirmation</p>
+                <h3 className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  Confirm the mapping for this import execution.
+                </h3>
                 <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                  {mappingPreview.exactTemplateMatch
-                    ? "This file already matches the REVORY structure. You can import it directly."
-                    : "REVORY matched what it could automatically. Review any low-confidence or unmapped fields before continuing."}
+                  REVORY will run this import using the mapping confirmed in
+                  this step for the current execution. This confirmation
+                  applies only to the current execution and does not create a
+                  persistent mapping memory for the workspace.
                 </p>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                      Headers detected
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
-                      {mappingPreview.totalHeaderCount}
-                    </p>
-                  </div>
-                  <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                      Strong matches
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
-                      {mappingPreview.matchedWithConfidenceCount}
-                    </p>
-                  </div>
-                  <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                      Needs confirmation
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
-                      {mappingPreview.suggestedCount}
-                    </p>
-                  </div>
-                  <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                      Unresolved
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
-                      {mappingPreview.unresolvedCount}
-                    </p>
-                  </div>
-                </div>
-
-                {mappingPreview.missingRequiredColumns.length > 0 ? (
-                  <div className="mt-4 rounded-[20px] border border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.12)] px-4 py-4 text-sm leading-6 text-[color:var(--warning)]">
-                    Missing required fields:{" "}
-                    {mappingPreview.missingRequiredColumns
-                      .map((column) => formatImportColumnLabel(column))
-                      .join(", ")}
-                    .
-                  </div>
-                ) : null}
-
-                {mappingPreview.hasDuplicateSourceHeaders ? (
-                  <div className="mt-4 rounded-[20px] border border-[rgba(255,114,141,0.35)] bg-[rgba(255,114,141,0.1)] px-4 py-4 text-sm leading-6 text-[color:var(--danger)]">
-                    REVORY detected duplicate raw headers in this file:{" "}
-                    {mappingPreview.duplicateSourceHeaders.join(", ")}. Assisted
-                    mapping can preview them, but import stays blocked until the
-                    source file exposes each column name only once.
-                  </div>
-                ) : null}
-
-                {mappingPreview.missingIdentityPath ? (
-                  <div className="mt-4 rounded-[20px] border border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.12)] px-4 py-4 text-sm leading-6 text-[color:var(--warning)]">
-                    Map at least one client identifier so REVORY can connect rows correctly:{" "}
-                    {mappingPreview.identityColumns
-                      .map((column) => formatImportColumnLabel(column))
-                      .join(", ")}
-                    .
-                  </div>
-                ) : null}
-
-                {mappingPreview.duplicateTargets.length > 0 ? (
-                  <div className="mt-4 rounded-[20px] border border-[rgba(255,114,141,0.35)] bg-[rgba(255,114,141,0.1)] px-4 py-4 text-sm leading-6 text-[color:var(--danger)]">
-                    Only one source column can be assigned to each REVORY field. Review:{" "}
-                    {mappingPreview.duplicateTargets
-                      .map((column) => formatImportColumnLabel(column))
-                      .join(", ")}
-                    .
-                  </div>
-                ) : null}
               </div>
-
-              <div className="rev-card rounded-[24px] p-5">
-                <p className="rev-label">Mapping guardrails</p>
-                <div className="mt-4 space-y-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  <p>Official template is still the fastest path.</p>
-                  <p>Assisted mapping is for header matching, not full ETL.</p>
-                  <p>Complex transformations stay outside the MVP.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rev-card rounded-[24px] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="rev-label">Detected columns</p>
-                  <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-                    Confirm each source header before import
-                  </p>
-                </div>
-                <span className="text-xs text-[color:var(--text-muted)]">
-                  Ignore anything REVORY does not need right now
-                </span>
-              </div>
-
-              <div className="mt-4 max-h-[560px] space-y-3 overflow-y-auto pr-1">
-                {mappingPreview.mappingOptions.map((option) => (
-                  <div
-                    key={option.sourceHeader}
-                    className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                          {option.sourceHeader}
-                        </p>
-                        <p className="mt-1 text-xs text-[color:var(--text-muted)]">
-                          Source header detected in this CSV
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${getConfidenceClassName(
-                          option.confidence,
-                        )}`}
-                      >
-                        {getConfidenceLabel(option.confidence)}
-                      </span>
-                    </div>
-
-                    <label className="mt-4 block">
-                      <span className="mb-2 block text-sm font-medium text-[color:var(--foreground)]">
-                        Map to REVORY field
-                      </span>
-                      <select
-                        className="rev-select-field"
-                        onChange={(event) => {
-                          handleMappingChange(option.sourceHeader, event.target.value);
-                        }}
-                        value={option.targetColumn ?? ""}
-                      >
-                        <option value="">Ignore this column</option>
-                        {targetOptions.map((targetOption) => (
-                          <option key={targetOption.column} value={targetOption.column}>
-                            {targetOption.label}
-                            {targetOption.isRequired ? " - Required" : ""}
-                            {!targetOption.isRequired && targetOption.isIdentity
-                              ? " - Identifier"
-                              : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {statusState.status === "imported" ? (
-          <div className="rev-feedback-success">
-            {statusState.message}
-            {statusState.fileName ? ` File: ${statusState.fileName}.` : ""}
-            {statusState.importSummary ? (
-              <span>
-                {" "}
-                Persisted rows: {statusState.importSummary.successRows} of{" "}
-                {statusState.importSummary.totalRows}. Rows needing correction:{" "}
-                {statusState.importSummary.errorRows}.
+              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+                Current execution only
               </span>
-            ) : null}
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-4">
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Pending suggestions
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {confirmationDraft.suggestedPendingConfirmationCount}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.08)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Kept from REVORY match
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {confirmationDraft.keptConfidentMatchCount}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Adjusted manually
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {confirmationDraft.mappedByUserCount}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Ignored
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {confirmationDraft.unmappedCount}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="font-medium text-[color:var(--foreground)]">
+                What happens next
+              </p>
+              <p className="mt-2">
+                REVORY uses the confirmed mapping shown here only for this
+                execution. The server rebuilds the official REVORY CSV
+                structure from that confirmed mapping, then runs the approved
+                import validation and persistence flow.
+              </p>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <button
+                className="rev-button-secondary"
+                onClick={() => {
+                  setIsConfirmationStepVisible(false);
+                }}
+                type="button"
+              >
+                Back to mapping
+              </button>
+              <button
+                className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.42)] bg-[linear-gradient(180deg,#d90f68_0%,#bc0c58_100%)] px-5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(194,9,90,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(255,110,170,0.52)] hover:bg-[linear-gradient(180deg,#eb1775_0%,#c90d5d_100%)] hover:shadow-[0_24px_46px_rgba(194,9,90,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
+                disabled={!canSubmit || isPending}
+                type="submit"
+              >
+                <span>{isPending ? "Importing..." : confirmationActionLabel}</span>
+                <ButtonArrowIcon />
+              </button>
+            </div>
           </div>
         ) : null}
 
-        {statusState.importSummary ? (
-          <div className="rev-card rounded-[24px] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
-            Clients created: {statusState.importSummary.createdClientCount}. Clients
-            updated: {statusState.importSummary.updatedClientCount}. Appointments created:{" "}
-            {statusState.importSummary.createdAppointmentCount}. Appointments updated:{" "}
-            {statusState.importSummary.updatedAppointmentCount}.
+        {isPending ? (
+          <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="rev-label">Import in progress</p>
+                <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
+                  REVORY is validating and importing the current file.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  Keep this page open while the current execution finishes. The
+                  detailed result will appear below as soon as the import returns.
+                </p>
+              </div>
+              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+                Current execution
+              </span>
+            </div>
           </div>
         ) : null}
 
         {statusState.status === "error" ? (
-          <div className="rev-feedback-error">{statusState.message}</div>
-        ) : null}
-
-        {statusState.warnings && statusState.warnings.length > 0 ? (
-          <div className="rev-feedback-warning">
-            <p className="font-medium">Warnings to review in this import:</p>
-            <ul className="mt-2 space-y-1">
-              {statusState.warnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
+          <div className="rev-feedback-error">
+            <p className="font-medium text-[color:var(--foreground)]">
+              Import cannot continue yet
+            </p>
+            <p className="mt-2">{statusState.message}</p>
+            {statusState.requiresReauth ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Link
+                  className="rev-button-secondary"
+                  href={buildSignInRedirectPath("/app/imports")}
+                >
+                  Sign in again
+                </Link>
+                <button
+                  className="rounded-[14px] border border-white/10 px-4 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.04)]"
+                  onClick={() => {
+                    window.location.reload();
+                  }}
+                  type="button"
+                >
+                  Refresh session
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
         {statusState.failedRows && statusState.failedRows.length > 0 ? (
           <div className="rev-feedback-error">
-            <p className="font-medium">Rows still needing correction:</p>
-            <ul className="mt-2 space-y-2">
+            <p className="font-medium text-[color:var(--foreground)]">
+              Rows still needing correction
+            </p>
+            <ul className="mt-3 space-y-2">
               {statusState.failedRows.map((row) => (
                 <li key={row.lineNumber}>
                   Line {row.lineNumber}: {row.reasons.join(" ")}
@@ -766,18 +868,182 @@ export function CsvUploadCard({
           </div>
         ) : null}
 
+        {statusState.warnings && statusState.warnings.length > 0 ? (
+          <div className="rev-feedback-warning">
+            <p className="font-medium text-[color:var(--foreground)]">
+              Warnings to review in this import
+            </p>
+            <ul className="mt-3 space-y-1">
+              {statusState.warnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {statusState.importSummary ? (
+          <div className="rev-card rounded-[28px] p-5 md:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="max-w-3xl">
+                <p className="rev-label">Current execution</p>
+                <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                  Result from the import that just ran.
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                  This section describes only the execution that just finished.
+                  The &quot;Last import&quot; block higher on the page continues to show
+                  the latest aggregated state saved for this source.
+                </p>
+              </div>
+              <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+                {statusState.importedAt ? formatImportedAt(statusState.importedAt) : "Just now"}
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-4">
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Total rows
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {statusState.importSummary.totalRows}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.08)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Imported rows
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {statusState.importSummary.successRows}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.08)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  Rejected rows
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                  {statusState.importSummary.errorRows}
+                </p>
+              </div>
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                  File
+                </p>
+                <p className="mt-2 truncate text-base font-semibold text-[color:var(--foreground)]">
+                  {statusState.fileName ?? "Current upload"}
+                </p>
+              </div>
+            </div>
+
+            {statusState.mappingExecutionSummary ? (
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
+                <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                    Pending suggestions
+                  </p>
+                  <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                    {statusState.mappingExecutionSummary.suggestedPendingConfirmationCount}
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.08)] px-4 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                    Kept
+                  </p>
+                  <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                    {statusState.mappingExecutionSummary.keptConfidentMatchCount}
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                    Adjusted manually
+                  </p>
+                  <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                    {statusState.mappingExecutionSummary.mappedByUserCount}
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                    Ignored
+                  </p>
+                  <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                    {statusState.mappingExecutionSummary.unmappedCount}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {statusState.importSummary ? (
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                Clients created
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                {statusState.importSummary.createdClientCount}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                Clients updated
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                {statusState.importSummary.updatedClientCount}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                Appointments created
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                {statusState.importSummary.createdAppointmentCount}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                Appointments updated
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
+                {statusState.importSummary.updatedAppointmentCount}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {statusState.status === "imported" && !statusState.importSummary ? (
+          <div className="rev-feedback-success">
+            <p className="font-medium text-[color:var(--foreground)]">
+              Import finished
+            </p>
+            <p className="mt-2">
+              {statusState.message}
+              {statusState.fileName ? ` File: ${statusState.fileName}.` : ""}
+            </p>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
-            Review the mapping, confirm the structure, and let REVORY handle the import.
+            {isConfirmationStepVisible
+              ? "This is the final check before import. Confirm to execute the current mapping exactly as shown."
+              : currentPreview
+              ? canSubmit
+                ? "The current mapping is ready. Open the final confirmation when you want to execute this import."
+                : "Resolve the blockers shown in the mapping preview before REVORY can continue with this import."
+              : "Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first."}
           </p>
-          <button
-            className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.42)] bg-[linear-gradient(180deg,#d90f68_0%,#bc0c58_100%)] px-5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(194,9,90,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(255,110,170,0.52)] hover:bg-[linear-gradient(180deg,#eb1775_0%,#c90d5d_100%)] hover:shadow-[0_24px_46px_rgba(194,9,90,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
-            disabled={isPending}
-            type="submit"
-          >
-            <span>{isPending ? "Importing..." : primaryActionLabel}</span>
-            <ButtonArrowIcon />
-          </button>
+          {!isConfirmationStepVisible && currentPreview ? (
+            <button
+              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.42)] bg-[linear-gradient(180deg,#d90f68_0%,#bc0c58_100%)] px-5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(194,9,90,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(255,110,170,0.52)] hover:bg-[linear-gradient(180deg,#eb1775_0%,#c90d5d_100%)] hover:shadow-[0_24px_46px_rgba(194,9,90,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
+              disabled={!canOpenConfirmation || isPending}
+              onClick={handleOpenConfirmation}
+              type="button"
+            >
+              <span>{primaryActionLabel}</span>
+              <ButtonArrowIcon />
+            </button>
+          ) : null}
         </div>
       </form>
     </section>

@@ -1,0 +1,2 @@
+appointment_external_id,client_email,client_email,scheduled_at,status,client_full_name
+qa_duplicate_apt_001,qa-duplicate@example.com,qa-duplicate-alt@example.com,2026-12-30T10:00:00Z,SCHEDULED,Fabio Duplicate

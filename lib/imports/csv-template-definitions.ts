@@ -57,14 +57,35 @@ export const revoryCsvTemplateDefinitions = {
   clients: revoryClientsCsvTemplateDefinition,
 } as const;
 
-export function getRevoryCsvTemplateColumns(key: keyof typeof revoryCsvTemplateDefinitions) {
-  const definition = revoryCsvTemplateDefinitions[key];
+const revoryCsvTemplateColumnOrder = {
+  appointments: [
+    "appointment_external_id",
+    "client_full_name",
+    "client_external_id",
+    "client_email",
+    "client_phone",
+    "scheduled_at",
+    "status",
+    "service_name",
+    "provider_name",
+    "estimated_revenue",
+    "booked_at",
+    "canceled_at",
+    "location_name",
+    "source_notes",
+  ],
+  clients: [
+    "full_name",
+    "external_id",
+    "email",
+    "phone",
+    "last_visit_at",
+    "total_visits",
+    "tags",
+    "notes",
+  ],
+} as const;
 
-  return [
-    ...new Set([
-      ...definition.requiredColumns,
-      ...(definition.atLeastOneOf ?? []),
-      ...definition.optionalColumns,
-    ]),
-  ];
+export function getRevoryCsvTemplateColumns(key: keyof typeof revoryCsvTemplateDefinitions) {
+  return [...revoryCsvTemplateColumnOrder[key]];
 }

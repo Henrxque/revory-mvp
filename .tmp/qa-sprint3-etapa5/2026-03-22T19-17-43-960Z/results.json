@@ -1,0 +1,60 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-sprint3-qa-1774207064557+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-22T19:19:12.258Z",
+  "startedAt": "2026-03-22T19:17:43.960Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "auth.sign-up-page",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app/setup/template"
+      },
+      "name": "auth.sign-up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn25304q000hbm90casmm3ne",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn25304w000jbm90ukm3uh8p",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "auth.workspace-created",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "page.waitForURL: Timeout 60000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n  navigated to \"http://localhost:3000/app/setup/source\"\n============================================================",
+        "stack": "page.waitForURL: Timeout 60000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n  navigated to \"http://localhost:3000/app/setup/source\"\n============================================================\n    at waitForStepPage (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:287:14)\n    at async performOnboarding (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:409:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:716:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

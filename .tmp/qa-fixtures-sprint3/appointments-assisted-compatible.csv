@@ -1,0 +1,2 @@
+appt identifier,client name,scheduled visit,status text,client mobile number,service performed,revenue estimate,notes from spa
+qa_assisted_apt_001,Carla Assisted,2026-12-22T16:30:00Z,SCHEDULED,+5511999910003,Skin Booster,310,Assisted mapping QA scenario

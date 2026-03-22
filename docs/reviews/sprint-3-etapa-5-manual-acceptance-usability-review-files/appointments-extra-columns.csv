@@ -1,0 +1,2 @@
+appointment_external_id,client_full_name,scheduled_at,status,client_email,random_col,notes_x
+qa_extra_apt_001,Diego Extra,2026-12-27T12:15:00Z,SCHEDULED,qa-extra-diego@example.com,foo,Imported with extra columns

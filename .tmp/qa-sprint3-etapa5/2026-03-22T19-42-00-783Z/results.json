@@ -1,0 +1,115 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-sprint3-qa-1774208521272+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-22T19:44:48.384Z",
+  "startedAt": "2026-03-22T19:42:00.783Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "auth.sign-up-page",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app/setup/template"
+      },
+      "name": "auth.sign-up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn25y7nk004gbm90evef2som",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn25y7nr004ibm90h3llyas5",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "auth.workspace-created",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-sprint3-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn25y7nk004gbm90evef2som",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn25y7nr004ibm90h3llyas5",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "auth.activated-workspace-for-sprint3",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "progressDisabled": false,
+        "progressLabel": "Review final confirmation",
+        "textSnippet": "REVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nREADY TO CONFIRM\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-official-exact.csv\n\n14 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-official-exact.csv\n\n14 headers detected.\n\nREVORY SUGGESTION\n\n14\n\nConfident matches\n\n0\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n14\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREADY\n\nMapping ready to move forward\n\nRequired fields are ready, the identity path is covered, and the current mapping can proceed to the final import step.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nFILE RECEIVED\nREVORY SUGGESTION\nCURRENT MAPPING DECISION\nSOURCE\n\nappointment_external_id\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nAppointment External Id\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nAppointment External Id\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nclient_full_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient Full Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Requ",
+        "uploadResult": {
+          "attempt": 1,
+          "inputState": {
+            "filesLength": 1,
+            "firstName": "appointments-official-exact.csv"
+          },
+          "reacted": true,
+          "sectionText": "REVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nREADY TO CONFIRM\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-official-exact.csv\n\n14 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-official-exact.csv\n\n14 headers detected.\n\nREVORY SUGGESTION\n\n14\n\nConfident matches\n\n0\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n14\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREADY\n\nMapping ready to move forward\n\nRequired fields are ready, the identity path is covered, and the current mapping can proceed to the final import step.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nFILE RECEIVED\nREVORY SUGGESTION\nCURRENT MAPPING DECISION\nSOURCE\n\nappointment_external_id\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nAppointment External Id\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nAppointment External Id\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nclient_full_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient Full Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nClient Full Name\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nclient_external_id\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient External Id\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nClient External Id\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nCLIENT IDENTIFIER PATH\n\nSOURCE\n\nclient_email\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient Email\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nClient Email\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nCLIENT IDENTIFIER PATH\n\nSOURCE\n\nclient_phone\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient Phone\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nClient Phone\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nCLIENT IDENTIFIER PATH\n\nSOURCE\n\nscheduled_at\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nScheduled At\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nScheduled At\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nstatus\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nStatus\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nStatus\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nservice_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nService Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nService Name\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\nprovider_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nProvider Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nProvider Name\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\nestimated_revenue\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nEstimated Revenue\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nEstimated Revenue\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\nbooked_at\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nBooked At\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nBooked At\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\ncanceled_at\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nCanceled At\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nCanceled At\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\nlocation_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nLocation Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nLocation Name\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nSOURCE\n\nsource_notes\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nSource Notes\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nSource Notes\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nOPTIONAL REVORY FIELD\n\nThe current mapping is ready. Open the final confirmation when you want to execute this import.\n\nReview final confirmation"
+        }
+      },
+      "name": "regression.official-appointments-import.preview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "confirmLabel": "Confirm official mapping and import",
+        "textSnippet": "REVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nFINAL CONFIRMATION\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-official-exact.csv\n\n14 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-official-exact.csv\n\n14 headers detected.\n\nREVORY SUGGESTION\n\n14\n\nConfident matches\n\n0\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n14\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREADY\n\nMapping ready to move forward\n\nRequired fields are ready, the identity path is covered, and the current mapping can proceed to the final import step.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nFILE RECEIVED\nREVORY SUGGESTION\nCURRENT MAPPING DECISION\nSOURCE\n\nappointment_external_id\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nAppointment External Id\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Required\nStatus - Required\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nAppointment External Id\n\nREVORY matched this field with confidence and the current mapping keeps it as suggested.\n\nREQUIRED REVORY FIELD\n\nSOURCE\n\nclient_full_name\n\nUploaded header detected in this file.\n\nREVORY SUGGESTION\nCONFIDENT MATCH\n\nClient Full Name\n\nHeader matches the official REVORY field name exactly.\n\nFINAL DECISION\nKEPT\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nScheduled At - Re"
+      },
+      "name": "regression.official-appointments-import.confirmation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.waitFor: Timeout 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').first().getByText(/Result from the import that just ran\\.|Import finished|Rows still needing correction/i).first() to be visible\u001b[22m\n",
+        "stack": "locator.waitFor: Timeout 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').first().getByText(/Result from the import that just ran\\.|Import finished|Rows still needing correction/i).first() to be visible\u001b[22m\n\n    at submitConfirmedImport (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:696:6)\n    at async runSuccessfulImportScenario (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-3-etapa-5-qa-import-assisted.mjs:747:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-3-etapa-5-qa-import-assisted.mjs:865:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

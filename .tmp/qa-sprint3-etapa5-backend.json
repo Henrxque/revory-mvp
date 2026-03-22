@@ -1,0 +1,325 @@
+{
+  "email": "revory-sprint3-qa-1774208521272+clerk_test@example.com",
+  "generatedAt": "2026-03-22T19:46:22.789Z",
+  "scenarios": [
+    {
+      "fileName": "appointments-official-exact.csv",
+      "label": "regression.official-appointments.preview",
+      "preview": {
+        "canImport": true,
+        "duplicateSourceHeaders": [],
+        "duplicateTargets": [],
+        "exactTemplateMatch": true,
+        "matchedWithConfidenceCount": 14,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedPendingConfirmationCount": 0,
+        "totalHeaderCount": 14,
+        "unresolvedCount": 0
+      },
+      "status": "previewed"
+    },
+    {
+      "fileName": "appointments-official-exact.csv",
+      "importResult": {
+        "createdAppointmentCount": 1,
+        "createdClientCount": 1,
+        "errorRows": [],
+        "finalStatus": "imported",
+        "persistedAppointmentCount": 1,
+        "persistedClientCount": 1,
+        "successRows": 1,
+        "totalRows": 1,
+        "updatedAppointmentCount": 0,
+        "updatedClientCount": 0
+      },
+      "label": "regression.official-appointments.import",
+      "preview": {
+        "canImport": true,
+        "exactTemplateMatch": true,
+        "matchedWithConfidenceCount": 14,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedCount": 0,
+        "unresolvedCount": 0
+      },
+      "snapshot": {
+        "appointments": 1,
+        "clients": 1,
+        "dataSources": [
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "appointments-official-exact.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "appointments-csv-upload",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "status": "imported"
+    },
+    {
+      "fileName": "clients-official-exact.csv",
+      "importResult": {
+        "createdAppointmentCount": 0,
+        "createdClientCount": 1,
+        "errorRows": [],
+        "finalStatus": "imported",
+        "persistedAppointmentCount": 0,
+        "persistedClientCount": 1,
+        "successRows": 1,
+        "totalRows": 1,
+        "updatedAppointmentCount": 0,
+        "updatedClientCount": 0
+      },
+      "label": "regression.official-clients.import",
+      "preview": {
+        "canImport": true,
+        "exactTemplateMatch": true,
+        "matchedWithConfidenceCount": 8,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedCount": 0,
+        "unresolvedCount": 0
+      },
+      "snapshot": {
+        "appointments": 1,
+        "clients": 2,
+        "dataSources": [
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "appointments-official-exact.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "appointments-csv-upload",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "clients-official-exact.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "clients-csv-upload",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "status": "imported"
+    },
+    {
+      "fileName": "appointments-assisted-compatible.csv",
+      "label": "sprint3.assisted-compatible.preview",
+      "preview": {
+        "canImport": true,
+        "duplicateSourceHeaders": [],
+        "duplicateTargets": [],
+        "exactTemplateMatch": false,
+        "matchedWithConfidenceCount": 1,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedPendingConfirmationCount": 7,
+        "totalHeaderCount": 8,
+        "unresolvedCount": 0
+      },
+      "status": "previewed"
+    },
+    {
+      "fileName": "appointments-assisted-compatible.csv",
+      "importResult": {
+        "createdAppointmentCount": 1,
+        "createdClientCount": 1,
+        "errorRows": [],
+        "finalStatus": "imported",
+        "persistedAppointmentCount": 1,
+        "persistedClientCount": 1,
+        "successRows": 1,
+        "totalRows": 1,
+        "updatedAppointmentCount": 0,
+        "updatedClientCount": 0
+      },
+      "label": "sprint3.assisted-compatible.import",
+      "preview": {
+        "canImport": true,
+        "exactTemplateMatch": false,
+        "matchedWithConfidenceCount": 1,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedCount": 7,
+        "unresolvedCount": 0
+      },
+      "snapshot": {
+        "appointments": 2,
+        "clients": 3,
+        "dataSources": [
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "appointments-assisted-compatible.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "appointments-csv-upload",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "clients-official-exact.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "clients-csv-upload",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "status": "imported"
+    },
+    {
+      "fileName": "appointments-extra-columns.csv",
+      "importResult": {
+        "createdAppointmentCount": 1,
+        "createdClientCount": 1,
+        "errorRows": [],
+        "finalStatus": "imported",
+        "persistedAppointmentCount": 1,
+        "persistedClientCount": 1,
+        "successRows": 1,
+        "totalRows": 1,
+        "updatedAppointmentCount": 0,
+        "updatedClientCount": 0
+      },
+      "label": "sprint3.extra-columns.import",
+      "preview": {
+        "canImport": true,
+        "exactTemplateMatch": false,
+        "matchedWithConfidenceCount": 5,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedCount": 1,
+        "unresolvedCount": 1
+      },
+      "snapshot": {
+        "appointments": 3,
+        "clients": 4,
+        "dataSources": [
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "appointments-extra-columns.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "appointments-csv-upload",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportError": null,
+            "lastImportErrorRowCount": 0,
+            "lastImportFileName": "clients-official-exact.csv",
+            "lastImportRowCount": 1,
+            "lastImportSuccessRowCount": 1,
+            "name": "clients-csv-upload",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "status": "imported"
+    },
+    {
+      "fileName": "appointments-missing-required.csv",
+      "label": "sprint3.block-missing-required.preview",
+      "preview": {
+        "canImport": false,
+        "duplicateSourceHeaders": [],
+        "duplicateTargets": [],
+        "exactTemplateMatch": false,
+        "matchedWithConfidenceCount": 4,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [
+          "scheduled_at",
+          "status"
+        ],
+        "suggestedPendingConfirmationCount": 0,
+        "totalHeaderCount": 4,
+        "unresolvedCount": 0
+      },
+      "status": "previewed"
+    },
+    {
+      "fileName": "appointments-duplicate-headers.csv",
+      "label": "sprint3.block-duplicate-headers.preview",
+      "preview": {
+        "canImport": false,
+        "duplicateSourceHeaders": [
+          "client_email"
+        ],
+        "duplicateTargets": [],
+        "exactTemplateMatch": false,
+        "matchedWithConfidenceCount": 6,
+        "missingIdentityPath": false,
+        "missingRequiredColumns": [],
+        "suggestedPendingConfirmationCount": 0,
+        "totalHeaderCount": 6,
+        "unresolvedCount": 0
+      },
+      "status": "previewed"
+    },
+    {
+      "fileName": "appointments-empty.csv",
+      "label": "sprint3.block-empty.validation",
+      "status": "blocked",
+      "validation": {
+        "accepted": false,
+        "detectedRowCount": 0,
+        "errors": [
+          "The CSV file is empty. Add a header row and at least one usable data row."
+        ],
+        "usefulRowCount": 0,
+        "warnings": []
+      }
+    },
+    {
+      "fileName": "appointments-malformed-quote.csv",
+      "label": "sprint3.block-malformed.validation",
+      "status": "blocked",
+      "validation": {
+        "accepted": false,
+        "detectedRowCount": 1,
+        "errors": [
+          "Line 2 contains an unclosed quoted value. Re-export the CSV and try again.",
+          "The CSV file does not contain any usable data rows after the header."
+        ],
+        "usefulRowCount": 0,
+        "warnings": []
+      }
+    }
+  ],
+  "userId": "cmn25y7nk004gbm90evef2som",
+  "workspaceId": "cmn25y7nr004ibm90h3llyas5",
+  "finalSnapshot": {
+    "appointments": 3,
+    "clients": 4,
+    "dataSources": [
+      {
+        "lastImportError": null,
+        "lastImportErrorRowCount": 0,
+        "lastImportFileName": "appointments-extra-columns.csv",
+        "lastImportRowCount": 1,
+        "lastImportSuccessRowCount": 1,
+        "name": "appointments-csv-upload",
+        "status": "IMPORTED"
+      },
+      {
+        "lastImportError": null,
+        "lastImportErrorRowCount": 0,
+        "lastImportFileName": "clients-official-exact.csv",
+        "lastImportRowCount": 1,
+        "lastImportSuccessRowCount": 1,
+        "name": "clients-csv-upload",
+        "status": "IMPORTED"
+      }
+    ]
+  }
+}

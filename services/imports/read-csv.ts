@@ -2,12 +2,15 @@ import type { RevoryCsvColumn } from "@/types/imports";
 
 export type RevoryCsvDocumentRow<TColumn extends string> = {
   hasUsefulData: boolean;
+  hasUnclosedQuote: boolean;
   lineNumber: number;
+  valueCount: number;
   values: Partial<Record<TColumn, string>>;
 };
 
 export type RevoryCsvDocument<TColumn extends string> = {
   headerColumns: TColumn[];
+  headerHasUnclosedQuote: boolean;
   rows: Array<RevoryCsvDocumentRow<TColumn>>;
 };
 
@@ -41,7 +44,11 @@ export function parseCsvLine(line: string) {
   }
 
   values.push(currentValue);
-  return values.map((value) => value.trim());
+
+  return {
+    hasUnclosedQuote: isInsideQuotes,
+    values: values.map((value) => value.trim()),
+  };
 }
 
 export function readCsvDocument<TColumn extends string = RevoryCsvColumn>(
@@ -50,7 +57,8 @@ export function readCsvDocument<TColumn extends string = RevoryCsvColumn>(
   const normalizedText = csvText.replace(/^\uFEFF/, "");
   const rawLines = normalizedText.split(/\r?\n/);
   const [headerLine = ""] = rawLines;
-  const headerColumns = parseCsvLine(headerLine) as TColumn[];
+  const parsedHeader = parseCsvLine(headerLine);
+  const headerColumns = parsedHeader.values as TColumn[];
   const dataLines = rawLines.slice(1);
 
   while (dataLines.length > 0 && dataLines[dataLines.length - 1].trim() === "") {
@@ -58,9 +66,12 @@ export function readCsvDocument<TColumn extends string = RevoryCsvColumn>(
   }
 
   const rows = dataLines.map((line, lineIndex) => {
-    const parsedValues = parseCsvLine(line);
+    const parsedLine = parseCsvLine(line);
     const values = Object.fromEntries(
-      headerColumns.map((column, columnIndex) => [column, parsedValues[columnIndex] ?? ""]),
+      headerColumns.map((column, columnIndex) => [
+        column,
+        parsedLine.values[columnIndex] ?? "",
+      ]),
     ) as Partial<Record<TColumn, string>>;
     const hasUsefulData = (Object.values(values) as Array<string | undefined>).some(
       (value) => (value ?? "").trim().length > 0,
@@ -68,13 +79,16 @@ export function readCsvDocument<TColumn extends string = RevoryCsvColumn>(
 
     return {
       hasUsefulData,
+      hasUnclosedQuote: parsedLine.hasUnclosedQuote,
       lineNumber: lineIndex + 2,
+      valueCount: parsedLine.values.length,
       values,
     };
   });
 
   return {
     headerColumns,
+    headerHasUnclosedQuote: parsedHeader.hasUnclosedQuote,
     rows,
   };
 }

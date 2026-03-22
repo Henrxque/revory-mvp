@@ -70,6 +70,18 @@ export function validateCsvStructure(
   const document = readCsvDocument(normalizedText);
   const headerColumns = document.headerColumns;
   const dataLines = document.rows;
+
+  if (document.headerHasUnclosedQuote) {
+    errors.push(
+      buildIssue({
+        code: "invalid_structure",
+        message:
+          "The CSV header contains an unclosed quoted value. Re-export the file and try again.",
+        severity: "error",
+      }),
+    );
+  }
+
   const missingRequiredColumns = schema.requiredColumns.filter(
     (column) => !headerColumns.includes(column),
   );
@@ -90,6 +102,32 @@ export function validateCsvStructure(
   dataLines.forEach((row) => {
     const lineNumber = row.lineNumber;
     const rowValuesByColumn = row.values;
+
+    if (row.hasUnclosedQuote) {
+      errors.push(
+        buildIssue({
+          code: "invalid_structure",
+          lineNumber,
+          message: `Line ${lineNumber} contains an unclosed quoted value. Re-export the CSV and try again.`,
+          severity: "error",
+        }),
+      );
+
+      return;
+    }
+
+    if (row.valueCount !== headerColumns.length) {
+      errors.push(
+        buildIssue({
+          code: "invalid_structure",
+          lineNumber,
+          message: `Line ${lineNumber} does not match the number of columns declared in the header.`,
+          severity: "error",
+        }),
+      );
+
+      return;
+    }
 
     if (!row.hasUsefulData) {
       emptyDataRowCount += 1;

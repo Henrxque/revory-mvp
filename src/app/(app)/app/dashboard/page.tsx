@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
+import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
 import {
   getOnboardingStepPath,
@@ -73,6 +74,19 @@ function formatModeLabel(modeKey: string) {
   }
 }
 
+function formatModeBadgeLabel(modeKey: string) {
+  switch (modeKey) {
+    case "MODE_A":
+      return "Mode A";
+    case "MODE_B":
+      return "Mode B";
+    case "MODE_C":
+      return "Mode C";
+    default:
+      return modeKey;
+  }
+}
+
 type MetricCardProps = Readonly<{
   accent?: boolean;
   label: string;
@@ -125,7 +139,7 @@ export default async function DashboardPage() {
   const appContext = await getAppContext();
 
   if (!appContext) {
-    redirect("/sign-in");
+    redirect(buildSignInRedirectPath("/app/dashboard"));
   }
 
   if (!appContext.activationSetup.isCompleted) {
@@ -221,9 +235,9 @@ export default async function DashboardPage() {
             <span className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-2 text-xs font-medium text-[color:var(--text-muted)]">
               {monthChip}
             </span>
-            <Link className="rev-button-primary" href="/app/imports">
+            <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
               {hasImportedData ? "Open imports" : "Import data"}
-            </Link>
+            </DocumentNavigationLink>
           </div>
         </div>
       </section>
@@ -307,7 +321,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
-              {overview.importSources.length > 0 ? "Real import state" : "Awaiting first import"}
+              {overview.importSources.length > 0 ? "Imported" : "Awaiting import"}
             </RevoryStatusBadge>
           </div>
 
@@ -408,7 +422,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <RevoryStatusBadge tone="accent">
-              {formatModeLabel(workspace.activeModeKey)}
+              {formatModeBadgeLabel(workspace.activeModeKey)}
             </RevoryStatusBadge>
           </div>
 
@@ -450,7 +464,7 @@ export default async function DashboardPage() {
             </div>
             <RevoryStatusBadge tone={overview.upcomingAppointments > 0 ? "real" : "neutral"}>
               {overview.upcomingAppointments > 0
-                ? `${overview.upcomingAppointments} upcoming`
+                ? `${overview.upcomingAppointments} scheduled`
                 : "Awaiting schedule"}
             </RevoryStatusBadge>
           </div>

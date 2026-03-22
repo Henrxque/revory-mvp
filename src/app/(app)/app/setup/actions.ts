@@ -8,6 +8,7 @@ import {
 import { redirect } from "next/navigation";
 
 import { getAppContext } from "@/services/app/get-app-context";
+import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { completeActivationSetup } from "@/services/onboarding/complete-activation-setup";
 import { setCurrentOnboardingStep } from "@/services/onboarding/set-current-step";
 import { updateActivationSetup } from "@/services/onboarding/update-activation-setup";
@@ -60,9 +61,17 @@ function normalizeGoogleReviewsUrl(value: string) {
 
 async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
   const appContext = await getAppContext();
+  const requestedStepKey =
+    typeof stepValue === "string" && isOnboardingStepKey(stepValue)
+      ? stepValue
+      : null;
 
   if (!appContext) {
-    redirect("/sign-in");
+    redirect(
+      buildSignInRedirectPath(
+        requestedStepKey ? getOnboardingStepPath(requestedStepKey) : "/app/setup",
+      ),
+    );
   }
 
   if (appContext.activationSetup.isCompleted) {
@@ -70,12 +79,9 @@ async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
   }
 
   const currentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
-  const requestedStepKey =
-    typeof stepValue === "string" && isOnboardingStepKey(stepValue)
-      ? stepValue
-      : currentStepKey;
+  const safeRequestedStepKey = requestedStepKey ?? currentStepKey;
 
-  if (requestedStepKey !== currentStepKey) {
+  if (safeRequestedStepKey !== currentStepKey) {
     redirect(getOnboardingStepPath(currentStepKey));
   }
 

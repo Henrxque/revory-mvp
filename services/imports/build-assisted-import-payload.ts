@@ -4,7 +4,10 @@ import {
 } from "@/lib/imports/csv-template-definitions";
 import { readCsvDocument } from "@/services/imports/read-csv";
 import type {
+  RevoryAssistedImportConfirmationDraft,
   RevoryAssistedImportConfidence,
+  RevoryAssistedImportDecision,
+  RevoryAssistedImportExecutionMappingSummary,
   RevoryAssistedImportMapping,
   RevoryAssistedImportMappingOption,
   RevoryAssistedImportMatchStatus,
@@ -381,6 +384,98 @@ export function buildAssistedImportPreview(
     unmappedHeaders: mappingOptions
       .filter((option) => option.targetColumn === null)
       .map((option) => option.sourceHeader),
+  };
+}
+
+export function buildAssistedImportConfirmationDraft(
+  initialPreview: RevoryAssistedImportPreview,
+  currentPreview: RevoryAssistedImportPreview,
+): RevoryAssistedImportConfirmationDraft {
+  const currentOptionsBySourceHeader = new Map(
+    currentPreview.mappingOptions.map((option) => [option.sourceHeader, option]),
+  );
+
+  const decisions = initialPreview.mappingOptions.map((initialOption) => {
+    const currentOption =
+      currentOptionsBySourceHeader.get(initialOption.sourceHeader) ?? initialOption;
+    const finalTargetColumn = currentOption.targetColumn;
+    let decisionState: RevoryAssistedImportDecision["decisionState"] = "unmapped";
+
+    if (finalTargetColumn === null) {
+      decisionState = "unmapped";
+    } else if (initialOption.targetColumn !== finalTargetColumn) {
+      decisionState = "mapped_by_user";
+    } else if (initialOption.matchStatus === "matched_with_confidence") {
+      decisionState = "kept_confident_match";
+    } else {
+      decisionState = "suggested_pending_confirmation";
+    }
+
+    return {
+      decisionState,
+      finalTargetColumn,
+      normalizedSourceHeader: initialOption.normalizedSourceHeader,
+      sourceHeader: initialOption.sourceHeader,
+      systemConfidence: initialOption.confidence,
+      systemMatchStatus: initialOption.matchStatus,
+      systemReason: initialOption.reason,
+      systemReasonCode: initialOption.reasonCode,
+      systemSuggestedColumn: initialOption.targetColumn,
+    } satisfies RevoryAssistedImportDecision;
+  });
+
+  return {
+    canProceed:
+      currentPreview.duplicateSourceHeaders.length === 0 &&
+      currentPreview.duplicateTargets.length === 0 &&
+      currentPreview.missingRequiredColumns.length === 0 &&
+      !currentPreview.missingIdentityPath,
+    decisions,
+    duplicateSourceHeaders: currentPreview.duplicateSourceHeaders,
+    duplicateTargets: currentPreview.duplicateTargets,
+    keptConfidentMatchCount: decisions.filter(
+      (decision) => decision.decisionState === "kept_confident_match",
+    ).length,
+    mappedByUserCount: decisions.filter(
+      (decision) => decision.decisionState === "mapped_by_user",
+    ).length,
+    missingIdentityPath: currentPreview.missingIdentityPath,
+    missingRequiredColumns: currentPreview.missingRequiredColumns,
+    requiredMatchedCount: currentPreview.requiredMatchedCount,
+    requiredTotalCount: currentPreview.requiredColumns.length,
+    suggestedPendingConfirmationCount: decisions.filter(
+      (decision) => decision.decisionState === "suggested_pending_confirmation",
+    ).length,
+    templateKey: currentPreview.templateKey,
+    unmappedCount: decisions.filter((decision) => decision.decisionState === "unmapped")
+      .length,
+  };
+}
+
+export function buildAssistedImportMappingFromConfirmationDraft(
+  templateKey: RevoryCsvTemplateKey,
+  draft: RevoryAssistedImportConfirmationDraft,
+): RevoryAssistedImportMapping {
+  const validTargetColumns = new Set(getRevoryCsvTemplateColumns(templateKey));
+
+  return Object.fromEntries(
+    draft.decisions.map((decision) => [
+      decision.sourceHeader,
+      decision.finalTargetColumn && validTargetColumns.has(decision.finalTargetColumn)
+        ? decision.finalTargetColumn
+        : null,
+    ]),
+  );
+}
+
+export function buildAssistedImportExecutionMappingSummary(
+  draft: RevoryAssistedImportConfirmationDraft,
+): RevoryAssistedImportExecutionMappingSummary {
+  return {
+    keptConfidentMatchCount: draft.keptConfidentMatchCount,
+    mappedByUserCount: draft.mappedByUserCount,
+    suggestedPendingConfirmationCount: draft.suggestedPendingConfirmationCount,
+    unmappedCount: draft.unmappedCount,
   };
 }
 
