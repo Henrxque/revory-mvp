@@ -1,0 +1,38 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-final-1774131217269+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T22:13:41.792Z",
+  "startedAt": "2026-03-21T22:13:36.654Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/sign-up/verify-email-address"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": null
+      },
+      "name": "1. local sync after sign up",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "message": "The local workspace was not created after sign-up.",
+        "stack": "Error: The local workspace was not created after sign-up.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-final.mjs:92:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-final.mjs:532:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

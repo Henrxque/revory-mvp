@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774125977431+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T20:47:26.479Z",
+  "startedAt": "2026-03-21T20:46:16.839Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "page.waitForFunction: Timeout 60000ms exceeded.",
+        "stack": "page.waitForFunction: Timeout 60000ms exceeded.\n    at expectOnboardingUrl (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:236:14)\n    at C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:305:9"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

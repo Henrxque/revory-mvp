@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
@@ -9,31 +9,9 @@ import {
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
 
-function formatActivatedAt(value: Date | null) {
-  if (!value) {
-    return "Activation timestamp pending";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value);
-}
-
-function formatImportedAt(value: Date | null) {
-  if (!value) {
-    return "No file imported yet";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value);
-}
-
 function formatCurrency(value: number | null) {
   if (value === null) {
-    return "Awaiting revenue base";
+    return "Awaiting import";
   }
 
   return new Intl.NumberFormat("en-US", {
@@ -42,16 +20,105 @@ function formatCurrency(value: number | null) {
   }).format(value);
 }
 
+function formatMonthChip() {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+  }).format(new Date());
+}
+
 function formatSourceStatus(status: string) {
   return status.toLowerCase().replaceAll("_", " ");
 }
 
-function getBarWidth(value: number, total: number) {
-  if (total <= 0) {
+function formatAppointmentDate(value: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+  }).format(value);
+}
+
+function getInitials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "RV"
+  );
+}
+
+function getProgressPercent(successRows: number, totalRows: number) {
+  if (totalRows <= 0) {
     return 0;
   }
 
-  return Math.max(8, Math.min(100, Math.round((value / total) * 100)));
+  return Math.round((successRows / totalRows) * 100);
+}
+
+function formatModeLabel(modeKey: string) {
+  switch (modeKey) {
+    case "MODE_A":
+      return "Mode A · Basic Reminder";
+    case "MODE_B":
+      return "Mode B · Attendance Recovery";
+    case "MODE_C":
+      return "Mode C · Attendance + Reviews";
+    default:
+      return modeKey;
+  }
+}
+
+type MetricCardProps = Readonly<{
+  accent?: boolean;
+  label: string;
+  note: string;
+  value: string | number;
+}>;
+
+function MetricCard({ accent = false, label, note, value }: MetricCardProps) {
+  return (
+    <div
+      className={`rounded-[18px] border p-5 ${
+        accent
+          ? "border-[color:var(--border-accent)] bg-[linear-gradient(135deg,rgba(194,9,90,0.14),rgba(21,20,28,0.98))]"
+          : "border-[color:var(--border)] bg-[color:var(--background-card)]"
+      }`}
+    >
+      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+        {label}
+      </p>
+      <p
+        className={`mt-4 text-[2rem] font-semibold leading-none ${
+          accent ? "text-[color:var(--accent-light)]" : "text-[color:var(--foreground)]"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+    </div>
+  );
+}
+
+type NorthStarCardProps = Readonly<{
+  note: string;
+  title: string;
+}>;
+
+function NorthStarCard({ note, title }: NorthStarCardProps) {
+  return (
+    <div className="rev-card-soft rounded-[20px] px-4 py-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[color:var(--foreground)]">{title}</p>
+        <RevoryStatusBadge tone="future">Next layer</RevoryStatusBadge>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+    </div>
+  );
 }
 
 export default async function DashboardPage() {
@@ -71,268 +138,298 @@ export default async function DashboardPage() {
 
   const { activationSetup, workspace } = appContext;
   const overview = await getDashboardOverview(workspace.id);
-  const totalImportedRows = overview.importSources.reduce(
-    (sum, source) => sum + source.totalRows,
-    0,
-  );
-  const totalSuccessfulRows = overview.importSources.reduce(
-    (sum, source) => sum + source.successRows,
-    0,
-  );
-  const totalErroredRows = overview.importSources.reduce(
-    (sum, source) => sum + source.errorRows,
-    0,
-  );
-  const importedSourcesLabel =
-    overview.importSources.length > 0
-      ? `${overview.importSources.length} source${overview.importSources.length > 1 ? "s" : ""} live`
-      : "No source live yet";
-  const monitoredBarWidth = getBarWidth(
-    overview.upcomingAppointments,
-    overview.appointmentsMonitored,
-  );
-  const canceledBarWidth = getBarWidth(
-    overview.canceledAppointments,
-    overview.appointmentsMonitored,
-  );
-  const nextPhaseBlocks = [
+  const monthChip = formatMonthChip();
+  const hasImportedData =
+    overview.importSources.length > 0 ||
+    overview.appointmentsMonitored > 0 ||
+    overview.clientsImported > 0;
+  const workspaceReadyItems = [
     {
-      description:
-        "Confirmation rate stays in the future layer until reminders and confirmations start generating monitored events.",
-      label: "Coming soon",
-      title: "Confirmations",
+      done: activationSetup.isCompleted,
+      label: "Workspace activated",
+      note: "Core setup is complete and the private workspace is live.",
     },
     {
-      description:
-        "Recovery outcomes remain outside the current imported-only scope, so this stays explicitly in the next phase.",
-      label: "Next phase",
-      title: "Recovery",
+      done: overview.importSources.length > 0,
+      label: "Data imported",
+      note: "Bring in appointments or clients so REVORY has an operational base to monitor.",
     },
     {
-      description:
-        "Review automation only becomes real when the outbound flow and delivery layer exist beyond Sprint 2.",
-      label: "Coming soon",
-      title: "Reviews",
+      done: Boolean(activationSetup.googleReviewsUrl),
+      label: "Google reviews destination",
+      note: "The growth layer already has the target link saved for future review requests.",
+    },
+    {
+      done: Boolean(activationSetup.recommendedModeKey),
+      label: "Starting mode selected",
+      note: `${formatModeLabel(workspace.activeModeKey)} is the current operating direction.`,
     },
   ];
+  const flowCatalog = [
+    {
+      included: true,
+      note: "Included in every starting mode once the live automation layer turns on.",
+      title: "Confirmation Flow",
+    },
+    {
+      included: true,
+      note: "Included in every starting mode for pre-appointment follow-up.",
+      title: "Reminder Flow",
+    },
+    {
+      included: workspace.activeModeKey === "MODE_B" || workspace.activeModeKey === "MODE_C",
+      note:
+        workspace.activeModeKey === "MODE_B" || workspace.activeModeKey === "MODE_C"
+          ? "Included in this mode once recovery logic is live."
+          : "Unlocks when the workspace moves beyond the reminder-only mode.",
+      title: "Rebooking / Empty Slot Recovery",
+    },
+    {
+      included: workspace.activeModeKey === "MODE_C",
+      note:
+        workspace.activeModeKey === "MODE_C"
+          ? "Included in this mode once the review layer is active."
+          : "Unlocks in the review-focused mode.",
+      title: "Review Request Flow",
+    },
+  ];
+  const nextBestAction = !hasImportedData
+    ? "Open Imports and bring in the first CSV so REVORY can start monitoring real appointments and clients."
+    : overview.upcomingAppointments === 0
+      ? "Upload a fresher appointments export so the workspace has a current schedule to monitor."
+      : "Review the import quality and keep the appointment base fresh while the operational flow layer is added.";
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(18,17,24,0.98),rgba(11,10,15,0.98))] p-6 shadow-[0_26px_90px_rgba(0,0,0,0.28)]">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="max-w-3xl space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <RevoryStatusBadge tone="neutral">REVORY Overview</RevoryStatusBadge>
-              <RevoryStatusBadge tone="real">{importedSourcesLabel}</RevoryStatusBadge>
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[color:var(--text-subtle)]">
-                Dashboard MVP
-              </p>
-              <h2 className="font-[family:var(--font-display)] text-5xl leading-none text-[color:var(--foreground)] md:text-6xl">
-                Real imported signals, premium shell, honest next phase.
-              </h2>
-              <p className="max-w-2xl text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
-                The dashboard now pulls from appointments, clients, and source
-                metadata already persisted in the workspace. Future automation
-                layers stay visible, but they remain clearly marked as not live yet.
-              </p>
-            </div>
+      <section className="rev-shell-hero rounded-[30px] p-6">
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="max-w-3xl space-y-3">
+            <p className="rev-kicker">Operations overview</p>
+            <h1 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
+              {hasImportedData
+                ? "Your workspace has a real operational base."
+                : "Activation is complete. Now give REVORY the data to work with."}
+            </h1>
+            <p className="text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
+              {hasImportedData
+                ? "REVORY is already holding the imported foundation for appointment monitoring. Confirmation, recovery, and review metrics unlock next from this base."
+                : "The premium experience starts with a low-friction import. Bring in appointments or clients and let REVORY turn that first dataset into a clean, guided operational view."}
+            </p>
           </div>
 
-          <div className="grid min-w-[260px] gap-3">
-            <div className="flex flex-wrap justify-end gap-2">
-              <RevoryStatusBadge tone="accent">
-                {workspace.activeModeKey}
-              </RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">Current workspace state</RevoryStatusBadge>
-            </div>
-
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Activation
-              </p>
-              <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-                Completed
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Activated at {formatActivatedAt(activationSetup.activatedAt)}
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-2 text-xs font-medium text-[color:var(--text-muted)]">
+              {monthChip}
+            </span>
+            <Link className="rev-button-primary" href="/app/imports">
+              {hasImportedData ? "Open imports" : "Import data"}
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-4">
-        <div className="rounded-[28px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.24),rgba(30,26,36,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] xl:col-span-2">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
-              Estimated Imported Revenue
+      <section className="grid gap-4 xl:grid-cols-5">
+        <MetricCard
+          accent
+          label="Monitored Revenue Base"
+          note={
+            overview.estimatedImportedRevenue === null
+              ? "REVORY will show the revenue base as soon as appointment values arrive."
+              : "Current revenue already attached to imported appointments."
+          }
+          value={formatCurrency(overview.estimatedImportedRevenue)}
+        />
+        <MetricCard
+          label="Appointments Monitored"
+          note="Appointments already persisted in this workspace."
+          value={overview.appointmentsMonitored}
+        />
+        <MetricCard
+          label="Upcoming Appointments"
+          note="Scheduled ahead of the current server time."
+          value={overview.upcomingAppointments}
+        />
+        <MetricCard
+          label="Client Profiles"
+          note="Current stored client base available to REVORY."
+          value={overview.clientsImported}
+        />
+        <MetricCard
+          label="Cancelled Appointments"
+          note="Imported rows already marked as canceled."
+          value={overview.canceledAppointments}
+        />
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              North-star metrics
             </p>
-            <RevoryStatusBadge
-              tone={overview.estimatedImportedRevenue === null ? "future" : "real"}
-            >
-              {overview.estimatedImportedRevenue === null ? "Revenue base pending" : "Real now"}
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              These are the outcomes REVORY is designed to surface as the live flow layer
+              comes online.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <NorthStarCard
+            note="Starts once confirmation logic is running on top of imported appointments."
+            title="Confirmation Rate"
+          />
+          <NorthStarCard
+            note="Appears when no-show prevention begins protecting booked revenue."
+            title="Estimated Revenue Protected"
+          />
+          <NorthStarCard
+            note="Appears when rebooking and empty-slot recovery are active."
+            title="Estimated Revenue Recovered"
+          />
+          <NorthStarCard
+            note="Appears when the review request layer begins using the saved Google link."
+            title="Google Reviews Requested"
+          />
+        </div>
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+                Import readiness
+              </p>
+              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+                Data quality stays visible so the customer always knows what landed and what
+                still needs cleanup.
+              </p>
+            </div>
+            <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
+              {overview.importSources.length > 0 ? "Real import state" : "Awaiting first import"}
             </RevoryStatusBadge>
           </div>
-          <p className="mt-6 text-4xl font-semibold text-[color:var(--foreground)] md:text-5xl">
-            {formatCurrency(overview.estimatedImportedRevenue)}
-          </p>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-white/72">
-            This card only reflects the sum of <code>estimatedRevenue</code> values
-            already present in persisted appointments. It does not imply realized,
-            protected, or recovered revenue.
-          </p>
-        </div>
-
-        <div className="rev-card rounded-[28px] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-            Appointments Monitored
-          </p>
-          <p className="mt-4 text-4xl font-semibold text-[color:var(--foreground)]">
-            {overview.appointmentsMonitored}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-            Total appointments persisted from CSV into this workspace.
-          </p>
-        </div>
-
-        <div className="rev-card rounded-[28px] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-            Clients Imported
-          </p>
-          <p className="mt-4 text-4xl font-semibold text-[color:var(--foreground)]">
-            {overview.clientsImported}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-            Current client base stored from official client imports.
-          </p>
-        </div>
-
-        <div className="rev-card rounded-[28px] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-            Upcoming Appointments
-          </p>
-          <p className="mt-4 text-4xl font-semibold text-[color:var(--foreground)]">
-            {overview.upcomingAppointments}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-            Scheduled appointments still ahead of the current server-side time reference.
-          </p>
-        </div>
-
-        <div className="rev-card rounded-[28px] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-            Cancelled Appointments
-          </p>
-          <p className="mt-4 text-4xl font-semibold text-[color:var(--foreground)]">
-            {overview.canceledAppointments}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-            Appointments already imported with canceled status.
-          </p>
-        </div>
-      </section>
-
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[30px] border border-[color:var(--border)] bg-[color:var(--surface)] p-6">
-          <RevorySectionHeader
-            badgeLabel="Latest aggregate source state"
-            badgeTone="neutral"
-            description="Import readiness reflects the last aggregate state saved for each CSV source, not a detailed execution history."
-            eyebrow="Import Readiness"
-            title="The imported base is already visible in the dashboard."
-          />
 
           {overview.importSources.length > 0 ? (
-            <div className="mt-5 space-y-3">
-              {overview.importSources.map((source) => (
-                <div
-                  key={source.type}
-                  className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] px-5 py-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                        {source.templateLabel}
-                      </p>
-                      <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-                        {formatSourceStatus(source.status)}
-                      </p>
-                    </div>
-                    <RevoryStatusBadge
-                      tone={source.successRows > 0 ? "real" : "neutral"}
-                    >
-                      {source.fileName ?? "No file yet"}
-                    </RevoryStatusBadge>
-                  </div>
+            <div className="mt-5 space-y-4">
+              {overview.importSources.map((source) => {
+                const progressPercent = getProgressPercent(
+                  source.successRows,
+                  source.totalRows,
+                );
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-3">
-                    <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                        Last import
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
-                        {formatImportedAt(source.importedAt)}
-                      </p>
+                return (
+                  <div
+                    key={source.type}
+                    className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                          {source.templateLabel}
+                        </p>
+                        <p className="mt-1 text-xs text-[color:var(--text-muted)]">
+                          {source.fileName ?? "No file name saved"}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+                        {formatSourceStatus(source.status)}
+                      </span>
                     </div>
-                    <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                        Success rows
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                        {source.successRows} / {source.totalRows}
-                      </p>
+
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
+                        style={{ width: `${progressPercent}%` }}
+                      />
                     </div>
-                    <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                        Rows needing correction
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                        {source.errorRows}
-                      </p>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          Coverage
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                          {progressPercent}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          Success rows
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                          {source.successRows}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          Review rows
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                          {source.errorRows}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          Total rows
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                          {source.totalRows}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <div className="mt-5 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] px-5 py-5">
-              <p className="text-lg font-semibold text-[color:var(--foreground)]">
-                No CSV sources imported yet
+            <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                No import state yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The dashboard shell is ready, but this workspace still needs its
-                first appointments or clients CSV import before real imported
-                signals can appear.
+                Open Imports, upload the file you already have, and let REVORY guide the
+                header mapping inside the app before the final import runs.
               </p>
             </div>
           )}
         </section>
 
-        <section className="rounded-[30px] border border-[color:var(--border)] bg-[color:var(--surface)] p-6">
-          <RevorySectionHeader
-            badgeLabel="Not live yet"
-            badgeTone="future"
-            description="These blocks mirror the visual direction of the mockup while staying explicit about what still belongs to the next phase."
-            eyebrow="Next Phase"
-            title="Future layers stay visible without pretending they already run."
-          />
+        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+                Mode and flow roadmap
+              </p>
+              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+                The workspace already has a clear operating direction, even before all live
+                automations are on.
+              </p>
+            </div>
+            <RevoryStatusBadge tone="accent">
+              {formatModeLabel(workspace.activeModeKey)}
+            </RevoryStatusBadge>
+          </div>
 
           <div className="mt-5 space-y-3">
-            {nextPhaseBlocks.map((block) => (
+            {flowCatalog.map((flow) => (
               <div
-                key={block.title}
-                className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] px-5 py-4"
+                key={flow.title}
+                className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-lg font-semibold text-[color:var(--foreground)]">
-                    {block.title}
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                    {flow.title}
                   </p>
-                  <RevoryStatusBadge tone="future">{block.label}</RevoryStatusBadge>
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      flow.included ? "bg-[color:var(--accent-light)]" : "bg-[color:var(--text-subtle)]"
+                    }`}
+                  />
                 </div>
-                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                  {block.description}
+                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  {flow.note}
                 </p>
               </div>
             ))}
@@ -340,121 +437,100 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-        <section className="rounded-[30px] border border-[color:var(--border)] bg-[color:var(--surface)] p-6">
-          <RevorySectionHeader
-            badgeLabel="Real now"
-            badgeTone="real"
-            description="This block keeps the semantic reading of the imported appointments grounded in counts that already exist in the database."
-            eyebrow="Operational Snapshot"
-            title="What the imported appointment base currently says."
-          />
-
-          <div className="mt-5 space-y-4">
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-[color:var(--foreground)]">
-                  Upcoming appointments within monitored base
-                </p>
-                <span className="text-sm font-semibold text-[color:var(--foreground)]">
-                  {overview.upcomingAppointments}
-                </span>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
-                <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#e0106a,#ff6fa8)]"
-                  style={{ width: `${monitoredBarWidth}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-[color:var(--foreground)]">
-                  Cancelled appointments within monitored base
-                </p>
-                <span className="text-sm font-semibold text-[color:var(--foreground)]">
-                  {overview.canceledAppointments}
-                </span>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
-                <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#57536c,#8f8aa8)]"
-                  style={{ width: `${canceledBarWidth}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Semantics
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+                Upcoming appointments
               </p>
-              <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
-                Appointments monitored means the total appointments already
-                imported and persisted in this workspace. It does not imply
-                real-time monitoring or continuous automation yet.
+              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+                The next scheduled appointments already visible in the current workspace base.
               </p>
             </div>
+            <RevoryStatusBadge tone={overview.upcomingAppointments > 0 ? "real" : "neutral"}>
+              {overview.upcomingAppointments > 0
+                ? `${overview.upcomingAppointments} upcoming`
+                : "Awaiting schedule"}
+            </RevoryStatusBadge>
           </div>
+
+          {overview.upcomingList.length > 0 ? (
+            <div className="mt-5 space-y-3">
+              {overview.upcomingList.map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className="flex items-center gap-3 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] text-xs font-semibold text-[color:var(--accent-light)]">
+                    {getInitials(appointment.clientName)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+                      {appointment.clientName}
+                    </p>
+                    <p className="mt-1 truncate text-sm text-[color:var(--text-muted)]">
+                      {appointment.serviceName ?? "Imported appointment"} ·{" "}
+                      {formatAppointmentDate(appointment.scheduledAt)}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--success)]">
+                    {appointment.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                No upcoming appointments yet
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                Import an appointments CSV to give REVORY a current schedule to monitor.
+              </p>
+            </div>
+          )}
         </section>
 
-        <section className="rounded-[30px] border border-[color:var(--border)] bg-[color:var(--surface)] p-6">
-          <RevorySectionHeader
-            badgeLabel="Sprint 2 state"
-            badgeTone="accent"
-            description="This panel keeps the product honest about what is already real, what is aggregated, and what still waits for the next sprint."
-            eyebrow="Workspace State"
-            title="The MVP is operational, but still intentionally narrow."
-          />
+        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+          <div className="space-y-3">
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Workspace readiness
+            </p>
+            <p className="text-sm text-[color:var(--text-muted)]">
+              A premium SaaS should make the next action obvious. This block keeps the
+              workspace status readable at a glance.
+            </p>
+          </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Active mode
-              </p>
-              <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)]">
-                {workspace.activeModeKey}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The same mode selected during setup and applied at activation.
-              </p>
-            </div>
+          <div className="mt-5 space-y-3">
+            {workspaceReadyItems.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                    {item.label}
+                  </p>
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      item.done ? "bg-[color:var(--success)]" : "bg-[color:var(--warning)]"
+                    }`}
+                  />
+                </div>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  {item.note}
+                </p>
+              </div>
+            ))}
+          </div>
 
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Import readiness
-              </p>
-              <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)]">
-                {totalSuccessfulRows} rows
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Persisted from the latest aggregate import state across all CSV sources.
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Total tracked rows
-              </p>
-              <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)]">
-                {totalImportedRows}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Current aggregate row count from the latest saved import state.
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-subtle)]">
-                Rows needing correction
-              </p>
-              <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)]">
-                {totalErroredRows}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Rejections from the current aggregate import state, not a deep execution log.
-              </p>
-            </div>
+          <div className="mt-5 rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
+            <p className="rev-label">Next best action</p>
+            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
+              {nextBestAction}
+            </p>
           </div>
         </section>
       </div>

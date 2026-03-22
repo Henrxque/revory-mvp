@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
 import { CsvUploadCard } from "@/components/imports/CsvUploadCard";
-import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { revoryCsvTemplateDefinitions } from "@/lib/imports/csv-template-definitions";
 import { getAppContext } from "@/services/app/get-app-context";
 import { getCsvUploadSources } from "@/services/imports/get-csv-upload-sources";
@@ -53,57 +52,61 @@ export default async function ImportsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rev-shell-hero rounded-[30px] p-6">
-        <RevorySectionHeader
-          badgeLabel="Official templates only"
-          badgeTone="accent"
-          description="This step now receives the CSV file, validates the official structure, persists the supported rows, and keeps the import outcome explicit for the next correction pass."
-          eyebrow="CSV Imports"
-          title="Bring appointments and clients into REVORY with the official CSV templates."
-        />
-      </section>
+      <section className="rev-card-soft relative overflow-hidden rounded-[30px] p-6 md:p-7">
+        <div className="pointer-events-none absolute -left-12 top-0 h-32 w-32 rounded-full bg-[rgba(194,9,90,0.12)] blur-3xl" />
+        <div className="pointer-events-none absolute right-12 top-8 h-24 w-24 rounded-full bg-[rgba(224,16,106,0.07)] blur-3xl" />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {[
-          {
-            description:
-              "The upload flow is intentionally strict and aligned to the official REVORY templates.",
-            label: "Accepted file",
-            title: "CSV only",
-          },
-          {
-            description:
-              "File presence, extension, structure, and row normalization are checked before rows reach the database.",
-            label: "Validation",
-            title: "Front, server, and persistence",
-          },
-          {
-            description:
-              "Supported rows are persisted now, while deeper deduplication and automation behavior stay out of scope on purpose.",
-            label: "Current scope",
-            title: "MVP import persistence",
-          },
-        ].map((card) => (
-          <div
-            key={card.label}
-            className="rev-card-soft rounded-[24px] px-5 py-5"
-          >
-            <p className="rev-label">
-              {card.label}
-            </p>
-            <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
-              {card.title}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-              {card.description}
+        <div className="relative space-y-6">
+          <div className="max-w-[880px] space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="rev-kicker">Imports & Mapping</p>
+              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+                Guided import
+              </span>
+            </div>
+
+            <h1 className="max-w-[700px] font-[family:var(--font-display)] text-[clamp(2.3rem,4vw,3.8rem)] leading-[0.94] text-[color:var(--foreground)]">
+              Import real MedSpa data with a calmer workflow.
+            </h1>
+
+            <p className="max-w-[600px] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
+              Upload the CSV you already have, let REVORY detect the columns,
+              confirm the mapping, and keep the outcome explicit.
             </p>
           </div>
-        ))}
-      </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              {
+                label: "Official template",
+                text: "Fastest path for the first clean import.",
+              },
+              {
+                label: "Assisted mapping",
+                text: "REVORY suggests the best column matches inside the app.",
+              },
+              {
+                label: "Clear result",
+                text: "Coverage, warnings, and review rows stay visible.",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-4 py-4"
+              >
+                <p className="rev-label">{item.label}</p>
+                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 2xl:grid-cols-2">
         <CsvUploadCard
-          helperText="Use the appointments template when the export already includes appointment-level scheduling rows and a client identifier path."
+          helperText="Schedule-level CSV with guided column matching."
           lastUpload={toUploadSummary(uploadSources.appointments)}
           templateHref={`/templates/${revoryCsvTemplateDefinitions.appointments.fileName}`}
           templateKey="appointments"
@@ -111,7 +114,7 @@ export default async function ImportsPage() {
         />
 
         <CsvUploadCard
-          helperText="Use the clients template when the export is centered on patient records and visit history before appointment import begins."
+          helperText="Patient records and visit history with guided column matching."
           lastUpload={toUploadSummary(uploadSources.clients)}
           templateHref={`/templates/${revoryCsvTemplateDefinitions.clients.fileName}`}
           templateKey="clients"

@@ -1,5 +1,6 @@
 import { SignUp } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
@@ -41,8 +42,18 @@ export default async function SignUpPage() {
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_0.85fr] lg:items-stretch">
         <section className="rev-shell-hero flex flex-col rounded-[36px] p-7 md:p-9">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <RevoryLogo />
-            <RevoryStatusBadge tone="accent">New workspace</RevoryStatusBadge>
+            <Link href="/">
+              <RevoryLogo />
+            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                className="rev-button-secondary px-4 py-2 text-xs"
+                href="/"
+              >
+                Back to home
+              </Link>
+              <RevoryStatusBadge tone="accent">New workspace</RevoryStatusBadge>
+            </div>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-2">
@@ -109,7 +120,7 @@ export default async function SignUpPage() {
             </div>
 
             <div className="rev-auth-clerk rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5 md:p-6">
-              <SignUp />
+              <SignUp fallbackRedirectUrl="/app" forceRedirectUrl="/app" />
             </div>
           </div>
         </section>

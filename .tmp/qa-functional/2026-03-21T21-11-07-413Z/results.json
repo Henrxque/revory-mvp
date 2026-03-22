@@ -1,0 +1,17 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774127468056+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T21:11:38.585Z",
+  "startedAt": "2026-03-21T21:11:07.413Z",
+  "steps": [
+    {
+      "details": {
+        "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3300/\", waiting until \"networkidle\"\u001b[22m\n",
+        "stack": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3300/\", waiting until \"networkidle\"\u001b[22m\n\n    at setupTestingBypass (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:93:14)\n    at C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:346:9"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

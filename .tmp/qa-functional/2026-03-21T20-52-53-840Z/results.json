@@ -1,0 +1,122 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774126374329+clerk_test@example.com",
+  "findings": [
+    {
+      "details": {
+        "observedLabel": "Continue to dashboard"
+      },
+      "title": "Activation CTA label mismatch"
+    }
+  ],
+  "finishedAt": "2026-03-21T20:53:43.168Z",
+  "startedAt": "2026-03-21T20:52:53.840Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/setup/template"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0t1gsw002pbm1c7sp4ycx3",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0t1gsy002rbm1cn76c2zdx",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "activationButtonLabel": "Continue to dashboard",
+        "reachedStep": "activation"
+      },
+      "name": "2. onboarding wizard complete",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/dashboard"
+      },
+      "name": "3. activation final",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0t1gsw002pbm1c7sp4ycx3",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0t1gsy002rbm1cn76c2zdx",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "4. dashboard after activation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('REVORY Appointments Template', { exact: true }).locator('xpath=ancestor::section[1]').getByRole('button', { name: 'Upload CSV', exact: true })\u001b[22m\n",
+        "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('REVORY Appointments Template', { exact: true }).locator('xpath=ancestor::section[1]').getByRole('button', { name: 'Upload CSV', exact: true })\u001b[22m\n\n    at uploadCsv (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:291:74)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:406:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

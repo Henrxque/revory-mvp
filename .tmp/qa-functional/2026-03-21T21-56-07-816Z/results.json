@@ -1,0 +1,130 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-1774130168367+clerk_test@example.com",
+  "findings": [
+    {
+      "details": {
+        "observedLabel": "Continue to dashboard"
+      },
+      "title": "Activation CTA label mismatch"
+    }
+  ],
+  "finishedAt": "2026-03-21T21:57:32.229Z",
+  "startedAt": "2026-03-21T21:56:07.816Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0vav9s009zbmlg53gwf613",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0vav9w00a1bmlg5pzvw4jw",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "activationButtonLabel": "Continue to dashboard",
+        "reachedStep": "activation"
+      },
+      "name": "2. onboarding wizard complete",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. activation final",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0vav9s009zbmlg53gwf613",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0vav9w00a1bmlg5pzvw4jw",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "4. dashboard after activation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "textSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-1774130168367+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nImport real MedSpa data with a calmer workflow.\n\nUpload the CSV you already have, let REVORY detect the columns, confirm the mapping, and keep the outcome explicit.\n\nOFFICIAL TEMPLATE\n\nFastest path for the first clean import.\n\nASSISTED MAPPING\n\nREVORY suggests the best column matches inside the app.\n\nCLEAR RESULT\n\nCoverage, warnings, and review rows stay visible.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nPENDING\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import\n\nREVORY CLIENTS TEMPLATE\n\nClients import\nPENDING\n\nPatient records and visit history with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import",
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "4. imports page access",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').first().getByText('appointments-valid.csv') to be visible\u001b[22m\n",
+        "stack": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').first().getByText('appointments-valid.csv') to be visible\u001b[22m\n\n    at uploadCsv (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:329:34)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:606:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

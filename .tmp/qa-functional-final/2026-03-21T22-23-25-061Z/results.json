@@ -1,0 +1,774 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-final-1774131805752+clerk_test@example.com",
+  "findings": [
+    {
+      "details": {
+        "observedLabel": "Continue to dashboard"
+      },
+      "title": "Activation CTA label mismatch"
+    }
+  ],
+  "finishedAt": "2026-03-21T22:24:36.874Z",
+  "startedAt": "2026-03-21T22:23:25.061Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "activationButtonLabel": "Continue to dashboard",
+        "reachedStep": "activation"
+      },
+      "name": "2. onboarding wizard complete",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. activation final",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "4. dashboard after activation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "textSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-final-1774131805752+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nImport real MedSpa data with a calmer workflow.\n\nUpload the CSV you already have, let REVORY detect the columns, confirm the mapping, and keep the outcome explicit.\n\nOFFICIAL TEMPLATE\n\nFastest path for the first clean import.\n\nASSISTED MAPPING\n\nREVORY suggests the best column matches inside the app.\n\nCLEAR RESULT\n\nCoverage, warnings, and review rows stay visible.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nPENDING\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import\n\nREVORY CLIENTS TEMPLATE\n\nClients import\nPENDING\n\nPatient records and visit history with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import",
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "4. imports page access",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "bodySnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-final-1774131805752+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nImport real MedSpa data with a calmer workflow.\n\nUpload the CSV you already have, let REVORY detect the columns, confirm the mapping, and keep the outcome explicit.\n\nOFFICIAL TEMPLATE\n\nFastest path for the first clean import.\n\nASSISTED MAPPING\n\nREVORY suggests the best column matches inside the app.\n\nCLEAR RESULT\n\nCoverage, warnings, and review rows stay visible.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nPENDING\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nappointments-valid.csv\n\nHEADER REVIEW\n\nAssisted mapping ready for review\n\nREADY TO IMPORT\n\nREVORY matched what it could automatically. Review any low-confidence or unmapped fields before continuing.\n\nHEADERS DETECTED\n\n12\n\nREQUIRED MATCHED\n\n4/4\n\nUNMAPPED\n\n0\n\nMAPPING GUARDRAILS\n\nOfficial template is still the fastest path.\n\nAssisted mapping is for header matching, not full ETL.\n\nComplex transformations stay outside the MVP.\n\nDETECTED COLUMNS\n\nConfirm each source header before import\n\nIgnore anything REVORY does not need right now\n\nappointment_external_id\n\nSource header detected in this CSV\n\nSTRONG MATCH\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nScheduled At - Required\nStatus - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocation Name\nSource Notes\n\nclient_full_name\n\nSource header detected in this CSV\n\nSTRONG MATCH\nMap to REVORY field\nIgnore this column\nAppointment External Id - Required\nClient Full Name - Required\nScheduled At - Required\nStatus - Required\nClient External Id - Identifier\nClient Email - Identifier\nClient Phone - Identifier\nService Name\nProvider Name\nEstimated Revenue\nBooked At\nCanceled At\nLocatio",
+        "inputState": {
+          "filesLength": 1,
+          "firstName": "appointments-valid.csv"
+        },
+        "reacted": true
+      },
+      "name": "5. upload ui appointments control",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "importResult": {
+          "errorRows": 0,
+          "status": "imported",
+          "successRows": 3,
+          "totalRows": 3
+        },
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            }
+          ],
+          "appointmentsCount": 3,
+          "canceledAppointments": 1,
+          "clientsCount": 3,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "appointments-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 520,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 1,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "5. upload de CSV valido de appointments",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "importResult": {
+          "errorRows": 0,
+          "status": "imported",
+          "successRows": 3,
+          "totalRows": 3
+        },
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            }
+          ],
+          "appointmentsCount": 3,
+          "canceledAppointments": 1,
+          "clientsCount": 6,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "appointments-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 520,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 1,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "6. upload de CSV valido de clients",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "after": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            }
+          ],
+          "appointmentsCount": 3,
+          "canceledAppointments": 1,
+          "clientsCount": 6,
+          "dataSources": [
+            {
+              "lastImportError": "Missing required columns: status. Line 2 is missing a value for required column \"status\".",
+              "lastImportErrorRowCount": 1,
+              "lastImportFileName": "appointments-invalid.csv",
+              "lastImportRowCount": 1,
+              "lastImportSuccessRowCount": 0,
+              "name": "appointments-csv-upload",
+              "status": "ERROR",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 520,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 1,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        },
+        "before": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            }
+          ],
+          "appointmentsCount": 3,
+          "canceledAppointments": 1,
+          "clientsCount": 6,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "appointments-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 520,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 1,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        },
+        "importResult": {
+          "accepted": false,
+          "errors": [
+            "Missing required columns: status.",
+            "Line 2 is missing a value for required column \"status\"."
+          ]
+        }
+      },
+      "name": "7. validacao de CSV invalido",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "importResult": {
+          "errorRows": [
+            {
+              "lineNumber": 3,
+              "reasons": [
+                "Appointment status is not supported by the official REVORY contract."
+              ]
+            }
+          ],
+          "status": "imported",
+          "successRows": 1,
+          "totalRows": 2
+        },
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            },
+            {
+              "externalId": "apt_004",
+              "status": "SCHEDULED"
+            }
+          ],
+          "appointmentsCount": 4,
+          "canceledAppointments": 1,
+          "clientsCount": 7,
+          "dataSources": [
+            {
+              "lastImportError": "1 row(s) could not be imported.",
+              "lastImportErrorRowCount": 1,
+              "lastImportFileName": "appointments-partial.csv",
+              "lastImportRowCount": 2,
+              "lastImportSuccessRowCount": 1,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 670,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 2,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "8. cenario de rejeicao parcial",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "after": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            },
+            {
+              "externalId": "apt_004",
+              "status": "SCHEDULED"
+            }
+          ],
+          "appointmentsCount": 4,
+          "canceledAppointments": 1,
+          "clientsCount": 7,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "appointments-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 670,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 2,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        },
+        "before": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            },
+            {
+              "externalId": "apt_004",
+              "status": "SCHEDULED"
+            }
+          ],
+          "appointmentsCount": 4,
+          "canceledAppointments": 1,
+          "clientsCount": 7,
+          "dataSources": [
+            {
+              "lastImportError": "1 row(s) could not be imported.",
+              "lastImportErrorRowCount": 1,
+              "lastImportFileName": "appointments-partial.csv",
+              "lastImportRowCount": 2,
+              "lastImportSuccessRowCount": 1,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 670,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 2,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        },
+        "importResult": {
+          "errorRows": 0,
+          "status": "imported",
+          "successRows": 3,
+          "totalRows": 3
+        }
+      },
+      "name": "9. reimportacao do mesmo CSV",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "dashboardTextSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-final-1774131805752+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nOPERATIONS OVERVIEW\n\nYour workspace has a real operational base.\n\nREVORY is already holding the imported foundation for appointment monitoring. Confirmation, recovery, and review metrics unlock next from this base.\n\nMar 2026\nOpen imports\n\nMONITORED REVENUE BASE\n\n$670.00\n\nCurrent revenue already attached to imported appointments.\n\nAPPOINTMENTS MONITORED\n\n4\n\nAppointments already persisted in this workspace.\n\nUPCOMING APPOINTMENTS\n\n2\n\nScheduled ahead of the current server time.\n\nCLIENT PROFILES\n\n7\n\nCurrent stored client base available to REVORY.\n\nCANCELLED APPOINTMENTS\n\n1\n\nImported rows already marked as canceled.\n\nNorth-star metrics\n\nThese are the outcomes REVORY is designed to surface as the live flow layer comes online.\n\nConfirmation Rate\n\nNext layer\n\nStarts once confirmation logic is running on top of imported appointments.\n\nEstimated Revenue Protected\n\nNext layer\n\nAppears when no-show prevention begins protecting booked revenue.\n\nEstimated Revenue Recovered\n\nNext layer\n\nAppears when rebooking and empty-slot recovery are active.\n\nGoogle Reviews Requested\n\nNext layer\n\nAppears when the review request layer begins using the saved Google link.\n\nImport readiness\n\nData quality stays visible so the customer always knows what landed and what still needs cleanup.\n\nReal import state\n\nAppointments CSV\n\nappointments-valid.csv\n\nIMPORTED\n\nCOVERAGE\n\n100%\n\nSUCCESS ROWS\n\n3\n\nREVIEW ROWS\n\n0\n\nTOTAL ROWS\n\n3\n\nClients CSV\n\nclients-valid.csv\n\nIMPORTED\n\nCOVERAGE\n\n100%\n\nSUCCESS ROWS\n\n3\n\nREVIEW ROWS\n\n0\n\nTOTAL ROWS\n\n3\n\nAppointments CSV\n\nNo file name saved\n\nPENDING\n\nCOVERAGE\n\n0%\n\nSUCCESS ROWS\n\n0\n\nREVIEW ROWS\n\n0\n\nTOTAL ROWS\n\n0\n\nMode and flow roadmap\n\nThe workspace already has a clear operating direction, even before all live automations are on.\n\nMode B · Attendance Recovery\n\nConfirmation Flow\n\nIncluded in every starting mode once the live automation layer turns on.\n\nReminder Flow\n\nIncluded in every starting mode for pre-appointment follow-up.\n\nRebooking / Empty Slot Recovery\n\nIncluded in this mode once recovery logic is live.\n\nReview Request Flow\n\nUnlocks in the review-focused mode.\n\nUpcoming appointments\n\nThe next scheduled appointments already visible in the current workspace base.\n\n2 upcoming\nAC\n\nAna Costa\n\nLaser Facial · Dec 15, 11:00 AM\n\nSCHEDULED\nDA\n\nDiego Alves\n\nHydra Facial · Dec 20, 12:00 PM\n\nSCHEDULED\n\nWorkspace readiness\n\nA premium SaaS should make the next action obvious. This block keeps the workspace status readable at a glance.\n\nWorkspace activated\n\nCore setup is complete and the private workspace is live.\n\nData imported\n\nBring in appointments or clients so REVORY has an operational base to monitor.\n\nGoogl",
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [
+            {
+              "externalId": "apt_001",
+              "status": "SCHEDULED"
+            },
+            {
+              "externalId": "apt_002",
+              "status": "CANCELED"
+            },
+            {
+              "externalId": "apt_003",
+              "status": "COMPLETED"
+            },
+            {
+              "externalId": "apt_004",
+              "status": "SCHEDULED"
+            }
+          ],
+          "appointmentsCount": 4,
+          "canceledAppointments": 1,
+          "clientsCount": 7,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "appointments-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "appointments-csv-upload",
+              "status": "IMPORTED",
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": "clients-valid.csv",
+              "lastImportRowCount": 3,
+              "lastImportSuccessRowCount": 3,
+              "name": "clients-csv-upload",
+              "status": "IMPORTED",
+              "type": "CLIENTS_CSV"
+            },
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": 670,
+          "localUserId": "cmn0w9xu200vybmlgmx1oxjh3",
+          "upcomingAppointments": 2,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0w9xub00w0bmlg3vkb78xm",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "10. dashboard com dados reais persistidos",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "importsTextSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-final-1774131805752+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nImport real MedSpa data with a calmer workflow.\n\nUpload the CSV you already have, let REVORY detect the columns, confirm the mapping, and keep the outcome explicit.\n\nOFFICIAL TEMPLATE\n\nFastest path for the first clean import.\n\nASSISTED MAPPING\n\nREVORY suggests the best column matches inside the app.\n\nCLEAR RESULT\n\nCoverage, warnings, and review rows stay visible.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nIMPORTED\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nappointments-valid.csv\n\nMar 21, 2026, 7:24 PM\n\nCOVERAGE\n\n100%\n\nPERSISTED\n\n3\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import\n\nREVORY CLIENTS TEMPLATE\n\nClients import\nIMPORTED\n\nPatient records and visit history with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nclients-valid.csv\n\nMar 21, 2026, 7:24 PM\n\nCOVERAGE\n\n100%\n\nPERSISTED\n\n3\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import"
+      },
+      "name": "10. imports com dados persistidos",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "11. refresh do dashboard/imports",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "dashboardRestored": true,
+        "importsTextSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-final-1774131805752+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nImport real MedSpa data with a calmer workflow.\n\nUpload the CSV you already have, let REVORY detect the columns, confirm the mapping, and keep the outcome explicit.\n\nOFFICIAL TEMPLATE\n\nFastest path for the first clean import.\n\nASSISTED MAPPING\n\nREVORY suggests the best column matches inside the app.\n\nCLEAR RESULT\n\nCoverage, warnings, and review rows stay visible.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nIMPORTED\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nappointments-valid.csv\n\nMar 21, 2026, 7:24 PM\n\nCOVERAGE\n\n100%\n\nPERSISTED\n\n3\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import\n\nREVORY CLIENTS TEMPLATE\n\nClients import\nIMPORTED\n\nPatient records and visit history with guided column matching.\n\nDownload template\n01\nBring the CSV\n/\n02\nConfirm columns\n/\n03\nRun import\n\nLAST IMPORT\n\nclients-valid.csv\n\nMar 21, 2026, 7:24 PM\n\nCOVERAGE\n\n100%\n\nPERSISTED\n\n3\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nDrop in the exported file or choose it manually. REVORY checks the headers before the final import.\n\n5 MB MAX\nChoose file\n\nSELECTED FILE\n\nNo file selected yet\n\nReview the mapping, confirm the structure, and let REVORY handle the import.\n\nConfirm mapping and import",
+        "importsViewValidated": true
+      },
+      "name": "11. novo login e retorno ao dashboard/imports",
+      "status": "passed"
+    }
+  ]
+}

@@ -64,6 +64,68 @@ export type RevoryClientCsvColumn =
 
 export type RevoryCsvColumn = RevoryAppointmentCsvColumn | RevoryClientCsvColumn;
 
+export type RevoryAssistedImportConfidence = "high" | "medium" | "low" | "none";
+
+export type RevoryAssistedImportMatchStatus =
+  | "matched_with_confidence"
+  | "suggested_needs_confirmation"
+  | "unresolved";
+
+export type RevoryAssistedImportReasonCode =
+  | "exact_official_header"
+  | "exact_alias_match"
+  | "inclusive_alias_match"
+  | "shared_token_match"
+  | "unresolved_header";
+
+export type RevoryAssistedImportMapping = Record<string, RevoryCsvColumn | null>;
+
+export type RevoryAssistedImportMappingOption = {
+  confidence: RevoryAssistedImportConfidence;
+  matchStatus: RevoryAssistedImportMatchStatus;
+  normalizedSourceHeader: string;
+  reason: string;
+  reasonCode: RevoryAssistedImportReasonCode;
+  sourceHeader: string;
+  targetColumn: RevoryCsvColumn | null;
+};
+
+export type RevoryAssistedImportTargetOption = {
+  column: RevoryCsvColumn;
+  isIdentity: boolean;
+  isRequired: boolean;
+  label: string;
+};
+
+export type RevoryAssistedImportPreview = {
+  canImport: boolean;
+  detectedHeaders: string[];
+  duplicateSourceHeaders: string[];
+  duplicateTargets: RevoryCsvColumn[];
+  exactTemplateMatch: boolean;
+  hasDuplicateSourceHeaders: boolean;
+  identityColumns: RevoryCsvColumn[];
+  mappingOptions: RevoryAssistedImportMappingOption[];
+  matchedTargets: RevoryCsvColumn[];
+  matchedWithConfidenceCount: number;
+  missingIdentityPath: boolean;
+  missingRequiredColumns: RevoryCsvColumn[];
+  requiredColumns: RevoryCsvColumn[];
+  requiredMatchedCount: number;
+  suggestedCount: number;
+  templateKey: RevoryCsvTemplateKey;
+  totalHeaderCount: number;
+  unresolvedCount: number;
+  unmappedHeaders: string[];
+};
+
+export type RevoryAssistedImportPayload = {
+  detectedHeaders: string[];
+  mapping: RevoryAssistedImportMapping;
+  preview: RevoryAssistedImportPreview;
+  templateKey: RevoryCsvTemplateKey;
+};
+
 export type RevoryCsvColumnAliases<TColumn extends string> = Partial<
   Record<TColumn, readonly string[]>
 >;
@@ -126,6 +188,10 @@ export type RevoryCsvUploadActionState = {
   importedAt?: string;
   warnings?: string[];
   status: RevoryCsvUploadStatus;
+};
+
+export const initialRevoryCsvUploadActionState: RevoryCsvUploadActionState = {
+  status: "idle",
 };
 
 export type RevoryCsvRawRow<TColumn extends string> = {

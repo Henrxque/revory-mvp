@@ -1,0 +1,60 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-1774129908802+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T21:52:23.504Z",
+  "startedAt": "2026-03-21T21:51:48.525Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://localhost:3000/app"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0v5ayc0071bmlgy9g6ce4n",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0v5ayf0073bmlgjojaqth0",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "Source step did not persist the next onboarding state.",
+        "stack": "Error: Source step did not persist the next onboarding state.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:81:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:455:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

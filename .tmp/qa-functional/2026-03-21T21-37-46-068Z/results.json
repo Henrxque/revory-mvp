@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-1774129066371+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T21:38:25.876Z",
+  "startedAt": "2026-03-21T21:37:46.068Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Continue', exact: true })\u001b[22m\n",
+        "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Continue', exact: true })\u001b[22m\n\n    at completeEmailVerification (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:277:71)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:383:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

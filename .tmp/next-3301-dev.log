@@ -1,0 +1,18 @@
+
+> revory-mvp@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3301
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://127.0.0.1:3301
+- Network:       http://127.0.0.1:3301
+- Environments: .env.local, .env
+✓ Ready in 794ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          2492
+- Dir:          C:\Users\hriqu\Documents\revory-mvp
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 2492 /F to stop it.
+[?25h

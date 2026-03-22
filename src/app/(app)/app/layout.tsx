@@ -26,14 +26,20 @@ export default async function PrivateAppLayout({
   const currentStep = getOnboardingStep(
     resolveOnboardingStepKey(activationSetup.currentStep),
   );
+  const currentStepTitle = activationSetup.isCompleted
+    ? "Workspace active"
+    : currentStep.title;
+  const workspaceSubtitle = activationSetup.isCompleted
+    ? "Revenue recovery workspace"
+    : `Activation in progress · ${currentStep.eyebrow}`;
 
   return (
-    <main className="min-h-screen bg-[color:var(--background)] px-4 py-4 lg:px-6 lg:py-6">
-      <div className="mx-auto grid max-w-[1440px] gap-4 lg:grid-cols-[250px_1fr]">
+    <main className="min-h-screen bg-[color:var(--background)] px-4 py-4 lg:px-5 lg:py-5">
+      <div className="mx-auto grid max-w-[1440px] gap-4 lg:grid-cols-[200px_1fr]">
         <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
           <AppSidebar
             activationLabel={activationSetup.isCompleted ? "Active" : "Setup"}
-            currentStepTitle={currentStep.title}
+            currentStepTitle={currentStepTitle}
             userEmail={user.email}
             workspaceName={workspace.name}
             workspaceStatus={workspace.status}
@@ -41,62 +47,36 @@ export default async function PrivateAppLayout({
         </div>
 
         <div className="space-y-4">
-          <header className="rev-shell-hero rounded-[30px] px-5 py-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-3">
-                <p className="rev-kicker">
-                  REVORY Workspace
+          <header className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.94)] px-5 py-4 shadow-[0_16px_60px_rgba(0,0,0,0.22)]">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+                  {workspace.name}
                 </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)] md:text-[2.5rem]">
-                    {workspace.name}
-                  </h1>
-                  <RevoryStatusBadge tone="accent">
-                    {activationSetup.isCompleted ? "Activated" : "In setup"}
-                  </RevoryStatusBadge>
-                </div>
-                <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
-                  The MVP shell now mirrors the imported state of the workspace
-                  while keeping future automation layers clearly separated.
+                <p className="mt-1 text-xs text-[color:var(--text-muted)]">
+                  {workspaceSubtitle}
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <div className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
-                    Current step: {currentStep.title}
-                  </div>
-                  <div className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
-                    Status: {workspace.status}
-                  </div>
-                  <UserButton />
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
+                  MedSpa-first
                 </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rev-card-soft rounded-[22px] px-4 py-3">
-                    <p className="rev-label">Activation</p>
-                    <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                      {activationSetup.isCompleted ? "Completed" : "In progress"}
-                    </p>
-                  </div>
-                  <div className="rev-card-soft rounded-[22px] px-4 py-3">
-                    <p className="rev-label">Mode</p>
-                    <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                      {workspace.activeModeKey ?? "Pending"}
-                    </p>
-                  </div>
-                  <div className="rev-card-soft rounded-[22px] px-4 py-3">
-                    <p className="rev-label">Operator</p>
-                    <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                      {user.email}
-                    </p>
-                  </div>
+                <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
+                  {workspace.activeModeKey}
                 </div>
+                <RevoryStatusBadge tone={activationSetup.isCompleted ? "accent" : "neutral"}>
+                  {activationSetup.isCompleted ? "Activated" : "In setup"}
+                </RevoryStatusBadge>
+                <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
+                  {workspace.status}
+                </div>
+                <UserButton />
               </div>
             </div>
           </header>
 
-          <section className="rev-shell-panel rounded-[30px] p-5 md:p-6">
+          <section className="rounded-[28px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.82)] p-5 shadow-[0_20px_70px_rgba(0,0,0,0.2)] md:p-6">
             {children}
           </section>
         </div>

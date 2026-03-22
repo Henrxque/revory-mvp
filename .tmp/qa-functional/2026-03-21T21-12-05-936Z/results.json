@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774127526209+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T21:12:47.101Z",
+  "startedAt": "2026-03-21T21:12:05.936Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "message": "The sign-up form did not render on the authenticated QA instance.",
+        "stack": "Error: The sign-up form did not render on the authenticated QA instance.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:81:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:356:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

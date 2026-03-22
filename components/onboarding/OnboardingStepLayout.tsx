@@ -44,32 +44,42 @@ export function OnboardingStepLayout({
   const progressWidth = `${((currentStepIndex + 1) / stepKeys.length) * 100}%`;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
+    <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
       <aside className="rev-shell-hero rounded-[28px] p-5">
         <div className="space-y-6">
           <div className="space-y-3">
             <p className="rev-kicker">Guided setup</p>
             <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)]">
-              Configure the workspace with a narrow, premium path.
+              Activate REVORY in one guided pass.
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              The wizard keeps the MVP opinionated so activation, imports, and
-              the dashboard stay aligned.
+              Keep setup focused, self-service, and easy to review before live
+              monitoring begins.
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="rev-label">Progress</p>
-              <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                {currentStepIndex + 1} / {stepKeys.length}
-              </p>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="rev-label">Progress</p>
+                <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                  {currentStepIndex + 1} / {stepKeys.length}
+                </p>
+              </div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
+                  style={{ width: progressWidth }}
+                />
+              </div>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
-                style={{ width: progressWidth }}
-              />
+
+            <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+              <p className="rev-label">Experience promise</p>
+              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                One clear decision per step. No builder complexity. No setup
+                sprawl.
+              </p>
             </div>
           </div>
 
@@ -114,7 +124,7 @@ export function OnboardingStepLayout({
                           : "text-[color:var(--text-muted)]"
                     }`}
                   >
-                    {isCurrent ? "Current focus" : isDone ? "Locked in" : "Up next"}
+                    {isCurrent ? "Current focus" : isDone ? "Ready" : "Up next"}
                   </p>
                 </div>
               );
@@ -140,7 +150,7 @@ export function OnboardingStepLayout({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">This step defines</p>
+            <p className="rev-label">This step sets</p>
             <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
               {step.fieldLabel}
             </p>

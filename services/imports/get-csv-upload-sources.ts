@@ -1,26 +1,30 @@
 import "server-only";
 
-import { DataSourceType, type DataSource } from "@prisma/client";
+import type { DataSource } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { csvUploadSourceNames } from "@/services/imports/csv-upload-source-config";
 import type { RevoryCsvTemplateKey } from "@/types/imports";
 
 export async function getCsvUploadSources(
   workspaceId: string,
 ): Promise<Record<RevoryCsvTemplateKey, DataSource | null>> {
   const sources = await prisma.dataSource.findMany({
+    orderBy: {
+      updatedAt: "desc",
+    },
     where: {
-      workspaceId,
-      type: {
-        in: [DataSourceType.APPOINTMENTS_CSV, DataSourceType.CLIENTS_CSV],
+      name: {
+        in: Object.values(csvUploadSourceNames),
       },
+      workspaceId,
     },
   });
 
   const appointmentsSource =
-    sources.find((source) => source.type === DataSourceType.APPOINTMENTS_CSV) ?? null;
+    sources.find((source) => source.name === csvUploadSourceNames.appointments) ?? null;
   const clientsSource =
-    sources.find((source) => source.type === DataSourceType.CLIENTS_CSV) ?? null;
+    sources.find((source) => source.name === csvUploadSourceNames.clients) ?? null;
 
   return {
     appointments: appointmentsSource,

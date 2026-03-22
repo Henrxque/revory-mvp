@@ -1,24 +1,24 @@
 export const onboardingSteps = [
   {
     key: "template",
-    title: "Template MedSpa",
+    title: "Choose Your MedSpa Template",
     eyebrow: "Step 1 of 6",
     description:
-      "Start by confirming the MedSpa template that guides the MVP setup.",
-    fieldLabel: "Template selected for the workspace",
+      "Start with the MedSpa-first template REVORY was designed to activate quickly and clearly.",
+    fieldLabel: "Business template",
     helperText:
-      "REVORY starts with a single MedSpa-first template in this MVP. The goal here is clarity, not template sprawl.",
+      "One focused template keeps setup premium, consistent, and easy to review before automation starts.",
     ctaLabel: "Continue",
   },
   {
     key: "source",
-    title: "Supported Source Type",
+    title: "Choose Your Data Source",
     eyebrow: "Step 2 of 6",
     description:
-      "Define the supported source path for appointments and clients before any real connection or import work.",
-    fieldLabel: "Source path prepared for the next sprint",
+      "Pick the path that will bring appointments and clients into REVORY with the least friction.",
+    fieldLabel: "Data source path",
     helperText:
-      "This step only prepares the route for Google Calendar, Outlook Calendar, appointments CSV, clients CSV, or manual import.",
+      "The fastest path is the official CSV template. Assisted import helps when your existing export uses different column names.",
     ctaLabel: "Continue",
   },
   {
@@ -26,32 +26,32 @@ export const onboardingSteps = [
     title: "Primary Channel",
     eyebrow: "Step 3 of 6",
     description:
-      "Choose the main communication channel for the MVP, keeping the operation email-first.",
-    fieldLabel: "Primary channel for the initial flow",
+      "Set the default channel REVORY should prioritize for confirmations, reminders, and future recovery flows.",
+    fieldLabel: "Default communication channel",
     helperText:
-      "Email remains the default and most important channel in the MVP. SMS can stay secondary if enabled later.",
+      "Email is the recommended MVP default. SMS can stay secondary when your plan enables it.",
     ctaLabel: "Continue",
   },
   {
     key: "reviews",
-    title: "Google Reviews URL",
+    title: "Google Reviews Destination",
     eyebrow: "Step 4 of 6",
     description:
-      "Prepare the Google Reviews destination so review requests have a clear target.",
-    fieldLabel: "Review destination configured for the workspace",
+      "Add the review link REVORY should use once review requests become active for this workspace.",
+    fieldLabel: "Review destination",
     helperText:
-      "The real URL persistence comes next. For now, this step keeps the sequence and review intent explicit.",
+      "Keeping the destination ready now makes the growth layer much easier to activate later.",
     ctaLabel: "Continue",
   },
   {
     key: "mode",
-    title: "Recommended Mode",
+    title: "Choose Your Starting Mode",
     eyebrow: "Step 5 of 6",
     description:
-      "Review the recommended operating mode that will later support the active mode applied to the workspace.",
-    fieldLabel: "Recommended starting mode",
+      "Choose how hands-on or automated the workspace should feel when REVORY starts operating.",
+    fieldLabel: "Starting mode",
     helperText:
-      "The wizard stays opinionated here. It prepares one recommended operating path instead of exposing open-ended configuration.",
+      "Modes stay intentionally opinionated so activation remains self-service and easy to trust.",
     ctaLabel: "Continue",
   },
   {
@@ -59,10 +59,10 @@ export const onboardingSteps = [
     title: "Review and Activation",
     eyebrow: "Step 6 of 6",
     description:
-      "Review the setup structure before wiring the real step data and final activation behavior.",
-    fieldLabel: "Final check before activation logic",
+      "Review the essentials, activate the workspace, and move into the operational dashboard.",
+    fieldLabel: "Activation readiness",
     helperText:
-      "This sprint delivers the guided structure and step persistence. The next step connects the real saved values behind each screen.",
+      "Activation is the handoff from setup into daily monitoring, imports, and future revenue recovery flows.",
     ctaLabel: "Activate REVORY",
   },
 ] as const;

@@ -2,23 +2,16 @@ import "server-only";
 
 import {
   DataSourceStatus,
-  DataSourceType,
   type DataSource,
   type Prisma,
 } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import {
+  csvUploadSourceNames,
+  csvUploadSourceTypes,
+} from "@/services/imports/csv-upload-source-config";
 import type { RevoryCsvTemplateKey } from "@/types/imports";
-
-const csvImportSourceNames: Record<RevoryCsvTemplateKey, string> = {
-  appointments: "appointments-csv-upload",
-  clients: "clients-csv-upload",
-};
-
-const csvImportSourceTypes: Record<RevoryCsvTemplateKey, DataSourceType> = {
-  appointments: DataSourceType.APPOINTMENTS_CSV,
-  clients: DataSourceType.CLIENTS_CSV,
-};
 
 type RegisterCsvUploadInput = {
   errorMessage?: string | null;
@@ -75,11 +68,11 @@ export async function registerCsvUploadMetadata({
     where: {
       workspaceId_name: {
         workspaceId,
-        name: csvImportSourceNames[templateKey],
+        name: csvUploadSourceNames[templateKey],
       },
     },
     update: {
-      type: csvImportSourceTypes[templateKey],
+      type: csvUploadSourceTypes[templateKey],
       status,
       lastImportedAt: receivedAt,
       lastImportCompletedAt: importCompletedAt,
@@ -92,8 +85,8 @@ export async function registerCsvUploadMetadata({
     },
     create: {
       workspaceId,
-      name: csvImportSourceNames[templateKey],
-      type: csvImportSourceTypes[templateKey],
+      name: csvUploadSourceNames[templateKey],
+      type: csvUploadSourceTypes[templateKey],
       status,
       lastImportedAt: receivedAt,
       lastImportCompletedAt: importCompletedAt,

@@ -3,6 +3,10 @@ import type {
   RevoryClientCsvColumn,
   RevoryCsvTemplateDefinition,
 } from "@/types/imports";
+import {
+  revoryAppointmentsCsvHeaderSynonyms,
+  revoryClientsCsvHeaderSynonyms,
+} from "@/schemas/imports/csv-header-synonyms";
 
 export const revoryAppointmentsCsvTemplateDefinition = {
   key: "appointments",
@@ -27,6 +31,7 @@ export const revoryAppointmentsCsvTemplateDefinition = {
     "location_name",
     "source_notes",
   ],
+  aliases: revoryAppointmentsCsvHeaderSynonyms,
 } satisfies RevoryCsvTemplateDefinition<"appointments", RevoryAppointmentCsvColumn>;
 
 export const revoryClientsCsvTemplateDefinition = {
@@ -44,9 +49,22 @@ export const revoryClientsCsvTemplateDefinition = {
     "tags",
     "notes",
   ],
+  aliases: revoryClientsCsvHeaderSynonyms,
 } satisfies RevoryCsvTemplateDefinition<"clients", RevoryClientCsvColumn>;
 
 export const revoryCsvTemplateDefinitions = {
   appointments: revoryAppointmentsCsvTemplateDefinition,
   clients: revoryClientsCsvTemplateDefinition,
 } as const;
+
+export function getRevoryCsvTemplateColumns(key: keyof typeof revoryCsvTemplateDefinitions) {
+  const definition = revoryCsvTemplateDefinitions[key];
+
+  return [
+    ...new Set([
+      ...definition.requiredColumns,
+      ...(definition.atLeastOneOf ?? []),
+      ...definition.optionalColumns,
+    ]),
+  ];
+}

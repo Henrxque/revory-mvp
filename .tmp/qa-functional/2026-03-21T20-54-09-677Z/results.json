@@ -1,0 +1,60 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774126450814+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T20:54:53.370Z",
+  "startedAt": "2026-03-21T20:54:09.677Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/setup/source"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "source",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0t350n0045bm1cxzseh5b6",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0t350p0047bm1c78df21e8",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.check: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[value=\"MEDSPA\"]')\u001b[22m\n",
+        "stack": "locator.check: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[value=\"MEDSPA\"]')\u001b[22m\n\n    at C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:346:47"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

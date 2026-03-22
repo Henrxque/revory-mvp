@@ -1,0 +1,130 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774126863456+clerk_test@example.com",
+  "findings": [
+    {
+      "details": {
+        "observedLabel": "Continue to dashboard"
+      },
+      "title": "Activation CTA label mismatch"
+    }
+  ],
+  "finishedAt": "2026-03-21T21:01:22.429Z",
+  "startedAt": "2026-03-21T21:01:02.867Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/setup/template"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0tby8f007ibm1cdfulmi01",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0tby8l007kbm1cchm2nlbi",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "activationButtonLabel": "Continue to dashboard",
+        "reachedStep": "activation"
+      },
+      "name": "2. onboarding wizard complete",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/dashboard"
+      },
+      "name": "3. activation final",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0tby8f007ibm1cdfulmi01",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0tby8l007kbm1cchm2nlbi",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "4. dashboard after activation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "textSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nRW\n\nREVORY Workspace\n\nActive · ACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-functional-1774126863456+clerk_test@example.com\n\nREVORY Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMODE_B\nActivated\nACTIVE\n\nIMPORTS & MAPPING\n\nBring appointments and clients into REVORY without sending your team back to spreadsheet cleanup.\n\nREVORY should make imports feel effortless. Upload the file you already have, let the product read the headers, confirm the mapping inside the app, and keep the correction path visible when something still needs review.\n\nGuided import\n\nRECOMMENDED PATH\n\nOfficial template first\n\nThe official REVORY template is still the fastest path when you want a predictable first import.\n\nASSISTED IMPORT\n\nHeader detection inside the app\n\nWhen your export uses different header names, REVORY now reads the columns, suggests matches, and lets you confirm the mapping before upload.\n\nCUSTOMER TRUST\n\nClear outcome after every import\n\nValidation, persistence, warnings, and rejected rows remain explicit so the customer always understands what landed and what still needs attention.\n\nREVORY APPOINTMENTS TEMPLATE\n\nUpload with guided mapping inside REVORY.\n\nUse the appointments lane for schedule-level exports. The best experience is the REVORY template, but the guided mapper now helps when your source file uses different column names.\n\nDownload template\n\nSTEP 1\n\nBring the file you have\n\nChoose the official template or start from the CSV export you already have.\n\nSTEP 2\n\nReview detected columns\n\nREVORY reads the headers, suggests matches, and lets you confirm the mapping inside the app.\n\nSTEP 3\n\nConfirm and import\n\nOnce the mapping is clear, REVORY prepares the import structure and runs the upload.\n\nLATEST IMPORT HEALTH\n\nAwaiting first import\n\nPENDING\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\nCSV only, up to 5 MB. REVORY will detect headers and let you confirm the mapping before import.\nNo file selected yet\n\nREVORY keeps the import guided: review the header mapping, confirm the file structure, and let the product handle the clean path into the workspace.\n\nConfirm mapping and import\n\nREVORY CLIENTS TEMPLATE\n\nUpload with guided mapping inside REVORY.\n\nUse the clients lane when your export is centered on patient records and visit history. Keep a client identifier in the file so REVORY can map the base cleanly.\n\nDownload template\n\nSTEP 1\n\nBring the file you have\n\nChoose the official template or start from the CSV export you already have.\n\nSTEP 2\n\nReview detected columns\n\nREVORY reads the headers, suggests matches, and lets you confirm the mapping inside the app.\n\nSTEP 3\n\nConfirm and import\n\nOnce the mapping is clear, REVORY prepares the import structure and runs the upload.\n\nLATEST IMPORT HEALTH\n\nAwaiting first import\n\nPENDING\n\nNo CSV imported yet\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0",
+        "url": "http://127.0.0.1:3300/app/imports"
+      },
+      "name": "4. imports page access",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "message": "The imports page did not render after activation.",
+        "stack": "Error: The imports page did not render after activation.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:81:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:443:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

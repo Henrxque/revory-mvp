@@ -187,6 +187,29 @@ body::before {
   box-shadow: 0 0 0 3px rgba(194, 9, 90, 0.14);
 }
 
+.rev-select-field {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(21, 20, 28, 0.98), rgba(21, 20, 28, 0.98)),
+    linear-gradient(135deg, rgba(194, 9, 90, 0.08), rgba(255, 255, 255, 0.02));
+  padding: 0.9rem 1rem;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.rev-select-field:focus {
+  border-color: var(--border-accent);
+  background: var(--background-card-hover);
+  box-shadow: 0 0 0 3px rgba(194, 9, 90, 0.14);
+}
+
 .rev-feedback-success,
 .rev-feedback-warning,
 .rev-feedback-error {
@@ -244,6 +267,35 @@ select {
 .cl-formResendCodeLink,
 .cl-identityPreviewEditButton {
   color: #ff3f90 !important;
+}
+
+.cl-userPreviewMainIdentifier,
+.cl-userPreviewSecondaryIdentifier,
+.cl-userPreviewTextContainer,
+[class*="userPreviewMainIdentifier"],
+[class*="userPreviewSecondaryIdentifier"],
+[class*="userPreviewTextContainer"] {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.cl-userPreviewMainIdentifier,
+[class*="userPreviewMainIdentifier"] {
+  color: #f5f4f8 !important;
+  -webkit-text-fill-color: #f5f4f8 !important;
+}
+
+.cl-userPreviewSecondaryIdentifier,
+[class*="userPreviewSecondaryIdentifier"] {
+  color: #b6afc3 !important;
+  -webkit-text-fill-color: #b6afc3 !important;
+}
+
+.cl-userPreviewTextContainer *,
+[class*="userPreviewTextContainer"] * {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  opacity: 1 !important;
 }
 
 [class*="footerActionText"],

@@ -22,10 +22,6 @@ import type {
   RevoryCsvUploadActionState,
 } from "@/types/imports";
 
-const initialUploadState: RevoryCsvUploadActionState = {
-  status: "idle",
-};
-
 function isTemplateKey(value: string): value is RevoryCsvTemplateKey {
   return value === "appointments" || value === "clients";
 }
@@ -192,5 +188,3 @@ export async function uploadCsvFile(
     warnings: combinedWarnings,
   };
 }
-
-export { initialUploadState };

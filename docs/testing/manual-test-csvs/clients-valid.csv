@@ -1,0 +1,4 @@
+full_name,email,phone,external_id,last_visit_at,total_visits,tags,notes
+Ana Costa,ana@example.com,+55 11 99999-1001,cli_001,2026-11-20T14:00:00Z,3,medspa;vip,Imported for manual QA
+Bruno Lima,,+55 11 99999-1002,cli_002,2026-10-15T10:30:00Z,5,recovery,Phone-only identifier QA
+Carla Mendes,carla@example.com,,,2026-09-08T11:15:00Z,2,reviews,Email identifier without external id

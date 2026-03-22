@@ -47,6 +47,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
               card: "border-0 bg-transparent shadow-none",
               cardBox:
                 "w-full rounded-[24px] border border-white/6 bg-[rgba(255,255,255,0.02)] shadow-none",
+              userButtonPopoverActionButton:
+                "!text-[#F5F4F8] hover:!bg-[rgba(255,255,255,0.04)]",
+              userButtonPopoverActionButtonIcon: "!text-[#B6AFC3]",
+              userButtonPopoverActionButtonText: "!text-[#F5F4F8]",
+              userButtonPopoverCard:
+                "!border !border-white/8 !bg-[#1A1721] !shadow-[0_24px_80px_rgba(0,0,0,0.35)]",
+              userButtonPopoverFooter:
+                "!border-t !border-white/8 !bg-[rgba(255,255,255,0.02)]",
+              userButtonPopoverMain: "!bg-[#1A1721]",
+              userButtonPopoverText: "!text-[#F5F4F8]",
+              userPreview: "!text-[#F5F4F8]",
+              userPreviewMainIdentifier: "!text-[#F5F4F8]",
+              userPreviewSecondaryIdentifier: "!text-[#B6AFC3]",
+              userPreviewTextContainer: "!text-[#F5F4F8]",
               dividerLine: "bg-white/10",
               dividerText: "text-[#B6AFC3]",
               footerActionLink: "text-[#ff3f90] hover:text-[#ff6daa]",

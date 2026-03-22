@@ -1,0 +1,122 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "email": "revory-functional-1774126145083+clerk_test@example.com",
+  "findings": [
+    {
+      "details": {
+        "observedLabel": "Continue to dashboard"
+      },
+      "title": "Activation CTA label mismatch"
+    }
+  ],
+  "finishedAt": "2026-03-21T20:49:24.095Z",
+  "startedAt": "2026-03-21T20:49:04.823Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://127.0.0.1:3300/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/setup/template"
+      },
+      "name": "1. sign up flow",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "template",
+            "googleReviewsUrl": null,
+            "isCompleted": false,
+            "recommendedModeKey": null,
+            "selectedTemplate": null
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0swjpa000bbm1c0ggfyr5t",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_A",
+            "id": "cmn0swjpf000dbm1c1t8byxzo",
+            "name": "REVORY Workspace",
+            "status": "DRAFT"
+          }
+        }
+      },
+      "name": "1. local sync after sign up",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "activationButtonLabel": "Continue to dashboard",
+        "reachedStep": "activation"
+      },
+      "name": "2. onboarding wizard complete",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "http://127.0.0.1:3300/app/dashboard"
+      },
+      "name": "3. activation final",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "snapshot": {
+          "activationSetup": {
+            "currentStep": "activation",
+            "googleReviewsUrl": "https://g.page/r/revory-functional-qa",
+            "isCompleted": true,
+            "recommendedModeKey": "MODE_B",
+            "selectedTemplate": "MEDSPA"
+          },
+          "appointments": [],
+          "appointmentsCount": 0,
+          "canceledAppointments": 0,
+          "clientsCount": 0,
+          "dataSources": [
+            {
+              "lastImportError": null,
+              "lastImportErrorRowCount": 0,
+              "lastImportFileName": null,
+              "lastImportRowCount": 0,
+              "lastImportSuccessRowCount": 0,
+              "name": "primary-source",
+              "status": "PENDING",
+              "type": "APPOINTMENTS_CSV"
+            }
+          ],
+          "estimatedRevenue": null,
+          "localUserId": "cmn0swjpa000bbm1c0ggfyr5t",
+          "upcomingAppointments": 0,
+          "workspace": {
+            "activeModeKey": "MODE_B",
+            "id": "cmn0swjpf000dbm1c1t8byxzo",
+            "name": "REVORY Workspace",
+            "status": "ACTIVE"
+          }
+        }
+      },
+      "name": "4. dashboard after activation",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.setInputFiles: Error: strict mode violation: locator('section').filter({ hasText: 'REVORY Appointments Template' }).first().locator('input[type=\"file\"]') resolved to 2 elements:\n    1) <input type=\"file\" name=\"file\" accept=\".csv,text/csv\" class=\"mt-4 block w-full text-sm text-[color:var(--text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white\"/> aka getByRole('button', { name: 'Choose CSV file CSV only, up' }).first()\n    2) <input type=\"file\" name=\"file\" accept=\".csv,text/csv\" class=\"mt-4 block w-full text-sm text-[color:var(--text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white\"/> aka getByRole('button', { name: 'Choose CSV file CSV only, up' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for locator('section').filter({ hasText: 'REVORY Appointments Template' }).first().locator('input[type=\"file\"]')\u001b[22m\n",
+        "stack": "locator.setInputFiles: Error: strict mode violation: locator('section').filter({ hasText: 'REVORY Appointments Template' }).first().locator('input[type=\"file\"]') resolved to 2 elements:\n    1) <input type=\"file\" name=\"file\" accept=\".csv,text/csv\" class=\"mt-4 block w-full text-sm text-[color:var(--text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white\"/> aka getByRole('button', { name: 'Choose CSV file CSV only, up' }).first()\n    2) <input type=\"file\" name=\"file\" accept=\".csv,text/csv\" class=\"mt-4 block w-full text-sm text-[color:var(--text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white\"/> aka getByRole('button', { name: 'Choose CSV file CSV only, up' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for locator('section').filter({ hasText: 'REVORY Appointments Template' }).first().locator('input[type=\"file\"]')\u001b[22m\n\n    at async uploadCsv (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:256:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:378:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+appointment_external_id,client_full_name,scheduled_at,status,client_email,service_name,provider_name,estimated_revenue,booked_at,canceled_at,location_name,source_notes
+apt_001,Ana Costa,2026-12-15T14:00:00Z,SCHEDULED,ana@example.com,Laser Facial,Dr. Maia,300,2026-11-01T10:00:00Z,,Revory Paulista,Manual QA future scheduled
+apt_002,Beatriz Lima,2026-11-10T16:30:00Z,CANCELED,beatriz@example.com,Botox,Dr. Maia,220,2026-10-05T09:00:00Z,2026-11-08T12:00:00Z,Revory Jardins,Manual QA canceled
+apt_003,Caio Souza,2026-10-02T13:00:00Z,COMPLETED,caio@example.com,Skin Booster,Dr. Alves,,2026-09-20T08:30:00Z,,Revory Pinheiros,No revenue on purpose

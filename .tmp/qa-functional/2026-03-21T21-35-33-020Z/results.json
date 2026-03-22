@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-1774128933553+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-21T21:36:41.551Z",
+  "startedAt": "2026-03-21T21:35:33.020Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[aria-label=\"Enter verification code\"], input[inputmode=\"numeric\"]').first() to be visible\u001b[22m\n",
+        "stack": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[aria-label=\"Enter verification code\"], input[inputmode=\"numeric\"]').first() to be visible\u001b[22m\n\n    at completeEmailVerification (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-qa.mjs:256:21)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/revory-functional-qa.mjs:375:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

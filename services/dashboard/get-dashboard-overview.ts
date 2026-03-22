@@ -3,6 +3,7 @@ import "server-only";
 import { AppointmentStatus, DataSourceType } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { csvUploadSourceNames } from "@/services/imports/csv-upload-source-config";
 
 export type DashboardOverview = {
   canceledAppointments: number;
@@ -24,8 +25,32 @@ export type DashboardOverview = {
     type: DataSourceType;
   }>;
   appointmentsMonitored: number;
+  upcomingList: Array<{
+    clientName: string;
+    id: string;
+    scheduledAt: Date;
+    serviceName: string | null;
+    status: AppointmentStatus;
+  }>;
   upcomingAppointments: number;
 };
+
+function resolveClientName(client: {
+  firstName: string | null;
+  fullName: string | null;
+  lastName: string | null;
+}) {
+  if (client.fullName?.trim()) {
+    return client.fullName.trim();
+  }
+
+  const composedName = [client.firstName, client.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return composedName || "Client pending";
+}
 
 export async function getDashboardOverview(
   workspaceId: string,
@@ -38,6 +63,7 @@ export async function getDashboardOverview(
     canceledAppointments,
     revenueAggregate,
     dataSources,
+    upcomingList,
   ] = await Promise.all([
     prisma.appointment.count({
       where: {
@@ -89,9 +115,31 @@ export async function getDashboardOverview(
         type: true,
       },
       where: {
-        type: {
-          in: [DataSourceType.APPOINTMENTS_CSV, DataSourceType.CLIENTS_CSV],
+        name: {
+          in: Object.values(csvUploadSourceNames),
         },
+        workspaceId,
+      },
+    }),
+    prisma.appointment.findMany({
+      include: {
+        client: {
+          select: {
+            firstName: true,
+            fullName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        scheduledAt: "asc",
+      },
+      take: 4,
+      where: {
+        scheduledAt: {
+          gte: now,
+        },
+        status: AppointmentStatus.SCHEDULED,
         workspaceId,
       },
     }),
@@ -101,9 +149,10 @@ export async function getDashboardOverview(
     appointmentsMonitored: appointmentCount,
     canceledAppointments,
     clientsImported: clientCount,
-    estimatedImportedRevenue: revenueAggregate._sum.estimatedRevenue
-      ? Number(revenueAggregate._sum.estimatedRevenue)
-      : null,
+    estimatedImportedRevenue:
+      revenueAggregate._sum.estimatedRevenue !== null
+        ? Number(revenueAggregate._sum.estimatedRevenue)
+        : null,
     futureMetricsReady: {
       confirmationRate: false,
       revenueProtected: false,
@@ -121,6 +170,13 @@ export async function getDashboardOverview(
           : "Clients CSV",
       totalRows: source.lastImportRowCount,
       type: source.type,
+    })),
+    upcomingList: upcomingList.map((appointment) => ({
+      clientName: resolveClientName(appointment.client),
+      id: appointment.id,
+      scheduledAt: appointment.scheduledAt,
+      serviceName: appointment.serviceName,
+      status: appointment.status,
     })),
     upcomingAppointments,
   };
