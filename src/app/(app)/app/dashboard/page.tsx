@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 
+import { OperationalSurface } from "@/components/dashboard/OperationalSurface";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
+import { getOperationalSurface } from "@/services/operations/get-operational-surface";
 import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
@@ -152,6 +154,10 @@ export default async function DashboardPage() {
 
   const { activationSetup, workspace } = appContext;
   const overview = await getDashboardOverview(workspace.id);
+  const operationalSurface = await getOperationalSurface(
+    workspace.id,
+    overview.appointmentsMonitored > 0,
+  );
   const monthChip = formatMonthChip();
   const hasImportedData =
     overview.importSources.length > 0 ||
@@ -274,6 +280,8 @@ export default async function DashboardPage() {
           value={overview.canceledAppointments}
         />
       </section>
+
+      <OperationalSurface surface={operationalSurface} />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

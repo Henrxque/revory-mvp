@@ -1,6 +1,7 @@
 "use client";
 
-import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
+import Link from "next/link";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 type DocumentNavigationLinkProps = Readonly<
   AnchorHTMLAttributes<HTMLAnchorElement> & {
@@ -9,39 +10,18 @@ type DocumentNavigationLinkProps = Readonly<
   }
 >;
 
-function shouldKeepNativeNavigation(event: MouseEvent<HTMLAnchorElement>) {
-  return (
-    event.defaultPrevented ||
-    event.button !== 0 ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey
-  );
-}
-
 export function DocumentNavigationLink({
   children,
   href,
-  onClick,
   ...props
 }: DocumentNavigationLinkProps) {
   return (
-    <a
+    <Link
       {...props}
       href={href}
-      onClick={(event) => {
-        onClick?.(event);
-
-        if (shouldKeepNativeNavigation(event)) {
-          return;
-        }
-
-        event.preventDefault();
-        window.location.assign(href);
-      }}
+      prefetch={false}
     >
       {children}
-    </a>
+    </Link>
   );
 }
