@@ -1,15 +1,15 @@
-# REVORY - Sprint 4 Etapa 1 Review
+# REVORY - Sprint 4 Etapa 3 Review
 
 ## Objetivo da etapa
-Implementar a base tecnica da confirmation logic do MVP para identificar quais appointments entram em necessidade operacional de confirmacao, usando apenas dados ja existentes no produto e sem abrir automacoes, estados complexos ou promessas funcionais fora do escopo atual.
+Implementar a base tecnica da confirmation logic do MVP para identificar quais appointments entram em necessidade operacional de confirmacao, usando apenas dados ja existentes no produto e sem abrir automacoes, estados complexos ou promessas funcionais fora do escopo atual. Esta e a primeira etapa tecnica da Sprint 4, depois das Etapas 1 e 2 de definicao/gestao.
 
 ## Arquivos criados/alterados
 - Criado: `types/confirmation.ts`
 - Criado: `services/confirmation/build-confirmation-classification.ts`
 - Criado: `services/confirmation/get-confirmation-classification.ts`
-- Criado: `docs/testing/sprint-4-etapa-1-confirmation-logic-smoke.ts`
-- Criado: `docs/reviews/sprint-4-etapa-1-confirmation-logic-base.md`
-- Criado: `docs/reviews/generate_sprint_4_etapa_1_confirmation_logic_base_pdf.py`
+- Criado: `docs/testing/sprint-4-etapa-3-confirmation-logic-smoke.ts`
+- Criado: `docs/reviews/sprint-4-etapa-3-confirmation-logic-base.md`
+- Criado: `docs/reviews/generate_sprint_4_etapa_3_confirmation_logic_base_pdf.py`
 
 ## Decisoes tomadas
 - A regra foi mantida estreita por alinhamento de escopo da Sprint 4:
@@ -83,8 +83,8 @@ Implementar a base tecnica da confirmation logic do MVP para identificar quais a
 ## Evidencias do que funciona
 - `npm run typecheck`
 - `npm run build`
-- `npx eslint 'services/confirmation/build-confirmation-classification.ts' 'services/confirmation/get-confirmation-classification.ts' 'types/confirmation.ts' 'docs/testing/sprint-4-etapa-1-confirmation-logic-smoke.ts' --max-warnings=0`
-- `npx tsx docs/testing/sprint-4-etapa-1-confirmation-logic-smoke.ts`
+- `npx eslint 'services/confirmation/build-confirmation-classification.ts' 'services/confirmation/get-confirmation-classification.ts' 'types/confirmation.ts' 'docs/testing/sprint-4-etapa-3-confirmation-logic-smoke.ts' --max-warnings=0`
+- `npx tsx docs/testing/sprint-4-etapa-3-confirmation-logic-smoke.ts`
 
 Resultado observado no smoke:
 - `totalFutureScheduledAppointments = 3`

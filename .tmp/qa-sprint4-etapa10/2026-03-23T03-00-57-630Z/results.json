@@ -1,0 +1,18 @@
+{
+  "baseUrl": "http://127.0.0.1:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774234858443+clerk_test@example.com",
+  "finishedAt": "2026-03-23T03:01:32.051Z",
+  "findings": [],
+  "startedAt": "2026-03-23T03:00:57.630Z",
+  "steps": [
+    {
+      "details": {
+        "message": "page.waitForFunction: Timeout 30000ms exceeded.",
+        "stack": "page.waitForFunction: Timeout 30000ms exceeded.\n    at o (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\@clerk\\testing\\dist\\playwright\\index.mjs:1:516)\n    at async Object.d (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\@clerk\\testing\\dist\\playwright\\index.mjs:1:800)\n    at async signInToWorkspace (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-4-etapa-10-qa.mjs:327:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:543:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

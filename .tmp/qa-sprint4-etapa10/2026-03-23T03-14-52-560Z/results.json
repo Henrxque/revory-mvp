@@ -1,0 +1,25 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774235693173+clerk_test@example.com",
+  "finishedAt": "2026-03-23T03:15:08.967Z",
+  "findings": [],
+  "startedAt": "2026-03-23T03:14:52.560Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "1. authenticated dashboard render",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "message": "Initial dashboard did not render the empty operational surface.",
+        "stack": "Error: Initial dashboard did not render the empty operational surface.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:90:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:624:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

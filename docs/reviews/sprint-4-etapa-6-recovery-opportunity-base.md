@@ -86,6 +86,8 @@ Implementar os primeiros criterios de `recovery opportunity` no MVP como insight
   - houve interrupcao
   - ainda nao ha novo agendamento
   - entao existe oportunidade inicial de recovery
+- Essa leitura continua dependente da completude da base importada no workspace:
+  - se o rebook aconteceu fora da base atual, a oportunidade pode parecer aberta mesmo sem estar mais aberta na operacao real
 
 ## Evidencias do que funciona
 - `npm run typecheck`

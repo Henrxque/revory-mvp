@@ -11,7 +11,7 @@ export type RevoryOperationalCard = {
   blockedCount: number;
   count: number;
   description: string;
-  kindLabel: "Insight" | "Status";
+  kindLabel: string;
   key: RevoryOperationalCategoryKey;
   nextAction: string;
   title: string;

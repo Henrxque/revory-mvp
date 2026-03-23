@@ -1,0 +1,18 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774235014040+clerk_test@example.com",
+  "finishedAt": "2026-03-23T03:05:42.329Z",
+  "findings": [],
+  "startedAt": "2026-03-23T03:03:33.552Z",
+  "steps": [
+    {
+      "details": {
+        "message": "page.waitForURL: Timeout 120000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+        "stack": "page.waitForURL: Timeout 120000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at performUiSignIn (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-4-etapa-10-qa.mjs:403:14)\n    at async signInToWorkspace (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-4-etapa-10-qa.mjs:411:3)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:617:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

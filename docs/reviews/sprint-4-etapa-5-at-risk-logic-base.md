@@ -77,6 +77,7 @@ Implementar sinais iniciais de `at-risk appointments` no MVP de forma simples, u
 - Nao existe score escondido.
 - Nao existe ponderacao opaca.
 - Nao existe claims de IA ou modelo preditivo.
+- `same_day_tight_window` deve ser lido como alerta de urgencia operacional, nao como previsao de no-show.
 - Cada appointment entra na lista porque ha um motivo operacional legivel e exibivel para o usuario.
 - Isso mantem o produto premium e honesto:
   - simples de entender

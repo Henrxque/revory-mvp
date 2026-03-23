@@ -66,11 +66,11 @@ function getProgressPercent(successRows: number, totalRows: number) {
 function formatModeLabel(modeKey: string) {
   switch (modeKey) {
     case "MODE_A":
-      return "Mode A · Basic Reminder";
+      return "Mode A - Basic Reminder";
     case "MODE_B":
-      return "Mode B · Attendance Recovery";
+      return "Mode B - Attendance Recovery";
     case "MODE_C":
-      return "Mode C · Attendance + Reviews";
+      return "Mode C - Attendance + Reviews";
     default:
       return modeKey;
   }
@@ -89,6 +89,20 @@ function formatModeBadgeLabel(modeKey: string) {
   }
 }
 
+function getImportSourceTone(status: string) {
+  const normalized = status.toLowerCase();
+
+  if (normalized.includes("imported") || normalized.includes("completed")) {
+    return "real" as const;
+  }
+
+  if (normalized.includes("review") || normalized.includes("warning")) {
+    return "future" as const;
+  }
+
+  return "neutral" as const;
+}
+
 type MetricCardProps = Readonly<{
   accent?: boolean;
   label: string;
@@ -99,10 +113,10 @@ type MetricCardProps = Readonly<{
 function MetricCard({ accent = false, label, note, value }: MetricCardProps) {
   return (
     <div
-      className={`rounded-[18px] border p-5 ${
+      className={`rounded-[20px] border px-5 py-5 ${
         accent
           ? "border-[color:var(--border-accent)] bg-[linear-gradient(135deg,rgba(194,9,90,0.14),rgba(21,20,28,0.98))]"
-          : "border-[color:var(--border)] bg-[color:var(--background-card)]"
+          : "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]"
       }`}
     >
       <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
@@ -130,7 +144,7 @@ function NorthStarCard({ note, title }: NorthStarCardProps) {
     <div className="rev-card-soft rounded-[20px] px-4 py-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-[color:var(--foreground)]">{title}</p>
-        <RevoryStatusBadge tone="future">Next layer</RevoryStatusBadge>
+        <RevoryStatusBadge tone="neutral">Future layer</RevoryStatusBadge>
       </div>
       <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
     </div>
@@ -227,13 +241,13 @@ export default async function DashboardPage() {
             <p className="rev-kicker">Operations overview</p>
             <h1 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
               {hasImportedData
-                ? "Your workspace has a real operational base."
+                ? "Your workspace already has an operational base."
                 : "Activation is complete. Now give REVORY the data to work with."}
             </h1>
             <p className="text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               {hasImportedData
-                ? "REVORY is already holding the imported foundation for appointment monitoring. Confirmation, recovery, and review metrics unlock next from this base."
-                : "The premium experience starts with a low-friction import. Bring in appointments or clients and let REVORY turn that first dataset into a clean, guided operational view."}
+                ? "Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. Confirmation, recovery, and review execution can build from this base."
+                : "The premium experience starts with a low-friction import. Bring in appointments or clients and let REVORY turn that first dataset into a clean operational view."}
             </p>
           </div>
 
@@ -241,6 +255,9 @@ export default async function DashboardPage() {
             <span className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-2 text-xs font-medium text-[color:var(--text-muted)]">
               {monthChip}
             </span>
+            <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
+              {hasImportedData ? "Operational base live" : "Awaiting first import"}
+            </RevoryStatusBadge>
             <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
               {hasImportedData ? "Open imports" : "Import data"}
             </DocumentNavigationLink>
@@ -290,8 +307,7 @@ export default async function DashboardPage() {
               North-star metrics
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              These are the outcomes REVORY is designed to surface as the live flow layer
-              comes online.
+              Future operating outcomes that light up once the live flow layer comes online.
             </p>
           </div>
         </div>
@@ -324,8 +340,7 @@ export default async function DashboardPage() {
                 Import readiness
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                Data quality stays visible so the customer always knows what landed and what
-                still needs cleanup.
+                Keep what landed, what needs review, and what still needs cleanup visible.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
@@ -340,6 +355,7 @@ export default async function DashboardPage() {
                   source.successRows,
                   source.totalRows,
                 );
+                const sourceTone = getImportSourceTone(source.status);
 
                 return (
                   <div
@@ -355,7 +371,15 @@ export default async function DashboardPage() {
                           {source.fileName ?? "No file name saved"}
                         </p>
                       </div>
-                      <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+                      <span
+                        className={`inline-flex min-h-8 items-center rounded-[14px] border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${
+                          sourceTone === "real"
+                            ? "border-[rgba(46,204,134,0.25)] bg-[rgba(46,204,134,0.1)] text-[color:var(--success)]"
+                            : sourceTone === "future"
+                              ? "border-[rgba(245,166,35,0.24)] bg-[rgba(245,166,35,0.1)] text-[color:var(--warning)]"
+                              : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]"
+                        }`}
+                      >
                         {formatSourceStatus(source.status)}
                       </span>
                     </div>
@@ -367,38 +391,40 @@ export default async function DashboardPage() {
                       />
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                          Coverage
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-                          {progressPercent}%
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                          Success rows
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-                          {source.successRows}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                          Review rows
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-                          {source.errorRows}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                          Total rows
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-                          {source.totalRows}
-                        </p>
+                    <div className="mt-4 overflow-hidden rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]">
+                      <div className="grid divide-y divide-[color:var(--border)] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+                        <div className="px-3 py-3">
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                            Coverage
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                            {progressPercent}%
+                          </p>
+                        </div>
+                        <div className="px-3 py-3">
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                            Success rows
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                            {source.successRows}
+                          </p>
+                        </div>
+                        <div className="px-3 py-3">
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                            Review rows
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                            {source.errorRows}
+                          </p>
+                        </div>
+                        <div className="px-3 py-3">
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                            Total rows
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                            {source.totalRows}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -414,6 +440,11 @@ export default async function DashboardPage() {
                 Open Imports, upload the file you already have, and let REVORY guide the
                 header mapping inside the app before the final import runs.
               </p>
+              <div className="mt-4">
+                <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
+                  Open imports
+                </DocumentNavigationLink>
+              </div>
             </div>
           )}
         </section>
@@ -425,8 +456,8 @@ export default async function DashboardPage() {
                 Mode and flow roadmap
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                The workspace already has a clear operating direction, even before all live
-                automations are on.
+                The workspace already has a clear operating direction, even before every live
+                automation is on.
               </p>
             </div>
             <RevoryStatusBadge tone="accent">
@@ -444,11 +475,9 @@ export default async function DashboardPage() {
                   <p className="text-sm font-semibold text-[color:var(--foreground)]">
                     {flow.title}
                   </p>
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      flow.included ? "bg-[color:var(--accent-light)]" : "bg-[color:var(--text-subtle)]"
-                    }`}
-                  />
+                  <RevoryStatusBadge tone={flow.included ? "real" : "neutral"}>
+                    {flow.included ? "Included" : "Locked for this mode"}
+                  </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                   {flow.note}
@@ -492,11 +521,11 @@ export default async function DashboardPage() {
                       {appointment.clientName}
                     </p>
                     <p className="mt-1 truncate text-sm text-[color:var(--text-muted)]">
-                      {appointment.serviceName ?? "Imported appointment"} ·{" "}
+                      {appointment.serviceName ?? "Imported appointment"} -{" "}
                       {formatAppointmentDate(appointment.scheduledAt)}
                     </p>
                   </div>
-                  <span className="rounded-full border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--success)]">
+                  <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--success)]">
                     {appointment.status}
                   </span>
                 </div>
@@ -510,6 +539,11 @@ export default async function DashboardPage() {
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                 Import an appointments CSV to give REVORY a current schedule to monitor.
               </p>
+              <div className="mt-4">
+                <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
+                  Open imports
+                </DocumentNavigationLink>
+              </div>
             </div>
           )}
         </section>
@@ -520,8 +554,7 @@ export default async function DashboardPage() {
               Workspace readiness
             </p>
             <p className="text-sm text-[color:var(--text-muted)]">
-              A premium SaaS should make the next action obvious. This block keeps the
-              workspace status readable at a glance.
+              Keep category, current status, and the next obvious move readable at a glance.
             </p>
           </div>
 
@@ -535,11 +568,9 @@ export default async function DashboardPage() {
                   <p className="text-sm font-semibold text-[color:var(--foreground)]">
                     {item.label}
                   </p>
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      item.done ? "bg-[color:var(--success)]" : "bg-[color:var(--warning)]"
-                    }`}
-                  />
+                  <RevoryStatusBadge tone={item.done ? "real" : "future"}>
+                    {item.done ? "Ready" : "Pending"}
+                  </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                   {item.note}
@@ -553,6 +584,13 @@ export default async function DashboardPage() {
             <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
               {nextBestAction}
             </p>
+            {!hasImportedData ? (
+              <div className="mt-4">
+                <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
+                  Import data
+                </DocumentNavigationLink>
+              </div>
+            ) : null}
           </div>
         </section>
       </div>

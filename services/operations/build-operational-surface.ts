@@ -45,6 +45,17 @@ function getBlockedAppointmentIds(input: BuildOperationalSurfaceInput) {
 function buildCategoryCards(
   input: BuildOperationalSurfaceInput,
 ): RevoryOperationalCard[] {
+  const confirmationHasBlockedOnly =
+    input.confirmation.readyForConfirmationCount === 0 &&
+    input.confirmation.blockedMissingEmailCount > 0;
+  const reminderHasBlockedOnly =
+    input.reminder.readyForReminderCount === 0 &&
+    input.reminder.blockedMissingEmailCount > 0;
+  const reviewHasBlockedOnly =
+    input.reviewRequest.eligibleCount === 0 &&
+    (input.reviewRequest.blockedMissingEmailCount > 0 ||
+      input.reviewRequest.blockedMissingReviewsUrlCount > 0);
+
   return [
     {
       blockedCount: input.atRisk.blockedContactCount,
@@ -52,8 +63,8 @@ function buildCategoryCards(
       description:
         input.atRisk.atRiskCount > 0
           ? `${input.atRisk.attentionNowCount} need immediate attention and ${input.atRisk.watchlistCount} stay on the watchlist.`
-          : "No appointments are currently surfaced by the initial at-risk signals.",
-      kindLabel: "Insight",
+          : "No appointments are currently surfaced by the active at-risk signals.",
+      kindLabel: "Priority signal",
       key: "at_risk",
       nextAction:
         input.atRisk.atRiskCount > 0
@@ -73,15 +84,21 @@ function buildCategoryCards(
       description:
         input.confirmation.readyForConfirmationCount > 0
           ? `${input.confirmation.readyForConfirmationCount} appointments are already inside the ${input.confirmation.windowHours}h confirmation window.`
+          : confirmationHasBlockedOnly
+            ? `${input.confirmation.blockedMissingEmailCount} appointments are already inside the confirmation window, but still blocked by missing email.`
           : "No appointments are currently waiting in the confirmation-ready queue.",
-      kindLabel: "Status",
+      kindLabel: "Ready queue",
       key: "confirmation",
       nextAction:
         input.confirmation.blockedMissingEmailCount > 0
           ? `${input.confirmation.blockedMissingEmailCount} still need a usable email before confirmation can help.`
-          : "Keep this queue visible while REVORY stays in the first email-first confirmation layer.",
+          : "Keep this queue readable while REVORY stays in the first email-first confirmation layer.",
       title: "Confirmation queue",
-      tone: input.confirmation.readyForConfirmationCount > 0 ? "real" : "neutral",
+      tone: input.confirmation.readyForConfirmationCount > 0
+        ? "real"
+        : confirmationHasBlockedOnly
+          ? "future"
+          : "neutral",
     },
     {
       blockedCount: input.reminder.blockedMissingEmailCount,
@@ -89,15 +106,21 @@ function buildCategoryCards(
       description:
         input.reminder.readyForReminderCount > 0
           ? `${input.reminder.readyForReminderCount} appointments are already inside the ${input.reminder.windowHours}h reminder window.`
+          : reminderHasBlockedOnly
+            ? `${input.reminder.blockedMissingEmailCount} appointments are already inside the reminder window, but still blocked by missing email.`
           : "No appointments are currently waiting in the reminder-ready queue.",
-      kindLabel: "Status",
+      kindLabel: "Ready queue",
       key: "reminder",
       nextAction:
         input.reminder.blockedMissingEmailCount > 0
           ? `${input.reminder.blockedMissingEmailCount} still need a usable email before reminder logic can help.`
-          : "Keep the reminder window visible, but do not confuse it with a full cadence engine.",
+          : "Keep this queue visible while REVORY stays in the first reminder layer.",
       title: "Reminder queue",
-      tone: input.reminder.readyForReminderCount > 0 ? "real" : "neutral",
+      tone: input.reminder.readyForReminderCount > 0
+        ? "real"
+        : reminderHasBlockedOnly
+          ? "future"
+          : "neutral",
     },
     {
       blockedCount: input.recovery.blockedMissingEmailCount,
@@ -106,7 +129,7 @@ function buildCategoryCards(
         input.recovery.opportunityCount > 0
           ? `${input.recovery.opportunityCount} recent disruptions were surfaced without pretending there is already a rebooking machine behind them.`
           : "No cancellations or no-shows currently qualify as near-term recovery opportunities.",
-      kindLabel: "Insight",
+      kindLabel: "Opportunity",
       key: "recovery",
       nextAction:
         input.recovery.blockedMissingEmailCount > 0
@@ -123,15 +146,21 @@ function buildCategoryCards(
       description:
         input.reviewRequest.eligibleCount > 0
           ? `${input.reviewRequest.eligibleCount} completed visits are already eligible for a simple review request layer.`
+          : reviewHasBlockedOnly
+            ? "Recent completed visits were found, but the current MVP still has them blocked by missing email or missing reviews destination."
           : "No completed visits are currently review-ready inside the initial eligibility window.",
-      kindLabel: "Status",
+      kindLabel: "Eligibility",
       key: "review_request",
       nextAction:
         input.reviewRequest.blockedMissingReviewsUrlCount > 0
           ? `${input.reviewRequest.blockedMissingReviewsUrlCount} stay blocked until the Google Reviews destination is configured.`
-          : "Keep reviews honest: this is eligibility visibility, not a live reputation campaign engine.",
+          : "Keep reviews honest: this is eligibility visibility, not a live reputation campaign.",
       title: "Review-ready visits",
-      tone: input.reviewRequest.eligibleCount > 0 ? "real" : "neutral",
+      tone: input.reviewRequest.eligibleCount > 0
+        ? "real"
+        : reviewHasBlockedOnly
+          ? "future"
+          : "neutral",
     },
   ];
 }
@@ -319,7 +348,7 @@ function buildPriorityItems(
   addItems(buildRecoveryPriorityItems(input.recovery));
   addItems(buildReviewPriorityItems(input.reviewRequest));
 
-  return items.slice(0, 7);
+  return items.slice(0, 5);
 }
 
 function buildPrioritySummary(
@@ -330,8 +359,8 @@ function buildPrioritySummary(
   if (!input.hasAppointmentBase) {
     return {
       description:
-        "REVORY already knows how to classify confirmation, reminders, at-risk signals, recovery, and review eligibility. This layer turns on as soon as the workspace has imported appointments to monitor.",
-      headline: "Operational visibility starts with the appointment base.",
+        "REVORY already knows how to classify confirmation, reminders, at-risk signals, recovery, and review eligibility. This layer turns on as soon as the workspace has appointments to monitor.",
+      headline: "Operational visibility starts after the first appointments import.",
       suggestedNextAction:
         "Open Imports and bring in the first appointments CSV so the operational layer has something real to work with.",
     };
@@ -341,7 +370,7 @@ function buildPrioritySummary(
     return {
       description:
         "The imported base is live, but no current appointment, disruption, or completed visit needs operational attention right now.",
-      headline: "The workspace is currently quiet.",
+      headline: "The current schedule looks calm.",
       suggestedNextAction:
         "Keep the imported schedule fresh so REVORY can keep surfacing trustworthy operational signals.",
     };
@@ -350,7 +379,7 @@ function buildPrioritySummary(
   if (input.atRisk.attentionNowCount > 0) {
     return {
       description:
-        "REVORY has already surfaced a small group of appointments that deserves a closer look now. The list below keeps the signal, the status, and the next suggested move separate and readable.",
+        "REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility.",
       headline: "A small set of appointments needs attention now.",
       suggestedNextAction:
         blockedCount > 0
@@ -363,7 +392,7 @@ function buildPrioritySummary(
     return {
       description:
         "The main operational friction right now is data readiness. REVORY can already see who would be ready next, but some paths are still blocked by missing email or missing reviews destination.",
-      headline: "The workspace has signals, but some paths are still blocked.",
+      headline: "Signals are live, but some paths are still blocked.",
       suggestedNextAction:
         "Tighten the client contact base first so confirmation, reminders, recovery, and reviews can progress cleanly.",
     };
@@ -371,7 +400,7 @@ function buildPrioritySummary(
 
   return {
     description:
-      "The first operational layer is live. REVORY is surfacing the people who are ready for the next step without turning the product into a CRM or inbox.",
+      "The first operational layer is live. REVORY is surfacing who is ready for the next step without turning the product into a CRM, inbox, or workflow builder.",
     headline: "The workspace already has guided operational signals.",
     suggestedNextAction:
       "Use the surfaced queues below to understand what is ready, why it matters, and what REVORY suggests next.",

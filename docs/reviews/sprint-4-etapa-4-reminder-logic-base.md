@@ -1,15 +1,15 @@
-# REVORY - Sprint 4 Etapa 2 Review
+# REVORY - Sprint 4 Etapa 4 Review
 
 ## Objetivo da etapa
-Implementar a base tecnica da reminder logic do MVP para identificar quais appointments entram em necessidade operacional de lembrete, mantendo a separacao clara em relacao a confirmation logic e sem abrir motor de cadencia, builder de campanha ou automacao multicanal.
+Implementar a base tecnica da reminder logic do MVP para identificar quais appointments entram em necessidade operacional de lembrete, mantendo a separacao clara em relacao a confirmation logic e sem abrir motor de cadencia, builder de campanha ou automacao multicanal. Esta etapa continua a base tecnica da Sprint 4 depois da confirmation logic.
 
 ## Arquivos criados/alterados
 - Criado: `types/reminder.ts`
 - Criado: `services/reminder/build-reminder-classification.ts`
 - Criado: `services/reminder/get-reminder-classification.ts`
-- Criado: `docs/testing/sprint-4-etapa-2-reminder-logic-smoke.ts`
-- Criado: `docs/reviews/sprint-4-etapa-2-reminder-logic-base.md`
-- Criado: `docs/reviews/generate_sprint_4_etapa_2_reminder_logic_base_pdf.py`
+- Criado: `docs/testing/sprint-4-etapa-4-reminder-logic-smoke.ts`
+- Criado: `docs/reviews/sprint-4-etapa-4-reminder-logic-base.md`
+- Criado: `docs/reviews/generate_sprint_4_etapa_4_reminder_logic_base_pdf.py`
 
 ## Decisoes tomadas
 - A reminder logic ficou separada da confirmation logic em:
@@ -113,8 +113,8 @@ Implementar a base tecnica da reminder logic do MVP para identificar quais appoi
 ## Evidencias do que funciona
 - `npm run typecheck`
 - `npm run build`
-- `npx eslint 'services/reminder/build-reminder-classification.ts' 'services/reminder/get-reminder-classification.ts' 'types/reminder.ts' 'docs/testing/sprint-4-etapa-2-reminder-logic-smoke.ts' --max-warnings=0`
-- `npx tsx docs/testing/sprint-4-etapa-2-reminder-logic-smoke.ts`
+- `npx eslint 'services/reminder/build-reminder-classification.ts' 'services/reminder/get-reminder-classification.ts' 'types/reminder.ts' 'docs/testing/sprint-4-etapa-4-reminder-logic-smoke.ts' --max-warnings=0`
+- `npx tsx docs/testing/sprint-4-etapa-4-reminder-logic-smoke.ts`
 
 Resultado observado no smoke:
 - `totalFutureScheduledAppointments = 3`

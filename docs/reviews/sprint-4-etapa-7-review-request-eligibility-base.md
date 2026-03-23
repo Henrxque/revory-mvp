@@ -44,6 +44,7 @@ Implementar a base de `eligibility` para review request no MVP, de forma simples
   - `blocked_missing_reviews_url`
     - appointment concluido recentemente
     - sem destino de Google Reviews configurado
+- Quando `completedAt` vier ausente em import legado, o fallback para `scheduledAt` continua sendo apenas aproximacao inicial de MVP, nao uma verdade operacional mais profunda.
 
 ## Shape pronto para UI e evolucao futura
 - O payload `RevoryReviewRequestEligibilityClassification` entrega:

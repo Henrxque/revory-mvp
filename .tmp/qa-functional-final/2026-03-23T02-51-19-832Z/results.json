@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "email": "revory-functional-final-1774234280286+clerk_test@example.com",
+  "findings": [],
+  "finishedAt": "2026-03-23T02:53:23.512Z",
+  "startedAt": "2026-03-23T02:51:19.832Z",
+  "steps": [
+    {
+      "details": {
+        "url": "http://localhost:3000/sign-up"
+      },
+      "name": "1. sign up page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "page.waitForURL: Timeout 120000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n  navigated to \"http://localhost:3000/sign-in?redirect_url=%2Fapp\"\n  navigated to \"http://localhost:3000/sign-in?redirect_url=%2Fapp\"\n============================================================",
+        "stack": "page.waitForURL: Timeout 120000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n  navigated to \"http://localhost:3000/sign-in?redirect_url=%2Fapp\"\n  navigated to \"http://localhost:3000/sign-in?redirect_url=%2Fapp\"\n============================================================\n    at C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\revory-functional-final.mjs:632:14"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

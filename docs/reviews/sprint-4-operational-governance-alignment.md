@@ -3,6 +3,30 @@
 ## Objetivo
 Consolidar pequenos alinhamentos de governanca sobre as logicas operacionais ja aprovadas na Sprint 4, sem expandir escopo, sem criar novas features e sem alterar o comportamento funcional que ja estava aceito.
 
+## Ordem oficial da Sprint 4
+- Etapa 1:
+  - fluxo executivo
+  - definicao/gestao
+- Etapa 2:
+  - modelo operacional minimo
+  - definicao/gestao
+- Etapa 3:
+  - confirmation logic base
+- Etapa 4:
+  - reminder logic base
+- Etapa 5:
+  - at-risk signals
+- Etapa 6:
+  - recovery opportunity
+- Etapa 7:
+  - review request eligibility
+- Etapa 8:
+  - superficie operacional agregada
+
+Observacao:
+- as etapas tecnicas da Sprint 4 comecam corretamente na confirmation logic base
+- os artefatos de review foram alinhados para refletir essa ordem oficial
+
 ## Arquivos alterados
 - Alterado: `types/confirmation.ts`
 - Alterado: `types/at-risk.ts`
@@ -109,8 +133,8 @@ Consolidar pequenos alinhamentos de governanca sobre as logicas operacionais ja 
 - `npm run typecheck`
 - `npm run build`
 - `npx eslint 'services/operations/get-usable-email.ts' 'services/confirmation/build-confirmation-classification.ts' 'services/reminder/build-reminder-classification.ts' 'services/at-risk/build-at-risk-classification.ts' 'services/recovery/build-recovery-opportunity-classification.ts' 'services/review-request/build-review-request-eligibility-classification.ts' 'types/confirmation.ts' 'types/at-risk.ts' --max-warnings=0`
-- `npx tsx docs/testing/sprint-4-etapa-1-confirmation-logic-smoke.ts`
-- `npx tsx docs/testing/sprint-4-etapa-2-reminder-logic-smoke.ts`
+- `npx tsx docs/testing/sprint-4-etapa-3-confirmation-logic-smoke.ts`
+- `npx tsx docs/testing/sprint-4-etapa-4-reminder-logic-smoke.ts`
 - `npx tsx docs/testing/sprint-4-etapa-5-at-risk-logic-smoke.ts`
 - `npx tsx docs/testing/sprint-4-etapa-6-recovery-opportunity-smoke.ts`
 - `npx tsx docs/testing/sprint-4-etapa-7-review-request-eligibility-smoke.ts`

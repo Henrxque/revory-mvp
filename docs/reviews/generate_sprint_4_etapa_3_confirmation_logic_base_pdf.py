@@ -9,8 +9,8 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
 ROOT = Path(__file__).resolve().parent
-SOURCE = ROOT / "sprint-4-etapa-1-confirmation-logic-base.md"
-OUTPUT = ROOT / "sprint-4-etapa-1-confirmation-logic-base.pdf"
+SOURCE = ROOT / "sprint-4-etapa-3-confirmation-logic-base.md"
+OUTPUT = ROOT / "sprint-4-etapa-3-confirmation-logic-base.pdf"
 
 
 def build_styles():
@@ -116,7 +116,7 @@ def main():
         rightMargin=18 * mm,
         topMargin=18 * mm,
         bottomMargin=18 * mm,
-        title="REVORY Sprint 4 Etapa 1 Review",
+        title="REVORY Sprint 4 Etapa 3 Review",
         author="Codex",
     )
     doc.build(render_markdown(content))

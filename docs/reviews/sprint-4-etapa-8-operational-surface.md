@@ -47,6 +47,8 @@ Criar a primeira superficie operacional da REVORY dentro do app, mostrando quem 
 - Appointments agendados nao aparecem duplicados em varias linhas da fila:
   - se um appointment ja foi puxado por `at-risk`, ele nao reaparece logo abaixo como reminder/confirmation
 - Isso protege foco e legibilidade.
+- Confirmation continua visivel como categoria mesmo quando perde a prioridade da fila curta para sinais mais urgentes.
+- Buckets auxiliares, como `scheduled_later`, nao entram como prioridade principal nesta superficie.
 
 ## O que a superficie mostra com honestidade
 - `Insight`
@@ -78,12 +80,14 @@ Resultado observado no smoke:
   - `reminder`
   - `recovery`
   - `review_request`
+- a fila curta fica limitada para evitar deriva para mini-inbox
 
 ## Blocos visuais adicionados
 - Bloco hero operacional:
   - headline de foco
   - contadores curtos
   - suggested next action
+- o estado de bloqueio foi mantido mais discreto para nao competir com a prioridade operacional real
 - Cards de categoria:
   - diferenciam `Insight` de `Status`
   - deixam contagem e bloqueio claros
