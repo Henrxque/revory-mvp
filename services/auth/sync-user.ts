@@ -1,60 +1,78 @@
 import "server-only";
 
 import { UserStatus, type User as LocalUser } from "@prisma/client";
-import { auth, clerkClient, type User as ClerkUser } from "@clerk/nextjs/server";
 
+import { getAuthSession } from "@/auth";
 import { prisma } from "@/db/prisma";
 
-function resolvePrimaryEmail(clerkUser: ClerkUser) {
-  const primaryVerifiedEmail =
-    clerkUser.primaryEmailAddress?.verification?.status === "verified"
-      ? clerkUser.primaryEmailAddress.emailAddress
-      : null;
+function normalizeEmail(email: string | null | undefined) {
+  const normalized = email?.trim().toLowerCase() ?? null;
 
-  const firstVerifiedEmail =
-    clerkUser.emailAddresses.find((emailAddress) => emailAddress.verification?.status === "verified")
-      ?.emailAddress ?? null;
-
-  const primaryEmail = clerkUser.primaryEmailAddress?.emailAddress ?? null;
-  const firstAvailableEmail = clerkUser.emailAddresses[0]?.emailAddress ?? null;
-
-  return primaryVerifiedEmail ?? firstVerifiedEmail ?? primaryEmail ?? firstAvailableEmail;
+  return normalized && normalized.length > 0 ? normalized : null;
 }
 
-function resolveFullName(firstName: string | null, lastName: string | null) {
-  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+function normalizeFullName(name: string | null | undefined) {
+  const normalized = name?.trim() ?? null;
 
-  return fullName.length > 0 ? fullName : null;
+  return normalized && normalized.length > 0 ? normalized : null;
 }
 
 export async function syncAuthenticatedUser(): Promise<LocalUser | null> {
-  const { userId } = await auth();
+  const session = await getAuthSession();
+  const sessionUser = session?.user;
+  const authSubject = sessionUser?.id ?? null;
+  const email = normalizeEmail(sessionUser?.email);
 
-  if (!userId) {
+  if (!authSubject || !email) {
     return null;
   }
 
-  const client = await clerkClient();
-  const clerkUser = await client.users.getUser(userId);
-  const email = resolvePrimaryEmail(clerkUser);
+  const fullName = normalizeFullName(sessionUser?.name);
 
-  if (!email) {
-    throw new Error("Authenticated Clerk user is missing a usable email address.");
+  const existingByAuthSubject = await prisma.user.findUnique({
+    where: {
+      authSubject,
+    },
+  });
+
+  if (existingByAuthSubject) {
+    return prisma.user.update({
+      where: {
+        id: existingByAuthSubject.id,
+      },
+      data: {
+        authProvider: "google",
+        email,
+        fullName,
+        status: UserStatus.ACTIVE,
+      },
+    });
   }
 
-  const fullName = resolveFullName(clerkUser.firstName, clerkUser.lastName);
-
-  return prisma.user.upsert({
+  const existingByEmail = await prisma.user.findUnique({
     where: {
-      clerkUserId: clerkUser.id,
-    },
-    update: {
       email,
-      fullName,
-      status: UserStatus.ACTIVE,
     },
-    create: {
-      clerkUserId: clerkUser.id,
+  });
+
+  if (existingByEmail) {
+    return prisma.user.update({
+      where: {
+        id: existingByEmail.id,
+      },
+      data: {
+        authProvider: "google",
+        authSubject,
+        fullName,
+        status: UserStatus.ACTIVE,
+      },
+    });
+  }
+
+  return prisma.user.create({
+    data: {
+      authProvider: "google",
+      authSubject,
       email,
       fullName,
       status: UserStatus.ACTIVE,

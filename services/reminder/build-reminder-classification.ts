@@ -6,6 +6,12 @@ import {
   type RevoryReminderCandidate,
   type RevoryReminderClassification,
 } from "@/types/reminder";
+import {
+  buildBlockedOperationalState,
+  buildOperationalStateSummary,
+  buildPreparedOperationalState,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 import { getUsableEmail } from "@/services/operations/get-usable-email";
 
 const HOUR_IN_MS = 60 * 60 * 1000;
@@ -69,6 +75,9 @@ function buildReminderCandidate(
       clientName: resolveClientName(appointment.client),
       estimatedRevenue: appointment.estimatedRevenue,
       hoursUntilAppointment,
+      operationalState: clientEmail
+        ? buildReadyOperationalState()
+        : buildBlockedOperationalState(["missing_patient_email"]),
       providerName: appointment.providerName,
       reasonCode: clientEmail
         ? "inside_reminder_window"
@@ -90,6 +99,7 @@ function buildReminderCandidate(
     clientName: resolveClientName(appointment.client),
     estimatedRevenue: appointment.estimatedRevenue,
     hoursUntilAppointment,
+    operationalState: buildPreparedOperationalState(),
     providerName: appointment.providerName,
     reasonCode: "outside_reminder_window",
     // This is an auxiliary visibility bucket, not a primary operational action bucket.
@@ -128,6 +138,11 @@ export function buildReminderClassification(
     scheduledLaterCount: items.filter(
       (item) => item.reminderState === "scheduled_later",
     ).length,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: items.length,
+      states: items.map((item) => item.operationalState),
+      totalBaselineCount: items.length,
+    }),
     totalFutureScheduledAppointments: items.length,
     windowEndsAt,
     windowHours: revoryReminderWindowHours,

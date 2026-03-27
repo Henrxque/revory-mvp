@@ -1,4 +1,5 @@
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
+import { OperationalTemplatePreviewGrid } from "@/components/dashboard/OperationalTemplatePreviewGrid";
 import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import type {
@@ -58,80 +59,90 @@ const tonePanelClasses: Record<RevoryOperationalTone, string> = {
   real: "border-[rgba(46,204,134,0.18)] bg-[linear-gradient(180deg,rgba(46,204,134,0.08),rgba(255,255,255,0.02))]",
 };
 
+function getCategoryCardGridClassName(index: number, total: number) {
+  if (total === 5) {
+    return index >= 3 ? "xl:col-span-3" : "xl:col-span-2";
+  }
+
+  return "xl:col-span-2";
+}
+
 export function OperationalSurface({ surface }: OperationalSurfaceProps) {
   return (
     <section className="space-y-4">
       <RevorySectionHeader
         badgeLabel={surface.hasLiveSignals ? "Signals live" : "Awaiting operational base"}
         badgeTone={surface.hasLiveSignals ? "real" : "neutral"}
-        description="A narrow operating layer that keeps signal, current status, and the next suggested action readable without pretending REVORY is already a CRM or an automation engine."
+        description="A short operational layer that keeps signal, readiness, and the next step readable without turning REVORY into a CRM or a heavy ops panel."
         eyebrow="Operational Layer"
-        title="Who needs action, and why."
+        title="What needs action next."
       />
 
-      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(21,20,28,0.98))] p-5 md:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="max-w-2xl">
-              <p className="rev-kicker">Operational focus</p>
-              <h3 className="mt-3 max-w-xl text-3xl leading-none text-[color:var(--foreground)] md:text-[2.65rem]">
-                {surface.prioritySummary.headline}
-              </h3>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <RevoryStatusBadge tone={surface.needsAttentionNowCount > 0 ? "accent" : "real"}>
-                {surface.needsAttentionNowCount > 0
-                  ? `${surface.needsAttentionNowCount} attention now`
-                  : "Guided visibility"}
-              </RevoryStatusBadge>
-              <span className="inline-flex min-h-9 items-center rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
-                Updated {formatGeneratedAt(surface.generatedAt)}
-              </span>
-            </div>
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(21,20,28,0.98))] p-5 md:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-3xl">
+            <p className="rev-kicker">Operational focus</p>
+            <h3 className="mt-3 max-w-2xl text-[1.95rem] leading-none text-[color:var(--foreground)] md:text-[2.2rem]">
+              {surface.prioritySummary.headline}
+            </h3>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
+              {surface.prioritySummary.description}
+            </p>
           </div>
 
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
-            {surface.prioritySummary.description}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <RevoryStatusBadge tone={surface.needsAttentionNowCount > 0 ? "accent" : "real"}>
+              {surface.needsAttentionNowCount > 0
+                ? `${surface.needsAttentionNowCount} attention now`
+                : "Guided visibility"}
+            </RevoryStatusBadge>
+            <span className="inline-flex min-h-9 items-center rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
+              Updated {formatGeneratedAt(surface.generatedAt)}
+            </span>
+          </div>
+        </div>
 
-          <div className="mt-6 overflow-hidden rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)]">
+        <div className="mt-5 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="overflow-hidden rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)]">
             <div className="grid divide-y divide-[color:var(--border)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               <div className="px-4 py-4">
-                <p className="rev-label">Signals surfaced</p>
+                <p className="rev-label">Next actions</p>
                 <p className="mt-3 text-3xl font-semibold text-[color:var(--foreground)]">
-                  {surface.priorityItems.length}
+                  {surface.readinessSummary.nextActionCount}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Guided items currently visible in the workspace.
+                  The short list worth reading first.
                 </p>
               </div>
               <div className="px-4 py-4">
-                <p className="rev-label">Attention now</p>
+                <p className="rev-label">Ready now</p>
                 <p className="mt-3 text-3xl font-semibold text-[color:var(--foreground)]">
-                  {surface.needsAttentionNowCount}
+                  {surface.readinessSummary.readyNowCount}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Tight-window appointments surfaced by the current logic.
+                  Items already ready for the next step.
                 </p>
               </div>
               <div className="px-4 py-4">
                 <p className="rev-label">Operational friction</p>
                 <div className="mt-3">
-                  <RevoryStatusBadge tone={surface.blockedCount > 0 ? "future" : "neutral"}>
-                    {surface.blockedCount > 0
-                      ? `${surface.blockedCount} blocked`
+                  <RevoryStatusBadge
+                    tone={surface.readinessSummary.blockedCount > 0 ? "future" : "neutral"}
+                  >
+                    {surface.readinessSummary.blockedCount > 0
+                      ? `${surface.readinessSummary.blockedCount} blocked`
                       : "No open blockers"}
                   </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Visible, but still secondary to live action queues.
+                  Visible, but secondary to ready items.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-5 rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4 md:p-5">
+            <div className="flex h-full flex-col justify-between gap-4">
               <div className="max-w-2xl">
                 <p className="rev-label">Current priority</p>
                 <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
@@ -139,59 +150,82 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                 </p>
               </div>
               {!surface.hasAppointmentBase ? (
-                <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-                  Open imports
-                </DocumentNavigationLink>
+                <div>
+                  <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
+                    Open imports
+                  </DocumentNavigationLink>
+                </div>
               ) : null}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-          {surface.categoryCards.map((card) => (
-            <div
-              key={card.key}
-              className="rev-card rev-card-hover flex h-full flex-col rounded-[24px] p-5"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <RevoryStatusBadge tone={card.tone}>{card.kindLabel}</RevoryStatusBadge>
-                    {card.blockedCount > 0 ? (
-                      <RevoryStatusBadge tone="future">
-                        {card.blockedCount} blocked
-                      </RevoryStatusBadge>
-                    ) : null}
-                    {card.count === 0 ? (
-                      <RevoryStatusBadge tone="neutral">No live items</RevoryStatusBadge>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-lg font-semibold text-[color:var(--foreground)]">
-                      {card.title}
-                    </p>
-                    <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-                      {card.description}
-                    </p>
-                  </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        {surface.categoryCards.map((card, index) => (
+          <div
+            key={card.key}
+            className={`rev-card rev-card-hover flex h-full flex-col rounded-[24px] p-4 md:p-5 ${getCategoryCardGridClassName(
+              index,
+              surface.categoryCards.length,
+            )}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <RevoryStatusBadge tone="neutral">{card.kindLabel}</RevoryStatusBadge>
+                  <RevoryStatusBadge tone={card.tone}>{card.readinessLabel}</RevoryStatusBadge>
+                  {card.blockedCount > 0 ? (
+                    <RevoryStatusBadge tone="future">
+                      {card.blockedCount} blocked
+                    </RevoryStatusBadge>
+                  ) : null}
+                  {card.count === 0 ? (
+                    <RevoryStatusBadge tone="neutral">{card.emptyLabel}</RevoryStatusBadge>
+                  ) : null}
                 </div>
-                <div
-                  className={`inline-flex min-h-[4.5rem] min-w-[4.5rem] items-center justify-center rounded-[22px] border px-4 text-3xl font-semibold leading-none ${toneCountClasses[card.tone]}`}
-                >
-                  {card.count}
+                <div className="space-y-2">
+                  <p className="text-lg font-semibold text-[color:var(--foreground)]">
+                    {card.title}
+                  </p>
+                  <p className="max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                    {card.description}
+                  </p>
                 </div>
               </div>
-
-              <div className="mt-auto border-t border-[color:var(--border)] pt-4">
-                <p className="rev-label">How to read it</p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
-                  {card.nextAction}
-                </p>
+              <div
+                className={`inline-flex min-h-[3.15rem] min-w-[3.15rem] items-center justify-center rounded-[16px] border px-3 text-[1.35rem] font-semibold leading-none ${toneCountClasses[card.tone]}`}
+              >
+                {card.count}
               </div>
             </div>
-          ))}
-        </div>
+
+            <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="rev-label">Readiness</p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                    {card.readinessLabel}
+                  </p>
+                </div>
+                {card.blockedReason ? (
+                  <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[rgba(245,166,35,0.24)] bg-[rgba(245,166,35,0.1)] px-3 py-1 text-[11px] font-medium text-[color:var(--warning)]">
+                    {card.blockedReason}
+                  </span>
+                ) : null}
+              </div>
+              <div className="mt-4 border-t border-[color:var(--border)] pt-4">
+                <p className="rev-label">Next action</p>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                {card.nextAction}
+              </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      <OperationalTemplatePreviewGrid previews={surface.templatePreviews} />
 
       <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -229,7 +263,10 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <RevoryStatusBadge tone="neutral">{item.categoryLabel}</RevoryStatusBadge>
-                      <RevoryStatusBadge tone={item.stateTone}>{item.stateLabel}</RevoryStatusBadge>
+                      <RevoryStatusBadge tone={item.stateTone}>{item.readinessLabel}</RevoryStatusBadge>
+                      {item.blockedReason ? (
+                        <RevoryStatusBadge tone="future">{item.blockedReason}</RevoryStatusBadge>
+                      ) : null}
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-[color:var(--foreground)]">
@@ -256,7 +293,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[1.05fr_0.75fr_1.2fr]">
                   <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-                    <p className="rev-label">Why surfaced</p>
+                    <p className="rev-label">Insight</p>
                     <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
                       {item.insight}
                     </p>
@@ -264,13 +301,18 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                   <div
                     className={`rounded-[18px] border p-4 ${tonePanelClasses[item.stateTone]}`}
                   >
-                    <p className="rev-label">Current status</p>
+                    <p className="rev-label">Status</p>
                     <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
-                      {item.stateLabel}
+                      {item.readinessLabel}
                     </p>
+                    {item.blockedReason ? (
+                      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                        {item.blockedReason}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-                    <p className="rev-label">Recommended next step</p>
+                    <p className="rev-label">Next action</p>
                     <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
                       {item.nextAction}
                     </p>
@@ -290,7 +332,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                   {surface.hasAppointmentBase
-                    ? "REVORY is already evaluating confirmation, reminders, at-risk, recovery, and review eligibility in the background. Nothing currently needs focus."
+                    ? "REVORY is still reading confirmation, reminders, at-risk, recovery, and review eligibility in the background. Nothing currently needs focus."
                     : "Import appointments first so REVORY has a real schedule to classify instead of placeholder states."}
                 </p>
               </div>

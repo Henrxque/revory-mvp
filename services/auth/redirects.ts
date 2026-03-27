@@ -29,3 +29,9 @@ export function buildSignInRedirectPath(redirectTarget: string) {
 
   return `/sign-in?redirect_url=${encodeURIComponent(normalizedTarget)}`;
 }
+
+export function buildSignUpRedirectPath(redirectTarget: string) {
+  const normalizedTarget = normalizeAuthRedirectTarget(redirectTarget);
+
+  return `/sign-up?redirect_url=${encodeURIComponent(normalizedTarget)}`;
+}

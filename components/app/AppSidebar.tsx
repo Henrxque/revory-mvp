@@ -175,6 +175,10 @@ function getWorkspaceInitials(workspaceName: string) {
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("") || "RV";
 }
 
+function formatWorkspaceStatus(status: string) {
+  return status.toUpperCase();
+}
+
 export function AppSidebar({
   activationLabel,
   currentStepTitle,
@@ -207,19 +211,19 @@ export function AppSidebar({
                 ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : false;
 
-              const itemClassName = `flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm transition ${
+              const itemClassName = `flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-sm transition ${
                 isActive
-                  ? "border-l-2 border-[color:var(--accent)] bg-[rgba(194,9,90,0.14)] text-[color:var(--accent-light)]"
+                  ? "bg-[rgba(194,9,90,0.16)] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(194,9,90,0.18)]"
                   : "text-[color:var(--text-muted)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[color:var(--foreground)]"
               }`;
 
               const content = (
                 <>
                   <SidebarIcon icon={item.icon} />
-                  <span>{item.label}</span>
+                  <span className={isActive ? "font-medium" : ""}>{item.label}</span>
                   {item.status ? (
                     <span
-                      className={`ml-auto h-2 w-2 rounded-full ${
+                      className={`ml-auto h-2.5 w-2.5 rounded-full ${
                         isActive
                           ? "bg-[color:var(--accent-light)]"
                           : item.status === "Live"
@@ -255,23 +259,33 @@ export function AppSidebar({
       </nav>
 
       <div className="border-t border-[color:var(--border)] px-4 py-4">
-        <div className="flex items-center gap-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] px-3 py-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-sm font-semibold text-[color:var(--accent-light)]">
-            {workspaceInitials}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
-              {workspaceName}
-            </p>
-            <p className="truncate text-xs text-[color:var(--text-muted)]">
-              {activationLabel} · {workspaceStatus}
-            </p>
-            <p className="mt-1 truncate text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-              {currentStepTitle}
-            </p>
-            <p className="mt-1 truncate text-[11px] text-[color:var(--text-subtle)]">
-              {userEmail}
-            </p>
+        <div className="rounded-[18px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3 py-3">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-sm font-semibold text-[color:var(--accent-light)]">
+              {workspaceInitials}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+                {workspaceName}
+              </p>
+
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+                  {activationLabel}
+                </span>
+                <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+                  {formatWorkspaceStatus(workspaceStatus)}
+                </span>
+              </div>
+
+              <p className="mt-2 truncate text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+                {currentStepTitle}
+              </p>
+              <p className="mt-1 truncate text-[11px] text-[color:var(--text-muted)]">
+                {userEmail}
+              </p>
+            </div>
           </div>
         </div>
       </div>

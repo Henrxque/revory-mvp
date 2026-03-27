@@ -1,0 +1,769 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [
+    {
+      "details": {
+        "impact": "The assisted import mapping UI may be unstable or too brittle to reach the expected confirmation preview.",
+        "message": "page.waitForFunction: Timeout 60000ms exceeded.",
+        "reproduction": "1. Open /app/imports\n2. Upload the assisted appointments CSV fixture\n3. Observe whether the mapping preview and confirmation CTA appear"
+      },
+      "severity": "P2",
+      "title": "Assisted import preview did not stabilize in browser QA"
+    },
+    {
+      "details": {
+        "impact": "The operational layer would stop being trustworthy because the same imported base would no longer classify into the expected confirmation/reminder/at-risk/recovery/review buckets.",
+        "reproduction": "1. Seed the stage 10 operational dataset\n2. Run the classification services for the workspace\n3. Compare the resulting counts against the expected seeded cases",
+        "snapshot": {
+          "atRisk": {
+            "atRiskCount": 1,
+            "attentionNowCount": 1,
+            "blockedContactCount": 1,
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "items": [
+              {
+                "appointmentId": "cmn9cjrh0000cbmasck6w0jnw",
+                "attentionLevel": "attention_now",
+                "clientEmail": null,
+                "clientId": "cmn9cjrgy000bbmas7l62nspx",
+                "clientName": "Lia At Risk",
+                "estimatedRevenue": 250,
+                "hoursUntilAppointment": 10,
+                "primaryReasonCode": "reminder_blocked_missing_email",
+                "providerName": "Dr. Maia",
+                "reasons": [
+                  {
+                    "attentionLevel": "attention_now",
+                    "code": "reminder_blocked_missing_email",
+                    "description": "The appointment is already inside the reminder window, but REVORY has no usable email for the client.",
+                    "label": "Reminder blocked by missing email"
+                  }
+                ],
+                "scheduledAt": "2026-03-28T06:19:58.556Z",
+                "serviceName": "Laser Session",
+                "status": "SCHEDULED"
+              }
+            ],
+            "policy": {
+              "confirmationWindowHours": 48,
+              "immediateWindowHours": 6,
+              "reminderWindowHours": 24
+            },
+            "tightWindowCount": 0,
+            "totalFutureScheduledAppointments": 5,
+            "watchlistCount": 0
+          },
+          "confirmation": {
+            "blockedMissingEmailCount": 1,
+            "channel": "EMAIL",
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "items": [
+              {
+                "appointmentId": "cmn9cjrh0000cbmasck6w0jnw",
+                "clientEmail": null,
+                "clientId": "cmn9cjrgy000bbmas7l62nspx",
+                "clientName": "Lia At Risk",
+                "confirmationState": "blocked_missing_email",
+                "estimatedRevenue": 250,
+                "hoursUntilAppointment": 10,
+                "providerName": "Dr. Maia",
+                "reasonCode": "inside_confirmation_window_missing_email",
+                "requiresAttention": true,
+                "scheduledAt": "2026-03-28T06:19:58.556Z",
+                "serviceName": "Laser Session",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrgv000abmasiw4sm9ey",
+                "clientEmail": "noa.reminder@example.com",
+                "clientId": "cmn9cjrgs0009bmasa8q3y44m",
+                "clientName": "Noa Reminder",
+                "confirmationState": "ready_for_confirmation",
+                "estimatedRevenue": 220,
+                "hoursUntilAppointment": 12,
+                "providerName": "Dr. Maia",
+                "reasonCode": "inside_confirmation_window",
+                "requiresAttention": true,
+                "scheduledAt": "2026-03-28T08:19:58.556Z",
+                "serviceName": "Skin Booster",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrgm0008bmascemh81my",
+                "clientEmail": "mia.confirmation@example.com",
+                "clientId": "cmn9cjrg90007bmashvse68ru",
+                "clientName": "Mia Confirmation",
+                "confirmationState": "ready_for_confirmation",
+                "estimatedRevenue": 180,
+                "hoursUntilAppointment": 36,
+                "providerName": "Dr. Maia",
+                "reasonCode": "inside_confirmation_window",
+                "requiresAttention": true,
+                "scheduledAt": "2026-03-29T08:19:58.556Z",
+                "serviceName": "Hydrafacial",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrhk000ibmas9xf9aft2",
+                "clientEmail": "zoe.later@example.com",
+                "clientId": "cmn9cjrhh000hbmasjqlsok2x",
+                "clientName": "Zoe Later",
+                "confirmationState": "scheduled_later",
+                "estimatedRevenue": 90,
+                "hoursUntilAppointment": 72,
+                "providerName": "Dr. Maia",
+                "reasonCode": "outside_confirmation_window",
+                "requiresAttention": false,
+                "scheduledAt": "2026-03-30T20:19:58.556Z",
+                "serviceName": "Consultation",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjri9000pbmas9g0wbfq1",
+                "clientEmail": null,
+                "clientId": "cmn9cjri7000obmaschwfn1my",
+                "clientName": "Nia Assisted",
+                "confirmationState": "scheduled_later",
+                "estimatedRevenue": 110,
+                "hoursUntilAppointment": 96,
+                "providerName": null,
+                "reasonCode": "outside_confirmation_window",
+                "requiresAttention": false,
+                "scheduledAt": "2026-03-31T20:19:58.556Z",
+                "serviceName": "LED Session",
+                "status": "SCHEDULED"
+              }
+            ],
+            "needsAttentionCount": 3,
+            "readyForConfirmationCount": 2,
+            "scheduledLaterCount": 2,
+            "totalFutureScheduledAppointments": 5,
+            "windowEndsAt": "2026-03-29T20:21:16.932Z",
+            "windowHours": 48
+          },
+          "operationalSurface": {
+            "blockedCount": 1,
+            "categoryCards": [
+              {
+                "blockedCount": 1,
+                "count": 1,
+                "description": "1 need immediate attention and 0 stay on the watchlist.",
+                "kindLabel": "Priority signal",
+                "key": "at_risk",
+                "nextAction": "Review these appointments first. REVORY is surfacing explainable signals, not predictive scoring.",
+                "title": "At-risk appointments",
+                "tone": "accent"
+              },
+              {
+                "blockedCount": 1,
+                "count": 2,
+                "description": "2 appointments are already inside the 48h confirmation window.",
+                "kindLabel": "Ready queue",
+                "key": "confirmation",
+                "nextAction": "1 still need a usable email before confirmation can help.",
+                "title": "Confirmation queue",
+                "tone": "real"
+              },
+              {
+                "blockedCount": 1,
+                "count": 1,
+                "description": "1 appointments are already inside the 24h reminder window.",
+                "kindLabel": "Ready queue",
+                "key": "reminder",
+                "nextAction": "1 still need a usable email before reminder logic can help.",
+                "title": "Reminder queue",
+                "tone": "real"
+              },
+              {
+                "blockedCount": 0,
+                "count": 1,
+                "description": "1 recent disruptions were surfaced without pretending there is already a rebooking machine behind them.",
+                "kindLabel": "Opportunity",
+                "key": "recovery",
+                "nextAction": "Keep recovery visible as guided opportunity, not as a call-center flow.",
+                "title": "Recovery opportunities",
+                "tone": "real"
+              },
+              {
+                "blockedCount": 0,
+                "count": 1,
+                "description": "1 completed visits are already eligible for a simple review request layer.",
+                "kindLabel": "Eligibility",
+                "key": "review_request",
+                "nextAction": "Keep reviews honest: this is eligibility visibility, not a live campaign.",
+                "title": "Review-ready visits",
+                "tone": "real"
+              }
+            ],
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "hasAppointmentBase": true,
+            "hasLiveSignals": true,
+            "needsAttentionNowCount": 1,
+            "priorityItems": [
+              {
+                "categoryKey": "at_risk",
+                "categoryLabel": "At-risk",
+                "clientName": "Lia At Risk",
+                "estimatedRevenue": 250,
+                "id": "cmn9cjrh0000cbmasck6w0jnw",
+                "insight": "Reminder blocked by missing email",
+                "nextAction": "Add a usable client email so REVORY can support the next confirmation or reminder step.",
+                "providerName": "Dr. Maia",
+                "serviceName": "Laser Session",
+                "stateLabel": "Attention now",
+                "stateTone": "accent",
+                "timestamp": "2026-03-28T06:19:58.556Z",
+                "timestampLabel": "Scheduled"
+              },
+              {
+                "categoryKey": "reminder",
+                "categoryLabel": "Reminder",
+                "clientName": "Noa Reminder",
+                "estimatedRevenue": 220,
+                "id": "cmn9cjrgv000abmasiw4sm9ey",
+                "insight": "Inside reminder window",
+                "nextAction": "Keep this appointment visible in the narrow reminder-ready queue.",
+                "providerName": "Dr. Maia",
+                "serviceName": "Skin Booster",
+                "stateLabel": "Reminder ready",
+                "stateTone": "real",
+                "timestamp": "2026-03-28T08:19:58.556Z",
+                "timestampLabel": "Scheduled"
+              },
+              {
+                "categoryKey": "confirmation",
+                "categoryLabel": "Confirmation",
+                "clientName": "Mia Confirmation",
+                "estimatedRevenue": 180,
+                "id": "cmn9cjrgm0008bmascemh81my",
+                "insight": "Inside confirmation window",
+                "nextAction": "Keep this appointment visible in the confirmation-ready queue.",
+                "providerName": "Dr. Maia",
+                "serviceName": "Hydrafacial",
+                "stateLabel": "Confirmation ready",
+                "stateTone": "real",
+                "timestamp": "2026-03-29T08:19:58.556Z",
+                "timestampLabel": "Scheduled"
+              },
+              {
+                "categoryKey": "recovery",
+                "categoryLabel": "Recovery",
+                "clientName": "Rafa Recovery",
+                "estimatedRevenue": 300,
+                "id": "cmn9cjrh6000ebmas5a82ipqb",
+                "insight": "Canceled without rebooking",
+                "nextAction": "Keep this disrupted visit visible for the first recovery outreach layer.",
+                "providerName": "Dr. Maia",
+                "serviceName": "Botox",
+                "stateLabel": "Recovery ready",
+                "stateTone": "real",
+                "timestamp": "2026-03-25T20:19:58.556Z",
+                "timestampLabel": "Disrupted"
+              },
+              {
+                "categoryKey": "review_request",
+                "categoryLabel": "Reviews",
+                "clientName": "Bia Review",
+                "estimatedRevenue": 140,
+                "id": "cmn9cjrhe000gbmaswvqz0qq4",
+                "insight": "Completed recently and eligible for a review request",
+                "nextAction": "Keep this visit visible for the first email-first review layer.",
+                "providerName": "Dr. Maia",
+                "serviceName": "Peeling",
+                "stateLabel": "Review-ready",
+                "stateTone": "real",
+                "timestamp": "2026-03-25T20:19:58.556Z",
+                "timestampLabel": "Completed"
+              }
+            ],
+            "prioritySummary": {
+              "description": "REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility.",
+              "headline": "A small set of appointments needs attention now.",
+              "suggestedNextAction": "Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot."
+            }
+          },
+          "overview": {
+            "appointmentsMonitored": 7,
+            "canceledAppointments": 1,
+            "clientsImported": 8,
+            "estimatedImportedRevenue": 1290,
+            "futureMetricsReady": {
+              "confirmationRate": false,
+              "revenueProtected": false,
+              "revenueRecovered": false
+            },
+            "importSources": [
+              {
+                "errorRows": 0,
+                "fileName": "appointments-assisted-stage10.csv",
+                "importedAt": "2026-03-27T20:21:16.922Z",
+                "status": "IMPORTED",
+                "successRows": 1,
+                "templateLabel": "Appointments CSV",
+                "totalRows": 1,
+                "type": "APPOINTMENTS_CSV"
+              },
+              {
+                "errorRows": 0,
+                "fileName": "clients-official-stage10.csv",
+                "importedAt": "2026-03-27T20:21:16.909Z",
+                "status": "IMPORTED",
+                "successRows": 1,
+                "templateLabel": "Clients CSV",
+                "totalRows": 1,
+                "type": "CLIENTS_CSV"
+              }
+            ],
+            "upcomingList": [
+              {
+                "clientName": "Lia At Risk",
+                "id": "cmn9cjrh0000cbmasck6w0jnw",
+                "scheduledAt": "2026-03-28T06:19:58.556Z",
+                "serviceName": "Laser Session",
+                "status": "SCHEDULED"
+              },
+              {
+                "clientName": "Noa Reminder",
+                "id": "cmn9cjrgv000abmasiw4sm9ey",
+                "scheduledAt": "2026-03-28T08:19:58.556Z",
+                "serviceName": "Skin Booster",
+                "status": "SCHEDULED"
+              },
+              {
+                "clientName": "Mia Confirmation",
+                "id": "cmn9cjrgm0008bmascemh81my",
+                "scheduledAt": "2026-03-29T08:19:58.556Z",
+                "serviceName": "Hydrafacial",
+                "status": "SCHEDULED"
+              },
+              {
+                "clientName": "Zoe Later",
+                "id": "cmn9cjrhk000ibmas9xf9aft2",
+                "scheduledAt": "2026-03-30T20:19:58.556Z",
+                "serviceName": "Consultation",
+                "status": "SCHEDULED"
+              }
+            ],
+            "upcomingAppointments": 5
+          },
+          "recovery": {
+            "blockedMissingEmailCount": 0,
+            "canceledOpportunityCount": 1,
+            "channel": "EMAIL",
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "items": [
+              {
+                "appointmentId": "cmn9cjrh6000ebmas5a82ipqb",
+                "clientEmail": "rafa.recovery@example.com",
+                "clientId": "cmn9cjrh3000dbmasjmi1gmro",
+                "clientName": "Rafa Recovery",
+                "disruptionDate": "2026-03-25T20:19:58.556Z",
+                "estimatedRevenue": 300,
+                "providerName": "Dr. Maia",
+                "reasons": [
+                  {
+                    "code": "canceled_without_rebooking",
+                    "description": "The appointment was canceled and there is no later scheduled visit in the current workspace.",
+                    "label": "Canceled without rebooking"
+                  }
+                ],
+                "recoveryState": "ready_for_recovery",
+                "serviceName": "Botox",
+                "status": "CANCELED"
+              }
+            ],
+            "noShowOpportunityCount": 0,
+            "opportunityCount": 1,
+            "readyForRecoveryCount": 1,
+            "totalDisruptedAppointmentsInWindow": 1,
+            "windowDays": 14,
+            "windowEndsAt": "2026-04-10T20:21:16.932Z",
+            "windowStartsAt": "2026-03-13T20:21:16.932Z"
+          },
+          "reminder": {
+            "blockedMissingEmailCount": 1,
+            "channel": "EMAIL",
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "items": [
+              {
+                "appointmentId": "cmn9cjrh0000cbmasck6w0jnw",
+                "clientEmail": null,
+                "clientId": "cmn9cjrgy000bbmas7l62nspx",
+                "clientName": "Lia At Risk",
+                "estimatedRevenue": 250,
+                "hoursUntilAppointment": 10,
+                "providerName": "Dr. Maia",
+                "reasonCode": "inside_reminder_window_missing_email",
+                "reminderState": "blocked_missing_email",
+                "requiresAttention": true,
+                "scheduledAt": "2026-03-28T06:19:58.556Z",
+                "serviceName": "Laser Session",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrgv000abmasiw4sm9ey",
+                "clientEmail": "noa.reminder@example.com",
+                "clientId": "cmn9cjrgs0009bmasa8q3y44m",
+                "clientName": "Noa Reminder",
+                "estimatedRevenue": 220,
+                "hoursUntilAppointment": 12,
+                "providerName": "Dr. Maia",
+                "reasonCode": "inside_reminder_window",
+                "reminderState": "ready_for_reminder",
+                "requiresAttention": true,
+                "scheduledAt": "2026-03-28T08:19:58.556Z",
+                "serviceName": "Skin Booster",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrgm0008bmascemh81my",
+                "clientEmail": "mia.confirmation@example.com",
+                "clientId": "cmn9cjrg90007bmashvse68ru",
+                "clientName": "Mia Confirmation",
+                "estimatedRevenue": 180,
+                "hoursUntilAppointment": 36,
+                "providerName": "Dr. Maia",
+                "reasonCode": "outside_reminder_window",
+                "reminderState": "scheduled_later",
+                "requiresAttention": false,
+                "scheduledAt": "2026-03-29T08:19:58.556Z",
+                "serviceName": "Hydrafacial",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjrhk000ibmas9xf9aft2",
+                "clientEmail": "zoe.later@example.com",
+                "clientId": "cmn9cjrhh000hbmasjqlsok2x",
+                "clientName": "Zoe Later",
+                "estimatedRevenue": 90,
+                "hoursUntilAppointment": 72,
+                "providerName": "Dr. Maia",
+                "reasonCode": "outside_reminder_window",
+                "reminderState": "scheduled_later",
+                "requiresAttention": false,
+                "scheduledAt": "2026-03-30T20:19:58.556Z",
+                "serviceName": "Consultation",
+                "status": "SCHEDULED"
+              },
+              {
+                "appointmentId": "cmn9cjri9000pbmas9g0wbfq1",
+                "clientEmail": null,
+                "clientId": "cmn9cjri7000obmaschwfn1my",
+                "clientName": "Nia Assisted",
+                "estimatedRevenue": 110,
+                "hoursUntilAppointment": 96,
+                "providerName": null,
+                "reasonCode": "outside_reminder_window",
+                "reminderState": "scheduled_later",
+                "requiresAttention": false,
+                "scheduledAt": "2026-03-31T20:19:58.556Z",
+                "serviceName": "LED Session",
+                "status": "SCHEDULED"
+              }
+            ],
+            "needsAttentionCount": 2,
+            "readyForReminderCount": 1,
+            "scheduledLaterCount": 3,
+            "totalFutureScheduledAppointments": 5,
+            "windowEndsAt": "2026-03-28T20:21:16.932Z",
+            "windowHours": 24
+          },
+          "reviewRequest": {
+            "blockedMissingEmailCount": 0,
+            "blockedMissingReviewsUrlCount": 0,
+            "channel": "EMAIL",
+            "eligibleCount": 1,
+            "generatedAt": "2026-03-27T20:21:16.932Z",
+            "items": [
+              {
+                "appointmentId": "cmn9cjrhe000gbmaswvqz0qq4",
+                "clientEmail": "bia.review@example.com",
+                "clientId": "cmn9cjrhb000fbmastqg6sqhb",
+                "clientName": "Bia Review",
+                "completedAt": "2026-03-25T20:19:58.556Z",
+                "estimatedRevenue": 140,
+                "googleReviewsUrl": "https://g.page/r/stage10-reviews",
+                "providerName": "Dr. Maia",
+                "reasons": [
+                  {
+                    "code": "completed_recently",
+                    "description": "The appointment was completed recently enough to qualify for a simple post-visit review request in the MVP.",
+                    "label": "Completed recently"
+                  }
+                ],
+                "reviewEligibilityState": "eligible_for_review_request",
+                "serviceName": "Peeling",
+                "status": "COMPLETED"
+              }
+            ],
+            "totalCompletedAppointmentsInWindow": 1,
+            "windowDays": 7,
+            "windowEndsAt": "2026-03-27T20:21:16.932Z",
+            "windowStartsAt": "2026-03-20T20:21:16.932Z"
+          }
+        }
+      },
+      "severity": "P1",
+      "title": "Sprint 4 classification counts diverged from the seeded operational dataset"
+    },
+    {
+      "details": {
+        "impact": "The operational layer would be technically computed but functionally invisible or ambiguous to the MedSpa user.",
+        "reproduction": "1. Import the stage 10 appointments dataset\n2. Open /app/dashboard\n3. Inspect the Operational Layer section and the priority list",
+        "textSnippet": "REVORY MEDSPA REVENUE RECOVERY WORKSPACE Dashboard Imports & Mapping REVENUE Active Flows Empty Slots GROWTH Reviews Recall ACCOUNT Activation Setup S4 Sprint 4 QA Workspace ACTIVE ACTIVE WORKSPACE ACTIVE revory-sprint4-etapa10-1774642798556@example.com Sprint 4 QA Workspace Revenue recovery workspace MedSpa-first Mode B Activated ACTIVE R OPERATOR revory-sprint4-etapa10-1774642798556@example.com Sign out OPERATIONS OVERVIEW Your workspace already has an operational base. Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. Confirmation, recovery, and review execution can build from this base. Mar 2026 Operational base live CURRENT ACCESS POINT Open imports whenever you need to refresh the base or review import quality. Open imports MONITORED REVENUE BASE $1,290.00 Current revenue already attached to imported appointments. APPOINTMENTS MONITORED 7 Appointments already persisted in this workspace. UPCOMING APPOINTMENTS 5 Scheduled ahead of the current server time. CLIENT PROFILES 8 Current stored client base available to REVORY. CANCELLED APPOINTMENTS 1 Imported rows already marked as canceled. OPERATIONAL LAYER Who needs action, and why. A narrow operating layer that keeps signal, current status, and the next suggested action readable without pretending REVORY is already a CRM or an automation engine. Signals live OPERATIONAL FOCUS A small set of appointments needs attention now. 1 attention now Updated Mar 27, 5:21 PM REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility. SIGNALS SURFACED 5 Guided items currently visible in the workspace. ATTENTION NOW 1 Tight-window appointments surfaced by the current logic. OPERATIONAL FRICTION 1 blocked Visible, but still secondary to live action queues. CURRENT PRIORITY Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot. Priority signal 1 blocked At-risk appointments 1 need immediate attention and 0 stay on the watchlist. 1 CURRENT GUIDANCE Review these appointments first. REVORY is surfacing explainable signals, not predictive scoring. Ready queue 1 blocked Confirmation queue 2 appointments are already inside the 48h confirmation window. 2 CURRENT GUIDANCE 1 still need a usable email before confirmation can help. Ready queue 1 blocked Reminder queue 1 appointments are already inside the 24h reminder window. 1 CURRENT GUIDANCE 1 still need a usable email before reminder logic can help. Opportunity Recovery opportunities 1 recent disruptions were surfaced without pretending there is already a rebooking machine behind them. 1 CURRENT GUIDANCE Keep recovery visible as guided opportunity, not as a call-center flow. Eligibility Review-ready visits 1 completed visits are already eligible for a simple review request layer. 1 CURRENT GUIDANCE Keep reviews honest: this is eligibility visibility, not a live campaign. Operational focus list This is a short, prioritized list. REVORY is not trying to become a CRM inbox here. 5 items surfaced Priority follows this reading order: at-risk, reminder, confirmation, recovery, then review visibility. Lower-priority categories stay visible in their cards even when they do not lead the short list. At-risk Attention now Lia At Risk Laser Session - Dr. Maia TIMING Scheduled Mar 28, 3:19 AM $250.00 WHY SURFACED Reminder blocked by missing email CURRENT STATUS Attention now RECOMMENDED NEXT STEP Add a usable client email so REVORY can support the next confirmation or reminder step. Reminder Reminder ready Noa Reminder Skin Booster - Dr. Maia TIMING Scheduled Mar 28, 5:19 AM $220.00 WHY SURFACED Inside reminder window CURRENT STATUS Reminder ready RECOMMENDED NEXT STEP Keep this appointment visible in the narrow reminder-ready queue. Confirmation Confirmation ready Mia Confirmation Hydrafacial - Dr. Maia TIMING Scheduled Mar 29, 5:19 AM $180.00 WHY SURFACED Inside confirmation window CURRENT STATUS Confirmation ready RECOMMENDED NEXT STEP Keep this appointment visible in the confirmation-ready queue. Recovery Recovery ready Rafa Recovery Botox - Dr. Maia TIMING Disrupted Mar 25, 5:19 PM $300.00 WHY SURFACED Canceled without rebooking CURRENT STATUS Recovery ready RECOMMENDED NEXT STEP Keep this disrupted visit visible for the first recovery outreach layer. Reviews Review-ready Bia Review Peeling - Dr. Maia TIMING Completed Mar 25, 5:19 PM $140.00 WHY SURFACED Completed recently and eligible for a review request CURRENT STATUS Review-ready RECOMMENDED NEXT STEP Keep this visit visible for the first email-first review layer. North-star metrics Future operating outcomes that light up once the live flow layer comes online. Confirmation Rate Future layer Starts once confirmation logic is running on top of imported appointments. Estimated Revenue Protected Future l"
+      },
+      "severity": "P1",
+      "title": "Operational surface UI did not expose the seeded Sprint 4 states clearly"
+    }
+  ],
+  "email": "revory-sprint4-etapa10-1774642798556@example.com",
+  "finishedAt": "2026-03-27T20:21:22.512Z",
+  "findings": [],
+  "startedAt": "2026-03-27T20:19:58.555Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-132536094%3A1774642824929203&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=4ClfJWD2xyd9KOD7hZ4_i0wHLuamm7aC5WAZqLT8v5Y&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=oTgNUdsaC2AuZZ8mUSMRFgsLOMz5Q9J6BA4eQN1d9qU&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAN88bZvVazzNE37YrjNK1Iy1LwwX9R9PaNSbuerCpD6naf0wZoiX4Sovcvq0YXVkJ4TYnEeTS3nbnNIQDij1Exv-aIBSA4e242ggCqtKYn26qaLduRfe540f4eicy0PgWyoE8SYaXvO9r-0HKzyWitw7hdk56bBQoxVKZtZUoBc1-KoIbXcwg0CPLyECGVTz7XD1vxDIpzzUTZe6yEyJfleLBtvbgSFXOqPj-UNCBtoIK3gH6brEcFaDbdqWklSYt-kWU6YR0LnBAuB0jEEsmaKETx79OT8RbZqavS-myul5--mzQCnJ9T1BscYaH379Uds9FSa64nXUi8e8bFMJEERoj7xL6qpexstem4_db43zFuAfr0z3suBnBu_r5T2MGH-xBFMs7yqSYOfU40Qlr_DjXA_zqJm9GUyOnlQRJw4DTdkZlYoA68qvYeTnXt9txEikG2pgwlnYUa7zcV1BVhV8B1RsQ%26flowName%3DGeneralOAuthFlow%26as%3DS-132536094%253A1774642824929203%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxcdEduX5b2LNhSyfOsKjvl4-Cu00qVrMHYvZeKj1DA885XLX6RUkRltTaRZf--z0RhXTRQwVtGsAVdSOWaGIgSu5FJ8qavrpqJLWQs6sE_3Tnnr43l8"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-667200507%3A1774642828305127&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=qULKJ9et2Q3igmBe1XtzMjc1X7FGylCLcbytLpEaNI0&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=119KvANQfh9o7OGyhY1WJuOlJhhtOhLlM5KVbpJfHvE&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOh1f9e5oqYKRz5GomZIrhjiugBKRzRsrauh3ylHLcYn_Kj0jsWJ_32pp1coDJsnmKHPz4QijpoFKskSbqFoZDtXLTIZziwZniFLA_XZIeYggkNbUn58_I3uIsjWzV-HmdZxgOa6Xg0TGC7BW29BwQNCRFLR72ivVRyf4NBMG7zCb2UsGSgjkov89_zm6Mqg_leHdmCEpYjvKZLTwhf5l9mIVzMud7xi0KD5_gVvdpYlZcgpg0nv6OI1J3eZofTV-5tnAg9aohrWR9P-4a5pPzMuVG30ozcXqOQUhZb0vsDD30dzOWFyIgZzAIE5iQxl_BynAeDw0MfbwffAjB3pgmCs95xbtra2hZUCcOfr8jLxU9meqbBgxDTFWF7bLyjA0zO6aKVqvXYUysmwbdvOqSKu-cm4jUU7j8hWVf5O-eFgQeGypiDOXimbPM4-03i6FIXHBwS4x8DGE6yL-236F0N9A8oiw%26flowName%3DGeneralOAuthFlow%26as%3DS-667200507%253A1774642828305127%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxccxp2nQb7kU3-F4J711-kkzr-ukUli8HN0fulr2pE7VHQHS4lKcbNaivEa4YZFmfCWewd_jupb9Fe5b2Va2tT9Af5xgI4iC2jKP-DIUXHwkfL55I2Y"
+      },
+      "name": "2. google auth sign-up entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. authenticated dashboard render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "4. imports page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "observedSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nS4\n\nSprint 4 QA Workspace\n\nACTIVE\nACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-sprint4-etapa10-1774642798556@example.com\n\nSprint 4 QA Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMode B\nActivated\nACTIVE\nR\nOPERATOR\n\nrevory-sprint4-etapa10-1774642798556@example.com\n\nSign out\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nReview incoming columns before REVORY imports the file.\n\nUpload the CSV you already have, review the detected headers, and confirm the final mapping before REVORY imports the file.\n\nOFFICIAL TEMPLATE\n\nFastest when the exported file already matches the REVORY contract.\n\nHEADER REVIEW\n\nHeaders are reviewed before anything is imported.\n\nCLEAR RESULT\n\nReview items, blockers, and final confirmation stay explicit.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nREADY TO CONFIRM\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-official-stage10.csv\n\n14 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-official-stage10.csv\n\n14 headers detected.\n\nREVORY SUGGESTION\n\n14\n\nConfident matches\n\n0\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n14\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREADY\n\nMapping ready to move forward\n\nRequired fields are ready, the identity path is covered, and the current mapping can proceed to the final import step.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nSOURCE\n\nappointment_external_id\n\nUploaded header "
+      },
+      "name": "5. official import UI preview",
+      "status": "passed"
+    },
+    {
+      "details": {},
+      "name": "6. assisted import UI preview",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "assistedImport": {
+          "createdAppointmentCount": 1,
+          "createdClientCount": 1,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 1,
+          "persistedClientCount": 1,
+          "successRows": 1,
+          "totalRows": 1,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        },
+        "officialAppointmentsImport": {
+          "createdAppointmentCount": 6,
+          "createdClientCount": 6,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 6,
+          "persistedClientCount": 6,
+          "successRows": 6,
+          "totalRows": 6,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        },
+        "officialClientsImport": {
+          "createdAppointmentCount": 0,
+          "createdClientCount": 1,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 0,
+          "persistedClientCount": 1,
+          "successRows": 1,
+          "totalRows": 1,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        }
+      },
+      "name": "7. official and assisted imports persisted",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "atRisk": {
+          "atRiskCount": 1,
+          "attentionNowCount": 1,
+          "blockedContactCount": 1
+        },
+        "confirmation": {
+          "blockedMissingEmailCount": 1,
+          "readyForConfirmationCount": 2
+        },
+        "operationalSurface": {
+          "blockedCount": 1,
+          "priorityItems": [
+            {
+              "category": "at_risk",
+              "clientName": "Lia At Risk",
+              "stateLabel": "Attention now"
+            },
+            {
+              "category": "reminder",
+              "clientName": "Noa Reminder",
+              "stateLabel": "Reminder ready"
+            },
+            {
+              "category": "confirmation",
+              "clientName": "Mia Confirmation",
+              "stateLabel": "Confirmation ready"
+            },
+            {
+              "category": "recovery",
+              "clientName": "Rafa Recovery",
+              "stateLabel": "Recovery ready"
+            },
+            {
+              "category": "review_request",
+              "clientName": "Bia Review",
+              "stateLabel": "Review-ready"
+            }
+          ]
+        },
+        "recovery": {
+          "opportunityCount": 1,
+          "readyForRecoveryCount": 1
+        },
+        "reminder": {
+          "blockedMissingEmailCount": 1,
+          "readyForReminderCount": 1
+        },
+        "reviewRequest": {
+          "blockedMissingEmailCount": 0,
+          "eligibleCount": 1
+        }
+      },
+      "name": "8. classification logic snapshot",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "overview": {
+          "appointmentsMonitored": 7,
+          "clientsImported": 8,
+          "estimatedImportedRevenue": 1290,
+          "upcomingAppointments": 5
+        },
+        "textSnippet": "REVORY MEDSPA REVENUE RECOVERY WORKSPACE Dashboard Imports & Mapping REVENUE Active Flows Empty Slots GROWTH Reviews Recall ACCOUNT Activation Setup S4 Sprint 4 QA Workspace ACTIVE ACTIVE WORKSPACE ACTIVE revory-sprint4-etapa10-1774642798556@example.com Sprint 4 QA Workspace Revenue recovery workspace MedSpa-first Mode B Activated ACTIVE R OPERATOR revory-sprint4-etapa10-1774642798556@example.com Sign out OPERATIONS OVERVIEW Your workspace already has an operational base. Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. Confirmation, recovery, and review execution can build from this base. Mar 2026 Operational base live CURRENT ACCESS POINT Open imports whenever you need to refresh the base or review import quality. Open imports MONITORED REVENUE BASE $1,290.00 Current revenue already attached to imported appointments. APPOINTMENTS MONITORED 7 Appointments already persisted in this workspace. UPCOMING APPOINTMENTS 5 Scheduled ahead of the current server time. CLIENT PROFILES 8 Current stored client base available to REVORY. CANCELLED APPOINTMENTS 1 Imported rows already marked as canceled. OPERATIONAL LAYER Who needs action, and why. A narrow operating layer that keeps signal, current status, and the next suggested action readable without pretending REVORY is already a CRM or an automation engine. Signals live OPERATIONAL FOCUS A small set of appointments needs attention now. 1 attention now Updated Mar 27, 5:21 PM REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility. SIGNALS SURFACED 5 Guided items currently visible in the workspace. ATTENTION NOW 1 Tight-window appointments surfaced by the current logic. OPERATIONAL FRICTION 1 blocked Visible, but still secondary to live action queues. CURRENT PRIORITY Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot. Priority signal 1 blocked At-risk appointments 1 need immediate attention and 0 stay on the watchlist. 1 CURRENT GUIDANCE Review these appointments first. REVORY is surfacing explainable signals, not predictive scoring. Ready queue 1 blocked Confirmation queue 2 appointments are already inside the 48h confirmation window. 2 CURRENT GUIDANCE 1 still need a usable email before confirmation can help. Ready queue 1 blocked Reminder queue 1 appointments are already inside the 24h reminder window. 1 CURRENT GUIDANCE 1 still need a usable email before reminder logic can help. Opportunity Recovery opportunities 1 recent disruptions were surfaced without pretending there is already a rebooking machine behind them. 1 CURRENT GUIDANCE Keep recovery visible as guided opportunity, not as a call-center flow. Eligibility Review-ready visits 1 completed visits are already eligible for a simple review request layer. 1 CURRENT GUIDANCE Keep reviews honest: this is eligibility visibility, not a live campaign. Operational focus list This is a short, prioritized list. REVORY is not trying to become a CRM inbox here. 5 items surfaced Priority follows this reading order: at-risk, reminder, confirmation, recovery, then review visibility. Lower-priority categories stay visible in their cards even when they do not lead the short list. At-risk Attention now Lia At Risk Laser Session - Dr. Maia TIMING Scheduled Mar 28, 3:19 AM $250.00 WHY SURFACED Reminder blocked by missing email CURRENT STATUS Attention now RECOMMENDED NEXT STEP Add a usable client email so REVORY can support the next confirmation or reminder step. Reminder Reminder ready Noa Reminder Skin Booster - Dr. Maia TIMING Scheduled Mar 28, 5:19 AM $220.00 WHY SURFACED Inside reminder window CURRENT STATUS Reminder ready RECOMMENDED NEXT STEP Keep this appointment visible in the narrow reminder-ready queue. Confirmation Confirmation ready Mia Confirmation Hydrafacial - Dr. Maia TIMING Scheduled Mar 29, 5:19 AM $180.00 WHY SURFACED Inside confirmation window CURRENT STATUS Confirmation ready RECOMMENDED NEXT STEP Keep this appointment visible in the confirmation-ready queue. Recovery Recovery ready Rafa Recovery Botox - Dr. Maia TIMING Disrupted Mar 25, 5:19 PM $300.00 WHY SURFACED Canceled without rebooking CURRENT STATUS Recovery ready RECOMMENDED NEXT STEP Keep this disrupted visit visible for the first recovery outreach layer. Reviews Review-ready Bia Review Peeling - Dr. Maia TIMING Completed Mar 25, 5:19 PM $140.00 WHY SURFACED Completed recently and eligible for a review request CURRENT STATUS Review-ready RECOMMENDED NEXT STEP Keep this visit visible for the first email-first review layer. North-star metrics Future operating outcomes that light up once the live flow layer comes online. Confirmation Rate Future layer Starts once confirmation logic is running on top of imported appointments. Estimated Revenue Protected Future l"
+      },
+      "name": "9. operational layer UI in dashboard",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "textSnippet": "REVORY MEDSPA REVENUE RECOVERY WORKSPACE Dashboard Imports & Mapping REVENUE Active Flows Empty Slots GROWTH Reviews Recall ACCOUNT Activation Setup S4 Sprint 4 QA Workspace ACTIVE ACTIVE WORKSPACE ACTIVE revory-sprint4-etapa10-1774642798556@example.com Sprint 4 QA Workspace Revenue recovery workspace MedSpa-first Mode B Activated ACTIVE R OPERATOR revory-sprint4-etapa10-1774642798556@example.com Sign out IMPORTS & MAPPING GUIDED IMPORT Review incoming columns before REVORY imports the file. Upload the CSV you already have, review the detected headers, and confirm the final mapping before REVORY imports the file. OFFICIAL TEMPLATE Fastest when the exported file already matches the REVORY contract. HEADER REVIEW Headers are reviewed before anything is imported. CLEAR RESULT Review items, blockers, and final confirmation stay explicit. REVORY APPOINTMENTS TEMPLATE Appointments import AWAITING FILE Schedule-level CSV with guided column matching. Download template 01 Read headers / 02 Review mapping / 03 Run import LAST IMPORT appointments-assisted-stage10.csv Mar 27, 2026, 5:21 PM LATEST SAVED RESULT: IMPORTED COVERAGE 100% PERSISTED 1 NEEDS REVIEW 0 CHOOSE CSV FILE Bring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import. 5 MB MAX Choose file SELECTED FILE No file selected yet The file stays local until you confirm the import. Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first. REVORY CLIENTS TEMPLATE Clients import AWAITING FILE Patient records and visit history with guided column matching. Download template 01 Read headers / 02 Review mapping / 03 Run import LAST IMPORT clients-official-stage10.csv Mar 27, 2026, 5:21 PM LATEST SAVED RESULT: IMPORTED COVERAGE 100% PERSISTED 1 NEEDS REVIEW 0 CHOOSE CSV FILE Bring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import. 5 MB MAX Choose file SELECTED FILE No file selected yet The file stays local until you confirm the import. Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first."
+      },
+      "name": "10. imports page persisted state",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "overview": {
+          "appointmentsMonitored": 7,
+          "canceledAppointments": 1,
+          "clientsImported": 8,
+          "estimatedImportedRevenue": 1290,
+          "futureMetricsReady": {
+            "confirmationRate": false,
+            "revenueProtected": false,
+            "revenueRecovered": false
+          },
+          "importSources": [
+            {
+              "errorRows": 0,
+              "fileName": "appointments-assisted-stage10.csv",
+              "importedAt": "2026-03-27T20:21:16.922Z",
+              "status": "IMPORTED",
+              "successRows": 1,
+              "templateLabel": "Appointments CSV",
+              "totalRows": 1,
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "errorRows": 0,
+              "fileName": "clients-official-stage10.csv",
+              "importedAt": "2026-03-27T20:21:16.909Z",
+              "status": "IMPORTED",
+              "successRows": 1,
+              "templateLabel": "Clients CSV",
+              "totalRows": 1,
+              "type": "CLIENTS_CSV"
+            }
+          ],
+          "upcomingList": [
+            {
+              "clientName": "Lia At Risk",
+              "id": "cmn9cjrh0000cbmasck6w0jnw",
+              "scheduledAt": "2026-03-28T06:19:58.556Z",
+              "serviceName": "Laser Session",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Noa Reminder",
+              "id": "cmn9cjrgv000abmasiw4sm9ey",
+              "scheduledAt": "2026-03-28T08:19:58.556Z",
+              "serviceName": "Skin Booster",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Mia Confirmation",
+              "id": "cmn9cjrgm0008bmascemh81my",
+              "scheduledAt": "2026-03-29T08:19:58.556Z",
+              "serviceName": "Hydrafacial",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Zoe Later",
+              "id": "cmn9cjrhk000ibmas9xf9aft2",
+              "scheduledAt": "2026-03-30T20:19:58.556Z",
+              "serviceName": "Consultation",
+              "status": "SCHEDULED"
+            }
+          ],
+          "upcomingAppointments": 5
+        }
+      },
+      "name": "11. dashboard existing metrics regression",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "observed": false
+      },
+      "name": "12. dashboard honesty check",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "evidenceDir": "C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\qa-sprint4-etapa10\\2026-03-27T20-19-58-555Z",
+        "workspaceId": "cmn9ci8w50002bmas0q0uzrx1"
+      },
+      "name": "suite",
+      "status": "passed"
+    }
+  ]
+}

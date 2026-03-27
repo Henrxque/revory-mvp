@@ -1,0 +1,7 @@
+appointment_external_id,client_full_name,client_external_id,client_email,client_phone,scheduled_at,status,service_name,provider_name,estimated_revenue,booked_at,canceled_at,location_name,source_notes
+stage10_conf_ready,Mia Confirmation,stage10_cli_conf,mia.confirmation@example.com,,2026-03-24T15:15:50.552Z,SCHEDULED,Hydrafacial,Dr. Maia,180,2026-03-19T03:15:50.552Z,,Revory Prime,Stage 10 confirmation ready
+stage10_rem_ready,Noa Reminder,stage10_cli_rem,noa.reminder@example.com,,2026-03-23T15:15:50.552Z,SCHEDULED,Skin Booster,Dr. Maia,220,2026-03-20T03:15:50.552Z,,Revory Prime,Stage 10 reminder ready
+stage10_at_risk_blocked,Lia At Risk,stage10_cli_risk,,+5511999000001,2026-03-23T13:15:50.552Z,SCHEDULED,Laser Session,Dr. Maia,250,2026-03-21T03:15:50.552Z,,Revory Prime,Stage 10 at-risk blocked by email
+stage10_recovery_ready,Rafa Recovery,stage10_cli_recovery,rafa.recovery@example.com,,2026-03-21T03:15:50.552Z,CANCELED,Botox,Dr. Maia,300,2026-03-16T03:15:50.552Z,2026-03-21T03:15:50.552Z,Revory Prime,Stage 10 recovery ready
+stage10_review_ready,Bia Review,stage10_cli_review,bia.review@example.com,,2026-03-21T03:15:50.552Z,COMPLETED,Peeling,Dr. Maia,140,2026-03-17T03:15:50.552Z,,Revory Prime,Stage 10 review ready
+stage10_scheduled_later,Zoe Later,stage10_cli_later,zoe.later@example.com,,2026-03-26T03:15:50.552Z,SCHEDULED,Consultation,Dr. Maia,90,2026-03-22T03:15:50.552Z,,Revory Prime,Stage 10 scheduled later

@@ -1,5 +1,10 @@
 import type { AppointmentStatus } from "@prisma/client";
 
+import type {
+  RevoryOperationalState,
+  RevoryOperationalStateSummary,
+} from "@/types/operational-state";
+
 export const revoryReminderChannel = "EMAIL" as const;
 // Initial MVP policy only. This is an operational starting window, not a final cadence rule.
 export const revoryReminderWindowHours = 24 as const;
@@ -22,6 +27,7 @@ export type RevoryReminderCandidate = {
   clientName: string;
   estimatedRevenue: number | null;
   hoursUntilAppointment: number;
+  operationalState: RevoryOperationalState;
   providerName: string | null;
   reasonCode: RevoryReminderReasonCode;
   reminderState: RevoryReminderState;
@@ -39,6 +45,7 @@ export type RevoryReminderClassification = {
   needsAttentionCount: number;
   readyForReminderCount: number;
   scheduledLaterCount: number;
+  stateSummary: RevoryOperationalStateSummary;
   totalFutureScheduledAppointments: number;
   windowEndsAt: Date;
   windowHours: number;

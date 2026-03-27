@@ -1,0 +1,71 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint5-qa-1774653192199@example.com",
+  "finishedAt": "2026-03-27T23:13:31.132Z",
+  "findings": [],
+  "startedAt": "2026-03-27T23:13:12.196Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-703043479%3A1774653218568365&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=j4DeQt12GIzEX53oHHtOmRvGhxoTzARmPevuOgUC2L8&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=mL4E7MyH0jMBr46XudumBHRD__CYcg0OYosQpTB_QOg&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANTjc8_m6fCWMNWs5Z1I2VEOV86cVCY3RRtImow0vcmgskry-AqlOhrBrX5Ba9rOjOeX0dCAr7-JzuSgByAhoeFNka7nOoCfzvIg0y39jsLTWH934Qe60AOv7uHBSurRrjn7h8NBsBU3w62omlQNn0QI7RyaqmiXYdJtY0rvLe1YvFa-i-5h6xmj9nhcVIFqzZbWvHM5D2EfxCTKrlDhSIXYmc5Qj5D9uR_bnFq7T3nl1B1ekU85KfMneLibx-IXcR3yu0PnewS8VsQWdPOyqF91ciXuVVq0HJXJCPS3_pdHEL2Q9DlS39Adtic2AUtlYQP0n6oCIgoHB3a_yIu8n34krB_fSHcYd9pP5NZV2pcPuNxJ0hiU5DMHSes_9PiXreTBsyTST_LXf2OZeq-397NHBistywHmXFAttYm1wg5jiAMFcUynXOUhn69ZmZo9_2noMeotxmsMqeFKcyzXc5uAbM_tQ%26flowName%3DGeneralOAuthFlow%26as%3DS-703043479%253A1774653218568365%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxccyZLKrDYe1nEViFTuMEyrOnSPqpzsDimqIKhiiUwDRZhVm7NXD7v2gZUVktaNyNzgH1yKyk6xalMWG-bZjYPmKprIbArIYBDJfy6o457WhhowC5Ys"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "appointmentsMonitored": 7,
+        "clientsImported": 8,
+        "importedSources": [
+          {
+            "lastImportFileName": "appointments-official-stage5.csv",
+            "name": "appointments-csv-upload",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportFileName": "clients-official-stage5.csv",
+            "name": "clients-csv-upload",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "name": "2. seeded data overview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "mixedTemplateCount": 3,
+        "partiallyReadyCount": 6,
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. dashboard execution foundation ui",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "4. imports persisted state",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "fileName": "appointments-official-stage5.csv"
+      },
+      "name": "5. official import preview ui",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "fileName": "appointments-assisted-stage5.csv"
+      },
+      "name": "6. assisted import preview ui",
+      "status": "passed"
+    },
+    {
+      "name": "suite",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [
+    {
+      "details": {
+        "message": "page.waitForFunction: Timeout 60000ms exceeded."
+      },
+      "severity": "P1",
+      "title": "Sprint 5 browser QA failed"
+    }
+  ],
+  "email": "revory-sprint5-qa-1774652912421@example.com",
+  "finishedAt": "2026-03-27T23:09:48.678Z",
+  "findings": [],
+  "startedAt": "2026-03-27T23:08:32.416Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S825794804%3A1774652940436716&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=bCik_rp-D3Dsk-ZYFOLjQ-cLPvsGwmDXiRMxlsdgyCk&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=pkRivoAtL3wQ1TRbbx1CUX-ayS8Bip_B0Bhq6yjwZVc&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANWUEVe36yrj5_nco_flGS26mj_YSwh5vYyN-jZCx2X6iYDlsun3xyMbC_cdk9FarK7Xp3Em3W90VtwM2L8EoeOvowddKllcpiH1V_1azkunLk9zxBavVyyrIqLx7iwnmmB190fatX87Z6leye8s5utmxJmdSitOnJy_MSmxqB6b5X_YP5VCp8cHVJN0bmJSX_DK_G3xqQeg8U8G8-SuQYUFdEP8cosl7qb5hjPPhLOvF8kctGoVKXIf3rrW4ubeWFQiGGYWrzNHePj_xy2z-5ap_l8wb901pMPVBfKmF3EJjm-Z5q0MqWJKIqAWVWQy75nNXu-7pHkeE249CFd4RvW-hip32YJjwfFMSG3EcKP9KmMsoZYqZGh7OT6LysjGI4rr1ySmPmg5Fi2Nv5Hi2V64HV5WCGU_u1JefIu0OHvPWXDSxzWlAQSN6r_5WOyeLD5YBRDnMF6P3adkyNIcWQdnielHw%26flowName%3DGeneralOAuthFlow%26as%3DS825794804%253A1774652940436716%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxccaYkEaTAmY4Sv0q9nM-McO1QtF1wxcxv08viBV-bPpmR09VZbY27eZ2ya9nGmZlvtJsRjPx8h1bFGl2OkGtreJ54kIqKo77FPRxszVavsCvMV0mkk"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "appointmentsMonitored": 7,
+        "clientsImported": 8,
+        "importedSources": [
+          {
+            "lastImportFileName": "appointments-official-stage5.csv",
+            "name": "Appointments CSV",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportFileName": "clients-official-stage5.csv",
+            "name": "Clients CSV",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "name": "2. seeded data overview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "mixedTemplateCount": 3,
+        "partiallyReadyCount": 6,
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. dashboard execution foundation ui",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "page.waitForFunction: Timeout 60000ms exceeded."
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

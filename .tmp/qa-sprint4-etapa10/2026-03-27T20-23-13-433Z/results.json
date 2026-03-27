@@ -1,0 +1,256 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774642993435@example.com",
+  "finishedAt": "2026-03-27T20:23:37.226Z",
+  "findings": [],
+  "startedAt": "2026-03-27T20:23:13.433Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S1477789315%3A1774643019819406&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=MP3v-RRdVckC8Q2k6HzIx4rdOUjC7Kx7Dni6CSZjXHU&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=oDKJ5zvzJfOEVWlPD27YIZ24pT8kWoYpLlZmHS86olE&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hANwxaQm0qYjCnNKo-N22XpQ5mYndaJJaQgvQdTW-PioHLhbIdboISBn5FL0d9wVLY6ZvNaRf4T0hu-nIrZsgk2M7eYd9tO9gtWMMZRMBnOVJAmYHrSlR486JZEy_wdHC-702PTzl0CUo59Nd5W9Vxes2sbikLJCm1JJTcR7aPbnl_3Dt6UFRGb9jV_nk5Q_S6KUDrIQ0X3GlRo60Lgv0V9Bt8S-vSrx3fgFNMY0J3oy6IngvaCD-5lF4iWyxN1yroJwXzis_TVcIzGnzIeJmLuhUZimkBR3NR6xDRfTXWsVWEtVRtQ5W6Z01bi3bXoQUuLMKOTEkoj0R9R7HMvkDxIDtyCbZ3GxjcTWlbfvDEyvqeEWmSwQe60S-c-YFrr-da8-QZy5xYQvZbdXBnyb4glT7Zjhfc0yUj6vEtOp5TZRSVyz52IOotcWmWNmwVsTnN7qrjlrZMbMa-eyo9oQgxE7TSuQVg%26flowName%3DGeneralOAuthFlow%26as%3DS1477789315%253A1774643019819406%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxcfbxlZZoUlFSJM4oGmPpENJU7tO3B4YjATXy1-i1UYEKd3u-jVH83DYeHuIDN2TJNltqogRFIgrbLJJaO0QkokXmVyrouEJhTkwMCtd6SwbrmHQgNQ"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-1255761287%3A1774643023107176&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=xgj1F7_l6O87PQK7U4LYgwAEuI6c7F4BmPZG_uayxww&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=yrrSa8ogHIlz0MdDBQiYf8aPJtIqL1gKdaVOaKx8RAc&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAPgLBPM9hQoOMefI2j6inTvvxKs4Iov8J0-ioQjnxP3qxl1lALG2w1Vq_24ZmjQ3_zBApulEda69xi_4yH7y6R4ZL6hy642FnOa-N8o79whnTAemAVl_mQNahSWJ4CNMSK4IeSfbZ6THaGjM7SMOy8IG-szcTWcF7770ItJpGYbk7rYISI_jhCoST1Trt-r7YrygE1uI6aQn16iRxq3L98e21uuUAC9KCCoPmAtALuPy7s768Eo4qBKWpoOTSGa6LXWndAfx6mhM0SwqGdCWjaxGFhdGSTPRR61XK2g-tOSIXfANjYNGRJE_Bt2gUBc8jyc3o9XyDlL-KQcc0xlvOSLVzHjDrTGJTDwe0WnO1TFB41ZiVXkwQ-RxXGCtKjR8r0IjPFmx6dbchDFvuzw0Ywt05yOGFPyfC6CyIvOiyWXKBsCYxqcfRn7_pI2zvCtCTGBkA3491kRAYTvPDCDX-UAJol3Yw%26flowName%3DGeneralOAuthFlow%26as%3DS-1255761287%253A1774643023107176%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxcdLZ2hFjKppmL7ooKSnMuhF6xj5zD2ya46RK4QFbB9kxAsLtBbaGTa14-XzXUh95P4IrAtuJfTi3SpCY-bV7VAVO8GRh227zh_V7TLUnI7TSS8t1TE"
+      },
+      "name": "2. google auth sign-up entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. authenticated dashboard render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/imports"
+      },
+      "name": "4. imports page render",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "observedSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nS4\n\nSprint 4 QA Workspace\n\nACTIVE\nACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-sprint4-etapa10-1774642993435@example.com\n\nSprint 4 QA Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMode B\nActivated\nACTIVE\nR\nOPERATOR\n\nrevory-sprint4-etapa10-1774642993435@example.com\n\nSign out\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nReview incoming columns before REVORY imports the file.\n\nUpload the CSV you already have, review the detected headers, and confirm the final mapping before REVORY imports the file.\n\nOFFICIAL TEMPLATE\n\nFastest when the exported file already matches the REVORY contract.\n\nHEADER REVIEW\n\nHeaders are reviewed before anything is imported.\n\nCLEAR RESULT\n\nReview items, blockers, and final confirmation stay explicit.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nREADY TO CONFIRM\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-official-stage10.csv\n\n14 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-official-stage10.csv\n\n14 headers detected.\n\nREVORY SUGGESTION\n\n14\n\nConfident matches\n\n0\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n14\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREADY\n\nMapping ready to move forward\n\nRequired fields are ready, the identity path is covered, and the current mapping can proceed to the final import step.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nSOURCE\n\nappointment_external_id\n\nUploaded header "
+      },
+      "name": "5. official import UI preview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "observedSnippet": "REVORY\n\nMEDSPA REVENUE RECOVERY\n\nWORKSPACE\n\nDashboard\nImports & Mapping\n\nREVENUE\n\nActive Flows\nEmpty Slots\n\nGROWTH\n\nReviews\nRecall\n\nACCOUNT\n\nActivation Setup\nS4\n\nSprint 4 QA Workspace\n\nACTIVE\nACTIVE\n\nWORKSPACE ACTIVE\n\nrevory-sprint4-etapa10-1774642993435@example.com\n\nSprint 4 QA Workspace\n\nRevenue recovery workspace\n\nMedSpa-first\nMode B\nActivated\nACTIVE\nR\nOPERATOR\n\nrevory-sprint4-etapa10-1774642993435@example.com\n\nSign out\n\nIMPORTS & MAPPING\n\nGUIDED IMPORT\nReview incoming columns before REVORY imports the file.\n\nUpload the CSV you already have, review the detected headers, and confirm the final mapping before REVORY imports the file.\n\nOFFICIAL TEMPLATE\n\nFastest when the exported file already matches the REVORY contract.\n\nHEADER REVIEW\n\nHeaders are reviewed before anything is imported.\n\nCLEAR RESULT\n\nReview items, blockers, and final confirmation stay explicit.\n\nREVORY APPOINTMENTS TEMPLATE\n\nAppointments import\nREADY TO CONFIRM\n\nSchedule-level CSV with guided column matching.\n\nDownload template\n01\nRead headers\n/\n02\nReview mapping\n/\n03\nRun import\n\nLAST IMPORT\n\nAwaiting first import\n\nNo CSV imported yet\n\nLATEST SAVED RESULT: PENDING\n\nCOVERAGE\n\n0%\n\nPERSISTED\n\n0\n\nNEEDS REVIEW\n\n0\n\nCHOOSE CSV FILE\n\nBring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import.\n\n5 MB MAX\nChoose file\n\nCURRENT FILE\n\nappointments-assisted-stage10.csv\n\n8 headers detected for review.\n\nMAPPING REVIEW\n\nReview the proposed mapping before import.\n\nREVORY shows its first suggested mapping. You keep it, adjust it, or leave a field out before the file can move to final confirmation.\n\nFILE RECEIVED\n\nappointments-assisted-stage10.csv\n\n8 headers detected.\n\nREVORY SUGGESTION\n\n1\n\nConfident matches\n\n7\n\nNeed confirmation\n\n0\n\nUnresolved\n\nCURRENT DECISION\n\n4/4\n\nRequired fields ready\n\n0\n\nAdjusted manually\n\n1\n\nKept as suggested\n\n0\n\nStill ignored\n\nPROGRESS BLOCKERS\n\nMapping can move forward\n\nREVIEW RECOMMENDED\n\nReview still recommended\n\n7 columns still sit in REVORY's suggested state. Import can continue, but these are the fields worth checking twice.\n\nCOLUMN MAPPING PREVIEW\n\nKeep the suggestion or make the final decision.\n\nThe right column is the only field that controls what goes into the import. Everything else is context for that choice.\n\nGUIDED MAPPING ONLY\nSOURCE\n\nappt identifier\n\nUploaded header detect"
+      },
+      "name": "6. assisted import UI preview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "assistedImport": {
+          "createdAppointmentCount": 1,
+          "createdClientCount": 1,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 1,
+          "persistedClientCount": 1,
+          "successRows": 1,
+          "totalRows": 1,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        },
+        "officialAppointmentsImport": {
+          "createdAppointmentCount": 6,
+          "createdClientCount": 6,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 6,
+          "persistedClientCount": 6,
+          "successRows": 6,
+          "totalRows": 6,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        },
+        "officialClientsImport": {
+          "createdAppointmentCount": 0,
+          "createdClientCount": 1,
+          "errorRows": [],
+          "finalStatus": "imported",
+          "persistedAppointmentCount": 0,
+          "persistedClientCount": 1,
+          "successRows": 1,
+          "totalRows": 1,
+          "updatedAppointmentCount": 0,
+          "updatedClientCount": 0
+        }
+      },
+      "name": "7. official and assisted imports persisted",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "atRisk": {
+          "atRiskCount": 1,
+          "attentionNowCount": 1,
+          "blockedContactCount": 1
+        },
+        "confirmation": {
+          "blockedMissingEmailCount": 1,
+          "readyForConfirmationCount": 2
+        },
+        "operationalSurface": {
+          "blockedCount": 1,
+          "priorityItems": [
+            {
+              "category": "at_risk",
+              "clientName": "Lia At Risk",
+              "stateLabel": "Attention now"
+            },
+            {
+              "category": "reminder",
+              "clientName": "Noa Reminder",
+              "stateLabel": "Reminder ready"
+            },
+            {
+              "category": "confirmation",
+              "clientName": "Mia Confirmation",
+              "stateLabel": "Confirmation ready"
+            },
+            {
+              "category": "recovery",
+              "clientName": "Rafa Recovery",
+              "stateLabel": "Recovery ready"
+            },
+            {
+              "category": "review_request",
+              "clientName": "Bia Review",
+              "stateLabel": "Review-ready"
+            }
+          ]
+        },
+        "recovery": {
+          "opportunityCount": 1,
+          "readyForRecoveryCount": 1
+        },
+        "reminder": {
+          "blockedMissingEmailCount": 1,
+          "readyForReminderCount": 1
+        },
+        "reviewRequest": {
+          "blockedMissingEmailCount": 0,
+          "eligibleCount": 1
+        }
+      },
+      "name": "8. classification logic snapshot",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "overview": {
+          "appointmentsMonitored": 7,
+          "clientsImported": 8,
+          "estimatedImportedRevenue": 1290,
+          "upcomingAppointments": 5
+        },
+        "textSnippet": "REVORY MEDSPA REVENUE RECOVERY WORKSPACE Dashboard Imports & Mapping REVENUE Active Flows Empty Slots GROWTH Reviews Recall ACCOUNT Activation Setup S4 Sprint 4 QA Workspace ACTIVE ACTIVE WORKSPACE ACTIVE revory-sprint4-etapa10-1774642993435@example.com Sprint 4 QA Workspace Revenue recovery workspace MedSpa-first Mode B Activated ACTIVE R OPERATOR revory-sprint4-etapa10-1774642993435@example.com Sign out OPERATIONS OVERVIEW Your workspace already has an operational base. Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. Confirmation, recovery, and review execution can build from this base. Mar 2026 Operational base live CURRENT ACCESS POINT Open imports whenever you need to refresh the base or review import quality. Open imports MONITORED REVENUE BASE $1,290.00 Current revenue already attached to imported appointments. APPOINTMENTS MONITORED 7 Appointments already persisted in this workspace. UPCOMING APPOINTMENTS 5 Scheduled ahead of the current server time. CLIENT PROFILES 8 Current stored client base available to REVORY. CANCELLED APPOINTMENTS 1 Imported rows already marked as canceled. OPERATIONAL LAYER Who needs action, and why. A narrow operating layer that keeps signal, current status, and the next suggested action readable without pretending REVORY is already a CRM or an automation engine. Signals live OPERATIONAL FOCUS A small set of appointments needs attention now. 1 attention now Updated Mar 27, 5:23 PM REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility. SIGNALS SURFACED 5 Guided items currently visible in the workspace. ATTENTION NOW 1 Tight-window appointments surfaced by the current logic. OPERATIONAL FRICTION 1 blocked Visible, but still secondary to live action queues. CURRENT PRIORITY Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot. Priority signal 1 blocked At-risk appointments 1 need immediate attention and 0 stay on the watchlist. 1 CURRENT GUIDANCE Review these appointments first. REVORY is surfacing explainable signals, not predictive scoring. Ready queue 1 blocked Confirmation queue 2 appointments are already inside the 48h confirmation window. 2 CURRENT GUIDANCE 1 still need a usable email before confirmation can help. Ready queue 1 blocked Reminder queue 1 appointments are already inside the 24h reminder window. 1 CURRENT GUIDANCE 1 still need a usable email before reminder logic can help. Opportunity Recovery opportunities 1 recent disruptions were surfaced without pretending there is already a rebooking machine behind them. 1 CURRENT GUIDANCE Keep recovery visible as guided opportunity, not as a call-center flow. Eligibility Review-ready visits 1 completed visits are already eligible for a simple review request layer. 1 CURRENT GUIDANCE Keep reviews honest: this is eligibility visibility, not a live campaign. Operational focus list This is a short, prioritized list. REVORY is not trying to become a CRM inbox here. 5 items surfaced Priority follows this reading order: at-risk, reminder, confirmation, recovery, then review visibility. Lower-priority categories stay visible in their cards even when they do not lead the short list. At-risk Attention now Lia At Risk Laser Session - Dr. Maia TIMING Scheduled Mar 28, 3:23 AM $250.00 WHY SURFACED Reminder blocked by missing email CURRENT STATUS Attention now RECOMMENDED NEXT STEP Add a usable client email so REVORY can support the next confirmation or reminder step. Reminder Reminder ready Noa Reminder Skin Booster - Dr. Maia TIMING Scheduled Mar 28, 5:23 AM $220.00 WHY SURFACED Inside reminder window CURRENT STATUS Reminder ready RECOMMENDED NEXT STEP Keep this appointment visible in the narrow reminder-ready queue. Confirmation Confirmation ready Mia Confirmation Hydrafacial - Dr. Maia TIMING Scheduled Mar 29, 5:23 AM $180.00 WHY SURFACED Inside confirmation window CURRENT STATUS Confirmation ready RECOMMENDED NEXT STEP Keep this appointment visible in the confirmation-ready queue. Recovery Recovery ready Rafa Recovery Botox - Dr. Maia TIMING Disrupted Mar 25, 5:23 PM $300.00 WHY SURFACED Canceled without rebooking CURRENT STATUS Recovery ready RECOMMENDED NEXT STEP Keep this disrupted visit visible for the first recovery outreach layer. Reviews Review-ready Bia Review Peeling - Dr. Maia TIMING Completed Mar 25, 5:23 PM $140.00 WHY SURFACED Completed recently and eligible for a review request CURRENT STATUS Review-ready RECOMMENDED NEXT STEP Keep this visit visible for the first email-first review layer. North-star metrics Future operating outcomes that light up once the live flow layer comes online. Confirmation Rate Future layer Starts once confirmation logic is running on top of imported appointments. Estimated Revenue Protected Future l"
+      },
+      "name": "9. operational layer UI in dashboard",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "textSnippet": "REVORY MEDSPA REVENUE RECOVERY WORKSPACE Dashboard Imports & Mapping REVENUE Active Flows Empty Slots GROWTH Reviews Recall ACCOUNT Activation Setup S4 Sprint 4 QA Workspace ACTIVE ACTIVE WORKSPACE ACTIVE revory-sprint4-etapa10-1774642993435@example.com Sprint 4 QA Workspace Revenue recovery workspace MedSpa-first Mode B Activated ACTIVE R OPERATOR revory-sprint4-etapa10-1774642993435@example.com Sign out IMPORTS & MAPPING GUIDED IMPORT Review incoming columns before REVORY imports the file. Upload the CSV you already have, review the detected headers, and confirm the final mapping before REVORY imports the file. OFFICIAL TEMPLATE Fastest when the exported file already matches the REVORY contract. HEADER REVIEW Headers are reviewed before anything is imported. CLEAR RESULT Review items, blockers, and final confirmation stay explicit. REVORY APPOINTMENTS TEMPLATE Appointments import AWAITING FILE Schedule-level CSV with guided column matching. Download template 01 Read headers / 02 Review mapping / 03 Run import LAST IMPORT appointments-assisted-stage10.csv Mar 27, 2026, 5:23 PM LATEST SAVED RESULT: IMPORTED COVERAGE 100% PERSISTED 1 NEEDS REVIEW 0 CHOOSE CSV FILE Bring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import. 5 MB MAX Choose file SELECTED FILE No file selected yet The file stays local until you confirm the import. Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first. REVORY CLIENTS TEMPLATE Clients import AWAITING FILE Patient records and visit history with guided column matching. Download template 01 Read headers / 02 Review mapping / 03 Run import LAST IMPORT clients-official-stage10.csv Mar 27, 2026, 5:23 PM LATEST SAVED RESULT: IMPORTED COVERAGE 100% PERSISTED 1 NEEDS REVIEW 0 CHOOSE CSV FILE Bring the export you already have. REVORY reads the headers first, suggests the best matching REVORY fields, and waits for your final confirmation before import. 5 MB MAX Choose file SELECTED FILE No file selected yet The file stays local until you confirm the import. Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first."
+      },
+      "name": "10. imports page persisted state",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "overview": {
+          "appointmentsMonitored": 7,
+          "canceledAppointments": 1,
+          "clientsImported": 8,
+          "estimatedImportedRevenue": 1290,
+          "futureMetricsReady": {
+            "confirmationRate": false,
+            "revenueProtected": false,
+            "revenueRecovered": false
+          },
+          "importSources": [
+            {
+              "errorRows": 0,
+              "fileName": "appointments-assisted-stage10.csv",
+              "importedAt": "2026-03-27T20:23:31.402Z",
+              "status": "IMPORTED",
+              "successRows": 1,
+              "templateLabel": "Appointments CSV",
+              "totalRows": 1,
+              "type": "APPOINTMENTS_CSV"
+            },
+            {
+              "errorRows": 0,
+              "fileName": "clients-official-stage10.csv",
+              "importedAt": "2026-03-27T20:23:31.387Z",
+              "status": "IMPORTED",
+              "successRows": 1,
+              "templateLabel": "Clients CSV",
+              "totalRows": 1,
+              "type": "CLIENTS_CSV"
+            }
+          ],
+          "upcomingList": [
+            {
+              "clientName": "Lia At Risk",
+              "id": "cmn9cmn8f000cbmoscz8uazxu",
+              "scheduledAt": "2026-03-28T06:23:13.435Z",
+              "serviceName": "Laser Session",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Noa Reminder",
+              "id": "cmn9cmn88000abmoswsjy44ql",
+              "scheduledAt": "2026-03-28T08:23:13.435Z",
+              "serviceName": "Skin Booster",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Mia Confirmation",
+              "id": "cmn9cmn7w0008bmos5fhbc33c",
+              "scheduledAt": "2026-03-29T08:23:13.435Z",
+              "serviceName": "Hydrafacial",
+              "status": "SCHEDULED"
+            },
+            {
+              "clientName": "Zoe Later",
+              "id": "cmn9cmn91000ibmosty1c8bka",
+              "scheduledAt": "2026-03-30T20:23:13.435Z",
+              "serviceName": "Consultation",
+              "status": "SCHEDULED"
+            }
+          ],
+          "upcomingAppointments": 5
+        }
+      },
+      "name": "11. dashboard existing metrics regression",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "observed": false
+      },
+      "name": "12. dashboard honesty check",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "evidenceDir": "C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\qa-sprint4-etapa10\\2026-03-27T20-23-13-433Z",
+        "workspaceId": "cmn9cmf3r0002bmos32k1j4bg"
+      },
+      "name": "suite",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 import type { AppointmentStatus } from "@prisma/client";
 
+import type {
+  RevoryOperationalState,
+  RevoryOperationalStateSummary,
+} from "@/types/operational-state";
+
 export const revoryRecoveryChannel = "EMAIL" as const;
 // Initial MVP policy only. Recovery stays focused on near-term disruptions, not a full calendar engine.
 export const revoryRecoveryWindowDays = 14 as const;
@@ -26,6 +31,7 @@ export type RevoryRecoveryOpportunity = {
   clientName: string;
   disruptionDate: Date;
   estimatedRevenue: number | null;
+  operationalState: RevoryOperationalState;
   providerName: string | null;
   reasons: RevoryRecoveryOpportunityReason[];
   recoveryState: RevoryRecoveryOpportunityState;
@@ -42,6 +48,7 @@ export type RevoryRecoveryOpportunityClassification = {
   noShowOpportunityCount: number;
   opportunityCount: number;
   readyForRecoveryCount: number;
+  stateSummary: RevoryOperationalStateSummary;
   totalDisruptedAppointmentsInWindow: number;
   windowDays: number;
   windowStartsAt: Date;

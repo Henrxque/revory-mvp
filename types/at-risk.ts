@@ -2,6 +2,10 @@ import type { AppointmentStatus } from "@prisma/client";
 
 import { revoryConfirmationWindowHours } from "@/types/confirmation";
 import { revoryReminderWindowHours } from "@/types/reminder";
+import type {
+  RevoryOperationalState,
+  RevoryOperationalStateSummary,
+} from "@/types/operational-state";
 
 // Initial MVP policy only. This is a short operational attention window, not a predictive risk model.
 export const revoryAtRiskImmediateWindowHours = 6 as const;
@@ -28,6 +32,7 @@ export type RevoryAtRiskAppointment = {
   clientName: string;
   estimatedRevenue: number | null;
   hoursUntilAppointment: number;
+  operationalState: RevoryOperationalState;
   primaryReasonCode: RevoryAtRiskReasonCode;
   providerName: string | null;
   reasons: RevoryAtRiskReason[];
@@ -47,6 +52,7 @@ export type RevoryAtRiskClassification = {
     immediateWindowHours: typeof revoryAtRiskImmediateWindowHours;
     reminderWindowHours: typeof revoryReminderWindowHours;
   };
+  stateSummary: RevoryOperationalStateSummary;
   tightWindowCount: number;
   totalFutureScheduledAppointments: number;
   watchlistCount: number;

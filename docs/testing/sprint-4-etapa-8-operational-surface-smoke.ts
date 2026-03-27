@@ -1,4 +1,10 @@
 import { buildOperationalSurface } from "@/services/operations/build-operational-surface";
+import {
+  buildBlockedOperationalState,
+  buildOperationalStateSummary,
+  buildPreparedOperationalState,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 
 const now = new Date("2026-03-22T15:00:00.000Z");
 
@@ -17,6 +23,7 @@ const surface = buildOperationalSurface({
         clientName: "Ashley Monroe",
         estimatedRevenue: 320,
         hoursUntilAppointment: 3,
+        operationalState: buildReadyOperationalState(),
         primaryReasonCode: "same_day_tight_window",
         providerName: "Dr. Rivera",
         reasons: [
@@ -39,6 +46,7 @@ const surface = buildOperationalSurface({
         clientName: "Bianca Hart",
         estimatedRevenue: 180,
         hoursUntilAppointment: 30,
+        operationalState: buildPreparedOperationalState(),
         primaryReasonCode: "confirmation_blocked_missing_email",
         providerName: "Dr. Chen",
         reasons: [
@@ -59,6 +67,11 @@ const surface = buildOperationalSurface({
       immediateWindowHours: 6,
       reminderWindowHours: 24,
     },
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: 2,
+      states: [buildReadyOperationalState(), buildPreparedOperationalState()],
+      totalBaselineCount: 4,
+    }),
     tightWindowCount: 1,
     totalFutureScheduledAppointments: 4,
     watchlistCount: 1,
@@ -76,6 +89,7 @@ const surface = buildOperationalSurface({
         confirmationState: "blocked_missing_email",
         estimatedRevenue: 180,
         hoursUntilAppointment: 30,
+        operationalState: buildBlockedOperationalState(["missing_patient_email"]),
         providerName: "Dr. Chen",
         reasonCode: "inside_confirmation_window_missing_email",
         requiresAttention: true,
@@ -87,6 +101,11 @@ const surface = buildOperationalSurface({
     needsAttentionCount: 1,
     readyForConfirmationCount: 0,
     scheduledLaterCount: 1,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: 1,
+      states: [buildBlockedOperationalState(["missing_patient_email"])],
+      totalBaselineCount: 4,
+    }),
     totalFutureScheduledAppointments: 4,
     windowEndsAt: new Date("2026-03-24T15:00:00.000Z"),
     windowHours: 48,
@@ -105,6 +124,7 @@ const surface = buildOperationalSurface({
         clientName: "Mila Stone",
         disruptionDate: new Date("2026-03-21T14:00:00.000Z"),
         estimatedRevenue: 260,
+        operationalState: buildReadyOperationalState(),
         providerName: "Dr. Rivera",
         reasons: [
           {
@@ -121,6 +141,11 @@ const surface = buildOperationalSurface({
     noShowOpportunityCount: 0,
     opportunityCount: 1,
     readyForRecoveryCount: 1,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: 1,
+      states: [buildReadyOperationalState()],
+      totalBaselineCount: 1,
+    }),
     totalDisruptedAppointmentsInWindow: 1,
     windowDays: 14,
     windowEndsAt: new Date("2026-04-05T15:00:00.000Z"),
@@ -138,6 +163,7 @@ const surface = buildOperationalSurface({
         clientName: "Olivia Reed",
         estimatedRevenue: 140,
         hoursUntilAppointment: 12,
+        operationalState: buildReadyOperationalState(),
         providerName: "Dr. Kent",
         reasonCode: "inside_reminder_window",
         reminderState: "ready_for_reminder",
@@ -150,6 +176,11 @@ const surface = buildOperationalSurface({
     needsAttentionCount: 1,
     readyForReminderCount: 1,
     scheduledLaterCount: 1,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: 1,
+      states: [buildReadyOperationalState()],
+      totalBaselineCount: 4,
+    }),
     totalFutureScheduledAppointments: 4,
     windowEndsAt: new Date("2026-03-23T15:00:00.000Z"),
     windowHours: 24,
@@ -169,6 +200,7 @@ const surface = buildOperationalSurface({
         completedAt: new Date("2026-03-21T10:00:00.000Z"),
         estimatedRevenue: 220,
         googleReviewsUrl: "https://g.page/example",
+        operationalState: buildReadyOperationalState(),
         providerName: "Dr. Kent",
         reasons: [
           {
@@ -189,6 +221,7 @@ const surface = buildOperationalSurface({
         completedAt: new Date("2026-03-20T12:00:00.000Z"),
         estimatedRevenue: 190,
         googleReviewsUrl: null,
+        operationalState: buildBlockedOperationalState(["missing_reviews_destination"]),
         providerName: "Dr. Chen",
         reasons: [
           {
@@ -207,6 +240,14 @@ const surface = buildOperationalSurface({
         status: "COMPLETED",
       },
     ],
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: 2,
+      states: [
+        buildReadyOperationalState(),
+        buildBlockedOperationalState(["missing_reviews_destination"]),
+      ],
+      totalBaselineCount: 2,
+    }),
     totalCompletedAppointmentsInWindow: 2,
     windowDays: 7,
     windowEndsAt: now,
@@ -218,14 +259,29 @@ console.log(
   JSON.stringify(
     {
       blockedCount: surface.blockedCount,
-      cardOrder: surface.categoryCards.map((card) => `${card.key}:${card.count}`),
+      cardOrder: surface.categoryCards.map(
+        (card) => `${card.key}:${card.count}:${card.readinessLabel}`,
+      ),
       hasLiveSignals: surface.hasLiveSignals,
       needsAttentionNowCount: surface.needsAttentionNowCount,
       priorityHeadline: surface.prioritySummary.headline,
+      readinessSummary: surface.readinessSummary,
       priorityItems: surface.priorityItems.map((item) => ({
+        blockedReason: item.blockedReason,
         category: item.categoryKey,
         id: item.id,
+        readiness: item.readinessLabel,
         state: item.stateLabel,
+      })),
+      templatePreviews: surface.templatePreviews.map((preview) => ({
+        blockedReason: preview.blockedReason,
+        key: preview.key,
+        liveItemCount: preview.liveItemCount,
+        mode: preview.previewMode,
+        outreachState: preview.outreachStateLabel,
+        placeholders: preview.placeholders.map((placeholder) => placeholder.token),
+        suggestedNextStep: preview.suggestedNextStep,
+        title: preview.title,
       })),
     },
     null,

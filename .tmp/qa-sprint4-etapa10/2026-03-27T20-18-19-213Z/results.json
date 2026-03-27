@@ -1,0 +1,18 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774642699214@example.com",
+  "finishedAt": "2026-03-27T20:18:51.957Z",
+  "findings": [],
+  "startedAt": "2026-03-27T20:18:19.213Z",
+  "steps": [
+    {
+      "details": {
+        "message": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Continue with Google', exact: true })\u001b[22m\n",
+        "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Continue with Google', exact: true })\u001b[22m\n\n    at probeGoogleAuthEntry (C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\sprint-4-etapa-10-qa.mjs:332:70)\n    at async file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:545:27"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [],
+  "email": "revory-sprint4-etapa10-1774642746585@example.com",
+  "finishedAt": "2026-03-27T20:19:20.166Z",
+  "findings": [],
+  "startedAt": "2026-03-27T20:19:06.583Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-886434827%3A1774642773001425&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=h0fJsNTV7xIGxSn_kNHct5cmTnHXaE_RxLc93ef6XyM&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=4ci6aGAFK1bmFZiub7GXAkjFkL0qOanq93DfPG3tY4Q&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOALQwdsI43CPfQmJ_aCK26TE3ImNU8gXrKc0QEobKd4uULWpsmdCVVlI6iO5x_g3tlPmJ9Zszj6vDwn26dqplTSdHlmfQ5_mI6C62S88pJxg36VANlGmSuvuQ5jmtySExT7Nc1dxqINwLu3EfaT6NpJcxh7HrHZG1bWE2E8Xwrsqx1L0mlKnFHSjjKmeVy1evrt594dpSajRQXDWScRt_G4ErByG5pJvK7UwZnlPJlGrkfg8BwkBptlDbSfyFaqumT7fYgDokSptalNGlEaugQPF1FsQn3b1cXxaLUGGeAhqpQHL50kqOOCVCNtpUQqmE296HdgSGtL3JlcE6KZHJXxjlVcK4Jm3huJca02Q167eIB3Xymcy4LzvxYXHXgiEB1XfC_IX5nJOC9LNEiHPYQloQeLU7RG4IIcM8SCEM6O91r8sRqQ6g8CNGvffggeQ1HfHTaYUERHZKm3Tiwouisi445gQ%26flowName%3DGeneralOAuthFlow%26as%3DS-886434827%253A1774642773001425%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxceKVypmv1tn_ozPf7Ls6QWt-wc2LrvBMSQtM5xZ5NRfP0gGSzk3vJZZ67Zsz8HYVzP0Ytj-hqBfKRBOviksbeZe5sCNGoMgEiqBiKqNy6V_Y3-U_V8"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S338271931%3A1774642776546300&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=4MfEmz6ho5cRLKMR7bVlj1xAMwYOC3NwXhG0HvfUjrY&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=qpHu8IuYYherD2YqPxJAP-Z8m9B9Q7_Qj73rEzgjseA&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAP9dL3t7E-BF3R4yJyG7lOLAsXu4E84eW_okrU-VmY94xuClMACg9r21JcOJILpIiyyKJAS6Nrajm2cG4CF8I2dEI2XkCbjEh9-MQrd6GJXjv38IGNdbSp5vvDMVXaTrHl9Rfg2lHHNrrL1WQLfT77HQhsZtoi7ihJ_cgUHC876_vkCkbBMTw9DXKXN_cYjJ1RC-ocBsXL4BjvGNSPYV_9ZymeA5aVizZC2R2fUTG9xXCQKn-HvsQVhhZaLaEVqSD8WUnVcMf5PeRnNhn8mGJ8KJc-RKkrJp9NdbsDnHXdPzQs9ypiVTEMMH-hMphQaHKdqGe7-qwwtHs-z15RMJmb2LSIg1Szb9_YwlIx2ZAA_RxudQA_hXyKXpOuHFMGOs3D8JRul8xnr7k9Po85-UjrCNluuEFM7uIib4f132NpkTTZY51_UPLAdtgdw7lU2HW7aBd8Pg3_mvEci_yl8z65FGNeIyw%26flowName%3DGeneralOAuthFlow%26as%3DS338271931%253A1774642776546300%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxccPHSHL88O7CyfJWMh6FODvKK0ITvY5GRz4gZclnXVxER88a83wpVOxVFS6DvaYLsiI6yweKLrwl0qxHZlraDnZDzYxeo6eCEh8Feu2uhb6Fuhbp-E"
+      },
+      "name": "2. google auth sign-up entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. authenticated dashboard render",
+      "status": "failed"
+    },
+    {
+      "details": {
+        "message": "Initial dashboard did not render the empty operational surface.",
+        "stack": "Error: Initial dashboard did not render the empty operational surface.\n    at ensure (file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:75:11)\n    at file:///C:/Users/hriqu/Documents/revory-mvp/.tmp/sprint-4-etapa-10-qa.mjs:591:3"
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

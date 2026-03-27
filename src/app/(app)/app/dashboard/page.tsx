@@ -103,6 +103,10 @@ function getImportSourceTone(status: string) {
   return "neutral" as const;
 }
 
+function getDashboardActionButtonClassName(hasImportedData: boolean) {
+  return hasImportedData ? "rev-button-secondary" : "rev-button-primary";
+}
+
 type MetricCardProps = Readonly<{
   accent?: boolean;
   label: string;
@@ -235,8 +239,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rev-shell-hero rounded-[30px] p-6">
-        <div className="flex flex-wrap items-start justify-between gap-5">
+      <section className="rev-shell-hero rounded-[30px] p-6 md:p-7">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div className="max-w-3xl space-y-3">
             <p className="rev-kicker">Operations overview</p>
             <h1 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
@@ -246,26 +250,42 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               {hasImportedData
-                ? "Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. Confirmation, recovery, and review execution can build from this base."
+                ? "Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. What matters now is keeping the base fresh, readable, and ready for the next live actions."
                 : "The premium experience starts with a low-friction import. Bring in appointments or clients and let REVORY turn that first dataset into a clean operational view."}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-md border border-[color:var(--border)] bg-[color:var(--background-card)] px-3 py-2 text-xs font-medium text-[color:var(--text-muted)]">
-              {monthChip}
-            </span>
-            <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-              {hasImportedData ? "Operational base live" : "Awaiting first import"}
-            </RevoryStatusBadge>
-            <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-              {hasImportedData ? "Open imports" : "Import data"}
-            </DocumentNavigationLink>
+          <div className="space-y-3 xl:ml-auto xl:max-w-[20rem]">
+            <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+              <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] font-medium text-[color:var(--text-muted)]">
+                {monthChip}
+              </span>
+              <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
+                {hasImportedData ? "Operational base live" : "Awaiting first import"}
+              </RevoryStatusBadge>
+            </div>
+
+            <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-4">
+              <p className="rev-label">Current access point</p>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                {hasImportedData
+                  ? "Open imports whenever you need to refresh the base or review import quality."
+                  : "Bring the first CSV in and give REVORY a real schedule and client base to work with."}
+              </p>
+              <div className="mt-4">
+                <DocumentNavigationLink
+                  className={`${getDashboardActionButtonClassName(hasImportedData)} w-full justify-center px-5 py-3 text-sm`}
+                  href="/app/imports"
+                >
+                  {hasImportedData ? "Open imports" : "Import data"}
+                </DocumentNavigationLink>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-5">
+      <section className="grid gap-4 xl:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))]">
         <MetricCard
           accent
           label="Monitored Revenue Base"
@@ -299,38 +319,6 @@ export default async function DashboardPage() {
       </section>
 
       <OperationalSurface surface={operationalSurface} />
-
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              North-star metrics
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Future operating outcomes that light up once the live flow layer comes online.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <NorthStarCard
-            note="Starts once confirmation logic is running on top of imported appointments."
-            title="Confirmation Rate"
-          />
-          <NorthStarCard
-            note="Appears when no-show prevention begins protecting booked revenue."
-            title="Estimated Revenue Protected"
-          />
-          <NorthStarCard
-            note="Appears when rebooking and empty-slot recovery are active."
-            title="Estimated Revenue Recovered"
-          />
-          <NorthStarCard
-            note="Appears when the review request layer begins using the saved Google link."
-            title="Google Reviews Requested"
-          />
-        </div>
-      </section>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
         <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
@@ -594,6 +582,39 @@ export default async function DashboardPage() {
           </div>
         </section>
       </div>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Future outcomes
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              Once the base stays clean and the operational layer is live, these are the
+              outcome metrics REVORY starts surfacing next.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <NorthStarCard
+            note="Starts once confirmation logic is running on top of imported appointments."
+            title="Confirmation Rate"
+          />
+          <NorthStarCard
+            note="Appears when no-show prevention begins protecting booked revenue."
+            title="Estimated Revenue Protected"
+          />
+          <NorthStarCard
+            note="Appears when rebooking and empty-slot recovery are active."
+            title="Estimated Revenue Recovered"
+          />
+          <NorthStarCard
+            note="Appears when the review request layer begins using the saved Google link."
+            title="Google Reviews Requested"
+          />
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,5 +1,10 @@
 import type { AppointmentStatus } from "@prisma/client";
 
+import type {
+  RevoryOperationalState,
+  RevoryOperationalStateSummary,
+} from "@/types/operational-state";
+
 export const revoryConfirmationChannel = "EMAIL" as const;
 // Initial MVP policy only. This is the first confirmation window, not a final cadence strategy.
 export const revoryConfirmationWindowHours = 48 as const;
@@ -23,6 +28,7 @@ export type RevoryConfirmationCandidate = {
   confirmationState: RevoryConfirmationState;
   estimatedRevenue: number | null;
   hoursUntilAppointment: number;
+  operationalState: RevoryOperationalState;
   providerName: string | null;
   reasonCode: RevoryConfirmationReasonCode;
   requiresAttention: boolean;
@@ -39,6 +45,7 @@ export type RevoryConfirmationClassification = {
   needsAttentionCount: number;
   readyForConfirmationCount: number;
   scheduledLaterCount: number;
+  stateSummary: RevoryOperationalStateSummary;
   totalFutureScheduledAppointments: number;
   windowEndsAt: Date;
   windowHours: number;

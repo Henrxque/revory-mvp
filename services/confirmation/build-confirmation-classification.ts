@@ -6,6 +6,12 @@ import {
   type RevoryConfirmationCandidate,
   type RevoryConfirmationClassification,
 } from "@/types/confirmation";
+import {
+  buildBlockedOperationalState,
+  buildOperationalStateSummary,
+  buildPreparedOperationalState,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 import { getUsableEmail } from "@/services/operations/get-usable-email";
 
 const HOUR_IN_MS = 60 * 60 * 1000;
@@ -72,6 +78,9 @@ function buildConfirmationCandidate(
         : "blocked_missing_email",
       estimatedRevenue: appointment.estimatedRevenue,
       hoursUntilAppointment,
+      operationalState: clientEmail
+        ? buildReadyOperationalState()
+        : buildBlockedOperationalState(["missing_patient_email"]),
       providerName: appointment.providerName,
       reasonCode: clientEmail
         ? "inside_confirmation_window"
@@ -91,6 +100,7 @@ function buildConfirmationCandidate(
     confirmationState: "scheduled_later",
     estimatedRevenue: appointment.estimatedRevenue,
     hoursUntilAppointment,
+    operationalState: buildPreparedOperationalState(),
     providerName: appointment.providerName,
     reasonCode: "outside_confirmation_window",
     requiresAttention: false,
@@ -127,6 +137,11 @@ export function buildConfirmationClassification(
     scheduledLaterCount: items.filter(
       (item) => item.confirmationState === "scheduled_later",
     ).length,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: items.length,
+      states: items.map((item) => item.operationalState),
+      totalBaselineCount: items.length,
+    }),
     totalFutureScheduledAppointments: items.length,
     windowEndsAt,
     windowHours: revoryConfirmationWindowHours,

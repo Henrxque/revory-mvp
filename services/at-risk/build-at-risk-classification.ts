@@ -13,6 +13,11 @@ import {
   type RevoryAtRiskClassification,
   type RevoryAtRiskReason,
 } from "@/types/at-risk";
+import {
+  buildOperationalStateSummary,
+  buildPreparedOperationalState,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 import { getUsableEmail } from "@/services/operations/get-usable-email";
 
 const HOUR_IN_MS = 60 * 60 * 1000;
@@ -129,6 +134,10 @@ function buildAtRiskCandidate(
     clientName: resolveClientName(appointment.client),
     estimatedRevenue: appointment.estimatedRevenue,
     hoursUntilAppointment: Math.round(millisecondsUntilAppointment / HOUR_IN_MS),
+    operationalState:
+      attentionLevel === "attention_now"
+        ? buildReadyOperationalState()
+        : buildPreparedOperationalState(),
     primaryReasonCode: reasons[0].code,
     providerName: appointment.providerName,
     reasons,
@@ -166,6 +175,15 @@ export function buildAtRiskClassification(
       immediateWindowHours: revoryAtRiskImmediateWindowHours,
       reminderWindowHours: revoryReminderWindowHours,
     },
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: items.length,
+      states: items.map((item) => item.operationalState),
+      totalBaselineCount: appointments.filter(
+        (appointment) =>
+          appointment.status === AppointmentStatus.SCHEDULED &&
+          appointment.scheduledAt.getTime() > now.getTime(),
+      ).length,
+    }),
     tightWindowCount: items.filter((item) =>
       item.reasons.some((reason) => reason.code === "same_day_tight_window"),
     ).length,

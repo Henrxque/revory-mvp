@@ -7,6 +7,11 @@ import {
   type RevoryRecoveryOpportunityClassification,
   type RevoryRecoveryOpportunityReason,
 } from "@/types/recovery";
+import {
+  buildBlockedOperationalState,
+  buildOperationalStateSummary,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 import { getUsableEmail } from "@/services/operations/get-usable-email";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -117,6 +122,9 @@ function buildRecoveryOpportunity(
     clientName: resolveClientName(appointment.client),
     disruptionDate: appointment.scheduledAt,
     estimatedRevenue: appointment.estimatedRevenue,
+    operationalState: clientEmail
+      ? buildReadyOperationalState()
+      : buildBlockedOperationalState(["missing_patient_email"]),
     providerName: appointment.providerName,
     reasons,
     recoveryState: clientEmail
@@ -172,6 +180,11 @@ export function buildRecoveryOpportunityClassification(
     readyForRecoveryCount: items.filter(
       (item) => item.recoveryState === "ready_for_recovery",
     ).length,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: items.length,
+      states: items.map((item) => item.operationalState),
+      totalBaselineCount: disruptedAppointments.length,
+    }),
     totalDisruptedAppointmentsInWindow: disruptedAppointments.length,
     windowDays: revoryRecoveryWindowDays,
     windowEndsAt,

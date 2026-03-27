@@ -1,12 +1,16 @@
-import { SignIn } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AuthRecoveryBridge } from "@/components/auth/AuthRecoveryBridge";
+import { getAuthSession } from "@/auth";
+import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
+import { AuthStepCard } from "@/components/auth/AuthStepCard";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
-import { normalizeAuthRedirectTarget } from "@/services/auth/redirects";
+import { isGoogleAuthConfigured } from "@/services/auth/provider-config";
+import {
+  buildSignUpRedirectPath,
+  normalizeAuthRedirectTarget,
+} from "@/services/auth/redirects";
 
 const signInHighlights = [
   "Protected workspace",
@@ -37,19 +41,20 @@ type SignInPageProps = Readonly<{
 }>;
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { userId } = await auth();
+  const session = await getAuthSession();
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const redirectTarget = normalizeAuthRedirectTarget(
     resolvedSearchParams.redirect_url ?? resolvedSearchParams.redirectUrl,
   );
+  const signUpPath = buildSignUpRedirectPath(redirectTarget);
+  const googleAuthConfigured = isGoogleAuthConfigured();
 
-  if (userId) {
+  if (session?.user?.id) {
     redirect(redirectTarget);
   }
 
   return (
     <main className="min-h-screen px-6 py-10 md:px-8 md:py-14">
-      <AuthRecoveryBridge redirectTarget={redirectTarget} />
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_0.85fr] lg:items-stretch">
         <section className="rev-shell-hero flex flex-col rounded-[36px] p-7 md:p-9">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -97,22 +102,15 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
           <div className="mt-8 h-px bg-[color:var(--border)]" />
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {signInSteps.map((step) => (
-              <div
+          <div className="mt-8 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+            {signInSteps.map((step, index) => (
+              <AuthStepCard
                 key={step.label}
-                className="rev-card-soft rounded-[24px] px-5 py-5"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--accent-light)]">
-                  {step.label}
-                </p>
-                <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
-                  {step.title}
-                </p>
-                <p className="mt-3 text-sm leading-7 text-[#b7afc5]">
-                  {step.text}
-                </p>
-              </div>
+                className={index === signInSteps.length - 1 ? "md:col-span-2 2xl:col-span-1" : ""}
+                label={step.label}
+                text={step.text}
+                title={step.title}
+              />
             ))}
           </div>
         </section>
@@ -130,11 +128,62 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               </p>
             </div>
 
-            <div className="rev-auth-clerk rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5 md:p-6">
-              <SignIn
-                fallbackRedirectUrl={redirectTarget}
-                forceRedirectUrl={redirectTarget}
-              />
+            <div className="rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5 md:p-6">
+              <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] p-5 md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xl font-semibold text-[color:var(--foreground)]">
+                    {googleAuthConfigured
+                      ? "Continue with Google"
+                      : "Auth setup required locally"}
+                  </p>
+                  <RevoryStatusBadge tone={googleAuthConfigured ? "real" : "future"}>
+                    {googleAuthConfigured ? "Google auth ready" : "Needs local config"}
+                  </RevoryStatusBadge>
+                </div>
+                <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
+                  Use the same Google account tied to your REVORY workspace so
+                  setup, imports, and dashboard state stay connected.
+                </p>
+
+                {googleAuthConfigured ? (
+                  <div className="mt-6">
+                    <AuthGoogleButton
+                      callbackUrl={redirectTarget}
+                      label="Continue with Google"
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-6 rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] p-4">
+                    <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                      Google auth is not configured locally yet
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
+                      Add <code>AUTH_GOOGLE_CLIENT_ID</code>,{" "}
+                      <code>AUTH_GOOGLE_CLIENT_SECRET</code>, and{" "}
+                      <code>AUTH_SECRET</code> to enable the real login flow.
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d5cede]">
+                    Same workspace path
+                  </span>
+                  <span className="rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d5cede]">
+                    Google OAuth
+                  </span>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-[rgba(255,255,255,0.08)] pt-4 text-sm text-[#beb7ca]">
+                  <span>Need a new workspace?</span>
+                  <Link
+                    className="font-semibold text-[color:var(--accent-light)] hover:text-white"
+                    href={signUpPath}
+                  >
+                    Create account
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>

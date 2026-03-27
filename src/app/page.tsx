@@ -1,11 +1,12 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { redirect } from "next/navigation";
+
+import { getAuthSession } from "@/auth";
 
 const LANDING_REFERENCE_PATH = path.join(
   process.cwd(),
@@ -57,17 +58,17 @@ function adaptReferenceCss(css: string) {
 
 function adaptReferenceMarkup(markup: string) {
   return markup
-    .replaceAll('href="#pricing" class="btn-primary"', 'href="/sign-up" class="btn-primary"')
-    .replaceAll('href="#pricing" class="nav-cta"', 'href="/sign-up" class="nav-cta"')
-    .replaceAll('href="#" class="btn-primary"', 'href="/sign-up" class="btn-primary"')
+    .replaceAll('href="#pricing" class="btn-primary"', 'href="/start" class="btn-primary"')
+    .replaceAll('href="#pricing" class="nav-cta"', 'href="/start" class="nav-cta"')
+    .replaceAll('href="#" class="btn-primary"', 'href="/start" class="btn-primary"')
     .replaceAll('href="#"', 'href="/"')
     .replaceAll("Â©", "©");
 }
 
 export default async function HomePage() {
-  const { userId } = await auth();
+  const session = await getAuthSession();
 
-  if (userId) {
+  if (session?.user?.id) {
     redirect("/app");
   }
 

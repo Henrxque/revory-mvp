@@ -1,0 +1,3 @@
+appointment_external_id,client_full_name,client_external_id,client_email,client_phone,scheduled_at,status,service_name,provider_name,estimated_revenue,booked_at,canceled_at,location_name,source_notes
+s5_csv_confirmation_ready,CSV Ready Confirmation,s5_csv_client_ready,csv.ready.confirmation@example.com,,2026-03-28T19:11:59.508Z,SCHEDULED,Laser Facial,Dr. Maia,210,2026-03-25T23:11:59.508Z,,Revory Prime,Sprint 5 official QA fixture
+s5_csv_review_ready,CSV Review Ready,s5_csv_client_review,csv.review.ready@example.com,,2026-03-26T23:11:59.508Z,COMPLETED,Collagen Boost,Dr. Maia,180,2026-03-23T23:11:59.508Z,,Revory Prime,Sprint 5 official QA fixture

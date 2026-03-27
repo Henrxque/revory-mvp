@@ -7,6 +7,11 @@ import {
   type RevoryReviewRequestEligibilityItem,
   type RevoryReviewRequestEligibilityReason,
 } from "@/types/review-request";
+import {
+  buildBlockedOperationalState,
+  buildOperationalStateSummary,
+  buildReadyOperationalState,
+} from "@/services/operations/build-operational-state";
 import { getUsableEmail } from "@/services/operations/get-usable-email";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -103,6 +108,11 @@ function buildEligibilityItem(
     completedAt,
     estimatedRevenue: appointment.estimatedRevenue,
     googleReviewsUrl: normalizedGoogleReviewsUrl,
+    operationalState: !clientEmail
+      ? buildBlockedOperationalState(["missing_patient_email"])
+      : !normalizedGoogleReviewsUrl
+        ? buildBlockedOperationalState(["missing_reviews_destination"])
+        : buildReadyOperationalState(),
     providerName: appointment.providerName,
     reasons,
     reviewEligibilityState: !clientEmail
@@ -156,6 +166,11 @@ export function buildReviewRequestEligibilityClassification(
     ).length,
     generatedAt: now,
     items,
+    stateSummary: buildOperationalStateSummary({
+      classifiedItemsCount: items.length,
+      states: items.map((item) => item.operationalState),
+      totalBaselineCount: recentCompletedAppointments.length,
+    }),
     totalCompletedAppointmentsInWindow: recentCompletedAppointments.length,
     windowDays: revoryReviewEligibilityWindowDays,
     windowEndsAt,

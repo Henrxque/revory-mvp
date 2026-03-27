@@ -1,0 +1,61 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "bugs": [
+    {
+      "details": {
+        "message": "Imports page did not reflect the persisted imported state."
+      },
+      "severity": "P1",
+      "title": "Sprint 5 browser QA failed"
+    }
+  ],
+  "email": "revory-sprint5-qa-1774653119509@example.com",
+  "finishedAt": "2026-03-27T23:12:15.337Z",
+  "findings": [],
+  "startedAt": "2026-03-27T23:11:59.505Z",
+  "steps": [
+    {
+      "details": {
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-1137842367%3A1774653145873099&client_id=91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com&code_challenge=9cbPvIwOV-N-pEr7y-mPAX2ZxaQrZA9wTaA1rvfMjwY&code_challenge_method=S256&o2v=2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fgoogle&response_type=code&scope=openid+email+profile&service=lso&state=Ko5cS6aRRKpD1rABZ-JusnwsC8NjtAfvzI5QH5y7AUg&flowName=GeneralOAuthLite&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Flegacy%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAMuYXr0df8sgaVMCzvAejdjPjbMTnvO54UudeimiBUrz__59dEVeODKwzlruRYtdIt2HSCq_sFY7Qh_izMNb-sfxqrfrHv4gx2FzmVJD7RlACIgTskEMKYSlqnjMoUZX3dvftlvaWkWg6uu9wXpQr9e5Oy0VPE3gRFHT2bfP3jjpNV2fXMpn6nReskgdhjjKwnMMOYEatrcF8KsR_FD317h8ABWueY-FZ6OCDR4KsFRO-IwNFYPE9QWy20HP-Vuc2isZSnOUdxIznZHS3fHmqnytXPuIL5IFfi5t2LYsA40e_bf5OWNKEBpGRIpoxT2yXnv82IjgQSNqWIqCKiF-kfuiOK35E9tQZOrJZWxvOgCABVH3mMVSca56YTbACPD0dD8w3NK2GG_Nmv27Y7fLoAWkWWvhaIF2FGxITrFg--4M2pw2etL3cgZOnJt4mDtQPm-1e2mZhNafS1HeDZ_deZyGEwg1Q%26flowName%3DGeneralOAuthFlow%26as%3DS-1137842367%253A1774653145873099%26client_id%3D91047040904-85lb265l0qivtvs1n92i6ao7at2tr2o3.apps.googleusercontent.com%23&app_domain=http%3A%2F%2Flocalhost%3A3000&rart=ANgoxcfwOU7W-NuU-wiqIjVKye7bsrNoE1r-fWNUhhlROFyX2l40AL74paw17qOndPLVFj1SER9xgVx8pzuBFYyApC5uRm0669092h9r7Itp0Q1xVG8uw-k"
+      },
+      "name": "1. google auth sign-in entry",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "appointmentsMonitored": 7,
+        "clientsImported": 8,
+        "importedSources": [
+          {
+            "lastImportFileName": "appointments-official-stage5.csv",
+            "name": "Appointments CSV",
+            "status": "IMPORTED"
+          },
+          {
+            "lastImportFileName": "clients-official-stage5.csv",
+            "name": "Clients CSV",
+            "status": "IMPORTED"
+          }
+        ]
+      },
+      "name": "2. seeded data overview",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "mixedTemplateCount": 3,
+        "partiallyReadyCount": 6,
+        "url": "http://localhost:3000/app/dashboard"
+      },
+      "name": "3. dashboard execution foundation ui",
+      "status": "passed"
+    },
+    {
+      "details": {
+        "message": "Imports page did not reflect the persisted imported state."
+      },
+      "name": "suite",
+      "status": "failed"
+    }
+  ]
+}

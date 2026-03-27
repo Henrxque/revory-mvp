@@ -1,5 +1,10 @@
 import type { AppointmentStatus } from "@prisma/client";
 
+import type {
+  RevoryOperationalState,
+  RevoryOperationalStateSummary,
+} from "@/types/operational-state";
+
 export const revoryReviewRequestChannel = "EMAIL" as const;
 // Initial MVP policy only. This is a simple post-visit eligibility window, not a reputation ops cadence.
 export const revoryReviewEligibilityWindowDays = 7 as const;
@@ -28,6 +33,7 @@ export type RevoryReviewRequestEligibilityItem = {
   completedAt: Date;
   estimatedRevenue: number | null;
   googleReviewsUrl: string | null;
+  operationalState: RevoryOperationalState;
   providerName: string | null;
   reasons: RevoryReviewRequestEligibilityReason[];
   reviewEligibilityState: RevoryReviewRequestEligibilityState;
@@ -42,6 +48,7 @@ export type RevoryReviewRequestEligibilityClassification = {
   eligibleCount: number;
   generatedAt: Date;
   items: RevoryReviewRequestEligibilityItem[];
+  stateSummary: RevoryOperationalStateSummary;
   totalCompletedAppointmentsInWindow: number;
   windowDays: number;
   windowEndsAt: Date;
