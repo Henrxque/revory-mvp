@@ -21,14 +21,6 @@ function formatCurrency(value: number | null) {
   }).format(value);
 }
 
-function formatMetricValue(value: number | null) {
-  if (value === null) {
-    return "Awaiting signal";
-  }
-
-  return `${value}`;
-}
-
 function formatMonthChip() {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -79,6 +71,17 @@ function formatMainOfferLabel(value: string | null) {
       return "Body Contouring";
     default:
       return "Main offer pending";
+  }
+}
+
+function formatBookingPathLabel(value: string | null) {
+  switch (value) {
+    case "SMS":
+      return "Assisted booking path (SMS)";
+    case "EMAIL":
+      return "Primary booking path (Email)";
+    default:
+      return "Booking path pending";
   }
 }
 
@@ -149,6 +152,47 @@ function MetricCard({ label, note, value }: MetricCardProps) {
   );
 }
 
+type MotionStageCardProps = Readonly<{
+  detail: string;
+  label: string;
+  stage: string;
+  status: string;
+  tone: "accent" | "neutral" | "real" | "future";
+}>;
+
+function MotionStageCard({
+  detail,
+  label,
+  stage,
+  status,
+  tone,
+}: MotionStageCardProps) {
+  const toneClassName =
+    tone === "real"
+      ? "border-[rgba(46,204,134,0.2)] bg-[rgba(46,204,134,0.08)]"
+      : tone === "accent"
+        ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)]"
+        : tone === "future"
+          ? "border-[rgba(245,166,35,0.2)] bg-[rgba(245,166,35,0.08)]"
+          : "border-[color:var(--border)] bg-[rgba(255,255,255,0.025)]";
+
+  const badgeTone =
+    tone === "real" ? "real" : tone === "accent" ? "accent" : tone === "future" ? "future" : "neutral";
+
+  return (
+    <div className={`min-w-0 rounded-[22px] border p-4 ${toneClassName}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="rev-label">{stage}</p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">{label}</p>
+        </div>
+        <RevoryStatusBadge tone={badgeTone}>{status}</RevoryStatusBadge>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{detail}</p>
+    </div>
+  );
+}
+
 type SignalCardProps = Readonly<{
   note: string;
   title: string;
@@ -207,14 +251,66 @@ export default async function DashboardPage() {
     overview.appointmentsMonitored > 0 ||
     overview.clientsImported > 0;
   const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
+  const bookingPathLabel = formatBookingPathLabel(activationSetup.primaryChannel);
   const nextLeveragePoint = !hasImportedData
-    ? "Open Lead Sources and bring in the first dataset so REVORY Seller can start reading booking and revenue context."
+    ? "Make the first booked outcome visible so REVORY Seller can open the revenue path with real context. Lead Sources is the shortest way to do that."
     : overview.upcomingAppointments === 0
-      ? "Upload a fresher appointments export so the booking view stays current."
-      : "Keep the appointment base fresh so revenue visibility and booking guidance stay trustworthy.";
+      ? "Upload a fresher appointments export so the booking view stays current and booked outcomes stay trustworthy."
+      : "Keep the lead and appointment base fresh so REVORY Seller can keep the booking motion and revenue read clean.";
   const speedSignalValue = hasImportedData ? "Awaiting signal" : "No signal yet";
   const bookingRateValue = hasImportedData ? "Awaiting signal" : "No signal yet";
-  const activeSourcePathsValue = overview.importSources.length;
+  const leadBaseValue = overview.clientsImported > 0 ? overview.clientsImported : "Awaiting lead base";
+  const bookedAppointmentsValue =
+    overview.bookedAppointments > 0 ? overview.bookedAppointments : "Awaiting bookings";
+  const motionStages = [
+    {
+      detail:
+        overview.clientsImported > 0
+          ? `${overview.clientsImported} client record${overview.clientsImported === 1 ? "" : "s"} currently give REVORY Seller a visible lead base to work from.`
+          : "Bring the first lead base into view so REVORY Seller can start reading real demand and its path toward booking.",
+      label: "Lead received",
+      stage: "01",
+      status: overview.clientsImported > 0 ? "Visible" : "Awaiting base",
+      tone: overview.clientsImported > 0 ? ("real" as const) : ("future" as const),
+    },
+    {
+      detail: `Main offer set to ${mainOfferLabel} with ${bookingPathLabel.toLowerCase()} kept as the natural booking destination for this workspace.`,
+      label: "Guided flow started",
+      stage: "02",
+      status: "Active",
+      tone: "accent" as const,
+    },
+    {
+      detail:
+        hasImportedData
+          ? "Short triage still stays narrow and honest here. REVORY Seller is waiting for live event coverage before surfacing this signal."
+          : "Triage stays inactive until a real lead base enters the workspace.",
+      label: "Short triage",
+      stage: "03",
+      status: hasImportedData ? "Signal pending" : "Waiting",
+      tone: "neutral" as const,
+    },
+    {
+      detail:
+        hasImportedData
+          ? "Advance rate will appear once REVORY Seller can read how leads move from intake toward booking without inventing motion."
+          : "Advance remains hidden until the workspace has real lead-to-booking movement to read.",
+      label: "Lead advance",
+      stage: "04",
+      status: hasImportedData ? "Awaiting signal" : "Not ready",
+      tone: "neutral" as const,
+    },
+    {
+      detail:
+        overview.bookedAppointments > 0
+          ? `${overview.bookedAppointments} booked appointment${overview.bookedAppointments === 1 ? "" : "s"} already visible in the current Seller view.`
+          : "Booked appointments appear here as soon as REVORY Seller can read them from the first live dataset.",
+      label: "Booking",
+      stage: "05",
+      status: overview.bookedAppointments > 0 ? "Visible" : "Awaiting booking",
+      tone: overview.bookedAppointments > 0 ? ("real" as const) : ("future" as const),
+    },
+  ];
 
   return (
     <div className="space-y-5">
@@ -222,25 +318,25 @@ export default async function DashboardPage() {
         <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-end">
           <div className="max-w-[46rem] space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="rev-kicker">Revenue view</p>
+              <p className="rev-kicker">Lead-to-booking motion</p>
               <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] font-medium text-[color:var(--text-muted)]">
                 {monthChip}
               </span>
               <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-                {hasImportedData ? "Revenue view live" : "Awaiting first source"}
+                {hasImportedData ? "Motion visible" : "Revenue path pending"}
               </RevoryStatusBadge>
             </div>
 
             <h1 className="max-w-[40rem] font-[family:var(--font-display)] text-[clamp(2.4rem,4vw,3.95rem)] leading-[0.92] text-[color:var(--foreground)]">
               {hasImportedData
-                ? "Revenue Generated by REVORY this month."
-                : "Connect your first source to unlock the revenue view."}
+                ? "See how paid leads are moving toward booked appointments."
+                : "Bring the first booked outcomes into the live Seller view."}
             </h1>
 
             <p className="max-w-[39rem] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               {hasImportedData
-                ? "Money stays first. Booked appointments, source health, and booking context stay directly underneath so the dashboard remains premium and easy to read."
-                : "Bring in appointments or client records and let REVORY Seller turn that first dataset into a clean, revenue-first booking view."}
+                ? "Revenue still stays first, but the dashboard now makes the booking motion explicit: lead base, guided path, booked outcomes, and the next controlled move."
+                : "Start from one clean dataset and let REVORY Seller turn it into visible booked outcomes, a clearer booking path, and the first revenue-connected read."}
             </p>
           </div>
 
@@ -257,15 +353,15 @@ export default async function DashboardPage() {
               </p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
                 {hasImportedData
-                  ? "Booked revenue currently visible inside this workspace."
-                  : "Revenue appears as soon as appointment value data is attached."}
+                  ? "Revenue currently visible from the booked appointments attached to this workspace."
+                  : "Revenue appears as soon as Seller can see booked outcomes and apply the deal value already locked in activation."}
               </p>
               <div className="mt-5">
                 <DocumentNavigationLink
                   className={`${hasImportedData ? "rev-button-secondary" : "rev-button-primary"} w-full justify-center px-5 py-3 text-sm`}
                   href="/app/imports"
                 >
-                  {hasImportedData ? "Refresh sources" : "Connect first source"}
+                  {hasImportedData ? "Refresh visibility input" : "Open Lead Sources"}
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -275,25 +371,123 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
         <MetricCard
-          label="Appointments booked"
-          note="Scheduled or completed appointments currently attached to this workspace."
-          value={overview.bookedAppointments}
+          label="Lead base visible"
+          note="Client records currently available for REVORY Seller to read as the live lead base."
+          value={leadBaseValue}
         />
         <MetricCard
-          label="Booking rate"
-          note="Appears once REVORY Seller has enough real lead-to-booking data."
+          label="Booked appointments"
+          note="Appointments already visible as booked outcomes inside this workspace."
+          value={bookedAppointmentsValue}
+        />
+        <MetricCard
+          label="Lead advance rate"
+          note="Appears once REVORY Seller has enough real lead-to-booking movement to measure it honestly."
           value={bookingRateValue}
         />
         <MetricCard
-          label="Response time"
-          note="Appears once REVORY Seller starts receiving live speed signals."
+          label="Lead response time"
+          note="Appears once REVORY Seller starts receiving real speed coverage from the live motion."
           value={speedSignalValue}
         />
-        <MetricCard
-          label="Sources connected"
-          note="Active sources feeding booking and revenue visibility."
-          value={activeSourcePathsValue}
-        />
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.82fr)]">
+        <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+                Why this revenue is believable
+              </p>
+              <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                REVORY Seller does not treat revenue as a floating KPI. The number exists because activation locked the booking path, imported data made booked outcomes visible, and deal value turned those outcomes into money.
+              </p>
+            </div>
+            <RevoryStatusBadge tone={hasImportedData ? "accent" : "neutral"}>
+              {hasImportedData ? "Attribution path visible" : "Attribution path pending"}
+            </RevoryStatusBadge>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            {[
+              {
+                label: "Activation",
+                note: "Main offer, lead source, booking path, and deal value were locked before the workspace went live.",
+                value: activationSetup.isCompleted ? "Locked" : "Pending",
+              },
+              {
+                label: "Booked outcomes",
+                note: "Appointments visible in this workspace are the booked outcomes behind the revenue read.",
+                value:
+                  overview.bookedAppointments > 0
+                    ? `${overview.bookedAppointments} visible`
+                    : "Awaiting bookings",
+              },
+              {
+                label: "Deal value",
+                note: "One booked appointment translates into money through the revenue baseline defined in activation.",
+                value: activationSetup.averageDealValue
+                  ? formatCurrency(Number(activationSetup.averageDealValue))
+                  : "Awaiting value",
+              },
+              {
+                label: "Revenue read",
+                note: "The executive number stays short because the attribution path is already established underneath it.",
+                value: formatCurrency(overview.estimatedImportedRevenue),
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4"
+              >
+                <p className="rev-label">{item.label}</p>
+                <p className="mt-3 text-[1.05rem] font-semibold text-[color:var(--foreground)]">
+                  {item.value}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-5 md:p-6">
+          <p className="rev-label">Executive read</p>
+          <p className="mt-3 text-[1.05rem] font-semibold text-[color:var(--foreground)]">
+            Revenue stays dominant, but it now reads as the result of the Seller motion instead of as an isolated dashboard number.
+          </p>
+          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+            The dashboard remains executive-first on purpose. Attribution is explained just enough to build trust, without turning the product into analytics-heavy BI.
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+              Lead-to-booking motion
+            </p>
+            <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
+              The Seller core is the motion itself. Sources stay in the product only to feed this path, not to become the center of the experience.
+            </p>
+          </div>
+          <RevoryStatusBadge tone={hasImportedData ? "accent" : "neutral"}>
+            {hasImportedData ? "Motion active" : "Motion waiting on source"}
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-5 grid gap-3 xl:grid-cols-5">
+          {motionStages.map((item) => (
+            <MotionStageCard
+              key={item.stage}
+              detail={item.detail}
+              label={item.label}
+              stage={item.stage}
+              status={item.status}
+              tone={item.tone}
+            />
+          ))}
+        </div>
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.14fr)_minmax(300px,0.86fr)]">
@@ -301,14 +495,14 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Source health
+                Booking visibility input
               </p>
               <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                Import quality, coverage, and base freshness kept readable in one place.
+                Data quality and freshness stay readable here because they support the Seller motion, not because they are the product center.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
-              {overview.importSources.length > 0 ? "Sources active" : "Awaiting source"}
+              {overview.importSources.length > 0 ? "Input active" : "Input pending"}
             </RevoryStatusBadge>
           </div>
 
@@ -398,14 +592,14 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No source health yet
+                No booking visibility yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Open Lead Sources, upload the file you already have, and let REVORY Seller build the first booking and revenue view.
+                The live Seller view is ready for the first booked outcomes. Open Lead Sources, add the file you already have, and let REVORY Seller turn it into booking and revenue visibility.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open sources
+                  Open Lead Sources
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -432,7 +626,7 @@ export default async function DashboardPage() {
                 className={hasImportedData ? "rev-button-secondary" : "rev-button-primary"}
                 href="/app/imports"
               >
-                {hasImportedData ? "Review sources" : "Connect source"}
+                {hasImportedData ? "Review visibility input" : "Open Lead Sources"}
               </DocumentNavigationLink>
             </div>
           </div>
@@ -487,19 +681,19 @@ export default async function DashboardPage() {
               value={mainOfferLabel}
             />
             <ContextCard
+              label="Booking path"
+              note="The guided flow keeps one explicit booking destination instead of multiple competing routes."
+              value={bookingPathLabel}
+            />
+            <ContextCard
               label="Lead base"
               note="Current imported base available for booking and revenue visibility."
               value={`${overview.clientsImported} client records`}
             />
             <ContextCard
-              label="Schedule in view"
-              note="Upcoming appointments currently visible in this workspace."
+              label="Booked outcomes in view"
+              note="Upcoming appointments currently visible as the live result of the booking path."
               value={`${overview.upcomingAppointments} upcoming`}
-            />
-            <ContextCard
-              label="Canceled appointments"
-              note="A light signal only, not the center of the dashboard."
-              value={formatMetricValue(overview.canceledAppointments)}
             />
           </div>
         </section>
@@ -552,11 +746,11 @@ export default async function DashboardPage() {
                 No appointments in view yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Import an appointments source so REVORY Seller can keep a current booking schedule visible.
+                Add the first appointments dataset so REVORY Seller can make upcoming bookings visible in the live Seller view.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open sources
+                  Open Lead Sources
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -588,7 +782,7 @@ export default async function DashboardPage() {
             title="Booked appointments"
           />
           <SignalCard
-            note="Surfaces once Seller can compare which sources are feeding the healthiest booking pipeline."
+            note="Surfaces once Seller can compare which lead paths are feeding the healthiest booking pipeline."
             title="Source performance"
           />
         </div>

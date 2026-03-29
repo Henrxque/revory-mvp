@@ -1,68 +1,68 @@
 export const onboardingSteps = [
   {
     key: "template",
-    title: "Set Your Main Offer",
+    title: "Lock Your Main Offer",
     eyebrow: "Step 1 of 6",
     description:
-      "Choose the one offer REVORY Seller should help move toward booked appointments first.",
+      "Choose the one offer REVORY Seller should move from paid lead to booked appointment first.",
     fieldLabel: "Main offer",
     helperText:
-      "Start narrow. One main offer keeps activation premium, predictable, and easier to trust.",
+      "One focused offer keeps the booking motion narrow, premium, and easier to trust.",
     ctaLabel: "Continue",
   },
   {
     key: "source",
-    title: "Choose Your Lead Source",
+    title: "Connect Your Lead Source",
     eyebrow: "Step 2 of 6",
     description:
-      "Pick the cleanest path to bring lead and booking data into REVORY Seller with the least friction.",
+      "Pick the source REVORY Seller should read first so the booking motion starts from real lead flow.",
     fieldLabel: "Lead source",
     helperText:
-      "Choose the path that gets this workspace live fastest without turning setup into a technical project.",
+      "Choose the cleanest path to get live lead and booking context into Seller without turning activation into a technical project.",
     ctaLabel: "Continue",
   },
   {
     key: "channel",
-    title: "Choose Your Booking Path",
+    title: "Set Your Booking Path",
     eyebrow: "Step 3 of 6",
     description:
-      "Set the primary booking lane REVORY Seller should treat as the default path when the workspace goes live.",
+      "Set the primary path REVORY Seller should reinforce when a lead is ready to move toward booking.",
     fieldLabel: "Booking path",
     helperText:
-      "A single primary path keeps activation simpler. Email is the default; SMS stays secondary when your plan enables it.",
+      "A single primary path keeps the booking system predictable. Email stays the default; SMS remains assisted when available.",
     ctaLabel: "Continue",
   },
   {
     key: "deal_value",
-    title: "Set Your Deal Value",
+    title: "Set Your Revenue Baseline",
     eyebrow: "Step 4 of 6",
     description:
-      "Set the average value tied to one booked appointment so REVORY Seller starts with a clean revenue baseline.",
+      "Set the revenue tied to one booked appointment so REVORY Seller can read performance against money, not just activity.",
     fieldLabel: "Average deal value",
     helperText:
-      "Keep this directional, simple, and useful. The goal is cleaner revenue visibility from day one.",
+      "Keep this simple and directional. The goal is a clean revenue baseline from day one.",
     ctaLabel: "Continue",
   },
   {
     key: "mode",
-    title: "Choose Your Brand Voice",
+    title: "Choose Your Booking Voice",
     eyebrow: "Step 5 of 6",
     description:
-      "Choose the voice posture REVORY Seller should reflect in the guided booking motion.",
+      "Choose the tone REVORY Seller should carry while guiding leads through the booking motion.",
     fieldLabel: "Brand voice",
     helperText:
-      "Keep the voice premium and opinionated so the workspace feels consistent without needing a complex builder.",
+      "Keep the tone premium and controlled so the booking path feels consistent without needing a custom builder.",
     ctaLabel: "Continue",
   },
   {
     key: "activation",
-    title: "Review and Activate",
+    title: "Activate Seller",
     eyebrow: "Step 6 of 6",
     description:
-      "Review the essentials, activate the workspace, and move into a revenue-first dashboard.",
+      "Review the booking pillars, activate the workspace, and move into the live Seller view.",
     fieldLabel: "Activation readiness",
     helperText:
-      "Activation is the handoff from setup into booking visibility, revenue tracking, and a cleaner booking-first workspace.",
+      "Activation is the handoff from guided setup into a live booking-first system with cleaner revenue visibility.",
     ctaLabel: "Activate REVORY Seller",
   },
 ] as const;

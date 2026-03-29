@@ -32,8 +32,12 @@ type SidebarItem =
       status?: string;
     };
 
-const navGroups = (leadSourcesStatus: string) =>
-  [
+type SidebarGroup = {
+  items: SidebarItem[];
+  label: string;
+};
+
+const navGroups = (leadSourcesStatus: string): SidebarGroup[] => [
     {
       label: "Seller",
       items: [
@@ -61,7 +65,7 @@ const navGroups = (leadSourcesStatus: string) =>
         },
       ],
     },
-  ] as const;
+  ];
 
 function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
   const sharedProps = {

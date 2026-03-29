@@ -6,6 +6,7 @@ import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigati
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { isSupportedOnboardingSourceType } from "@/services/onboarding/supported-onboarding-source-types";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
   getOnboardingStep,
@@ -20,10 +21,6 @@ function formatSourceLabel(value: DataSourceType | null) {
       return "CSV upload";
     case "CLIENTS_CSV":
       return "Client export";
-    case "GOOGLE_CALENDAR":
-      return "Calendar sync";
-    case "OUTLOOK_CALENDAR":
-      return "Calendar sync (Outlook)";
     case "MANUAL_IMPORT":
       return "Guided import";
     default:
@@ -57,6 +54,17 @@ function formatBrandVoiceLabel(modeKey: string | null) {
   }
 }
 
+function formatBookingPathLabel(value: string | null) {
+  switch (value) {
+    case "SMS":
+      return "Assisted booking path (SMS)";
+    case "EMAIL":
+      return "Primary booking path (Email)";
+    default:
+      return null;
+  }
+}
+
 function formatDealValue(value: Prisma.Decimal | null) {
   if (!value) {
     return null;
@@ -82,7 +90,9 @@ function isLikelyUrl(value: string) {
 type SetupItem = {
   detail: string;
   label: string;
+  note: string;
   ready: boolean;
+  type: "pillar" | "support";
 };
 
 type SetupItemDetailProps = Readonly<{
@@ -133,65 +143,84 @@ export default async function SetupPage() {
   const continueSetupHref = getOnboardingStepPath(currentStepKey);
   const sourceLabel = formatSourceLabel(dataSource?.type ?? null);
   const mainOfferLabel = formatMainOfferLabel(appContext.activationSetup.selectedTemplate);
+  const bookingPathLabel = formatBookingPathLabel(appContext.activationSetup.primaryChannel);
   const brandVoiceLabel = formatBrandVoiceLabel(appContext.activationSetup.recommendedModeKey);
   const dealValueLabel = formatDealValue(appContext.activationSetup.averageDealValue ?? null);
+  const sourceNeedsReview =
+    Boolean(dataSource?.type) &&
+    !isSupportedOnboardingSourceType(dataSource?.type ?? null);
 
   const setupItems: SetupItem[] = [
     {
       detail: mainOfferLabel ?? "No main offer selected yet",
       label: "Main offer",
+      note: "Defines the one offer REVORY Seller should help book first.",
       ready: Boolean(mainOfferLabel),
+      type: "pillar",
     },
     {
-      detail: sourceLabel ?? "No lead source selected yet",
-      label: "Lead source",
-      ready: Boolean(sourceLabel),
-    },
-    {
-      detail:
-        appContext.activationSetup.primaryChannel === "SMS"
-          ? "Assisted booking path (SMS)"
-          : "Primary booking path (Email)",
+      detail: bookingPathLabel ?? "No booking path selected yet",
       label: "Booking path",
-      ready: Boolean(appContext.activationSetup.primaryChannel),
+      note: "Defines the exact route REVORY Seller should push leads into when it is time to convert interest into a booked appointment.",
+      ready: Boolean(bookingPathLabel),
+      type: "pillar",
+    },
+    {
+      detail: sourceNeedsReview
+        ? "Current lead source needs review"
+        : sourceLabel ?? "No lead source selected yet",
+      label: "Lead source",
+      note: sourceNeedsReview
+        ? "This workspace still carries a source type that Sprint 2 does not support in the live Seller flow."
+        : "Sets where Seller reads demand and hands qualified lead flow into the booking path.",
+      ready: Boolean(sourceLabel) && !sourceNeedsReview,
+      type: "pillar",
     },
     {
       detail: dealValueLabel ?? "No deal value set yet",
-      label: "Average deal value",
+      label: "Deal value",
+      note: "Turns booked appointments into a clean revenue signal from day one.",
       ready: Boolean(appContext.activationSetup.averageDealValue),
+      type: "pillar",
     },
     {
       detail: brandVoiceLabel ?? "No brand voice selected yet",
       label: "Brand voice",
+      note: "Keeps the booking motion consistent without turning Seller into a builder.",
       ready: Boolean(brandVoiceLabel),
+      type: "support",
     },
     {
       detail: appContext.activationSetup.isCompleted
         ? "Workspace already activated"
         : `Current step: ${currentStep.title}`,
       label: "Go-live status",
+      note: "Shows whether the booking pillars are already active in the live Seller workspace.",
       ready: appContext.activationSetup.isCompleted,
+      type: "support",
     },
   ];
 
-  const configuredItems = setupItems.filter((item) => item.ready);
-  const pendingItems = setupItems.filter((item) => !item.ready);
+  const pillarItems = setupItems.filter((item) => item.type === "pillar");
+  const supportItems = setupItems.filter((item) => item.type === "support");
+  const configuredPillars = pillarItems.filter((item) => item.ready);
+  const pendingPillars = pillarItems.filter((item) => !item.ready);
 
   return (
     <div className="space-y-6">
       <section className="rev-card-soft rev-accent-mist rounded-[30px] p-6 md:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-3xl space-y-3">
-            <p className="rev-kicker">Activation Setup</p>
+            <p className="rev-kicker">Activation integrity</p>
             <h1 className="font-[family:var(--font-display)] text-[clamp(2.2rem,4vw,3.8rem)] leading-[0.94] text-[color:var(--foreground)]">
               {appContext.activationSetup.isCompleted
-                ? "Your Seller setup is already in place."
-                : "Finish Seller setup before REVORY goes live."}
+                ? "Your Seller booking engine is already active."
+                : "Turn the setup into a live Seller booking engine."}
             </h1>
             <p className="max-w-[720px] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               {appContext.activationSetup.isCompleted
-                ? "This page keeps the Seller setup state readable without pushing you back into the wizard."
-                : "This page keeps main offer, lead source, booking path, deal value, and brand voice readable in one place so activation stays clean."}
+                ? "This page keeps the booking pillars readable without dragging you back into the wizard."
+                : "Main offer, lead source, booking path, and deal value are the pillars that shape how REVORY Seller reads demand, pushes toward booking, and frames revenue from day one."}
             </p>
           </div>
 
@@ -200,32 +229,32 @@ export default async function SetupPage() {
               {appContext.activationSetup.isCompleted ? "Activated" : "Setup in progress"}
             </RevoryStatusBadge>
             <span className="inline-flex min-h-9 items-center rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
-              {configuredItems.length} of {setupItems.length} configured
+              {configuredPillars.length} of {pillarItems.length} booking pillars locked
             </span>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] xl:items-start">
           <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-5">
-            <p className="rev-label">Current setup status</p>
+            <p className="rev-label">Why activation matters</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
               {appContext.activationSetup.isCompleted
-                ? "The activation flow is complete. Dashboard and source mapping already use this workspace state."
-                : `REVORY Seller is still waiting on setup completion. The current step is "${currentStep.title}".`}
+                ? "The activation flow is complete. Dashboard and lead-source mapping already use the live Seller state."
+                : `REVORY Seller is still waiting on activation integrity. The current step is "${currentStep.title}".`}
             </p>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
               {appContext.activationSetup.isCompleted
-                ? "You can keep working from the dashboard or source mapping without reopening the step-by-step flow."
-                : "The setup stays narrow on purpose: one main offer, one lead source, one booking path, one deal value, one brand voice, then activation."}
+                ? "You can keep working from the dashboard or sources view without reopening the guided flow."
+                : "The path stays narrow on purpose: one main offer, one lead source, one booking path, one deal value, one booking voice, then activation."}
             </p>
           </div>
 
           <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-5">
-            <p className="rev-label">Next step</p>
+            <p className="rev-label">Next controlled step</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
               {appContext.activationSetup.isCompleted
-                ? "The setup is already complete. Use the dashboard as the main workspace and come back here only when you need a clean activation checkpoint."
-                : `Continue from "${currentStep.title}" to finish the activation path cleanly.`}
+                ? "The setup is already complete. Use the dashboard as the main workspace and return here only when you need a clean activation checkpoint."
+                : `Continue from "${currentStep.title}" to finish the booking pillars cleanly.`}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               {appContext.activationSetup.isCompleted ? (
@@ -234,7 +263,7 @@ export default async function SetupPage() {
                     Open dashboard
                   </DocumentNavigationLink>
                   <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                    Review sources
+                    Open Lead Sources
                   </DocumentNavigationLink>
                 </>
               ) : (
@@ -247,22 +276,160 @@ export default async function SetupPage() {
         </div>
       </section>
 
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {pillarItems.map((item) => (
+          <div
+            key={item.label}
+            className={`min-w-0 overflow-hidden rounded-[24px] border p-5 ${
+              item.ready
+                ? "border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)]"
+                : "border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.06)]"
+            }`}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <p className="rev-label">{item.label}</p>
+              <RevoryStatusBadge tone={item.ready ? "real" : "future"}>
+                {item.ready ? "Locked" : "Pending"}
+              </RevoryStatusBadge>
+            </div>
+            <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
+              {item.detail}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Booking handoff
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              The setup should make the path to booking obvious: where the lead enters, which path Seller reinforces, and what counts as the outcome.
+            </p>
+          </div>
+          <RevoryStatusBadge tone={bookingPathLabel ? "accent" : "future"}>
+            {bookingPathLabel ? "Path defined" : "Path pending"}
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
+            <p className="rev-label">01 • Lead enters</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              {sourceLabel ?? "Lead source pending"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              This is the feed REVORY Seller reads first before it can guide the booking motion.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+            <p className="rev-label">02 • Seller guides</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              {bookingPathLabel ?? "Booking path pending"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              This is the main handoff REVORY Seller treats as the natural destination of the guided path.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
+            <p className="rev-label">03 • Booking lands</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              Booked appointment
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              Deal value then turns each visible booking into a revenue read instead of a generic activity signal.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Revenue line of sight
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              REVORY Seller should make revenue feel earned and explainable from the first session, not decorative.
+            </p>
+          </div>
+          <RevoryStatusBadge
+            tone={
+              bookingPathLabel && dealValueLabel && appContext.activationSetup.isCompleted
+                ? "real"
+                : "future"
+            }
+          >
+            {bookingPathLabel && dealValueLabel && appContext.activationSetup.isCompleted
+              ? "Revenue path locked"
+              : "Revenue path pending"}
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
+            <p className="rev-label">01 • Activation</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              Seller setup locked
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              Activation integrity keeps main offer, source, booking path, and deal value inside one narrow system.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+            <p className="rev-label">02 • Booking path</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              {bookingPathLabel ?? "Booking path pending"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              Seller pushes the lead into one explicit booking destination instead of spreading motion across multiple lanes.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
+            <p className="rev-label">03 • Booked outcome</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              Booked appointment
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              Bookings are the live proof point behind the revenue read.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
+            <p className="rev-label">04 • Revenue</p>
+            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+              {dealValueLabel ?? "Deal value pending"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              Deal value is what turns each visible booking into a clean revenue signal on the dashboard.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)] xl:items-start">
         <div className="min-w-0 overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-                Configured items
+                Booking pillars already in place
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                What REVORY already has on file for this Seller workspace.
+                The parts of the Seller engine that are already ready to shape booking performance.
               </p>
             </div>
-            <RevoryStatusBadge tone="real">{configuredItems.length} configured</RevoryStatusBadge>
+            <RevoryStatusBadge tone="real">{configuredPillars.length} locked</RevoryStatusBadge>
           </div>
 
           <div className="mt-5 space-y-3">
-            {configuredItems.map((item) => (
+            {configuredPillars.map((item) => (
               <div
                 key={item.label}
                 className="min-w-0 overflow-hidden rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4"
@@ -273,6 +440,7 @@ export default async function SetupPage() {
                   </p>
                   <RevoryStatusBadge tone="real">Configured</RevoryStatusBadge>
                 </div>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
                 <SetupItemDetail detail={item.detail} tone="configured" />
               </div>
             ))}
@@ -283,20 +451,20 @@ export default async function SetupPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-                Pending items
+                What still blocks activation integrity
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                What still needs user input before setup is fully complete.
+                The missing pieces that still prevent Seller from starting with a clean lead-to-booking motion.
               </p>
             </div>
-            <RevoryStatusBadge tone={pendingItems.length > 0 ? "future" : "neutral"}>
-              {pendingItems.length > 0 ? `${pendingItems.length} pending` : "Nothing pending"}
+            <RevoryStatusBadge tone={pendingPillars.length > 0 ? "future" : "neutral"}>
+              {pendingPillars.length > 0 ? `${pendingPillars.length} pending` : "Nothing pending"}
             </RevoryStatusBadge>
           </div>
 
-          {pendingItems.length > 0 ? (
+          {pendingPillars.length > 0 ? (
             <div className="mt-5 space-y-3">
-              {pendingItems.map((item) => (
+              {pendingPillars.map((item) => (
                 <div
                   key={item.label}
                   className="min-w-0 overflow-hidden rounded-[20px] border border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.06)] p-4"
@@ -307,6 +475,7 @@ export default async function SetupPage() {
                     </p>
                     <RevoryStatusBadge tone="future">Pending</RevoryStatusBadge>
                   </div>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
                   <SetupItemDetail detail={item.detail} tone="pending" />
                 </div>
               ))}
@@ -317,11 +486,44 @@ export default async function SetupPage() {
                 Nothing is currently pending.
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The workspace activation is already complete, so this page is now a clean status
-                checkpoint rather than an active to-do list.
+                The booking pillars are already locked, so this page now works as a clean activation checkpoint rather than an active to-do list.
               </p>
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Activation support
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              Supporting context that keeps the Seller motion consistent after the core booking pillars are locked.
+            </p>
+          </div>
+          <RevoryStatusBadge tone={supportItems.every((item) => item.ready) ? "real" : "neutral"}>
+            {supportItems.filter((item) => item.ready).length} of {supportItems.length} ready
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {supportItems.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="text-sm font-semibold text-[color:var(--foreground)]">{item.label}</p>
+                <RevoryStatusBadge tone={item.ready ? "real" : "neutral"}>
+                  {item.ready ? "Ready" : "In progress"}
+                </RevoryStatusBadge>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+              <SetupItemDetail detail={item.detail} tone={item.ready ? "configured" : "pending"} />
+            </div>
+          ))}
         </div>
       </section>
 

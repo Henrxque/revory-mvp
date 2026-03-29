@@ -12,6 +12,7 @@ import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { completeActivationSetup } from "@/services/onboarding/complete-activation-setup";
 import { setCurrentOnboardingStep } from "@/services/onboarding/set-current-step";
+import { isSupportedOnboardingSourceType } from "@/services/onboarding/supported-onboarding-source-types";
 import { updateActivationSetup } from "@/services/onboarding/update-activation-setup";
 import { upsertOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
@@ -123,7 +124,8 @@ export async function submitOnboardingStep(formData: FormData) {
 
       if (
         typeof selectedDataSourceType !== "string" ||
-        !isDataSourceType(selectedDataSourceType)
+        !isDataSourceType(selectedDataSourceType) ||
+        !isSupportedOnboardingSourceType(selectedDataSourceType)
       ) {
         redirect(`${getOnboardingStepPath(currentStepKey)}?error=source`);
       }

@@ -4,6 +4,7 @@ import { WorkspaceStatus, type ActivationSetup, type Workspace } from "@prisma/c
 
 import { prisma } from "@/db/prisma";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
+import { isSupportedOnboardingSourceType } from "@/services/onboarding/supported-onboarding-source-types";
 
 type ActivationCompletionResult =
   | {
@@ -41,7 +42,8 @@ export async function completeActivationSetup(
     !activationSetup.averageDealValue ||
     !activationSetup.recommendedModeKey ||
     !activationSetup.primaryChannel ||
-    !onboardingDataSource
+    !onboardingDataSource ||
+    !isSupportedOnboardingSourceType(onboardingDataSource.type)
   ) {
     return { ok: false };
   }

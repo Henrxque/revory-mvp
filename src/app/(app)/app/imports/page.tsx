@@ -58,34 +58,38 @@ export default async function ImportsPage() {
             <div className="flex flex-wrap items-center gap-3">
               <p className="rev-kicker">Lead Sources</p>
               <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
-                Guided import
+                Booking feed
               </span>
             </div>
 
             <h1 className="max-w-[700px] font-[family:var(--font-display)] text-[clamp(2.3rem,4vw,3.8rem)] leading-[0.94] text-[color:var(--foreground)]">
-              Review the incoming columns before REVORY Seller maps the source.
+              Feed the booking path with a clean source before REVORY Seller maps it.
             </h1>
 
             <p className="max-w-[600px] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               Upload the CSV you already have, review the detected headers, and
-              confirm the final mapping before REVORY Seller turns it into
-              booking and revenue visibility.
+              confirm the final mapping before REVORY Seller turns that source
+              into visible booking motion and revenue context.
             </p>
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
             {[
               {
-                label: "Official template",
-                text: "Fastest when the exported file already matches the REVORY Seller contract.",
+                label: "Feed first",
+                text: "The source exists to feed the booking path, not to become the center of the product.",
               },
               {
-                label: "Header review",
-                text: "Headers are reviewed before anything lands in the booking view.",
+                label: "Guided review",
+                text: "Headers are reviewed before anything is allowed to shape the booking path.",
               },
               {
-                label: "Clear result",
-                text: "Mapping blockers, review rows, and final confirmation stay explicit.",
+                label: "Clean handoff",
+                text: "Mapping blockers, review rows, and final confirmation stay explicit before data reaches the Seller view.",
+              },
+              {
+                label: "Revenue context",
+                text: "Once booked outcomes are visible, deal value is what lets REVORY Seller turn that motion into a trusted revenue read.",
               },
             ].map((item) => (
               <div

@@ -60,81 +60,81 @@ const stepBody: Record<
 > = {
   activation: {
     checklist: [
-      "Review the core setup choices before turning the workspace into a live Seller system.",
-      "Confirm that REVORY has enough context to show booking visibility and revenue context clearly.",
+      "Review the booking pillars before turning the workspace into a live Seller system.",
+      "Confirm REVORY has enough context to read booking motion and revenue clearly.",
       "Keep activation short, explicit, and self-service.",
     ],
     summary:
-      "This final step moves the workspace from setup into a live REVORY Seller environment.",
+      "This final step locks the booking pillars and turns the workspace into a live REVORY Seller environment.",
     whyItMatters:
-      "Activation is the moment setup ends and revenue visibility begins. The customer should feel ready to track booking signals, not trapped in more configuration.",
+      "Activation is where setup stops feeling administrative and starts feeling like a live Seller system. The customer should feel ready to track paid leads, booked appointments, and revenue context.",
     next:
-      "After activation, the dashboard becomes the home for revenue visibility, source health, and the next leverage point.",
+      "After activation, the dashboard becomes the home for revenue visibility, booking performance, and the next leverage point.",
   },
   channel: {
     checklist: [
-      "Keep one primary booking lane so the path feels predictable from day one.",
-      "Anchor the MVP in a single, reliable booking path.",
-      "Avoid making the customer guess how REVORY Seller will move leads forward.",
+      "Keep one primary booking lane so the motion feels predictable from day one.",
+      "Anchor Seller in a single booking path instead of multiple competing routes.",
+      "Avoid making the customer guess where REVORY Seller should hand qualified leads off for booking.",
     ],
     summary:
-      "This choice sets the main booking lane REVORY Seller should prioritize in the guided booking path.",
+      "This choice sets the main booking lane REVORY Seller should reinforce when a lead is ready to become a booked appointment.",
     whyItMatters:
-      "A premium self-service setup should remove ambiguity early. One default lane keeps the product focused and easier to trust.",
+      "A premium self-service system removes ambiguity early. One default path makes the booking handoff explicit, cleaner to launch, and easier to trust.",
     next:
-      "Next, REVORY Seller sets the revenue baseline tied to a booked appointment.",
+      "Next, REVORY Seller sets the revenue baseline tied to each booked appointment.",
   },
   mode: {
     checklist: [
       "Keep the voice choice understandable in plain language.",
-      "Treat the choice as guided setup, not as a configuration matrix.",
-      "Make the customer feel the path is narrow, premium, and easy to launch.",
+      "Treat the choice as delivery posture, not as a custom copy system.",
+      "Make the customer feel the booking path is narrow, premium, and easy to launch.",
     ],
     summary:
-      "This choice defines the voice posture REVORY Seller should use as the starting booking tone.",
+      "This choice defines the voice posture REVORY Seller should carry across the guided booking motion.",
     whyItMatters:
-      "Brand voice should simplify the launch. It frames the initial setup without turning the MVP into a custom builder.",
+      "Voice should support the booking path, not create a new layer of complexity. The goal is consistency without turning Seller into a copy builder.",
     next:
-      "After this, activation becomes a clean final review instead of another strategic decision.",
+      "After this, activation becomes a clean final review instead of another strategy pass.",
   },
   deal_value: {
     checklist: [
-      "Keep this value easy to set without turning setup into a finance workflow.",
+      "Keep this value easy to set without turning activation into a finance workflow.",
       "Use one clear number to anchor revenue visibility from day one.",
-      "Avoid bloating the step with advanced pricing logic.",
+      "Avoid bloating the step with pricing logic or plan complexity.",
     ],
     summary:
-      "This step stores the average revenue tied to one booked appointment.",
+      "This step stores the revenue baseline tied to one booked appointment.",
     whyItMatters:
-      "Revenue visibility gets sharper when the product starts from a clean baseline instead of a blank state.",
+      "Seller should feel connected to money from the first session. A clear deal value keeps the dashboard centered on revenue instead of generic activity.",
     next:
-      "Once deal value is set, REVORY Seller can lock the brand voice and move to final activation.",
+      "Once deal value is set, REVORY Seller can lock the booking voice and move to final activation.",
   },
   source: {
     checklist: [
-      "Make the lead-source path obvious before the customer reaches Sources and Mapping.",
+      "Make the source path obvious before the customer reaches Sources and Mapping.",
       "Keep supported input types explicit and narrow.",
       "Position imports as guided, not technical.",
     ],
     summary:
-      "This choice tells REVORY Seller how the workspace plans to bring in the lead and booking data needed for visibility.",
+      "This choice tells REVORY Seller where lead and booking context will come from first.",
     whyItMatters:
-      "The product only feels premium when setup lowers friction. A clear source path prepares the customer for guided imports instead of messy prep work.",
+      "The product only feels premium when activation starts from real demand. A clear lead source connects Seller to the actual booking pipeline instead of a vague setup state.",
     next:
-      "After the lead source is chosen, REVORY Seller asks for the primary booking path.",
+      "After the lead source is chosen, REVORY Seller sets the primary booking path.",
   },
   template: {
     checklist: [
-      "Start with one main offer instead of spreading setup across multiple services.",
+      "Start with one main offer instead of spreading attention across multiple services.",
       "Keep the setup focused on what the clinic wants to book first.",
-      "Make the first choice feel confident and low-friction.",
+      "Make the first choice feel confident, narrow, and low-friction.",
     ],
     summary:
-      "The main offer anchors the workspace in the premium booking motion REVORY Seller is designed around.",
+      "The main offer anchors the workspace in the booking motion REVORY Seller is designed to accelerate.",
     whyItMatters:
-      "A narrow product feels easier to trust. One main offer tells the customer REVORY Seller is built to focus, not sprawl.",
+      "A narrow product feels easier to trust. One main offer tells the customer REVORY Seller is built to drive one booking outcome well instead of trying to cover every service at once.",
     next:
-      "After confirming the main offer, REVORY Seller helps the customer choose how lead and booking data will enter the workspace.",
+      "After locking the main offer, REVORY Seller connects the lead source feeding that booking motion.",
   },
 };
 
@@ -144,9 +144,7 @@ const optionCardClassName =
 const sourceTypeLabels: Record<string, string> = {
   APPOINTMENTS_CSV: "CSV upload",
   CLIENTS_CSV: "Client export",
-  GOOGLE_CALENDAR: "Calendar sync",
   MANUAL_IMPORT: "Guided import",
-  OUTLOOK_CALENDAR: "Calendar sync (Outlook)",
 };
 
 const modeLabels: Record<string, string> = {
@@ -239,14 +237,14 @@ export default async function OnboardingStepPage({
       <div className="space-y-5">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">What this step does</p>
+            <p className="rev-label">Pillar role</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
               {currentStepBody.summary}
             </p>
           </div>
 
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Why it matters</p>
+            <p className="rev-label">Why this changes booking performance</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
               {currentStepBody.whyItMatters}
             </p>
@@ -255,15 +253,15 @@ export default async function OnboardingStepPage({
 
         <div className="grid gap-3 md:grid-cols-3">
           {currentStepBody.checklist.map((item, index) => (
-            <div
-              key={item}
-              className="rev-card-soft rounded-[22px] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]"
-            >
-              <p className="rev-label">Focus {index + 1}</p>
-              <p className="mt-3">{item}</p>
-            </div>
-          ))}
-        </div>
+              <div
+                key={item}
+                className="rev-card-soft rounded-[22px] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]"
+              >
+                <p className="rev-label">Guardrail {index + 1}</p>
+                <p className="mt-3">{item}</p>
+              </div>
+            ))}
+          </div>
 
         {hasError ? (
           <div className="rev-feedback-error">
@@ -272,7 +270,7 @@ export default async function OnboardingStepPage({
         ) : null}
 
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
-          <span className="rev-label">What happens next</span>
+          <span className="rev-label">What this unlocks next</span>
           <p className="mt-3">{currentStepBody.next}</p>
         </div>
 
@@ -283,17 +281,17 @@ export default async function OnboardingStepPage({
                 {
                   value: "INJECTABLES",
                   label: "Injectables",
-                  note: "Best when the clinic wants REVORY Seller focused on a high-intent consult or treatment path.",
+                  note: "Best when the clinic wants REVORY Seller focused on a high-intent consult path with fast booking potential.",
                 },
                 {
                   value: "LASER_SKIN",
                   label: "Laser & Skin",
-                  note: "Best when the clinic wants one clear path around laser, skin, or resurfacing demand.",
+                  note: "Best when the clinic wants one clear booking motion around laser, skin, or resurfacing demand.",
                 },
                 {
                   value: "BODY_CONTOURING",
                   label: "Body Contouring",
-                  note: "Best when the clinic wants one structured path for a premium body treatment offer.",
+                  note: "Best when the clinic wants one structured path for a premium body offer with a single booking goal.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -320,29 +318,19 @@ export default async function OnboardingStepPage({
             <div className="space-y-3">
               {[
                 {
-                  value: "GOOGLE_CALENDAR",
-                  label: "Calendar sync",
-                  note: "Best when the workspace wants a direct sync path for ongoing lead and booking visibility.",
-                },
-                {
-                  value: "OUTLOOK_CALENDAR",
-                  label: "Calendar sync (Outlook)",
-                  note: "Best when the workspace already runs on Outlook and wants the same sync-first path.",
-                },
-                {
                   value: "APPOINTMENTS_CSV",
                   label: "CSV upload",
-                  note: "Recommended when the workspace already has exports and wants guided mapping inside REVORY Seller.",
+                  note: "Recommended when the workspace already has exports and wants guided activation inside REVORY Seller.",
                 },
                 {
                   value: "CLIENTS_CSV",
                   label: "Client export",
-                  note: "Recommended when the workspace wants to start from client records and keep revenue context visible.",
+                  note: "Recommended when the workspace wants to start from client records and keep lead-to-booking context visible.",
                 },
                 {
                   value: "MANUAL_IMPORT",
                   label: "Guided import",
-                  note: "Fallback for exports that need one more guided pass before the data is ready.",
+                  note: "Fallback for exports that need one guided pass before Seller can read the booking path cleanly.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -371,12 +359,12 @@ export default async function OnboardingStepPage({
                 {
                   value: "EMAIL",
                   label: "Primary booking path (Email)",
-                  note: "Recommended default for the MVP and the clearest way to keep the booking path simple.",
+                  note: "Recommended default for the MVP and the clearest way to make the final handoff to booking feel simple and explicit.",
                 },
                 {
                   value: "SMS",
                   label: "Assisted booking path (SMS)",
-                  note: "Useful when available in-plan, but REVORY Seller still treats one lane as the primary booking path.",
+                  note: "Useful when available in-plan, but REVORY Seller still keeps one main booking destination instead of multiple parallel lanes.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -403,7 +391,7 @@ export default async function OnboardingStepPage({
             <div className="space-y-3">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[color:var(--foreground)]">
-                  Average deal value
+                  Revenue tied to one booked appointment
                 </span>
                 <input
                   className="rev-input-field"
@@ -414,7 +402,7 @@ export default async function OnboardingStepPage({
                 />
               </label>
               <p className="text-sm text-[color:var(--text-muted)]">
-                Set the average revenue tied to one booked appointment. Keep it simple and directional.
+                Set the average revenue tied to one booked appointment. Keep it directional so Seller can read money clearly from day one.
               </p>
             </div>
           ) : null}
@@ -460,25 +448,83 @@ export default async function OnboardingStepPage({
 
           {currentStepKey === "activation" ? (
             <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)] p-4">
+                  <p className="rev-label">Booking pillars locked for go-live</p>
+                  <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                    These are the core choices REVORY Seller will use to read demand, guide the booking motion, and frame revenue visibility from the first session.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  {[
+                    {
+                      label: "Main offer",
+                      value: mainOfferLabels[selectedTemplate] || "Not selected",
+                    },
+                    {
+                      label: "Lead source",
+                      value:
+                        (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) ||
+                        "Not selected",
+                    },
+                    {
+                      label: "Booking path",
+                      value:
+                        (selectedPrimaryChannel &&
+                          channelLabels[selectedPrimaryChannel]) ||
+                        "Not selected",
+                    },
+                    {
+                      label: "Deal value",
+                      value: formattedDealValue ?? "Not configured",
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rev-card rounded-[22px] p-4"
+                    >
+                      <p className="rev-label">{item.label}</p>
+                      <p className="mt-2 font-medium text-[color:var(--foreground)]">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+                  <p className="rev-label">Lead enters from</p>
+                  <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+                    {(selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Not selected"}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                    Seller reads demand from this source first.
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+                  <p className="rev-label">REVORY hands off to</p>
+                  <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+                    {(selectedPrimaryChannel && channelLabels[selectedPrimaryChannel]) || "Not selected"}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                    This stays the natural booking destination of the guided flow.
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
+                  <p className="rev-label">Outcome visible as</p>
+                  <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+                    Booked appointment + revenue
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                    Dashboard visibility starts from booked outcomes, not from generic setup completion.
+                  </p>
+                </div>
+              </div>
+
               <div className="grid gap-3 md:grid-cols-2">
                 {[
-                  {
-                    label: "Main offer",
-                    value: mainOfferLabels[selectedTemplate] || "Not selected",
-                  },
-                  {
-                    label: "Lead source",
-                    value:
-                      (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) ||
-                      "Not selected",
-                  },
-                  {
-                    label: "Booking path",
-                    value:
-                      (selectedPrimaryChannel &&
-                        channelLabels[selectedPrimaryChannel]) ||
-                      "Not selected",
-                  },
                   {
                     label: "Brand voice",
                     value:
@@ -486,14 +532,16 @@ export default async function OnboardingStepPage({
                         modeLabels[selectedRecommendedModeKey]) ||
                       "Not selected",
                   },
+                  {
+                    label: "Activation outcome",
+                    value: "Dashboard becomes the live home for booking and revenue visibility.",
+                  },
                 ].map((item) => (
                   <div
                     key={item.label}
                     className="rev-card rounded-[22px] p-4"
                   >
-                    <p className="rev-label">
-                      {item.label}
-                    </p>
+                    <p className="rev-label">{item.label}</p>
                     <p className="mt-2 font-medium text-[color:var(--foreground)]">
                       {item.value}
                     </p>
@@ -501,19 +549,15 @@ export default async function OnboardingStepPage({
                 ))}
               </div>
 
-              <div className="rev-card rounded-[22px] p-4">
-                <p className="rev-label">
-                  Average deal value
-                </p>
-                <p className="mt-2 break-all font-medium text-[color:var(--foreground)]">
-                  {formattedDealValue ?? "Not configured"}
-                </p>
+              <div className="rev-feedback-warning">
+                If the booking pillars are present, activation will mark this workspace as live and send the customer into the Seller view where the booking path becomes the natural destination of the flow.
               </div>
 
-              <div className="rev-feedback-warning">
-                If the required setup values are present, activation will mark
-                this workspace as live and send the customer into the revenue
-                view.
+              <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+                <p className="rev-label">Why revenue appears after activation</p>
+                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                  REVORY Seller does not invent revenue from setup alone. Activation locks the booking path, the imported appointment base makes booked outcomes visible, and deal value turns those visible bookings into the executive revenue read.
+                </p>
               </div>
             </div>
           ) : null}

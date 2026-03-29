@@ -48,13 +48,14 @@ export function OnboardingStepLayout({
       <aside className="rev-shell-hero rounded-[28px] p-5">
         <div className="space-y-6">
           <div className="space-y-3">
-            <p className="rev-kicker">Guided setup</p>
+            <p className="rev-kicker">Activation integrity</p>
             <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)]">
-              Activate REVORY Seller in one premium guided pass.
+              Turn six guided choices into one live booking system.
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              Confirm your main offer, lead source, booking path, deal value,
-              and brand voice before booking acceleration goes live.
+              Main offer, lead source, booking path, and deal value are not admin
+              fields here. They are the pillars REVORY Seller uses to move paid
+              leads toward booked appointments.
             </p>
           </div>
 
@@ -75,10 +76,10 @@ export function OnboardingStepLayout({
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="rev-label">Experience promise</p>
+              <p className="rev-label">Seller guardrails</p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                One clear decision per step. No builder complexity. No legacy
-                ops logic.
+                One clear decision per step. One booking motion. No CRM sprawl,
+                no channel maze, no heavy ops setup.
               </p>
             </div>
           </div>
@@ -124,7 +125,7 @@ export function OnboardingStepLayout({
                           : "text-[color:var(--text-muted)]"
                     }`}
                   >
-                    {isCurrent ? "Current focus" : isDone ? "Ready" : "Up next"}
+                    {isCurrent ? "Current pillar" : isDone ? "Locked in" : "Up next"}
                   </p>
                 </div>
               );
@@ -150,14 +151,14 @@ export function OnboardingStepLayout({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">This step sets</p>
+            <p className="rev-label">Booking pillar</p>
             <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
               {step.fieldLabel}
             </p>
           </div>
 
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Guidance</p>
+            <p className="rev-label">Activation effect</p>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
               {step.helperText}
             </p>
