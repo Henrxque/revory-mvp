@@ -12,7 +12,7 @@ import {
 
 function formatCurrency(value: number | null) {
   if (value === null) {
-    return "Awaiting revenue";
+    return "Revenue path pending";
   }
 
   return new Intl.NumberFormat("en-US", {
@@ -105,7 +105,13 @@ function isPendingMetricValue(value: string | number) {
   }
 
   const normalized = value.toLowerCase();
-  return normalized.includes("awaiting") || normalized.includes("no signal");
+  return (
+    normalized.includes("awaiting") ||
+    normalized.includes("no signal") ||
+    normalized.includes("pending") ||
+    normalized.includes("waiting") ||
+    normalized.includes("warming")
+  );
 }
 
 function getMetricValueClassName(
@@ -253,15 +259,15 @@ export default async function DashboardPage() {
   const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
   const bookingPathLabel = formatBookingPathLabel(activationSetup.primaryChannel);
   const nextLeveragePoint = !hasImportedData
-    ? "Make the first booked outcome visible so REVORY Seller can open the revenue path with real context. Lead Sources is the shortest way to do that."
+    ? "Bring the first booked appointment into view so REVORY Seller can open the revenue path with real booking evidence. Booking Inputs is the cleanest next step."
     : overview.upcomingAppointments === 0
       ? "Upload a fresher appointments export so the booking view stays current and booked outcomes stay trustworthy."
       : "Keep the lead and appointment base fresh so REVORY Seller can keep the booking motion and revenue read clean.";
-  const speedSignalValue = hasImportedData ? "Awaiting signal" : "No signal yet";
-  const bookingRateValue = hasImportedData ? "Awaiting signal" : "No signal yet";
-  const leadBaseValue = overview.clientsImported > 0 ? overview.clientsImported : "Awaiting lead base";
+  const speedSignalValue = hasImportedData ? "Signal warming up" : "Waiting for motion";
+  const bookingRateValue = hasImportedData ? "Signal warming up" : "Waiting for motion";
+  const leadBaseValue = overview.clientsImported > 0 ? overview.clientsImported : "Lead base pending";
   const bookedAppointmentsValue =
-    overview.bookedAppointments > 0 ? overview.bookedAppointments : "Awaiting bookings";
+    overview.bookedAppointments > 0 ? overview.bookedAppointments : "Booked outcome pending";
   const motionStages = [
     {
       detail:
@@ -297,7 +303,7 @@ export default async function DashboardPage() {
           : "Advance remains hidden until the workspace has real lead-to-booking movement to read.",
       label: "Lead advance",
       stage: "04",
-      status: hasImportedData ? "Awaiting signal" : "Not ready",
+      status: hasImportedData ? "Signal warming up" : "Not ready",
       tone: "neutral" as const,
     },
     {
@@ -323,20 +329,20 @@ export default async function DashboardPage() {
                 {monthChip}
               </span>
               <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-                {hasImportedData ? "Motion visible" : "Revenue path pending"}
+                {hasImportedData ? "Motion visible" : "Revenue path waiting"}
               </RevoryStatusBadge>
             </div>
 
             <h1 className="max-w-[40rem] font-[family:var(--font-display)] text-[clamp(2.4rem,4vw,3.95rem)] leading-[0.92] text-[color:var(--foreground)]">
               {hasImportedData
                 ? "See how paid leads are moving toward booked appointments."
-                : "Bring the first booked outcomes into the live Seller view."}
+                : "Bring the first booked appointments into the live Seller view."}
             </h1>
 
             <p className="max-w-[39rem] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
               {hasImportedData
                 ? "Revenue still stays first, but the dashboard now makes the booking motion explicit: lead base, guided path, booked outcomes, and the next controlled move."
-                : "Start from one clean dataset and let REVORY Seller turn it into visible booked outcomes, a clearer booking path, and the first revenue-connected read."}
+                : "Start from one clean booking input and let REVORY Seller make booked outcomes, booking motion, and revenue path visible."}
             </p>
           </div>
 
@@ -354,14 +360,14 @@ export default async function DashboardPage() {
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
                 {hasImportedData
                   ? "Revenue currently visible from the booked appointments attached to this workspace."
-                  : "Revenue appears as soon as Seller can see booked outcomes and apply the deal value already locked in activation."}
+                  : "Revenue appears as soon as Seller can see booked appointments and apply the deal value already locked in activation."}
               </p>
               <div className="mt-5">
                 <DocumentNavigationLink
                   className={`${hasImportedData ? "rev-button-secondary" : "rev-button-primary"} w-full justify-center px-5 py-3 text-sm`}
                   href="/app/imports"
                 >
-                  {hasImportedData ? "Refresh visibility input" : "Open Lead Sources"}
+                  {hasImportedData ? "Refresh booking inputs" : "Open Booking Inputs"}
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -421,7 +427,7 @@ export default async function DashboardPage() {
                 value:
                   overview.bookedAppointments > 0
                     ? `${overview.bookedAppointments} visible`
-                    : "Awaiting bookings",
+                    : "Booked outcomes pending",
               },
               {
                 label: "Deal value",
@@ -472,7 +478,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <RevoryStatusBadge tone={hasImportedData ? "accent" : "neutral"}>
-            {hasImportedData ? "Motion active" : "Motion waiting on source"}
+            {hasImportedData ? "Motion active" : "Motion waiting on visibility"}
           </RevoryStatusBadge>
         </div>
 
@@ -495,10 +501,10 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Booking visibility input
+                Booking inputs
               </p>
               <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                Data quality and freshness stay readable here because they support the Seller motion, not because they are the product center.
+                Upload freshness stays readable here because it supports the Seller motion, not because it is the product center.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
@@ -592,14 +598,14 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No booking visibility yet
+                No booked outcomes visible yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The live Seller view is ready for the first booked outcomes. Open Lead Sources, add the file you already have, and let REVORY Seller turn it into booking and revenue visibility.
+                The live Seller view is ready for booked appointments. Open Booking Inputs, add the file you already have, and let REVORY Seller connect booking visibility to revenue.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open Lead Sources
+                  Open Booking Inputs
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -626,7 +632,7 @@ export default async function DashboardPage() {
                 className={hasImportedData ? "rev-button-secondary" : "rev-button-primary"}
                 href="/app/imports"
               >
-                {hasImportedData ? "Review visibility input" : "Open Lead Sources"}
+                {hasImportedData ? "Review booking inputs" : "Open Booking Inputs"}
               </DocumentNavigationLink>
             </div>
           </div>
@@ -687,7 +693,7 @@ export default async function DashboardPage() {
             />
             <ContextCard
               label="Lead base"
-              note="Current imported base available for booking and revenue visibility."
+              note="Current visible base available for booking and revenue visibility."
               value={`${overview.clientsImported} client records`}
             />
             <ContextCard
@@ -743,14 +749,14 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No appointments in view yet
+                No upcoming bookings visible yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Add the first appointments dataset so REVORY Seller can make upcoming bookings visible in the live Seller view.
+                Add the first appointments upload so REVORY Seller can make upcoming bookings visible in the live Seller view.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open Lead Sources
+                  Open Booking Inputs
                 </DocumentNavigationLink>
               </div>
             </div>

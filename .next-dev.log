@@ -8,3 +8,43 @@
 - Environments: .env.local, .env
 ✓ Ready in 643ms
 
+ GET / 307 in 790ms (next.js: 544ms, application-code: 245ms)
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+ GET /app 500 in 674ms (next.js: 156ms, application-code: 518ms)
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+ GET /app? 500 in 175ms (next.js: 4ms, application-code: 171ms)
+ GET / 307 in 58ms (next.js: 4ms, application-code: 54ms)
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+ GET /app 500 in 179ms (next.js: 3ms, application-code: 176ms)
+ GET /app 307 in 194ms (next.js: 3ms, application-code: 190ms)
+ GET /app/dashboard 200 in 538ms (next.js: 76ms, application-code: 462ms)
+ GET /api/auth/session 200 in 886ms (next.js: 851ms, application-code: 34ms)
+ GET /app/imports 200 in 204ms (next.js: 124ms, application-code: 80ms)
+ GET /app/setup 200 in 125ms (next.js: 65ms, application-code: 59ms)
+ GET /app/dashboard 200 in 67ms (next.js: 3ms, application-code: 64ms)
+✓ Compiled in 243ms
+ GET /app/dashboard 200 in 328ms (next.js: 176ms, application-code: 152ms)

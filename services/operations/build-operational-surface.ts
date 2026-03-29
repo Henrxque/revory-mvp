@@ -648,9 +648,9 @@ function buildPrioritySummary(
     return {
       description:
         "REVORY already knows how to classify confirmation, reminders, at-risk signals, follow-up, and feedback eligibility. This layer turns on as soon as the workspace has appointments to monitor.",
-      headline: "Booking visibility starts after the first appointments import.",
+      headline: "Booking visibility starts after the first appointments upload.",
       suggestedNextAction:
-        "Open Imports and bring in the first appointments CSV so the booking layer has something real to read.",
+        "Open Booking Inputs and bring in the first appointments CSV so the booking layer has something real to read.",
     };
   }
 

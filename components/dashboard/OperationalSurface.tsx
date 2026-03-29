@@ -76,7 +76,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
   return (
     <section className="space-y-4">
       <RevorySectionHeader
-        badgeLabel={surface.hasLiveSignals ? "Signals visible" : "Awaiting booking base"}
+        badgeLabel={surface.hasLiveSignals ? "Signals visible" : "Booked visibility pending"}
         badgeTone={surface.hasLiveSignals ? "real" : "neutral"}
         description="A short booking read of signal, guidance, blockers, and the next narrow step. Guidance stays visible without implying a live delivery engine."
         eyebrow="Booking Pulse"
@@ -160,7 +160,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
               {!surface.hasAppointmentBase ? (
                 <div>
                   <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-                    Open imports
+                    Open Booking Inputs
                   </DocumentNavigationLink>
                 </div>
               ) : null}
@@ -343,22 +343,22 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                 <p className="text-sm font-semibold text-[color:var(--foreground)]">
                   {surface.hasAppointmentBase
                     ? "Nothing currently needs a guided next step."
-                    : "Booking pulse turns on after the first appointments import."}
+                    : "Booking pulse turns on after the first appointments upload."}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                   {surface.hasAppointmentBase
                     ? "The current schedule is visible, but nothing needs a controlled next step right now."
-                    : "Import appointments first so REVORY has a real schedule to classify instead of placeholder states."}
+                    : "Add appointments first so REVORY has a real schedule to classify instead of placeholder states."}
                 </p>
               </div>
               <RevoryStatusBadge tone={surface.hasAppointmentBase ? "real" : "neutral"}>
-                {surface.hasAppointmentBase ? "Quiet right now" : "Awaiting import"}
+                {surface.hasAppointmentBase ? "Quiet right now" : "Visibility pending"}
               </RevoryStatusBadge>
             </div>
             {!surface.hasAppointmentBase ? (
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-                  Open imports
+                  Open Booking Inputs
                 </DocumentNavigationLink>
               </div>
             ) : null}

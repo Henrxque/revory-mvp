@@ -185,7 +185,7 @@ function getFlowStepToneClassName(state: FlowStepState) {
 
 function formatImportedAt(value: string | null | undefined) {
   if (!value) {
-    return "No CSV imported yet";
+    return "No upload saved yet";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -313,7 +313,7 @@ export function CsvUploadCard({
     currentPreview && confirmationDraft && confirmationDraft.canProceed,
   );
   const cardTitle =
-    templateKey === "appointments" ? "Appointments import" : "Clients import";
+    templateKey === "appointments" ? "Booked appointments" : "Lead base";
   const processSteps = [
     { detail: "Read headers", step: "01" },
     { detail: "Review mapping", step: "02" },
@@ -348,7 +348,7 @@ export function CsvUploadCard({
       return { label: "Reading file", tone: "accent" as const };
     }
 
-    return { label: "Awaiting file", tone: "neutral" as const };
+    return { label: "Ready for upload", tone: "neutral" as const };
   })();
   const hasImportResult = Boolean(statusState.importSummary);
   const hasUploadContext = Boolean(selectedFileName || currentPreview);
@@ -590,9 +590,9 @@ export function CsvUploadCard({
         <div className="overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)]">
           <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-5">
             <div>
-              <p className="rev-label">Last import</p>
+              <p className="rev-label">Latest upload</p>
               <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-                {lastUpload?.fileName ?? "Awaiting first import"}
+                {lastUpload?.fileName ?? "Ready for first upload"}
               </p>
               <p className="mt-1 text-sm leading-6 text-[color:var(--text-muted)]">
                 {formatImportedAt(lastUpload?.importedAt)}
@@ -603,7 +603,7 @@ export function CsvUploadCard({
                 getHistoricalStatusTone(lastUpload?.status),
               )}`}
             >
-              Latest saved result: {formatStatus(lastUpload?.status)}
+              Latest upload result: {formatStatus(lastUpload?.status)}
             </span>
           </div>
 
@@ -648,11 +648,11 @@ export function CsvUploadCard({
         <div className={`rounded-[30px] border p-5 transition ${uploadPanelClassName}`}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <p className="rev-label">Choose CSV file</p>
+              <p className="rev-label">Add CSV file</p>
               <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
                 Bring the export you already have. REVORY reads the headers
-                first, suggests the best matching REVORY fields, and waits for your
-                final check before import.
+                first, suggests the best matching Seller fields, and waits for
+                your final check before the upload goes live.
               </p>
             </div>
             <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
@@ -692,7 +692,7 @@ export function CsvUploadCard({
                 {currentPreview ? "Current file" : "Selected file"}
               </p>
               <p className="mt-1 truncate text-sm font-medium text-[color:var(--foreground)]">
-                {selectedFileName ?? "No file selected yet"}
+                {selectedFileName ?? "No file selected"}
               </p>
               <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
                 {currentPreview
@@ -1030,7 +1030,7 @@ export function CsvUploadCard({
               ? canSubmit
                 ? "The current mapping is ready. Open the final check when you want to run this import."
                 : "Resolve the blockers shown in the mapping preview before REVORY can continue with this import."
-              : "Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first."}
+              : "Keep the official structure when you can. When you cannot, REVORY will still help you review the incoming headers before anything reaches the live Seller view."}
           </p>
           {!isConfirmationStepVisible && currentPreview ? (
             <button

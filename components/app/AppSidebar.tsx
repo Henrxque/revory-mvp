@@ -49,7 +49,7 @@ const navGroups = (leadSourcesStatus: string): SidebarGroup[] => [
         {
           href: "/app/imports",
           icon: "appointments",
-          label: "Lead Sources",
+          label: "Booking Inputs",
           status: leadSourcesStatus,
         },
       ],
@@ -125,11 +125,11 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Live") {
+  if (status === "Visible") {
     return "success";
   }
 
-  if (status === "Awaiting import") {
+  if (status === "Ready for upload") {
     return "warning";
   }
 

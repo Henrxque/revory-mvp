@@ -18,11 +18,11 @@ import {
 function formatSourceLabel(value: DataSourceType | null) {
   switch (value) {
     case "APPOINTMENTS_CSV":
-      return "CSV upload";
+      return "Appointments CSV";
     case "CLIENTS_CSV":
       return "Client export";
     case "MANUAL_IMPORT":
-      return "Guided import";
+      return "Guided CSV upload";
     default:
       return null;
   }
@@ -167,12 +167,12 @@ export default async function SetupPage() {
     },
     {
       detail: sourceNeedsReview
-        ? "Current lead source needs review"
-        : sourceLabel ?? "No lead source selected yet",
+        ? "Current lead entry needs review"
+        : sourceLabel ?? "Lead entry point pending",
       label: "Lead source",
       note: sourceNeedsReview
         ? "This workspace still carries a source type that Sprint 2 does not support in the live Seller flow."
-        : "Sets where Seller reads demand and hands qualified lead flow into the booking path.",
+        : "Sets where Seller reads initial demand and hands qualified lead flow into the booking path.",
       ready: Boolean(sourceLabel) && !sourceNeedsReview,
       type: "pillar",
     },
@@ -239,7 +239,7 @@ export default async function SetupPage() {
             <p className="rev-label">Why activation matters</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
               {appContext.activationSetup.isCompleted
-                ? "The activation flow is complete. Dashboard and lead-source mapping already use the live Seller state."
+                ? "The activation flow is complete. Dashboard and booking inputs already use the live Seller state."
                 : `REVORY Seller is still waiting on activation integrity. The current step is "${currentStep.title}".`}
             </p>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
@@ -263,7 +263,7 @@ export default async function SetupPage() {
                     Open dashboard
                   </DocumentNavigationLink>
                   <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                    Open Lead Sources
+                    Open Booking Inputs
                   </DocumentNavigationLink>
                 </>
               ) : (
@@ -319,10 +319,10 @@ export default async function SetupPage() {
           <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
             <p className="rev-label">01 • Lead enters</p>
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              {sourceLabel ?? "Lead source pending"}
+              {sourceLabel ?? "Lead entry point pending"}
             </p>
             <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-              This is the feed REVORY Seller reads first before it can guide the booking motion.
+              This is the starting point REVORY Seller reads before it can guide the booking motion.
             </p>
           </div>
 
@@ -483,10 +483,10 @@ export default async function SetupPage() {
           ) : (
             <div className="mt-5 min-w-0 overflow-hidden rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                Nothing is currently pending.
+                Nothing currently blocks activation integrity.
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The booking pillars are already locked, so this page now works as a clean activation checkpoint rather than an active to-do list.
+                The booking pillars are already locked, so this page now works as a clean checkpoint rather than an active to-do list.
               </p>
             </div>
           )}

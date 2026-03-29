@@ -1,0 +1,218 @@
+[next-auth][warn][NEXTAUTH_URL] 
+https://next-auth.js.org/warnings#nextauth_url
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+[browser] Uncaught PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at <anonymous> (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     },
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+[browser] Uncaught PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at <anonymous> (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     },
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+⨯ Error [PrismaClientKnownRequestError]: 
+Invalid `{imported module ./db/prisma.ts}["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return {imported module ./db/prisma.ts}["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at async (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     }, {
+  code: 'P2022',
+  meta: {
+    modelName: 'ActivationSetup',
+    column: 'activation_setups.averageDealValue'
+  },
+  clientVersion: '6.18.0',
+  digest: '1370751179'
+}
+[browser] Uncaught PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert()` invocation in
+C:\Users\hriqu\Documents\revory-mvp\.next\dev\server\chunks\ssr\[root-of-the-server]__0h5kccr._.js:307:147
+
+  304 ;
+  305 ;
+  306 async function getOrCreateActivationSetup(workspace) {
+→ 307     return __TURBOPACK__imported__module__$5b$project$5d2f$db$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].activationSetup.upsert(
+The column `activation_setups.averageDealValue` does not exist in the current database.
+    at <unknown> (services\onboarding\get-or-create-activation-setup.ts:10:33)
+    at <anonymous> (services\app\get-app-context.ts:24:27)
+   8 |   workspace: Workspace,
+   9 | ): Promise<ActivationSetup> {
+> 10 |   return prisma.activationSetup.upsert({
+     |                                 ^
+  11 |     where: {
+  12 |       workspaceId: workspace.id,
+  13 |     },
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[next-auth][warn][NEXTAUTH_URL] 
+https://next-auth.js.org/warnings#nextauth_url
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[next-auth][warn][NEXTAUTH_URL] 
+https://next-auth.js.org/warnings#nextauth_url

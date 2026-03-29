@@ -25,11 +25,11 @@ function resolveLeadSourcesStatus(
   hasSuccessfulImport: boolean,
 ) {
   if (hasSuccessfulImport) {
-    return "Live";
+    return "Visible";
   }
 
   if (onboardingSourceExists) {
-    return "Awaiting import";
+    return "Ready for upload";
   }
 
   return "Not configured";
