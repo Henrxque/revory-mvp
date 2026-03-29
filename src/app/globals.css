@@ -83,6 +83,62 @@ body::before {
     rgba(255, 255, 255, 0.02);
 }
 
+.rev-accent-mist,
+.rev-accent-mist-soft {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.rev-accent-mist::before,
+.rev-accent-mist::after,
+.rev-accent-mist-soft::before,
+.rev-accent-mist-soft::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  z-index: 0;
+}
+
+.rev-accent-mist::before,
+.rev-accent-mist-soft::before {
+  left: -3.25rem;
+  top: -1.75rem;
+  height: 12rem;
+  width: 12rem;
+  background: rgba(194, 9, 90, 0.13);
+  filter: blur(58px);
+}
+
+.rev-accent-mist::after,
+.rev-accent-mist-soft::after {
+  right: -2.5rem;
+  top: 0.75rem;
+  height: 9rem;
+  width: 9rem;
+  background: rgba(224, 16, 106, 0.07);
+  filter: blur(54px);
+}
+
+.rev-accent-mist-soft::before {
+  background: rgba(194, 9, 90, 0.1);
+  height: 10rem;
+  width: 10rem;
+}
+
+.rev-accent-mist-soft::after {
+  background: rgba(224, 16, 106, 0.05);
+  height: 7.5rem;
+  width: 7.5rem;
+}
+
+.rev-accent-mist > *,
+.rev-accent-mist-soft > * {
+  position: relative;
+  z-index: 1;
+}
+
 .rev-card-hover {
   transition:
     border-color 0.18s ease,

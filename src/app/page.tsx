@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+﻿import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import Image from "next/image";
@@ -47,6 +47,27 @@ function extractLandingMarkup(content: string) {
   return content.slice(startIndex, footerIndex);
 }
 
+function normalizeReferenceText(content: string) {
+  return [
+    ["â€”", "—"],
+    ["â€“", "–"],
+    ["â€˜", "‘"],
+    ["â€™", "’"],
+    ["â€œ", "“"],
+    ["â€", "”"],
+    ["â€¦", "…"],
+    ["â†’", "→"],
+    ["âœ“", "✓"],
+    ["â˜…", "★"],
+    ["Â·", "·"],
+    ["Â©", "©"],
+    ["Â", ""],
+  ].reduce(
+    (normalizedContent, [from, to]) => normalizedContent.replaceAll(from, to),
+    content,
+  );
+}
+
 function adaptReferenceCss(css: string) {
   return css
     .replace(/body\s*\{/g, ".revory-landing-page {")
@@ -61,8 +82,7 @@ function adaptReferenceMarkup(markup: string) {
     .replaceAll('href="#pricing" class="btn-primary"', 'href="/start" class="btn-primary"')
     .replaceAll('href="#pricing" class="nav-cta"', 'href="/start" class="nav-cta"')
     .replaceAll('href="#" class="btn-primary"', 'href="/start" class="btn-primary"')
-    .replaceAll('href="#"', 'href="/"')
-    .replaceAll("Â©", "©");
+    .replaceAll('href="#"', 'href="/"');
 }
 
 export default async function HomePage() {
@@ -74,8 +94,10 @@ export default async function HomePage() {
 
   const referenceHtml = await readFile(LANDING_REFERENCE_PATH, "utf8");
   const rawCss = extractBetween(referenceHtml, "<style>", "</style>");
-  const landingCss = adaptReferenceCss(rawCss);
-  const landingMarkup = adaptReferenceMarkup(extractLandingMarkup(referenceHtml));
+  const landingCss = adaptReferenceCss(normalizeReferenceText(rawCss));
+  const landingMarkup = adaptReferenceMarkup(
+    normalizeReferenceText(extractLandingMarkup(referenceHtml)),
+  );
 
   return (
     <>
@@ -109,7 +131,7 @@ export default async function HomePage() {
             <span className="logo-wordmark">REVORY</span>
           </div>
           <span className="footer-copy">
-            © 2025 REVORY. Appointment recovery software for modern businesses.
+            © 2025 REVORY. Premium booking acceleration software for MedSpas.
           </span>
           <ul className="footer-links">
             <li>
@@ -127,3 +149,4 @@ export default async function HomePage() {
     </>
   );
 }
+

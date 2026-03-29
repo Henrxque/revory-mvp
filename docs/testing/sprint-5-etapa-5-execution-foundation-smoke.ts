@@ -259,9 +259,9 @@ if (!confirmationCard || !reviewCard || !confirmationTemplate || !reviewTemplate
   throw new Error("Sprint 5 execution foundation smoke could not find the expected dashboard structures.");
 }
 
-if (confirmationCard.readinessLabel !== "Partially ready") {
+if (confirmationCard.readinessLabel !== "Actionable, with blockers") {
   throw new Error(
-    `Expected confirmation card to be partially ready, received "${confirmationCard.readinessLabel}".`,
+    `Expected confirmation card to expose actionable readiness with blockers, received "${confirmationCard.readinessLabel}".`,
   );
 }
 
@@ -271,9 +271,9 @@ if (confirmationCard.blockedReason !== "Missing patient email") {
   );
 }
 
-if (reviewCard.readinessLabel !== "Partially ready") {
+if (reviewCard.readinessLabel !== "Actionable, with blockers") {
   throw new Error(
-    `Expected review card to be partially ready, received "${reviewCard.readinessLabel}".`,
+    `Expected review card to expose actionable readiness with blockers, received "${reviewCard.readinessLabel}".`,
   );
 }
 
@@ -283,7 +283,7 @@ if (reviewCard.blockedReason !== "Missing patient email") {
   );
 }
 
-if (confirmationTemplate.outreachStateLabel !== "Ready, with blockers") {
+if (confirmationTemplate.outreachStateLabel !== "Prepared base, with blockers") {
   throw new Error(
     `Expected confirmation template to expose mixed readiness, received "${confirmationTemplate.outreachStateLabel}".`,
   );
@@ -297,11 +297,11 @@ if (confirmationTemplate.blockedReason !== "Missing patient email") {
 
 if (!confirmationTemplate.body.includes("Hi Ready,")) {
   throw new Error(
-    "Expected confirmation template preview to use the ready appointment as the live preview source.",
+    "Expected confirmation template preview to use the actionable appointment as the current example source.",
   );
 }
 
-if (reviewTemplate.outreachStateLabel !== "Ready, with blockers") {
+if (reviewTemplate.outreachStateLabel !== "Prepared base, with blockers") {
   throw new Error(
     `Expected review template to expose mixed readiness, received "${reviewTemplate.outreachStateLabel}".`,
   );
@@ -315,7 +315,7 @@ if (reviewTemplate.blockedReason !== "Missing patient email") {
 
 if (!reviewTemplate.body.includes("Hi Ready,")) {
   throw new Error(
-    "Expected review template preview to use the ready visit as the live preview source.",
+    "Expected review template preview to use the actionable visit as the current example source.",
   );
 }
 

@@ -1,12 +1,10 @@
 import { redirect } from "next/navigation";
 
-import { OperationalSurface } from "@/components/dashboard/OperationalSurface";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
-import { getOperationalSurface } from "@/services/operations/get-operational-surface";
 import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
@@ -14,13 +12,21 @@ import {
 
 function formatCurrency(value: number | null) {
   if (value === null) {
-    return "Awaiting import";
+    return "Awaiting revenue";
   }
 
   return new Intl.NumberFormat("en-US", {
     currency: "USD",
     style: "currency",
   }).format(value);
+}
+
+function formatMetricValue(value: number | null) {
+  if (value === null) {
+    return "Awaiting signal";
+  }
+
+  return `${value}`;
 }
 
 function formatMonthChip() {
@@ -63,29 +69,16 @@ function getProgressPercent(successRows: number, totalRows: number) {
   return Math.round((successRows / totalRows) * 100);
 }
 
-function formatModeLabel(modeKey: string) {
-  switch (modeKey) {
-    case "MODE_A":
-      return "Mode A - Basic Reminder";
-    case "MODE_B":
-      return "Mode B - Attendance Recovery";
-    case "MODE_C":
-      return "Mode C - Attendance + Reviews";
+function formatMainOfferLabel(value: string | null) {
+  switch (value) {
+    case "INJECTABLES":
+      return "Injectables";
+    case "LASER_SKIN":
+      return "Laser & Skin";
+    case "BODY_CONTOURING":
+      return "Body Contouring";
     default:
-      return modeKey;
-  }
-}
-
-function formatModeBadgeLabel(modeKey: string) {
-  switch (modeKey) {
-    case "MODE_A":
-      return "Mode A";
-    case "MODE_B":
-      return "Mode B";
-    case "MODE_C":
-      return "Mode C";
-    default:
-      return modeKey;
+      return "Main offer pending";
   }
 }
 
@@ -103,54 +96,90 @@ function getImportSourceTone(status: string) {
   return "neutral" as const;
 }
 
-function getDashboardActionButtonClassName(hasImportedData: boolean) {
-  return hasImportedData ? "rev-button-secondary" : "rev-button-primary";
+function isPendingMetricValue(value: string | number) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const normalized = value.toLowerCase();
+  return normalized.includes("awaiting") || normalized.includes("no signal");
+}
+
+function getMetricValueClassName(
+  value: string | number,
+  emphasis: "primary" | "support",
+) {
+  const pending = isPendingMetricValue(value);
+
+  if (emphasis === "primary") {
+    return pending
+      ? "text-[1.75rem] leading-[1.08]"
+      : "text-[clamp(2.65rem,4vw,3.55rem)] leading-none";
+  }
+
+  return pending
+    ? "text-[1.45rem] leading-[1.15]"
+    : "text-[1.95rem] leading-none";
 }
 
 type MetricCardProps = Readonly<{
-  accent?: boolean;
   label: string;
   note: string;
   value: string | number;
 }>;
 
-function MetricCard({ accent = false, label, note, value }: MetricCardProps) {
+function MetricCard({ label, note, value }: MetricCardProps) {
   return (
-    <div
-      className={`rounded-[20px] border px-5 py-5 ${
-        accent
-          ? "border-[color:var(--border-accent)] bg-[linear-gradient(135deg,rgba(194,9,90,0.14),rgba(21,20,28,0.98))]"
-          : "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]"
-      }`}
-    >
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+    <div className="rev-card-soft min-w-0 rounded-[22px] px-4 py-5">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
         {label}
       </p>
       <p
-        className={`mt-4 text-[2rem] font-semibold leading-none ${
-          accent ? "text-[color:var(--accent-light)]" : "text-[color:var(--foreground)]"
-        }`}
+        className={`mt-4 max-w-[11rem] font-semibold text-[color:var(--foreground)] ${getMetricValueClassName(
+          value,
+          "support",
+        )}`}
       >
         {value}
       </p>
-      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+      <p className="mt-3 max-w-[18rem] text-[13px] leading-6 text-[color:var(--text-muted)]">
+        {note}
+      </p>
     </div>
   );
 }
 
-type NorthStarCardProps = Readonly<{
+type SignalCardProps = Readonly<{
   note: string;
   title: string;
 }>;
 
-function NorthStarCard({ note, title }: NorthStarCardProps) {
+function SignalCard({ note, title }: SignalCardProps) {
   return (
-    <div className="rev-card-soft rounded-[20px] px-4 py-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-[color:var(--foreground)]">{title}</p>
-        <RevoryStatusBadge tone="neutral">Future layer</RevoryStatusBadge>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+    <div className="rev-card-soft min-w-0 rounded-[20px] px-4 py-4">
+      <p className="rev-label">Secondary signal</p>
+      <p className="mt-3 text-base font-semibold leading-6 text-[color:var(--foreground)]">
+        {title}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+    </div>
+  );
+}
+
+type ContextCardProps = Readonly<{
+  label: string;
+  note: string;
+  value: string;
+}>;
+
+function ContextCard({ label, note, value }: ContextCardProps) {
+  return (
+    <div className="min-w-0 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+      <p className="rev-label">{label}</p>
+      <p className="mt-3 text-[1.1rem] font-semibold leading-6 text-[color:var(--foreground)]">
+        {value}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
     </div>
   );
 }
@@ -172,112 +201,71 @@ export default async function DashboardPage() {
 
   const { activationSetup, workspace } = appContext;
   const overview = await getDashboardOverview(workspace.id);
-  const operationalSurface = await getOperationalSurface(
-    workspace.id,
-    overview.appointmentsMonitored > 0,
-  );
   const monthChip = formatMonthChip();
   const hasImportedData =
     overview.importSources.length > 0 ||
     overview.appointmentsMonitored > 0 ||
     overview.clientsImported > 0;
-  const workspaceReadyItems = [
-    {
-      done: activationSetup.isCompleted,
-      label: "Workspace activated",
-      note: "Core setup is complete and the private workspace is live.",
-    },
-    {
-      done: overview.importSources.length > 0,
-      label: "Data imported",
-      note: "Bring in appointments or clients so REVORY has an operational base to monitor.",
-    },
-    {
-      done: Boolean(activationSetup.googleReviewsUrl),
-      label: "Google reviews destination",
-      note: "The growth layer already has the target link saved for future review requests.",
-    },
-    {
-      done: Boolean(activationSetup.recommendedModeKey),
-      label: "Starting mode selected",
-      note: `${formatModeLabel(workspace.activeModeKey)} is the current operating direction.`,
-    },
-  ];
-  const flowCatalog = [
-    {
-      included: true,
-      note: "Included in every starting mode once the live automation layer turns on.",
-      title: "Confirmation Flow",
-    },
-    {
-      included: true,
-      note: "Included in every starting mode for pre-appointment follow-up.",
-      title: "Reminder Flow",
-    },
-    {
-      included: workspace.activeModeKey === "MODE_B" || workspace.activeModeKey === "MODE_C",
-      note:
-        workspace.activeModeKey === "MODE_B" || workspace.activeModeKey === "MODE_C"
-          ? "Included in this mode once recovery logic is live."
-          : "Unlocks when the workspace moves beyond the reminder-only mode.",
-      title: "Rebooking / Empty Slot Recovery",
-    },
-    {
-      included: workspace.activeModeKey === "MODE_C",
-      note:
-        workspace.activeModeKey === "MODE_C"
-          ? "Included in this mode once the review layer is active."
-          : "Unlocks in the review-focused mode.",
-      title: "Review Request Flow",
-    },
-  ];
-  const nextBestAction = !hasImportedData
-    ? "Open Imports and bring in the first CSV so REVORY can start monitoring real appointments and clients."
+  const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
+  const nextLeveragePoint = !hasImportedData
+    ? "Open Lead Sources and bring in the first dataset so REVORY Seller can start reading booking and revenue context."
     : overview.upcomingAppointments === 0
-      ? "Upload a fresher appointments export so the workspace has a current schedule to monitor."
-      : "Review the import quality and keep the appointment base fresh while the operational flow layer is added.";
+      ? "Upload a fresher appointments export so the booking view stays current."
+      : "Keep the appointment base fresh so revenue visibility and booking guidance stay trustworthy.";
+  const speedSignalValue = hasImportedData ? "Awaiting signal" : "No signal yet";
+  const bookingRateValue = hasImportedData ? "Awaiting signal" : "No signal yet";
+  const activeSourcePathsValue = overview.importSources.length;
 
   return (
-    <div className="space-y-6">
-      <section className="rev-shell-hero rounded-[30px] p-6 md:p-7">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
-          <div className="max-w-3xl space-y-3">
-            <p className="rev-kicker">Operations overview</p>
-            <h1 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
-              {hasImportedData
-                ? "Your workspace already has an operational base."
-                : "Activation is complete. Now give REVORY the data to work with."}
-            </h1>
-            <p className="text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
-              {hasImportedData
-                ? "Imported appointments and clients already give REVORY enough structure to keep the operational layer readable. What matters now is keeping the base fresh, readable, and ready for the next live actions."
-                : "The premium experience starts with a low-friction import. Bring in appointments or clients and let REVORY turn that first dataset into a clean operational view."}
-            </p>
-          </div>
-
-          <div className="space-y-3 xl:ml-auto xl:max-w-[20rem]">
-            <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+    <div className="space-y-5">
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-7 md:p-8">
+        <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-end">
+          <div className="max-w-[46rem] space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="rev-kicker">Revenue view</p>
               <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] font-medium text-[color:var(--text-muted)]">
                 {monthChip}
               </span>
               <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-                {hasImportedData ? "Operational base live" : "Awaiting first import"}
+                {hasImportedData ? "Revenue view live" : "Awaiting first source"}
               </RevoryStatusBadge>
             </div>
 
-            <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-4">
-              <p className="rev-label">Current access point</p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                {hasImportedData
-                  ? "Open imports whenever you need to refresh the base or review import quality."
-                  : "Bring the first CSV in and give REVORY a real schedule and client base to work with."}
+            <h1 className="max-w-[40rem] font-[family:var(--font-display)] text-[clamp(2.4rem,4vw,3.95rem)] leading-[0.92] text-[color:var(--foreground)]">
+              {hasImportedData
+                ? "Revenue Generated by REVORY this month."
+                : "Connect your first source to unlock the revenue view."}
+            </h1>
+
+            <p className="max-w-[39rem] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
+              {hasImportedData
+                ? "Money stays first. Booked appointments, source health, and booking context stay directly underneath so the dashboard remains premium and easy to read."
+                : "Bring in appointments or client records and let REVORY Seller turn that first dataset into a clean, revenue-first booking view."}
+            </p>
+          </div>
+
+          <div className="xl:ml-auto xl:w-full xl:max-w-[19rem]">
+            <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+              <p className="rev-label">Primary metric</p>
+              <p
+                className={`mt-4 max-w-[14rem] font-semibold text-[color:var(--accent-light)] ${getMetricValueClassName(
+                  formatCurrency(overview.estimatedImportedRevenue),
+                  "primary",
+                )}`}
+              >
+                {formatCurrency(overview.estimatedImportedRevenue)}
               </p>
-              <div className="mt-4">
+              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                {hasImportedData
+                  ? "Booked revenue currently visible inside this workspace."
+                  : "Revenue appears as soon as appointment value data is attached."}
+              </p>
+              <div className="mt-5">
                 <DocumentNavigationLink
-                  className={`${getDashboardActionButtonClassName(hasImportedData)} w-full justify-center px-5 py-3 text-sm`}
+                  className={`${hasImportedData ? "rev-button-secondary" : "rev-button-primary"} w-full justify-center px-5 py-3 text-sm`}
                   href="/app/imports"
                 >
-                  {hasImportedData ? "Open imports" : "Import data"}
+                  {hasImportedData ? "Refresh sources" : "Connect first source"}
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -285,54 +273,42 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))]">
+      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
         <MetricCard
-          accent
-          label="Monitored Revenue Base"
-          note={
-            overview.estimatedImportedRevenue === null
-              ? "REVORY will show the revenue base as soon as appointment values arrive."
-              : "Current revenue already attached to imported appointments."
-          }
-          value={formatCurrency(overview.estimatedImportedRevenue)}
+          label="Appointments booked"
+          note="Scheduled or completed appointments currently attached to this workspace."
+          value={overview.bookedAppointments}
         />
         <MetricCard
-          label="Appointments Monitored"
-          note="Appointments already persisted in this workspace."
-          value={overview.appointmentsMonitored}
+          label="Booking rate"
+          note="Appears once REVORY Seller has enough real lead-to-booking data."
+          value={bookingRateValue}
         />
         <MetricCard
-          label="Upcoming Appointments"
-          note="Scheduled ahead of the current server time."
-          value={overview.upcomingAppointments}
+          label="Response time"
+          note="Appears once REVORY Seller starts receiving live speed signals."
+          value={speedSignalValue}
         />
         <MetricCard
-          label="Client Profiles"
-          note="Current stored client base available to REVORY."
-          value={overview.clientsImported}
-        />
-        <MetricCard
-          label="Cancelled Appointments"
-          note="Imported rows already marked as canceled."
-          value={overview.canceledAppointments}
+          label="Sources connected"
+          note="Active sources feeding booking and revenue visibility."
+          value={activeSourcePathsValue}
         />
       </section>
 
-      <OperationalSurface surface={operationalSurface} />
-
-      <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-                Import readiness
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.14fr)_minmax(300px,0.86fr)]">
+        <section className="min-w-0 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+                Source health
               </p>
-              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                Keep what landed, what needs review, and what still needs cleanup visible.
+              <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                Import quality, coverage, and base freshness kept readable in one place.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
-              {overview.importSources.length > 0 ? "Imported" : "Awaiting import"}
+              {overview.importSources.length > 0 ? "Sources active" : "Awaiting source"}
             </RevoryStatusBadge>
           </div>
 
@@ -348,14 +324,14 @@ export default async function DashboardPage() {
                 return (
                   <div
                     key={source.type}
-                    className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
+                    className="min-w-0 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-[color:var(--foreground)]">
                           {source.templateLabel}
                         </p>
-                        <p className="mt-1 text-xs text-[color:var(--text-muted)]">
+                        <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
                           {source.fileName ?? "No file name saved"}
                         </p>
                       </div>
@@ -382,7 +358,7 @@ export default async function DashboardPage() {
                     <div className="mt-4 overflow-hidden rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]">
                       <div className="grid divide-y divide-[color:var(--border)] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
                         <div className="px-3 py-3">
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
                             Coverage
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -390,7 +366,7 @@ export default async function DashboardPage() {
                           </p>
                         </div>
                         <div className="px-3 py-3">
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
                             Success rows
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -398,7 +374,7 @@ export default async function DashboardPage() {
                           </p>
                         </div>
                         <div className="px-3 py-3">
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
                             Review rows
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -406,7 +382,7 @@ export default async function DashboardPage() {
                           </p>
                         </div>
                         <div className="px-3 py-3">
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
                             Total rows
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -422,53 +398,65 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No import state yet
+                No source health yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Open Imports, upload the file you already have, and let REVORY guide the
-                header mapping inside the app before the final import runs.
+                Open Lead Sources, upload the file you already have, and let REVORY Seller build the first booking and revenue view.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open imports
+                  Open sources
                 </DocumentNavigationLink>
               </div>
             </div>
           )}
         </section>
 
-        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-                Mode and flow roadmap
-              </p>
-              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                The workspace already has a clear operating direction, even before every live
-                automation is on.
-              </p>
-            </div>
-            <RevoryStatusBadge tone="accent">
-              {formatModeBadgeLabel(workspace.activeModeKey)}
-            </RevoryStatusBadge>
+        <section className="min-w-0 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+          <div className="space-y-2">
+            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+              Next leverage point
+            </p>
+            <p className="max-w-[28rem] text-sm leading-6 text-[color:var(--text-muted)]">
+              Keep the next obvious move readable without turning the product into a queue.
+            </p>
           </div>
 
-          <div className="mt-5 space-y-3">
-            {flowCatalog.map((flow) => (
+          <div className="mt-5 rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-5">
+            <p className="rev-label">Recommended move</p>
+            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
+              {nextLeveragePoint}
+            </p>
+            <div className="mt-5">
+              <DocumentNavigationLink
+                className={hasImportedData ? "rev-button-secondary" : "rev-button-primary"}
+                href="/app/imports"
+              >
+                {hasImportedData ? "Review sources" : "Connect source"}
+              </DocumentNavigationLink>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+            {[
+              {
+                label: "One main offer",
+                note: "Seller stays narrow around one guided booking motion per client.",
+              },
+              {
+                label: "Revenue-first read",
+                note: "Money stays dominant while source and booking context remain secondary.",
+              },
+            ].map((item) => (
               <div
-                key={flow.title}
+                key={item.label}
                 className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                    {flow.title}
-                  </p>
-                  <RevoryStatusBadge tone={flow.included ? "real" : "neutral"}>
-                    {flow.included ? "Included" : "Locked for this mode"}
-                  </RevoryStatusBadge>
-                </div>
+                <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                  {item.label}
+                </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  {flow.note}
+                  {item.note}
                 </p>
               </div>
             ))}
@@ -476,15 +464,54 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-                Upcoming appointments
+      <div className="grid gap-4 xl:grid-cols-[minmax(300px,0.92fr)_minmax(0,1.08fr)]">
+        <section className="min-w-0 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+                Booking context
               </p>
-              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-                The next scheduled appointments already visible in the current workspace base.
+              <p className="mt-1 max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                Short business context that keeps the dashboard readable and revenue-connected.
+              </p>
+            </div>
+            <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
+              {hasImportedData ? "Revenue-connected" : "Signal pending"}
+            </RevoryStatusBadge>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <ContextCard
+              label="Main offer"
+              note="Seller stays narrow around one main offer at a time."
+              value={mainOfferLabel}
+            />
+            <ContextCard
+              label="Lead base"
+              note="Current imported base available for booking and revenue visibility."
+              value={`${overview.clientsImported} client records`}
+            />
+            <ContextCard
+              label="Schedule in view"
+              note="Upcoming appointments currently visible in this workspace."
+              value={`${overview.upcomingAppointments} upcoming`}
+            />
+            <ContextCard
+              label="Canceled appointments"
+              note="A light signal only, not the center of the dashboard."
+              value={formatMetricValue(overview.canceledAppointments)}
+            />
+          </div>
+        </section>
+
+        <section className="min-w-0 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+                Appointments in view
+              </p>
+              <p className="mt-1 max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                The next booked appointments currently visible inside this workspace.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.upcomingAppointments > 0 ? "real" : "neutral"}>
@@ -522,96 +549,47 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No upcoming appointments yet
+                No appointments in view yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Import an appointments CSV to give REVORY a current schedule to monitor.
+                Import an appointments source so REVORY Seller can keep a current booking schedule visible.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open imports
+                  Open sources
                 </DocumentNavigationLink>
               </div>
             </div>
           )}
         </section>
-
-        <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-          <div className="space-y-3">
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Workspace readiness
-            </p>
-            <p className="text-sm text-[color:var(--text-muted)]">
-              Keep category, current status, and the next obvious move readable at a glance.
-            </p>
-          </div>
-
-          <div className="mt-5 space-y-3">
-            {workspaceReadyItems.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                    {item.label}
-                  </p>
-                  <RevoryStatusBadge tone={item.done ? "real" : "future"}>
-                    {item.done ? "Ready" : "Pending"}
-                  </RevoryStatusBadge>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  {item.note}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-5 rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
-            <p className="rev-label">Next best action</p>
-            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
-              {nextBestAction}
-            </p>
-            {!hasImportedData ? (
-              <div className="mt-4">
-                <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-                  Import data
-                </DocumentNavigationLink>
-              </div>
-            ) : null}
-          </div>
-        </section>
       </div>
 
       <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Future outcomes
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Once the base stays clean and the operational layer is live, these are the
-              outcome metrics REVORY starts surfacing next.
-            </p>
-          </div>
+        <div>
+          <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+            Secondary signals
+          </p>
+          <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
+            These stay secondary until REVORY Seller has the lead and response events needed to measure them honestly.
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <NorthStarCard
-            note="Starts once confirmation logic is running on top of imported appointments."
-            title="Confirmation Rate"
+          <SignalCard
+            note="Surfaces once Seller starts showing how quickly new leads move through the guided path."
+            title="Lead response time"
           />
-          <NorthStarCard
-            note="Appears when no-show prevention begins protecting booked revenue."
-            title="Estimated Revenue Protected"
+          <SignalCard
+            note="Surfaces once Seller can measure how many leads advance toward booked appointments."
+            title="Lead advance rate"
           />
-          <NorthStarCard
-            note="Appears when rebooking and empty-slot recovery are active."
-            title="Estimated Revenue Recovered"
+          <SignalCard
+            note="Surfaces once Seller can connect cleaner booking outcomes to the active source path."
+            title="Booked appointments"
           />
-          <NorthStarCard
-            note="Appears when the review request layer begins using the saved Google link."
-            title="Google Reviews Requested"
+          <SignalCard
+            note="Surfaces once Seller can compare which sources are feeding the healthiest booking pipeline."
+            title="Source performance"
           />
         </div>
       </section>

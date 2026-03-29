@@ -333,7 +333,7 @@ export function CsvUploadCard({
     }
 
     if (isConfirmationStepVisible) {
-      return { label: "Final confirmation", tone: "accent" as const };
+      return { label: "Final check", tone: "accent" as const };
     }
 
     if (currentPreview && canSubmit) {
@@ -364,8 +364,8 @@ export function CsvUploadCard({
     : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]";
   const primaryActionLabel =
     currentPreview?.exactTemplateMatch
-      ? "Review final confirmation"
-      : "Continue to final confirmation";
+      ? "Review final check"
+      : "Continue to final check";
   const confirmationActionLabel =
     currentPreview?.exactTemplateMatch
       ? "Confirm official mapping and import"
@@ -458,7 +458,7 @@ export function CsvUploadCard({
     }
 
     if (!canOpenConfirmation) {
-      setClientError("Resolve the mapping blockers before moving to final confirmation.");
+      setClientError("Resolve the mapping blockers before moving to the final check.");
       return;
     }
 
@@ -652,7 +652,7 @@ export function CsvUploadCard({
               <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
                 Bring the export you already have. REVORY reads the headers
                 first, suggests the best matching REVORY fields, and waits for your
-                final confirmation before import.
+                final check before import.
               </p>
             </div>
             <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
@@ -720,19 +720,18 @@ export function CsvUploadCard({
           <div className="rev-card rounded-[28px] p-5 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-3xl">
-                <p className="rev-label">Final confirmation</p>
+                <p className="rev-label">Final check</p>
                 <h3 className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
-                  Confirm the mapping for this import execution.
+                  Confirm the mapping for this import.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
                   REVORY will run this import using the mapping confirmed in
-                  this step for the current execution. This confirmation
-                  applies only to the current execution and does not create a
-                  persistent mapping memory for the workspace.
+                  this step for the current import only. This check does not
+                  create a persistent mapping memory for the workspace.
                 </p>
               </div>
               <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
-                Current execution only
+                Current import only
               </span>
             </div>
 
@@ -775,12 +774,12 @@ export function CsvUploadCard({
               <p className="font-medium text-[color:var(--foreground)]">
                 What happens next
               </p>
-              <p className="mt-2">
+                <p className="mt-2">
                 REVORY uses the confirmed mapping shown here only for this
-                execution. The server rebuilds the official REVORY CSV
+                import. The server rebuilds the official REVORY CSV
                 structure from that confirmed mapping, then runs the approved
                 import validation and persistence flow.
-              </p>
+                </p>
             </div>
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
@@ -814,12 +813,12 @@ export function CsvUploadCard({
                   REVORY is validating and importing the current file.
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Keep this page open while the current execution finishes. The
+                  Keep this page open while the current import finishes. The
                   detailed result will appear below as soon as the import returns.
                 </p>
               </div>
               <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
-                Current execution
+                Current import
               </span>
             </div>
           </div>
@@ -885,12 +884,12 @@ export function CsvUploadCard({
           <div className="rev-card rounded-[28px] p-5 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-3xl">
-                <p className="rev-label">Current execution</p>
+                <p className="rev-label">Current import</p>
                 <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
                   Result from the import that just ran.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                  This section describes only the execution that just finished.
+                  This section describes only the import that just finished.
                   The &quot;Last import&quot; block higher on the page continues to show
                   the latest aggregated state saved for this source.
                 </p>
@@ -1026,10 +1025,10 @@ export function CsvUploadCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
             {isConfirmationStepVisible
-              ? "This is the final check before import. Confirm to execute the current mapping exactly as shown."
+              ? "This is the final check before import. Confirm to run the current mapping exactly as shown."
               : currentPreview
               ? canSubmit
-                ? "The current mapping is ready. Open the final confirmation when you want to execute this import."
+                ? "The current mapping is ready. Open the final check when you want to run this import."
                 : "Resolve the blockers shown in the mapping preview before REVORY can continue with this import."
               : "Keep the official structure when you can. When you cannot, REVORY will help you review the incoming headers first."}
           </p>

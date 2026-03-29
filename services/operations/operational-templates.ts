@@ -55,7 +55,7 @@ const placeholderCatalog: Record<
   },
   google_reviews_url: {
     key: "google_reviews_url",
-    label: "Google reviews URL",
+    label: "Google feedback link",
     token: "{{google_reviews_url}}",
   },
   provider_name: {
@@ -105,12 +105,12 @@ const operationalTemplateDefinitions: Record<
       "We noticed your {{service_name}} did not happen as planned.",
       "If you want to come back in, reply to this email and we can help with the next step.",
     ].join("\n"),
-    categoryLabel: "Recovery",
+    categoryLabel: "Follow-up",
     description:
-      "A narrow recovery starting point for recent disruptions, without pretending REVORY already runs a rebooking engine.",
+      "A narrow follow-up starting point for recent disruptions, without pretending REVORY already runs an automated rescheduling engine.",
     key: "recovery",
     placeholders: ["client_first_name", "service_name"],
-    title: "Recovery template",
+    title: "Follow-up template",
   },
   reminder: {
     body: [
@@ -136,14 +136,14 @@ const operationalTemplateDefinitions: Record<
       "Hi {{client_first_name}},",
       "",
       "Thank you for visiting us for {{service_name}}.",
-      "If you have a moment, we would appreciate your review here: {{google_reviews_url}}",
+      "If you have a moment, we would appreciate your feedback here: {{google_reviews_url}}",
     ].join("\n"),
-    categoryLabel: "Review request",
+    categoryLabel: "Feedback request",
     description:
-      "A short review-request base that stays in eligibility mode instead of pretending REVORY already runs full reputation operations.",
+      "A short feedback-request base that stays in eligibility mode instead of pretending REVORY already runs full public feedback operations.",
     key: "review_request",
     placeholders: ["client_first_name", "service_name", "google_reviews_url"],
-    title: "Review request template",
+    title: "Feedback request template",
   },
 };
 
@@ -360,11 +360,11 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Ready, with blockers"
-            : "Ready for outreach",
+            ? "Prepared base, with blockers"
+            : "Prepared base",
           suggestedNextStep:
             hasMixedBlockedPaths
-              ? "Use the base confirmation message for the ready appointments, then resolve the missing email path on the blocked confirmations."
+              ? "Use the base confirmation message for the actionable appointments, then resolve the missing email path on the blocked confirmations."
               : "Use the base confirmation message for appointments already inside the confirmation window.",
         };
       }
@@ -374,9 +374,9 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Recommended next",
+          outreachStateLabel: "Needs setup first",
           suggestedNextStep:
-            "Tighten the client email base first so eligible confirmation paths can move from blocked to ready.",
+            "Tighten the client email base first so eligible confirmation paths can move from blocked to actionable.",
         };
       }
 
@@ -385,7 +385,7 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Prepared for later",
+          outreachStateLabel: "Preparation in place",
           suggestedNextStep:
             "The template base is already in place; this category turns live as appointments move into the confirmation window.",
         };
@@ -395,9 +395,9 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Detected in model",
+        outreachStateLabel: "Visible in model",
         suggestedNextStep:
-          "Keep the template ready. Confirmation outreach starts once appointments enter the active window.",
+          "Keep the message base ready. Confirmation becomes actionable once appointments enter the active window.",
       };
     case "reminder":
       if (readiness.stage === "ready") {
@@ -406,11 +406,11 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Ready, with blockers"
-            : "Ready for outreach",
+            ? "Prepared base, with blockers"
+            : "Prepared base",
           suggestedNextStep:
             hasMixedBlockedPaths
-              ? "Use the reminder base for the ready appointments, then resolve the missing email path on the blocked reminders."
+              ? "Use the reminder base for the actionable appointments, then resolve the missing email path on the blocked reminders."
               : "Use the reminder base for appointments already inside the reminder window.",
         };
       }
@@ -420,9 +420,9 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Recommended next",
+          outreachStateLabel: "Needs setup first",
           suggestedNextStep:
-            "Fix the client email path first so reminder outreach can move from visible to ready.",
+            "Fix the client email path first so reminder guidance can move from visible to actionable.",
         };
       }
 
@@ -431,7 +431,7 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Prepared for later",
+          outreachStateLabel: "Preparation in place",
           suggestedNextStep:
             "The reminder template is already prepared; it becomes live as the schedule moves closer.",
         };
@@ -441,7 +441,7 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Detected in model",
+        outreachStateLabel: "Visible in model",
         suggestedNextStep:
           "Keep the reminder base available. It activates once the schedule reaches the reminder window.",
       };
@@ -452,12 +452,12 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Ready, with blockers"
-            : "Ready for outreach",
+            ? "Prepared base, with blockers"
+            : "Prepared base",
           suggestedNextStep:
             hasMixedBlockedPaths
-              ? "Use the recovery message for the ready opportunities, then resolve the missing email path on the blocked disruptions."
-              : "Use the recovery message as a narrow first outreach path for recent disruptions.",
+              ? "Use the follow-up message for the actionable opportunities, then resolve the missing email path on the blocked disruptions."
+              : "Use the follow-up message as a narrow primary booking path for recent disruptions.",
         };
       }
 
@@ -466,9 +466,9 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Recommended next",
+          outreachStateLabel: "Needs setup first",
           suggestedNextStep:
-            "Recovery is surfaced, but it still needs a usable email path before outreach can be prepared cleanly.",
+            "Follow-up is surfaced, but it still needs a usable email path before the message base becomes usable.",
         };
       }
 
@@ -477,9 +477,9 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Prepared for later",
+          outreachStateLabel: "Preparation in place",
           suggestedNextStep:
-            "The recovery base is already shaped, but it stays intentionally narrow and non-automated in this MVP.",
+            "The follow-up base is already shaped, but it stays intentionally narrow and non-automated in this MVP.",
         };
       }
 
@@ -487,9 +487,9 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Detected in model",
+        outreachStateLabel: "Visible in model",
         suggestedNextStep:
-          "Recovery stays available as a controlled template foundation without pretending there is already a rebooking engine.",
+          "Follow-up stays available as a controlled template foundation without pretending there is already a rebooking engine.",
       };
     case "review_request":
       if (readiness.stage === "ready") {
@@ -498,12 +498,12 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Ready, with blockers"
-            : "Ready for outreach",
+            ? "Prepared base, with blockers"
+            : "Prepared base",
           suggestedNextStep:
             hasMixedBlockedPaths
-              ? "Use the review-request base for the ready visits, then resolve the missing email or reviews destination on the blocked paths."
-              : "The review-request base is ready for recent eligible visits that already have a destination and email path.",
+              ? "Use the feedback-request base for the actionable visits, then resolve the missing email or feedback destination on the blocked paths."
+              : "The feedback-request base is ready for recent eligible visits that already have a destination and email path.",
         };
       }
 
@@ -512,11 +512,11 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Recommended next",
+          outreachStateLabel: "Needs setup first",
           suggestedNextStep:
-            blockedReason === "Missing reviews destination"
-              ? "Configure the Google Reviews destination first so the request can move from visible to ready."
-              : "Tighten the client email path first so the review request can move from visible to ready.",
+            blockedReason === "Missing feedback destination"
+              ? "Configure the Google feedback link first so the request can move from visible to actionable."
+              : "Tighten the client email path first so the feedback request can move from visible to actionable.",
         };
       }
 
@@ -525,9 +525,9 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Prepared for later",
+          outreachStateLabel: "Preparation in place",
           suggestedNextStep:
-            "The eligibility base is already being read; the template is ready to support the first review-request layer as soon as the path is clean.",
+            "The eligibility base is already being read; the template is ready to support the first feedback-request layer as soon as the path is clean.",
         };
       }
 
@@ -535,9 +535,9 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Detected in model",
+        outreachStateLabel: "Visible in model",
         suggestedNextStep:
-          "Keep the review base narrow and honest. It remains eligibility-first until more of the execution layer is live.",
+          "Keep the feedback base narrow and honest. It remains eligibility-first until more of the delivery layer is live.",
       };
   }
 }
@@ -613,7 +613,7 @@ function buildOperationalTemplatePreview(
       (placeholderKey) => placeholderCatalog[placeholderKey],
     ),
     previewMode: context ? "live_preview" : "controlled_sample",
-    previewModeLabel: context ? "Live preview" : "Controlled sample",
+    previewModeLabel: context ? "Current example" : "Sample preview",
     suggestedNextStep: preparationState.suggestedNextStep,
     title: definition.title,
   };

@@ -4,6 +4,7 @@ import {
   CommunicationChannel,
   DataSourceType,
   FlowModeKey,
+  Prisma,
 } from "@prisma/client";
 import { redirect } from "next/navigation";
 
@@ -21,7 +22,7 @@ import {
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
 
-const templateValues = ["MEDSPA"] as const;
+const templateValues = ["INJECTABLES", "LASER_SKIN", "BODY_CONTOURING"] as const;
 
 function isTemplateValue(value: string): value is (typeof templateValues)[number] {
   return templateValues.includes(value as (typeof templateValues)[number]);
@@ -39,24 +40,29 @@ function isFlowModeKey(value: string): value is FlowModeKey {
   return Object.values(FlowModeKey).includes(value as FlowModeKey);
 }
 
-function normalizeGoogleReviewsUrl(value: string) {
+function normalizeDealValue(value: string) {
   const trimmedValue = value.trim();
 
   if (!trimmedValue) {
     return null;
   }
 
-  try {
-    const url = new URL(trimmedValue);
-
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return null;
-    }
-
-    return url.toString();
-  } catch {
+  if (/^https?:\/\//i.test(trimmedValue)) {
     return null;
   }
+
+  const numericValue = trimmedValue.replace(/[^\d.]/g, "");
+  const parsedValue = Number(numericValue);
+
+  if (!numericValue || Number.isNaN(parsedValue) || !Number.isFinite(parsedValue)) {
+    return null;
+  }
+
+  if (parsedValue <= 0) {
+    return null;
+  }
+
+  return new Prisma.Decimal(parsedValue);
 }
 
 async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
@@ -143,20 +149,20 @@ export async function submitOnboardingStep(formData: FormData) {
       });
       break;
     }
-    case "reviews": {
-      const googleReviewsUrlValue = formData.get("googleReviewsUrl");
-      const googleReviewsUrl =
-        typeof googleReviewsUrlValue === "string"
-          ? normalizeGoogleReviewsUrl(googleReviewsUrlValue)
+    case "deal_value": {
+      const dealValueInput = formData.get("averageDealValue");
+      const averageDealValue =
+        typeof dealValueInput === "string"
+          ? normalizeDealValue(dealValueInput)
           : null;
 
-      if (!googleReviewsUrl) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=reviews`);
+      if (!averageDealValue) {
+        redirect(`${getOnboardingStepPath(currentStepKey)}?error=deal_value`);
       }
 
       await updateActivationSetup(workspaceId, {
         currentStep: nextStepKey ?? currentStepKey,
-        googleReviewsUrl,
+        averageDealValue,
         isCompleted: false,
       });
       break;

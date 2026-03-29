@@ -185,7 +185,7 @@ export function formatOperationalReasonLabel(reasonCode: RevoryOperationalReason
     case "missing_patient_email":
       return "Missing patient email";
     case "missing_reviews_destination":
-      return "Missing reviews destination";
+      return "Missing feedback destination";
     case "not_eligible":
       return "Not eligible";
     case "template_unavailable":

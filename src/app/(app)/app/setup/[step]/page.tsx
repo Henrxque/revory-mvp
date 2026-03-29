@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayout";
@@ -26,6 +27,28 @@ type OnboardingStepPageProps = Readonly<{
   }>;
 }>;
 
+function formatDealValue(value: Prisma.Decimal | null) {
+  if (!value) {
+    return null;
+  }
+
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    style: "currency",
+  }).format(numericValue);
+}
+
+function formatDealValueInput(value: Prisma.Decimal | null) {
+  return value ? value.toString() : "";
+}
+
 const stepBody: Record<
   (typeof onboardingSteps)[number]["key"],
   {
@@ -37,81 +60,81 @@ const stepBody: Record<
 > = {
   activation: {
     checklist: [
-      "Review the core setup choices before handing the workspace into the live dashboard.",
-      "Confirm that REVORY has enough context to start monitoring data with confidence.",
-      "Keep activation simple, explicit, and self-service.",
+      "Review the core setup choices before turning the workspace into a live Seller system.",
+      "Confirm that REVORY has enough context to show booking visibility and revenue context clearly.",
+      "Keep activation short, explicit, and self-service.",
     ],
     summary:
-      "This final step turns the workspace from setup mode into an operational REVORY environment.",
+      "This final step moves the workspace from setup into a live REVORY Seller environment.",
     whyItMatters:
-      "Activation is the moment the customer stops configuring and starts expecting visibility, guidance, and a clean path into imports and future flows.",
+      "Activation is the moment setup ends and revenue visibility begins. The customer should feel ready to track booking signals, not trapped in more configuration.",
     next:
-      "After activation, the dashboard becomes the home for imported data, readiness, and the next best action.",
+      "After activation, the dashboard becomes the home for revenue visibility, source health, and the next leverage point.",
   },
   channel: {
     checklist: [
-      "Keep one primary channel so the product feels predictable from day one.",
-      "Anchor the MVP in email-first communication.",
-      "Avoid making the customer guess which channel REVORY will prioritize.",
+      "Keep one primary booking lane so the path feels predictable from day one.",
+      "Anchor the MVP in a single, reliable booking path.",
+      "Avoid making the customer guess how REVORY Seller will move leads forward.",
     ],
     summary:
-      "The communication choice sets the default lane REVORY should use for confirmations, reminders, and future recovery moments.",
+      "This choice sets the main booking lane REVORY Seller should prioritize in the guided booking path.",
     whyItMatters:
-      "A premium self-service setup should remove ambiguity early. Picking one default channel now makes every future flow easier to trust.",
+      "A premium self-service setup should remove ambiguity early. One default lane keeps the product focused and easier to trust.",
     next:
-      "Next, REVORY captures the Google Reviews destination so the growth layer has a clear target.",
+      "Next, REVORY Seller sets the revenue baseline tied to a booked appointment.",
   },
   mode: {
     checklist: [
-      "Make the operating style understandable in plain language.",
-      "Keep the choice lightweight instead of exposing a configuration engine.",
-      "Let the customer understand what is included before activation.",
+      "Keep the voice choice understandable in plain language.",
+      "Treat the choice as guided setup, not as a configuration matrix.",
+      "Make the customer feel the path is narrow, premium, and easy to launch.",
     ],
     summary:
-      "This choice defines how much of REVORY's operational motion should be included in the starting setup.",
+      "This choice defines the voice posture REVORY Seller should use as the starting booking tone.",
     whyItMatters:
-      "Modes translate product complexity into a clear product promise: reminders only, recovery included, or recovery plus reviews.",
+      "Brand voice should simplify the launch. It frames the initial setup without turning the MVP into a custom builder.",
     next:
-      "After this, activation becomes a clean final review instead of another decision point.",
+      "After this, activation becomes a clean final review instead of another strategic decision.",
   },
-  reviews: {
+  deal_value: {
     checklist: [
-      "Keep the setup focused on the Google Reviews destination only.",
-      "Make the field easy to understand and easy to validate.",
-      "Prepare the workspace for future review requests without adding extra friction now.",
+      "Keep this value easy to set without turning setup into a finance workflow.",
+      "Use one clear number to anchor revenue visibility from day one.",
+      "Avoid bloating the step with advanced pricing logic.",
     ],
     summary:
-      "This step stores the destination REVORY should use when review request flows are active for this workspace.",
+      "This step stores the average revenue tied to one booked appointment.",
     whyItMatters:
-      "Reviews are part of the product promise. Capturing the destination now keeps growth visible in onboarding instead of bolting it on later.",
+      "Revenue visibility gets sharper when the product starts from a clean baseline instead of a blank state.",
     next:
-      "Once the review link is in place, REVORY can help the customer choose the best starting mode.",
+      "Once deal value is set, REVORY Seller can lock the brand voice and move to final activation.",
   },
   source: {
     checklist: [
-      "Make the data path obvious before the customer reaches the imports area.",
-      "Keep supported source types explicit and narrow.",
-      "Position CSV imports as guided, not technical.",
+      "Make the lead-source path obvious before the customer reaches Sources and Mapping.",
+      "Keep supported input types explicit and narrow.",
+      "Position imports as guided, not technical.",
     ],
     summary:
-      "This choice tells REVORY how the workspace plans to bring in appointments and clients.",
+      "This choice tells REVORY Seller how the workspace plans to bring in the lead and booking data needed for visibility.",
     whyItMatters:
-      "The product only feels premium when setup lowers friction. A clear source path prepares the customer for guided imports instead of external cleanup work.",
+      "The product only feels premium when setup lowers friction. A clear source path prepares the customer for guided imports instead of messy prep work.",
     next:
-      "After the source is chosen, REVORY asks for the primary communication channel.",
+      "After the lead source is chosen, REVORY Seller asks for the primary booking path.",
   },
   template: {
     checklist: [
-      "Start with the MedSpa-first motion REVORY is built to serve.",
-      "Keep the setup focused on one strong vertical instead of generic options.",
+      "Start with one main offer instead of spreading setup across multiple services.",
+      "Keep the setup focused on what the clinic wants to book first.",
       "Make the first choice feel confident and low-friction.",
     ],
     summary:
-      "The template step anchors the workspace in the premium MedSpa journey REVORY is designed around.",
+      "The main offer anchors the workspace in the premium booking motion REVORY Seller is designed around.",
     whyItMatters:
-      "A narrow product feels easier to trust. This first decision tells the customer REVORY is built for their business, not for everybody.",
+      "A narrow product feels easier to trust. One main offer tells the customer REVORY Seller is built to focus, not sprawl.",
     next:
-      "After confirming the template, REVORY helps the customer choose how data will enter the workspace.",
+      "After confirming the main offer, REVORY Seller helps the customer choose how lead and booking data will enter the workspace.",
   },
 };
 
@@ -119,22 +142,28 @@ const optionCardClassName =
   "flex cursor-pointer items-start gap-3 rounded-[22px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4 transition hover:border-[color:var(--border-accent)] hover:bg-[color:var(--background-card-hover)]";
 
 const sourceTypeLabels: Record<string, string> = {
-  APPOINTMENTS_CSV: "Appointments CSV",
-  CLIENTS_CSV: "Clients CSV",
-  GOOGLE_CALENDAR: "Google Calendar",
-  MANUAL_IMPORT: "Manual import",
-  OUTLOOK_CALENDAR: "Outlook Calendar",
+  APPOINTMENTS_CSV: "CSV upload",
+  CLIENTS_CSV: "Client export",
+  GOOGLE_CALENDAR: "Calendar sync",
+  MANUAL_IMPORT: "Guided import",
+  OUTLOOK_CALENDAR: "Calendar sync (Outlook)",
 };
 
 const modeLabels: Record<string, string> = {
-  MODE_A: "Mode A · Basic Reminder",
-  MODE_B: "Mode B · Attendance Recovery",
-  MODE_C: "Mode C · Attendance + Reviews",
+  MODE_A: "Calm & Premium",
+  MODE_B: "Clear & Assertive",
+  MODE_C: "High-Touch Premium",
 };
 
 const channelLabels: Record<string, string> = {
-  EMAIL: "Email",
-  SMS: "SMS",
+  EMAIL: "Primary booking path (Email)",
+  SMS: "Assisted booking path (SMS)",
+};
+
+const mainOfferLabels: Record<string, string> = {
+  BODY_CONTOURING: "Body Contouring",
+  INJECTABLES: "Injectables",
+  LASER_SKIN: "Laser & Skin",
 };
 
 export default async function OnboardingStepPage({
@@ -168,12 +197,13 @@ export default async function OnboardingStepPage({
   const previousStepKey = getPreviousOnboardingStepKey(currentStepKey);
   const currentStepBody = stepBody[currentStepKey];
   const hasError = Boolean(error);
-  const selectedTemplate = appContext.activationSetup.selectedTemplate ?? "MEDSPA";
+  const selectedTemplate = appContext.activationSetup.selectedTemplate ?? "INJECTABLES";
   const selectedPrimaryChannel = appContext.activationSetup.primaryChannel;
-  const selectedGoogleReviewsUrl = appContext.activationSetup.googleReviewsUrl ?? "";
+  const selectedAverageDealValue = appContext.activationSetup.averageDealValue ?? null;
   const selectedRecommendedModeKey =
     appContext.activationSetup.recommendedModeKey ?? "MODE_A";
   const selectedDataSourceType = sourceSelection?.type ?? null;
+  const formattedDealValue = formatDealValue(selectedAverageDealValue);
 
   return (
     <OnboardingStepLayout
@@ -249,23 +279,40 @@ export default async function OnboardingStepPage({
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
           {currentStepKey === "template" ? (
             <div className="space-y-3">
-              <label className={optionCardClassName}>
-                <input
-                  defaultChecked={selectedTemplate === "MEDSPA"}
-                  name="selectedTemplate"
-                  type="radio"
-                  value="MEDSPA"
-                />
-                <span className="space-y-1">
-                  <span className="block font-medium text-[color:var(--foreground)]">
-                    MedSpa
+              {[
+                {
+                  value: "INJECTABLES",
+                  label: "Injectables",
+                  note: "Best when the clinic wants REVORY Seller focused on a high-intent consult or treatment path.",
+                },
+                {
+                  value: "LASER_SKIN",
+                  label: "Laser & Skin",
+                  note: "Best when the clinic wants one clear path around laser, skin, or resurfacing demand.",
+                },
+                {
+                  value: "BODY_CONTOURING",
+                  label: "Body Contouring",
+                  note: "Best when the clinic wants one structured path for a premium body treatment offer.",
+                },
+              ].map((option) => (
+                <label key={option.value} className={optionCardClassName}>
+                  <input
+                    defaultChecked={selectedTemplate === option.value}
+                    name="selectedTemplate"
+                    type="radio"
+                    value={option.value}
+                  />
+                  <span className="space-y-1">
+                    <span className="block font-medium text-[color:var(--foreground)]">
+                      {option.label}
+                    </span>
+                    <span className="block text-sm text-[color:var(--text-muted)]">
+                      {option.note}
+                    </span>
                   </span>
-                  <span className="block text-sm text-[color:var(--text-muted)]">
-                    Premium, self-service setup for appointment monitoring,
-                    recovery, reviews, and a clearer revenue story.
-                  </span>
-                </span>
-              </label>
+                </label>
+              ))}
             </div>
           ) : null}
 
@@ -274,28 +321,28 @@ export default async function OnboardingStepPage({
               {[
                 {
                   value: "GOOGLE_CALENDAR",
-                  label: "Google Calendar",
-                  note: "Best when the workspace wants a direct calendar connection as the long-term path.",
+                  label: "Calendar sync",
+                  note: "Best when the workspace wants a direct sync path for ongoing lead and booking visibility.",
                 },
                 {
                   value: "OUTLOOK_CALENDAR",
-                  label: "Outlook Calendar",
-                  note: "Best when the workspace already runs on Outlook and wants the same calendar-first path.",
+                  label: "Calendar sync (Outlook)",
+                  note: "Best when the workspace already runs on Outlook and wants the same sync-first path.",
                 },
                 {
                   value: "APPOINTMENTS_CSV",
-                  label: "Appointments CSV",
-                  note: "Recommended when the workspace already has scheduling exports and wants guided mapping inside REVORY.",
+                  label: "CSV upload",
+                  note: "Recommended when the workspace already has exports and wants guided mapping inside REVORY Seller.",
                 },
                 {
                   value: "CLIENTS_CSV",
-                  label: "Clients CSV",
-                  note: "Recommended when the workspace wants to start from patient records and visit history.",
+                  label: "Client export",
+                  note: "Recommended when the workspace wants to start from client records and keep revenue context visible.",
                 },
                 {
                   value: "MANUAL_IMPORT",
-                  label: "Manual import",
-                  note: "Fallback for exports that need human confirmation inside REVORY before import.",
+                  label: "Guided import",
+                  note: "Fallback for exports that need one more guided pass before the data is ready.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -323,13 +370,13 @@ export default async function OnboardingStepPage({
               {[
                 {
                   value: "EMAIL",
-                  label: "Email",
-                  note: "Recommended default for the MVP and the clearest way to keep activation simple.",
+                  label: "Primary booking path (Email)",
+                  note: "Recommended default for the MVP and the clearest way to keep the booking path simple.",
                 },
                 {
                   value: "SMS",
-                  label: "SMS",
-                  note: "Useful when available in-plan, but REVORY still treats email as the primary path.",
+                  label: "Assisted booking path (SMS)",
+                  note: "Useful when available in-plan, but REVORY Seller still treats one lane as the primary booking path.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -352,23 +399,22 @@ export default async function OnboardingStepPage({
             </div>
           ) : null}
 
-          {currentStepKey === "reviews" ? (
+          {currentStepKey === "deal_value" ? (
             <div className="space-y-3">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[color:var(--foreground)]">
-                  Google Reviews URL
+                  Average deal value
                 </span>
                 <input
                   className="rev-input-field"
-                  defaultValue={selectedGoogleReviewsUrl}
-                  name="googleReviewsUrl"
-                  placeholder="https://g.page/r/your-google-reviews-link"
-                  type="url"
+                  defaultValue={formatDealValueInput(selectedAverageDealValue)}
+                  name="averageDealValue"
+                  placeholder="$350"
+                  type="text"
                 />
               </label>
               <p className="text-sm text-[color:var(--text-muted)]">
-                Save the destination REVORY should use once review requests are
-                active for this workspace.
+                Set the average revenue tied to one booked appointment. Keep it simple and directional.
               </p>
             </div>
           ) : null}
@@ -378,18 +424,18 @@ export default async function OnboardingStepPage({
               {[
                 {
                   value: "MODE_A",
-                  label: "Mode A · Basic Reminder",
-                  note: "Best for a lighter launch focused on confirmations and reminders.",
+                  label: "Calm & Premium",
+                  note: "Best when the clinic wants a measured, polished tone in the booking path.",
                 },
                 {
                   value: "MODE_B",
-                  label: "Mode B · Attendance Recovery",
-                  note: "Adds the recovery motion for teams that want to protect more empty slots.",
+                  label: "Clear & Assertive",
+                  note: "Best when the clinic wants a firmer, more direct booking posture.",
                 },
                 {
                   value: "MODE_C",
-                  label: "Mode C · Attendance + Reviews",
-                  note: "Extends the recovery motion with the review layer for a fuller starting setup.",
+                  label: "High-Touch Premium",
+                  note: "Best when the clinic wants a more concierge-like tone without losing focus.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -416,22 +462,25 @@ export default async function OnboardingStepPage({
             <div className="space-y-4">
               <div className="grid gap-3 md:grid-cols-2">
                 {[
-                  { label: "Template", value: selectedTemplate || "Not selected" },
                   {
-                    label: "Source type",
+                    label: "Main offer",
+                    value: mainOfferLabels[selectedTemplate] || "Not selected",
+                  },
+                  {
+                    label: "Lead source",
                     value:
                       (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) ||
                       "Not selected",
                   },
                   {
-                    label: "Primary channel",
+                    label: "Booking path",
                     value:
                       (selectedPrimaryChannel &&
                         channelLabels[selectedPrimaryChannel]) ||
                       "Not selected",
                   },
                   {
-                    label: "Recommended mode",
+                    label: "Brand voice",
                     value:
                       (selectedRecommendedModeKey &&
                         modeLabels[selectedRecommendedModeKey]) ||
@@ -454,17 +503,17 @@ export default async function OnboardingStepPage({
 
               <div className="rev-card rounded-[22px] p-4">
                 <p className="rev-label">
-                  Google Reviews URL
+                  Average deal value
                 </p>
                 <p className="mt-2 break-all font-medium text-[color:var(--foreground)]">
-                  {selectedGoogleReviewsUrl || "Not configured"}
+                  {formattedDealValue ?? "Not configured"}
                 </p>
               </div>
 
               <div className="rev-feedback-warning">
                 If the required setup values are present, activation will mark
-                this workspace as live, apply the selected starting mode, and
-                send the customer into the dashboard.
+                this workspace as live and send the customer into the revenue
+                view.
               </div>
             </div>
           ) : null}

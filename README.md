@@ -1,12 +1,22 @@
-# REVORY MVP
+# REVORY Seller 2.0
 
 Setup inicial do projeto `revory-mvp`, construido com Next.js, TypeScript e Tailwind.
 
+## Source Of Truth
+
+O contexto principal deste projeto esta em [docs/source-of-truth.md](docs/source-of-truth.md).
+
+Quando houver conflito entre docs antigas, wireframes, README legado ou implementacao parcial, siga primeiro esse documento de referencia.
+
 ## Foco do projeto
 
-- MVP premium
+- premium
 - self-service
 - MedSpa-first
+- booking-first
+- 1 main offer por cliente no inicio
+- IA minima, barata e invisivel
+- dashboard centrado em receita
 
 ## Stack
 

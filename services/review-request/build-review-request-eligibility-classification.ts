@@ -64,7 +64,7 @@ function buildBaseReason(): RevoryReviewRequestEligibilityReason {
   return {
     code: "completed_recently",
     description:
-      "The appointment was completed recently enough to qualify for a simple post-visit review request in the MVP.",
+      "The appointment was completed recently enough to qualify for a simple post-visit feedback request in the MVP.",
     label: "Completed recently",
   };
 }
@@ -86,8 +86,8 @@ function buildEligibilityItem(
     reasons.push({
       code: "blocked_missing_email",
       description:
-        "REVORY identified the post-visit review opportunity, but there is no usable email for the client in the current MVP.",
-      label: "Review request blocked by missing email",
+        "REVORY identified the post-visit feedback opportunity, but there is no usable email for the client in the current MVP.",
+      label: "Feedback request blocked by missing email",
     });
   }
 
@@ -95,8 +95,8 @@ function buildEligibilityItem(
     reasons.push({
       code: "blocked_missing_reviews_url",
       description:
-        "REVORY identified the post-visit review opportunity, but the workspace has no Google Reviews destination configured yet.",
-      label: "Review request blocked by missing reviews destination",
+        "REVORY identified the post-visit feedback opportunity, but the workspace has no Google feedback link configured yet.",
+      label: "Feedback request blocked by missing feedback destination",
     });
   }
 

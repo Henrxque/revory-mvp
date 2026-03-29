@@ -6,6 +6,7 @@ import { prisma } from "@/db/prisma";
 import { csvUploadSourceNames } from "@/services/imports/csv-upload-source-config";
 
 export type DashboardOverview = {
+  bookedAppointments: number;
   canceledAppointments: number;
   clientsImported: number;
   estimatedImportedRevenue: number | null;
@@ -57,6 +58,7 @@ export async function getDashboardOverview(
 ): Promise<DashboardOverview> {
   const now = new Date();
   const [
+    bookedAppointments,
     appointmentCount,
     clientCount,
     upcomingAppointments,
@@ -65,6 +67,14 @@ export async function getDashboardOverview(
     dataSources,
     upcomingList,
   ] = await Promise.all([
+    prisma.appointment.count({
+      where: {
+        status: {
+          in: [AppointmentStatus.SCHEDULED, AppointmentStatus.COMPLETED],
+        },
+        workspaceId,
+      },
+    }),
     prisma.appointment.count({
       where: {
         workspaceId,
@@ -146,6 +156,7 @@ export async function getDashboardOverview(
   ]);
 
   return {
+    bookedAppointments,
     appointmentsMonitored: appointmentCount,
     canceledAppointments,
     clientsImported: clientCount,

@@ -153,6 +153,7 @@ model ActivationSetup {
   selectedTemplate    String?
   primaryChannel      CommunicationChannel @default(EMAIL)
   googleReviewsUrl    String?
+  averageDealValue    Decimal?             @db.Decimal(10, 2)
   // Recommended mode suggested by the onboarding wizard before activation.
   recommendedModeKey  FlowModeKey?
   isCompleted         Boolean              @default(false)

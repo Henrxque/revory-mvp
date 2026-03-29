@@ -8,6 +8,7 @@ import { RevoryLogo } from "@/components/brand/RevoryLogo";
 type AppSidebarProps = Readonly<{
   activationLabel: string;
   currentStepTitle: string;
+  leadSourcesStatus: string;
   userEmail: string;
   workspaceName: string;
   workspaceStatus: string;
@@ -16,10 +17,6 @@ type AppSidebarProps = Readonly<{
 type SidebarIconKey =
   | "dashboard"
   | "appointments"
-  | "flows"
-  | "slots"
-  | "reviews"
-  | "recall"
   | "settings";
 
 type SidebarItem =
@@ -35,68 +32,36 @@ type SidebarItem =
       status?: string;
     };
 
-const navGroups: ReadonlyArray<{
-  items: ReadonlyArray<SidebarItem>;
-  label: string;
-}> = [
-  {
-    label: "Workspace",
-    items: [
-      {
-        href: "/app/dashboard",
-        icon: "dashboard",
-        label: "Dashboard",
-      },
-      {
-        href: "/app/imports",
-        icon: "appointments",
-        label: "Imports & Mapping",
-        status: "Live",
-      },
-    ],
-  },
-  {
-    label: "Revenue",
-    items: [
-      {
-        icon: "flows",
-        label: "Active Flows",
-        status: "Coming soon",
-      },
-      {
-        icon: "slots",
-        label: "Empty Slots",
-        status: "Next phase",
-      },
-    ],
-  },
-  {
-    label: "Growth",
-    items: [
-      {
-        icon: "reviews",
-        label: "Reviews",
-        status: "Coming soon",
-      },
-      {
-        icon: "recall",
-        label: "Recall",
-        status: "Coming soon",
-      },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      {
-        href: "/app/setup",
-        icon: "settings",
-        label: "Activation Setup",
-        status: "Configured",
-      },
-    ],
-  },
-] as const;
+const navGroups = (leadSourcesStatus: string) =>
+  [
+    {
+      label: "Seller",
+      items: [
+        {
+          href: "/app/dashboard",
+          icon: "dashboard",
+          label: "Revenue View",
+        },
+        {
+          href: "/app/imports",
+          icon: "appointments",
+          label: "Lead Sources",
+          status: leadSourcesStatus,
+        },
+      ],
+    },
+    {
+      label: "Setup",
+      items: [
+        {
+          href: "/app/setup",
+          icon: "settings",
+          label: "Seller Setup",
+          status: "Configured",
+        },
+      ],
+    },
+  ] as const;
 
 function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
   const sharedProps = {
@@ -128,34 +93,6 @@ function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
           <line x1="3" y1="10" x2="21" y2="10" />
         </svg>
       );
-    case "flows":
-      return (
-        <svg {...sharedProps}>
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      );
-    case "slots":
-      return (
-        <svg {...sharedProps}>
-          <circle cx="12" cy="12" r="9" />
-          <polyline points="12 7 12 12 15.5 14" />
-        </svg>
-      );
-    case "reviews":
-      return (
-        <svg {...sharedProps}>
-          <polygon points="12 2 15 8.2 22 9.2 17 14 18.2 21 12 17.6 5.8 21 7 14 2 9.2 9 8.2 12 2" />
-        </svg>
-      );
-    case "recall":
-      return (
-        <svg {...sharedProps}>
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      );
     case "settings":
       return (
         <svg {...sharedProps}>
@@ -179,9 +116,26 @@ function formatWorkspaceStatus(status: string) {
   return status.toUpperCase();
 }
 
+function getStatusTone(status?: string) {
+  if (!status) {
+    return "neutral";
+  }
+
+  if (status === "Live") {
+    return "success";
+  }
+
+  if (status === "Awaiting import") {
+    return "warning";
+  }
+
+  return "neutral";
+}
+
 export function AppSidebar({
   activationLabel,
   currentStepTitle,
+  leadSourcesStatus,
   userEmail,
   workspaceName,
   workspaceStatus,
@@ -191,16 +145,16 @@ export function AppSidebar({
 
   return (
     <aside className="relative z-50 flex h-full pointer-events-auto flex-col rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,#111018,#0d0c11)] shadow-[0_30px_90px_rgba(0,0,0,0.34)]">
-      <div className="border-b border-[color:var(--border)] px-5 py-5">
+      <div className="border-b border-[color:var(--border)] px-5 py-[1.125rem]">
         <RevoryLogo compact />
         <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-          MedSpa revenue recovery
+          Premium booking acceleration
         </p>
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-        {navGroups.map((group) => (
-          <div key={group.label} className="space-y-1.5">
+        {navGroups(leadSourcesStatus).map((group) => (
+          <div key={group.label} className="space-y-1">
             <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-subtle)]">
               {group.label}
             </p>
@@ -211,12 +165,13 @@ export function AppSidebar({
                 ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : false;
 
-              const itemClassName = `flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-sm transition ${
+              const itemClassName = `flex items-center gap-3 rounded-[16px] px-3.5 py-2.5 text-[13.5px] transition ${
                 isActive
                   ? "bg-[rgba(194,9,90,0.16)] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(194,9,90,0.18)]"
                   : "text-[color:var(--text-muted)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[color:var(--foreground)]"
               }`;
 
+              const statusTone = getStatusTone(item.status);
               const content = (
                 <>
                   <SidebarIcon icon={item.icon} />
@@ -226,9 +181,11 @@ export function AppSidebar({
                       className={`ml-auto h-2.5 w-2.5 rounded-full ${
                         isActive
                           ? "bg-[color:var(--accent-light)]"
-                          : item.status === "Live"
+                          : statusTone === "success"
                             ? "bg-[color:var(--success)]"
-                            : "bg-[color:var(--text-subtle)]"
+                            : statusTone === "warning"
+                              ? "bg-[color:var(--warning)]"
+                              : "bg-[color:var(--text-subtle)]"
                       }`}
                     />
                   ) : null}
@@ -259,14 +216,14 @@ export function AppSidebar({
       </nav>
 
       <div className="border-t border-[color:var(--border)] px-4 py-4">
-        <div className="rounded-[18px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3 py-3">
+        <div className="rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 py-3.5">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-sm font-semibold text-[color:var(--accent-light)]">
               {workspaceInitials}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+              <p className="truncate text-[13px] font-semibold text-[color:var(--foreground)]">
                 {workspaceName}
               </p>
 

@@ -21,7 +21,7 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "REVORY",
   description:
-    "Revenue recovery software for MedSpas with guided setup, CSV import, and premium operational visibility.",
+    "REVORY Seller is a premium booking acceleration system for MedSpas with guided setup, clear revenue visibility, and faster booked appointments.",
 };
 
 type RootLayoutProps = Readonly<{

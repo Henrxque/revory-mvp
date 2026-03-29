@@ -86,7 +86,7 @@ function buildAtRiskReasons(
       attentionLevel: "attention_now",
       code: "same_day_tight_window",
       description:
-        "The appointment is approaching with very little time buffer, so it deserves immediate operational attention.",
+        "The appointment is approaching with very little time buffer, so it deserves immediate booking attention.",
       label: "Same-day tight window",
     });
   }

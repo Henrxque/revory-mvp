@@ -68,20 +68,25 @@ function getCategoryCardGridClassName(index: number, total: number) {
 }
 
 export function OperationalSurface({ surface }: OperationalSurfaceProps) {
+  const attentionNowBadgeLabel =
+    surface.needsAttentionNowCount === 1
+      ? "1 needs attention now"
+      : `${surface.needsAttentionNowCount} need attention now`;
+
   return (
     <section className="space-y-4">
       <RevorySectionHeader
-        badgeLabel={surface.hasLiveSignals ? "Signals live" : "Awaiting operational base"}
+        badgeLabel={surface.hasLiveSignals ? "Signals visible" : "Awaiting booking base"}
         badgeTone={surface.hasLiveSignals ? "real" : "neutral"}
-        description="A short operational layer that keeps signal, readiness, and the next step readable without turning REVORY into a CRM or a heavy ops panel."
-        eyebrow="Operational Layer"
-        title="What needs action next."
+        description="A short booking read of signal, guidance, blockers, and the next narrow step. Guidance stays visible without implying a live delivery engine."
+        eyebrow="Booking Pulse"
+        title="What deserves attention next."
       />
 
       <section className="rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(21,20,28,0.98))] p-5 md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-3xl">
-            <p className="rev-kicker">Operational focus</p>
+            <p className="rev-kicker">Conversion guidance</p>
             <h3 className="mt-3 max-w-2xl text-[1.95rem] leading-none text-[color:var(--foreground)] md:text-[2.2rem]">
               {surface.prioritySummary.headline}
             </h3>
@@ -93,7 +98,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           <div className="flex flex-wrap items-center gap-2">
             <RevoryStatusBadge tone={surface.needsAttentionNowCount > 0 ? "accent" : "real"}>
               {surface.needsAttentionNowCount > 0
-                ? `${surface.needsAttentionNowCount} attention now`
+                ? attentionNowBadgeLabel
                 : "Guided visibility"}
             </RevoryStatusBadge>
             <span className="inline-flex min-h-9 items-center rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-muted)]">
@@ -106,7 +111,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           <div className="overflow-hidden rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)]">
             <div className="grid divide-y divide-[color:var(--border)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               <div className="px-4 py-4">
-                <p className="rev-label">Next actions</p>
+                <p className="rev-label">Booking priorities</p>
                 <p className="mt-3 text-3xl font-semibold text-[color:var(--foreground)]">
                   {surface.readinessSummary.nextActionCount}
                 </p>
@@ -115,16 +120,16 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                 </p>
               </div>
               <div className="px-4 py-4">
-                <p className="rev-label">Ready now</p>
+                <p className="rev-label">Next step ready</p>
                 <p className="mt-3 text-3xl font-semibold text-[color:var(--foreground)]">
                   {surface.readinessSummary.readyNowCount}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Items already ready for the next step.
+                  Items already clear enough for the next guided step.
                 </p>
               </div>
               <div className="px-4 py-4">
-                <p className="rev-label">Operational friction</p>
+                <p className="rev-label">Current blockers</p>
                 <div className="mt-3">
                   <RevoryStatusBadge
                     tone={surface.readinessSummary.blockedCount > 0 ? "future" : "neutral"}
@@ -135,7 +140,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                   </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                  Visible, but secondary to ready items.
+                  Worth fixing after the clearest next steps are understood.
                 </p>
               </div>
             </div>
@@ -144,9 +149,12 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4 md:p-5">
             <div className="flex h-full flex-col justify-between gap-4">
               <div className="max-w-2xl">
-                <p className="rev-label">Current priority</p>
+                <p className="rev-label">Next guided step</p>
                 <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
                   {surface.prioritySummary.suggestedNextAction}
+                </p>
+                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                  This is guidance, not a live queue. The broader signal and readiness stay visible below by category.
                 </p>
               </div>
               {!surface.hasAppointmentBase ? (
@@ -160,6 +168,19 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           </div>
         </div>
       </section>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="rev-kicker">Signals and guidance</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
+              Each category stays visible, but the dashboard should still lead with the narrowest next step.
+            </p>
+          </div>
+          <span className="text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--text-soft)]">
+            Guided booking framing
+          </span>
+        </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         {surface.categoryCards.map((card, index) => (
@@ -175,14 +196,6 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                 <div className="flex flex-wrap items-center gap-2">
                   <RevoryStatusBadge tone="neutral">{card.kindLabel}</RevoryStatusBadge>
                   <RevoryStatusBadge tone={card.tone}>{card.readinessLabel}</RevoryStatusBadge>
-                  {card.blockedCount > 0 ? (
-                    <RevoryStatusBadge tone="future">
-                      {card.blockedCount} blocked
-                    </RevoryStatusBadge>
-                  ) : null}
-                  {card.count === 0 ? (
-                    <RevoryStatusBadge tone="neutral">{card.emptyLabel}</RevoryStatusBadge>
-                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <p className="text-lg font-semibold text-[color:var(--foreground)]">
@@ -191,6 +204,10 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                   <p className="max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
                     {card.description}
                   </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-[color:var(--text-soft)]">
+                    {card.count === 0 ? <span>{card.emptyLabel}</span> : null}
+                    {card.blockedCount > 0 ? <span>{card.blockedCount} blocked</span> : null}
+                  </div>
                 </div>
               </div>
               <div
@@ -200,48 +217,50 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
               </div>
             </div>
 
-            <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="rev-label">Readiness</p>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
-                    {card.readinessLabel}
-                  </p>
-                </div>
+            <div className="mt-4 grid gap-3 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4 md:grid-cols-[0.78fr_1.22fr]">
+              <div>
+                <p className="rev-label">Status</p>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                  {card.readinessLabel}
+                </p>
                 {card.blockedReason ? (
-                  <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[rgba(245,166,35,0.24)] bg-[rgba(245,166,35,0.1)] px-3 py-1 text-[11px] font-medium text-[color:var(--warning)]">
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--warning)]">
                     {card.blockedReason}
-                  </span>
-                ) : null}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                    No blocker is shaping this category right now.
+                  </p>
+                )}
               </div>
-              <div className="mt-4 border-t border-[color:var(--border)] pt-4">
-                <p className="rev-label">Next action</p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
-                {card.nextAction}
-              </p>
+              <div className="border-t border-[color:var(--border)] pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+                <p className="rev-label">Next guided step</p>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                  {card.nextAction}
+                </p>
               </div>
             </div>
           </div>
         ))}
       </div>
+      </section>
 
       <OperationalTemplatePreviewGrid previews={surface.templatePreviews} />
 
       <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Operational focus list
+              <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
+              Booking priorities
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              This is a short, prioritized list. REVORY is not trying to become a CRM inbox
-              here.
+              This is a short guided read, not a working queue. REVORY stays far from a CRM or inbox here.
             </p>
           </div>
           <RevoryStatusBadge tone={surface.priorityItems.length > 0 ? "accent" : "neutral"}>
             {surface.priorityItems.length > 0
-              ? `${surface.priorityItems.length} items surfaced`
-              : "No open items"}
+              ? `${surface.priorityItems.length} focus items`
+              : "Nothing needs focus"}
           </RevoryStatusBadge>
         </div>
 
@@ -249,9 +268,8 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           <div className="mt-5 space-y-3">
             <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-4 py-3">
               <p className="text-sm leading-6 text-[color:var(--text-muted)]">
-                Priority follows this reading order: at-risk, reminder, confirmation,
-                recovery, then review visibility. Lower-priority categories stay visible in
-                their cards even when they do not lead the short list.
+                Priority follows this reading order: at-risk, reminder, confirmation, follow-up.
+                The rest stays visible by category without becoming a queue.
               </p>
             </div>
             {surface.priorityItems.map((item) => (
@@ -264,9 +282,6 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                     <div className="flex flex-wrap items-center gap-2">
                       <RevoryStatusBadge tone="neutral">{item.categoryLabel}</RevoryStatusBadge>
                       <RevoryStatusBadge tone={item.stateTone}>{item.readinessLabel}</RevoryStatusBadge>
-                      {item.blockedReason ? (
-                        <RevoryStatusBadge tone="future">{item.blockedReason}</RevoryStatusBadge>
-                      ) : null}
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-[color:var(--foreground)]">
@@ -306,7 +321,7 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
                       {item.readinessLabel}
                     </p>
                     {item.blockedReason ? (
-                      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                      <p className="mt-2 text-sm leading-6 text-[color:var(--warning)]">
                         {item.blockedReason}
                       </p>
                     ) : null}
@@ -327,12 +342,12 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold text-[color:var(--foreground)]">
                   {surface.hasAppointmentBase
-                    ? "No appointments currently need operational action."
-                    : "The operational layer turns on after the first appointments import."}
+                    ? "Nothing currently needs a guided next step."
+                    : "Booking pulse turns on after the first appointments import."}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
                   {surface.hasAppointmentBase
-                    ? "REVORY is still reading confirmation, reminders, at-risk, recovery, and review eligibility in the background. Nothing currently needs focus."
+                    ? "The current schedule is visible, but nothing needs a controlled next step right now."
                     : "Import appointments first so REVORY has a real schedule to classify instead of placeholder states."}
                 </p>
               </div>

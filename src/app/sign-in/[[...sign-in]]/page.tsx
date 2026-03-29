@@ -56,7 +56,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   return (
     <main className="min-h-screen px-6 py-10 md:px-8 md:py-14">
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.95fr_0.85fr] lg:items-stretch">
-        <section className="rev-shell-hero flex flex-col rounded-[36px] p-7 md:p-9">
+        <section className="rev-shell-hero rev-accent-mist flex flex-col rounded-[36px] p-7 md:p-9">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <Link href="/">
               <RevoryLogo />
@@ -115,7 +115,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
         </section>
 
-        <section className="rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
+        <section className="rev-accent-mist-soft rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
           <div className="space-y-5">
             <div className="space-y-3">
               <p className="rev-kicker">Authentication</p>

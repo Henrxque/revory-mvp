@@ -99,12 +99,12 @@ function getCategoryTone(
 
 function getCategoryReadinessLabel(readiness: RevoryOperationalCategoryReadiness) {
   if (readiness.readyCount > 0 && readiness.blockedCount > 0) {
-    return "Partially ready";
+    return "Actionable, with blockers";
   }
 
   switch (readiness.stage) {
     case "ready":
-      return "Ready now";
+      return "Actionable next";
     case "blocked":
       return "Blocked";
     case "prepared":
@@ -112,7 +112,7 @@ function getCategoryReadinessLabel(readiness: RevoryOperationalCategoryReadiness
     case "eligible":
       return "Eligible";
     case "classified":
-      return "Detected";
+      return "Visible";
   }
 }
 
@@ -182,7 +182,7 @@ function buildPriorityItemReadiness(state: RevoryOperationalState) {
       ? "Blocked"
       : readinessState === "prepared"
         ? "Prepared"
-        : "Ready now";
+        : "Actionable next";
   const stateTone: RevoryOperationalTone =
     readinessState === "blocked"
       ? "future"
@@ -271,14 +271,14 @@ function buildCategoryCards(
       key: "at_risk",
       nextAction:
         input.atRisk.atRiskCount > 0
-          ? "Read these signals first. REVORY is surfacing operational urgency, not predictive scoring."
+          ? "Read these signals first. REVORY is surfacing booking urgency, not predictive scoring."
           : "Keep the appointment base fresh so the at-risk layer stays trustworthy.",
       readinessLabel:
         atRiskReadyCount > 0
-          ? "Ready now"
+          ? "Attention now"
           : atRiskPreparedCount > 0
-            ? "Prepared"
-            : "Detected",
+            ? "Watchlist"
+            : "Visible",
       title: "At-risk appointments",
       tone:
         input.atRisk.attentionNowCount > 0
@@ -306,21 +306,21 @@ function buildCategoryCards(
             ? `${input.confirmation.blockedMissingEmailCount} appointments are eligible for confirmation but still blocked by missing email.`
             : input.confirmation.scheduledLaterCount > 0
               ? `${input.confirmation.scheduledLaterCount} future appointments are already classified, but remain outside the active confirmation window.`
-              : "No appointments are currently waiting in the confirmation queue.",
-      emptyLabel: "No one in queue",
-      kindLabel: "Ready queue",
+              : "Nothing currently needs confirmation in the active window.",
+      emptyLabel: "Nothing active",
+      kindLabel: "Action path",
       key: "confirmation",
       nextAction:
         input.confirmation.readyForConfirmationCount > 0 &&
         input.confirmation.blockedMissingEmailCount > 0
-          ? "Use the ready confirmation queue first, then fix the client email path for the blocked confirmations."
+          ? "Start with the actionable confirmation path, then fix the client email base for the blocked confirmations."
           : input.confirmation.readyForConfirmationCount > 0
-          ? "Use the confirmation queue first; blocked items stay secondary to the ready path."
+          ? "Start with the confirmation path first; blocked items stay secondary to what can move now."
           : input.confirmation.blockedMissingEmailCount > 0
-            ? "Tighten the client email base so eligible confirmations can move from blocked to ready."
-            : "Keep confirmation visible as a narrow email-first queue, not a larger workflow.",
+            ? "Tighten the client email base so eligible confirmations can move from blocked to actionable."
+            : "Keep confirmation visible as a narrow primary booking path, not a larger workflow.",
       readiness: confirmationReadiness,
-      title: "Confirmation queue",
+      title: "Confirmation readiness",
     }),
     buildCategoryCard({
       blockedCount: input.reminder.blockedMissingEmailCount,
@@ -341,21 +341,21 @@ function buildCategoryCards(
             ? `${input.reminder.blockedMissingEmailCount} appointments are eligible for reminder but still blocked by missing email.`
             : input.reminder.scheduledLaterCount > 0
               ? `${input.reminder.scheduledLaterCount} future appointments are already classified, but remain outside the active reminder window.`
-              : "No appointments are currently waiting in the reminder queue.",
-      emptyLabel: "No one in queue",
-      kindLabel: "Ready queue",
+              : "Nothing currently needs reminder coverage in the active window.",
+      emptyLabel: "Nothing active",
+      kindLabel: "Action path",
       key: "reminder",
       nextAction:
         input.reminder.readyForReminderCount > 0 &&
         input.reminder.blockedMissingEmailCount > 0
-          ? "Use the ready reminder queue first, then fix the client email path for the blocked reminders."
+          ? "Start with the actionable reminder path, then fix the client email base for the blocked reminders."
           : input.reminder.readyForReminderCount > 0
-          ? "Use the reminder queue after at-risk and confirmation needs are understood."
+          ? "Use the reminder path after at-risk and confirmation needs are understood."
           : input.reminder.blockedMissingEmailCount > 0
             ? "Fix the client email path first so reminder readiness can move forward cleanly."
-            : "Keep reminder visible as a narrow email-first layer, not as a campaign system.",
+            : "Keep reminder visible as a narrow primary booking layer, not as a campaign system.",
       readiness: reminderReadiness,
-      title: "Reminder queue",
+      title: "Reminder readiness",
     }),
     buildCategoryCard({
       blockedCount: input.recovery.blockedMissingEmailCount,
@@ -371,22 +371,22 @@ function buildCategoryCards(
         input.recovery.blockedMissingEmailCount > 0
           ? `${input.recovery.opportunityCount} recent disruptions were surfaced; ${input.recovery.readyForRecoveryCount} are already ready and ${input.recovery.blockedMissingEmailCount} stay blocked by missing email.`
           : input.recovery.opportunityCount > 0
-            ? `${input.recovery.opportunityCount} recent disruptions were surfaced as initial recovery opportunities, not as a rebooking engine.`
-          : "No cancellations or no-shows currently qualify for near-term recovery.",
-      emptyLabel: "No open opportunities",
+            ? `${input.recovery.opportunityCount} recent disruptions were surfaced as initial follow-up opportunities, not as an automated rebooking engine.`
+          : "No recent disruptions currently qualify for near-term follow-up.",
+      emptyLabel: "Nothing active",
       kindLabel: "Opportunity",
       key: "recovery",
       nextAction:
         input.recovery.readyForRecoveryCount > 0 &&
         input.recovery.blockedMissingEmailCount > 0
-          ? "Use the ready recovery paths first, then tighten the email base for the blocked opportunities."
+          ? "Use the actionable follow-up paths first, then tighten the email base for the blocked opportunities."
           : input.recovery.readyForRecoveryCount > 0
-          ? "Use recovery as a guided follow-up opportunity, not as a call-center flow."
+          ? "Use follow-up as a guided return-to-booking opportunity, not as a call-center flow."
           : input.recovery.blockedMissingEmailCount > 0
-            ? "Tighten the email base first; recovery opportunity stays visible but blocked."
-            : "Keep recovery narrow and tied to the imported schedule quality.",
+            ? "Tighten the email base first; follow-up stays visible but blocked."
+            : "Keep follow-up narrow and tied to the imported schedule quality.",
       readiness: recoveryReadiness,
-      title: "Recovery opportunities",
+      title: "Follow-up opportunities",
     }),
     buildCategoryCard({
       blockedCount:
@@ -406,16 +406,16 @@ function buildCategoryCards(
         input.reviewRequest.blockedMissingEmailCount +
           input.reviewRequest.blockedMissingReviewsUrlCount >
           0
-          ? `${input.reviewRequest.eligibleCount} completed visits are already eligible for the first review-request layer, and ${
+          ? `${input.reviewRequest.eligibleCount} completed visits are already eligible for the first feedback layer, and ${
               input.reviewRequest.blockedMissingEmailCount +
               input.reviewRequest.blockedMissingReviewsUrlCount
-            } more are still blocked by missing email or missing reviews destination.`
+            } more are still blocked by missing email or missing feedback destination.`
           : input.reviewRequest.eligibleCount > 0
-          ? `${input.reviewRequest.eligibleCount} completed visits are already eligible for the first review-request layer.`
+          ? `${input.reviewRequest.eligibleCount} completed visits are already eligible for the first feedback layer.`
           : input.reviewRequest.totalCompletedAppointmentsInWindow > 0
-            ? "Completed visits were detected, but the current path is still blocked by missing email or missing reviews destination."
-            : "No completed visits are currently review-ready in the initial window.",
-      emptyLabel: "No eligible visits",
+            ? "Completed visits were detected, but the current path is still blocked by missing email or missing feedback destination."
+            : "No completed visits are currently feedback-ready in the initial window.",
+      emptyLabel: "Nothing active",
       kindLabel: "Eligibility",
       key: "review_request",
       nextAction:
@@ -423,14 +423,14 @@ function buildCategoryCards(
         input.reviewRequest.blockedMissingEmailCount +
           input.reviewRequest.blockedMissingReviewsUrlCount >
           0
-          ? "Use the ready review-request path first, then resolve the missing email or reviews destination on the blocked visits."
+          ? "Start with the actionable feedback path, then resolve the missing email or feedback destination on the blocked visits."
           : input.reviewRequest.eligibleCount > 0
-          ? "Keep reviews in eligibility mode: visible, guided, and still far from a full reputation ops suite."
+          ? "Keep feedback in eligibility mode: visible, guided, and still far from a full reputation workflow."
           : input.reviewRequest.blockedMissingReviewsUrlCount > 0
-            ? "Configure the Google Reviews destination before the review path can move from blocked to ready."
-            : "Tighten the client email base first so review eligibility can progress cleanly.",
+            ? "Configure the Google feedback link before the feedback path can move from blocked to actionable."
+            : "Tighten the client email base first so feedback eligibility can progress cleanly.",
       readiness: reviewReadiness,
-      title: "Review-ready visits",
+      title: "Feedback-ready visits",
     }),
   ];
 }
@@ -457,11 +457,11 @@ function buildAtRiskPriorityItems(
       id: item.appointmentId,
       insight: item.reasons.map((reason) => reason.label).join(" + "),
       nextAction: item.reasons.some((reason) => reason.code.includes("missing_email"))
-        ? "Add a patient email so REVORY can support the next operational step."
+        ? "Add a patient email so REVORY can support the next booking step."
         : "Keep this appointment visible now and protect the slot before it goes cold.",
       providerName: item.providerName,
       readinessLabel:
-        item.attentionLevel === "attention_now" ? "Ready now" : "Prepared",
+        item.attentionLevel === "attention_now" ? "Needs attention now" : "Watchlist",
       readinessState:
         item.attentionLevel === "attention_now" ? "ready_now" : "prepared",
       serviceName: item.serviceName,
@@ -496,8 +496,8 @@ function buildReminderPriorityItems(
             : "Inside reminder window",
         nextAction:
           item.reminderState === "blocked_missing_email"
-            ? "Add a patient email to move this reminder path from blocked to ready."
-            : "Keep this appointment visible in the narrow reminder-ready queue.",
+            ? "Add a patient email to move this reminder path from blocked to actionable."
+            : "Keep this appointment visible in the narrow reminder path.",
         providerName: item.providerName,
         readinessLabel: readiness.readinessLabel,
         readinessState: readiness.readinessState,
@@ -532,8 +532,8 @@ function buildConfirmationPriorityItems(
             : "Inside confirmation window",
         nextAction:
           item.confirmationState === "blocked_missing_email"
-            ? "Add a patient email to move this confirmation path from blocked to ready."
-            : "Keep this appointment visible in the confirmation-ready queue.",
+            ? "Add a patient email to move this confirmation path from blocked to actionable."
+            : "Keep this appointment visible in the confirmation path.",
         providerName: item.providerName,
         readinessLabel: readiness.readinessLabel,
         readinessState: readiness.readinessState,
@@ -555,15 +555,15 @@ function buildRecoveryPriorityItems(
     return {
       blockedReason: readiness.blockedReason,
       categoryKey: "recovery",
-      categoryLabel: "Recovery",
+      categoryLabel: "Follow-up",
       clientName: item.clientName,
       estimatedRevenue: item.estimatedRevenue,
       id: item.appointmentId,
-      insight: item.reasons[0]?.label ?? "Recovery opportunity surfaced",
+      insight: item.reasons[0]?.label ?? "Follow-up opportunity surfaced",
       nextAction:
         item.recoveryState === "blocked_missing_email"
-          ? "Add a patient email before REVORY can support recovery here."
-          : "Keep this disrupted visit visible for the first recovery outreach layer.",
+          ? "Add a patient email before REVORY can support follow-up here."
+          : "Keep this disrupted visit visible for the first follow-up layer.",
       providerName: item.providerName,
       readinessLabel: readiness.readinessLabel,
       readinessState: readiness.readinessState,
@@ -585,21 +585,21 @@ function buildReviewPriorityItems(
     return {
       blockedReason: readiness.blockedReason,
       categoryKey: "review_request",
-      categoryLabel: "Reviews",
+      categoryLabel: "Feedback",
       clientName: item.clientName,
       estimatedRevenue: item.estimatedRevenue,
       id: item.appointmentId,
       insight:
         item.reviewEligibilityState === "blocked_missing_reviews_url"
-          ? "Eligible for review visibility, but blocked by missing reviews destination"
+          ? "Eligible for feedback visibility, but blocked by missing feedback destination"
           : item.reviewEligibilityState === "blocked_missing_email"
-            ? "Eligible for review visibility, but blocked by missing patient email"
-            : "Completed recently and eligible for a review request",
+            ? "Eligible for feedback visibility, but blocked by missing patient email"
+          : "Completed recently and visible for feedback readiness",
       nextAction:
         item.reviewEligibilityState === "eligible_for_review_request"
-          ? "Keep this visit visible for the first email-first review layer."
+          ? "Keep this visit visible for the first feedback layer."
           : item.reviewEligibilityState === "blocked_missing_reviews_url"
-            ? "Configure the Google Reviews destination before REVORY can support the request."
+            ? "Configure the Google feedback link before REVORY can support the request."
             : "Add a patient email before REVORY can support the request.",
       providerName: item.providerName,
       readinessLabel: readiness.readinessLabel,
@@ -647,51 +647,51 @@ function buildPrioritySummary(
   if (!input.hasAppointmentBase) {
     return {
       description:
-        "REVORY already knows how to classify confirmation, reminders, at-risk signals, recovery, and review eligibility. This layer turns on as soon as the workspace has appointments to monitor.",
-      headline: "Operational visibility starts after the first appointments import.",
+        "REVORY already knows how to classify confirmation, reminders, at-risk signals, follow-up, and feedback eligibility. This layer turns on as soon as the workspace has appointments to monitor.",
+      headline: "Booking visibility starts after the first appointments import.",
       suggestedNextAction:
-        "Open Imports and bring in the first appointments CSV so the operational layer has something real to read.",
+        "Open Imports and bring in the first appointments CSV so the booking layer has something real to read.",
     };
   }
 
   if (priorityItems.length === 0) {
     return {
       description:
-        "The imported base is live, but no current appointment, disruption, or completed visit needs operational attention right now.",
+        "The imported base is live, but no current appointment, disruption, or completed visit needs booking attention right now.",
       headline: "The current schedule looks calm.",
       suggestedNextAction:
-        "Keep the imported schedule fresh so REVORY can keep surfacing trustworthy operational signals.",
+        "Keep the imported schedule fresh so REVORY can keep surfacing trustworthy booking signals.",
     };
   }
 
   if (input.atRisk.attentionNowCount > 0) {
     return {
       description:
-        "REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, recovery, and review visibility.",
+        "REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, follow-up, and feedback visibility.",
       headline: "A small set of appointments needs attention now.",
       suggestedNextAction:
         blockedCount > 0
           ? "Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot."
-          : "Start with the attention-now items first, then move through the remaining ready queues below.",
+          : "Start with the attention-now items first, then move through the remaining guided paths below.",
     };
   }
 
   if (blockedCount > 0) {
     return {
       description:
-        "The main operational friction right now is data readiness. REVORY can already see who would be ready next, but some paths are still blocked by missing email or missing reviews destination.",
+        "The main booking friction right now is data readiness. REVORY can already see which paths can move next, but some remain blocked by missing email or missing feedback destination.",
       headline: "Signals are live, but some paths are still blocked.",
       suggestedNextAction:
-        "Tighten the client contact base first so confirmation, reminders, recovery, and reviews can progress cleanly.",
+        "Tighten the client contact base first so confirmation, reminders, follow-up, and feedback can progress cleanly.",
     };
   }
 
   return {
     description:
-      "The first operational layer is live. REVORY is surfacing who is ready for the next step without turning the product into a CRM, inbox, or workflow builder.",
-    headline: "The workspace already has guided operational signals.",
+        "The first booking guidance layer is live. REVORY is surfacing what is actionable next without turning the product into a CRM, inbox, or workflow builder.",
+    headline: "The workspace already has guided booking signals.",
     suggestedNextAction:
-      "Use the surfaced queues below to understand what is ready, why it matters, and what REVORY suggests next.",
+      "Use the surfaced categories below to understand what is ready, what is blocked, and what REVORY suggests next.",
   };
 }
 

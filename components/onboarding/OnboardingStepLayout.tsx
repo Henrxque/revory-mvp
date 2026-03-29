@@ -50,11 +50,11 @@ export function OnboardingStepLayout({
           <div className="space-y-3">
             <p className="rev-kicker">Guided setup</p>
             <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)]">
-              Activate REVORY in one guided pass.
+              Activate REVORY Seller in one premium guided pass.
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              Keep setup focused, self-service, and easy to review before live
-              monitoring begins.
+              Confirm your main offer, lead source, booking path, deal value,
+              and brand voice before booking acceleration goes live.
             </p>
           </div>
 
@@ -77,8 +77,8 @@ export function OnboardingStepLayout({
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <p className="rev-label">Experience promise</p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                One clear decision per step. No builder complexity. No setup
-                sprawl.
+                One clear decision per step. No builder complexity. No legacy
+                ops logic.
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export function OnboardingStepLayout({
       <form action={formAction} className="space-y-6">
         {formFields}
 
-        <div className="rev-shell-hero rounded-[28px] p-6">
+        <div className="rev-shell-hero rev-accent-mist-soft rounded-[28px] p-6">
           <div className="space-y-3">
             <p className="rev-kicker">{step.eyebrow}</p>
             <h2 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
@@ -178,10 +178,10 @@ export function OnboardingStepLayout({
 }
 
 const stepKeyLabels: Record<OnboardingStepKey, string> = {
-  activation: "Review and Activation",
-  channel: "Primary Channel",
-  mode: "Recommended Mode",
-  reviews: "Google Reviews URL",
-  source: "Supported Source Type",
-  template: "Template MedSpa",
+  activation: "Activation",
+  channel: "Booking Path",
+  deal_value: "Deal Value",
+  mode: "Brand Voice",
+  source: "Lead Source",
+  template: "Main Offer",
 };

@@ -58,7 +58,7 @@ function buildPrimaryOpportunityReason(
       code: "no_show_without_rebooking",
       description:
         "The client missed the appointment and there is no later scheduled visit in the current workspace.",
-      label: "No-show without rebooking",
+      label: "Missed appointment without rebooking",
     };
   }
 
@@ -110,8 +110,8 @@ function buildRecoveryOpportunity(
     reasons.push({
       code: "blocked_missing_email",
       description:
-        "REVORY found the recovery opportunity, but there is no usable email path for the client in the current MVP.",
-      label: "Recovery blocked by missing email",
+        "REVORY found the follow-up opportunity, but there is no usable email path for the client in the current MVP.",
+      label: "Follow-up blocked by missing email",
     });
   }
 

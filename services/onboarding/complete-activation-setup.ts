@@ -37,8 +37,8 @@ export async function completeActivationSetup(
   }
 
   if (
-    activationSetup.selectedTemplate !== "MEDSPA" ||
-    !activationSetup.googleReviewsUrl ||
+    !activationSetup.selectedTemplate ||
+    !activationSetup.averageDealValue ||
     !activationSetup.recommendedModeKey ||
     !activationSetup.primaryChannel ||
     !onboardingDataSource

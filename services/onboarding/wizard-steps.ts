@@ -1,69 +1,69 @@
 export const onboardingSteps = [
   {
     key: "template",
-    title: "Choose Your MedSpa Template",
+    title: "Set Your Main Offer",
     eyebrow: "Step 1 of 6",
     description:
-      "Start with the MedSpa-first template REVORY was designed to activate quickly and clearly.",
-    fieldLabel: "Business template",
+      "Choose the one offer REVORY Seller should help move toward booked appointments first.",
+    fieldLabel: "Main offer",
     helperText:
-      "One focused template keeps setup premium, consistent, and easy to review before automation starts.",
+      "Start narrow. One main offer keeps activation premium, predictable, and easier to trust.",
     ctaLabel: "Continue",
   },
   {
     key: "source",
-    title: "Choose Your Data Source",
+    title: "Choose Your Lead Source",
     eyebrow: "Step 2 of 6",
     description:
-      "Pick the path that will bring appointments and clients into REVORY with the least friction.",
-    fieldLabel: "Data source path",
+      "Pick the cleanest path to bring lead and booking data into REVORY Seller with the least friction.",
+    fieldLabel: "Lead source",
     helperText:
-      "The fastest path is the official CSV template. Assisted import helps when your existing export uses different column names.",
+      "Choose the path that gets this workspace live fastest without turning setup into a technical project.",
     ctaLabel: "Continue",
   },
   {
     key: "channel",
-    title: "Primary Channel",
+    title: "Choose Your Booking Path",
     eyebrow: "Step 3 of 6",
     description:
-      "Set the default channel REVORY should prioritize for confirmations, reminders, and future recovery flows.",
-    fieldLabel: "Default communication channel",
+      "Set the primary booking lane REVORY Seller should treat as the default path when the workspace goes live.",
+    fieldLabel: "Booking path",
     helperText:
-      "Email is the recommended MVP default. SMS can stay secondary when your plan enables it.",
+      "A single primary path keeps activation simpler. Email is the default; SMS stays secondary when your plan enables it.",
     ctaLabel: "Continue",
   },
   {
-    key: "reviews",
-    title: "Google Reviews Destination",
+    key: "deal_value",
+    title: "Set Your Deal Value",
     eyebrow: "Step 4 of 6",
     description:
-      "Add the review link REVORY should use once review requests become active for this workspace.",
-    fieldLabel: "Review destination",
+      "Set the average value tied to one booked appointment so REVORY Seller starts with a clean revenue baseline.",
+    fieldLabel: "Average deal value",
     helperText:
-      "Keeping the destination ready now makes the growth layer much easier to activate later.",
+      "Keep this directional, simple, and useful. The goal is cleaner revenue visibility from day one.",
     ctaLabel: "Continue",
   },
   {
     key: "mode",
-    title: "Choose Your Starting Mode",
+    title: "Choose Your Brand Voice",
     eyebrow: "Step 5 of 6",
     description:
-      "Choose how hands-on or automated the workspace should feel when REVORY starts operating.",
-    fieldLabel: "Starting mode",
+      "Choose the voice posture REVORY Seller should reflect in the guided booking motion.",
+    fieldLabel: "Brand voice",
     helperText:
-      "Modes stay intentionally opinionated so activation remains self-service and easy to trust.",
+      "Keep the voice premium and opinionated so the workspace feels consistent without needing a complex builder.",
     ctaLabel: "Continue",
   },
   {
     key: "activation",
-    title: "Review and Activation",
+    title: "Review and Activate",
     eyebrow: "Step 6 of 6",
     description:
-      "Review the essentials, activate the workspace, and move into the operational dashboard.",
+      "Review the essentials, activate the workspace, and move into a revenue-first dashboard.",
     fieldLabel: "Activation readiness",
     helperText:
-      "Activation is the handoff from setup into daily monitoring, imports, and future revenue recovery flows.",
-    ctaLabel: "Activate REVORY",
+      "Activation is the handoff from setup into booking visibility, revenue tracking, and a cleaner booking-first workspace.",
+    ctaLabel: "Activate REVORY Seller",
   },
 ] as const;
 
@@ -79,6 +79,10 @@ export function isOnboardingStepKey(value: string): value is OnboardingStepKey {
 }
 
 export function resolveOnboardingStepKey(value: string | null | undefined) {
+  if (value === "reviews") {
+    return "deal_value";
+  }
+
   if (value && isOnboardingStepKey(value)) {
     return value;
   }
