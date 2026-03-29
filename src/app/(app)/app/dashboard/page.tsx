@@ -12,11 +12,23 @@ import {
 
 function formatCurrency(value: number | null) {
   if (value === null) {
-    return "Revenue path pending";
+    return "Awaiting booked proof";
   }
 
   return new Intl.NumberFormat("en-US", {
     currency: "USD",
+    style: "currency",
+  }).format(value);
+}
+
+function formatDealValue(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
+    return "Not set";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 0,
     style: "currency",
   }).format(value);
 }
@@ -70,7 +82,7 @@ function formatMainOfferLabel(value: string | null) {
     case "BODY_CONTOURING":
       return "Body Contouring";
     default:
-      return "Main offer pending";
+      return "Not locked";
   }
 }
 
@@ -81,8 +93,31 @@ function formatBookingPathLabel(value: string | null) {
     case "EMAIL":
       return "Primary booking path (Email)";
     default:
-      return "Booking path pending";
+      return "Not locked";
   }
+}
+
+function formatBookingPathMetricLabel(value: string | null) {
+  switch (value) {
+    case "SMS":
+      return "SMS";
+    case "EMAIL":
+      return "Email";
+    default:
+      return "Not locked";
+  }
+}
+
+function formatRevenueProofLabel(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
+    return "Not set";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    style: "currency",
+  }).format(value);
 }
 
 function getImportSourceTone(status: string) {
@@ -122,13 +157,13 @@ function getMetricValueClassName(
 
   if (emphasis === "primary") {
     return pending
-      ? "text-[1.75rem] leading-[1.08]"
-      : "text-[clamp(2.65rem,4vw,3.55rem)] leading-none";
+      ? "text-[1.58rem] leading-[1.12]"
+      : "text-[clamp(2.15rem,3.2vw,2.95rem)] leading-none";
   }
 
   return pending
-    ? "text-[1.45rem] leading-[1.15]"
-    : "text-[1.95rem] leading-none";
+    ? "text-[1.25rem] leading-[1.2]"
+    : "text-[1.72rem] leading-none";
 }
 
 type MetricCardProps = Readonly<{
@@ -252,103 +287,86 @@ export default async function DashboardPage() {
   const { activationSetup, workspace } = appContext;
   const overview = await getDashboardOverview(workspace.id);
   const monthChip = formatMonthChip();
-  const hasImportedData =
-    overview.importSources.length > 0 ||
-    overview.appointmentsMonitored > 0 ||
-    overview.clientsImported > 0;
+  const hasRevenueProofVisible = overview.bookedAppointments > 0;
   const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
   const bookingPathLabel = formatBookingPathLabel(activationSetup.primaryChannel);
-  const nextLeveragePoint = !hasImportedData
-    ? "Bring the first booked appointment into view so REVORY Seller can open the revenue path with real booking evidence. Booking Inputs is the cleanest next step."
+  const bookingPathMetricLabel = formatBookingPathMetricLabel(
+    activationSetup.primaryChannel,
+  );
+  const dealValueLabel = formatDealValue(
+    activationSetup.averageDealValue
+      ? Number(activationSetup.averageDealValue)
+      : null,
+  );
+  const revenueProofLabel = formatRevenueProofLabel(overview.estimatedImportedRevenue);
+  const nextLeveragePoint = !hasRevenueProofVisible
+    ? "Open Booking Inputs and add booked proof first. That is the shortest path to a revenue view that feels commercially real."
     : overview.upcomingAppointments === 0
-      ? "Upload a fresher appointments export so the booking view stays current and booked outcomes stay trustworthy."
-      : "Keep the lead and appointment base fresh so REVORY Seller can keep the booking motion and revenue read clean.";
-  const speedSignalValue = hasImportedData ? "Signal warming up" : "Waiting for motion";
-  const bookingRateValue = hasImportedData ? "Signal warming up" : "Waiting for motion";
-  const leadBaseValue = overview.clientsImported > 0 ? overview.clientsImported : "Lead base pending";
+      ? "Refresh booked visibility so the booked calendar stays current and the revenue read stays believable."
+      : "Keep booked visibility fresh so REVORY Seller can preserve a clean commercial read.";
   const bookedAppointmentsValue =
-    overview.bookedAppointments > 0 ? overview.bookedAppointments : "Booked outcome pending";
+    overview.bookedAppointments > 0 ? overview.bookedAppointments : "Awaiting booked proof";
   const motionStages = [
     {
       detail:
         overview.clientsImported > 0
-          ? `${overview.clientsImported} client record${overview.clientsImported === 1 ? "" : "s"} currently give REVORY Seller a visible lead base to work from.`
-          : "Bring the first lead base into view so REVORY Seller can start reading real demand and its path toward booking.",
-      label: "Lead received",
+          ? `${overview.clientsImported} client record${overview.clientsImported === 1 ? "" : "s"} currently anchor the visible lead base behind this revenue read.`
+          : "Bring the first lead base into view so REVORY Seller can start reading paid demand honestly.",
+      label: "Lead base",
       stage: "01",
-      status: overview.clientsImported > 0 ? "Visible" : "Awaiting base",
+      status: overview.clientsImported > 0 ? "Visible" : "Next up",
       tone: overview.clientsImported > 0 ? ("real" as const) : ("future" as const),
     },
     {
-      detail: `Main offer set to ${mainOfferLabel} with ${bookingPathLabel.toLowerCase()} kept as the natural booking destination for this workspace.`,
-      label: "Guided flow started",
+      detail: `Main offer stays on ${mainOfferLabel} with ${bookingPathLabel.toLowerCase()} kept as the one booking destination REVORY Seller reinforces.`,
+      label: "Booking path",
       stage: "02",
-      status: "Active",
+      status: "Locked",
       tone: "accent" as const,
     },
     {
       detail:
-        hasImportedData
-          ? "Short triage still stays narrow and honest here. REVORY Seller is waiting for live event coverage before surfacing this signal."
-          : "Triage stays inactive until a real lead base enters the workspace.",
-      label: "Short triage",
-      stage: "03",
-      status: hasImportedData ? "Signal pending" : "Waiting",
-      tone: "neutral" as const,
-    },
-    {
-      detail:
-        hasImportedData
-          ? "Advance rate will appear once REVORY Seller can read how leads move from intake toward booking without inventing motion."
-          : "Advance remains hidden until the workspace has real lead-to-booking movement to read.",
-      label: "Lead advance",
-      stage: "04",
-      status: hasImportedData ? "Signal warming up" : "Not ready",
-      tone: "neutral" as const,
-    },
-    {
-      detail:
         overview.bookedAppointments > 0
-          ? `${overview.bookedAppointments} booked appointment${overview.bookedAppointments === 1 ? "" : "s"} already visible in the current Seller view.`
-          : "Booked appointments appear here as soon as REVORY Seller can read them from the first live dataset.",
-      label: "Booking",
-      stage: "05",
-      status: overview.bookedAppointments > 0 ? "Visible" : "Awaiting booking",
+          ? `${overview.bookedAppointments} booked appointment${overview.bookedAppointments === 1 ? "" : "s"} already give the revenue number a live commercial outcome.`
+          : "As soon as booked appointments become visible, revenue stops reading like a promise and starts reading like proof.",
+      label: "Booked outcome",
+      stage: "03",
+      status: overview.bookedAppointments > 0 ? "Visible" : "Proof next",
       tone: overview.bookedAppointments > 0 ? ("real" as const) : ("future" as const),
     },
   ];
 
   return (
     <div className="space-y-5">
-      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-7 md:p-8">
-        <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-end">
-          <div className="max-w-[46rem] space-y-4">
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_310px] xl:items-start">
+          <div className="max-w-[40rem] space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="rev-kicker">Lead-to-booking motion</p>
+              <p className="rev-kicker">Revenue view</p>
               <span className="inline-flex min-h-8 items-center rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] font-medium text-[color:var(--text-muted)]">
                 {monthChip}
               </span>
-              <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-                {hasImportedData ? "Motion visible" : "Revenue path waiting"}
+              <RevoryStatusBadge tone={hasRevenueProofVisible ? "real" : "neutral"}>
+                {hasRevenueProofVisible ? "Revenue connected" : "Booked proof next"}
               </RevoryStatusBadge>
             </div>
 
-            <h1 className="max-w-[40rem] font-[family:var(--font-display)] text-[clamp(2.4rem,4vw,3.95rem)] leading-[0.92] text-[color:var(--foreground)]">
-              {hasImportedData
-                ? "See how paid leads are moving toward booked appointments."
-                : "Bring the first booked appointments into the live Seller view."}
+            <h1 className="rev-display-hero max-w-[31rem]">
+              {hasRevenueProofVisible
+                ? "See booked revenue with real proof underneath."
+                : "Booked proof turns this page into a real revenue view."}
             </h1>
 
-            <p className="max-w-[39rem] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
-              {hasImportedData
-                ? "Revenue still stays first, but the dashboard now makes the booking motion explicit: lead base, guided path, booked outcomes, and the next controlled move."
-                : "Start from one clean booking input and let REVORY Seller make booked outcomes, booking motion, and revenue path visible."}
+            <p className="max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)] md:text-[15px]">
+              {hasRevenueProofVisible
+                ? "REVORY Seller keeps the value read immediate: revenue first, booked proof underneath, and one clear next move."
+                : "Bring one clean booked-visibility file into Seller first. That is what turns this page from a placeholder number into a commercially believable revenue view."}
             </p>
           </div>
 
-          <div className="xl:ml-auto xl:w-full xl:max-w-[19rem]">
-            <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
-              <p className="rev-label">Primary metric</p>
+          <div className="xl:ml-auto xl:w-full xl:max-w-[18.75rem]">
+            <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-[1.125rem] shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+              <p className="rev-label">Booked revenue visible</p>
               <p
                 className={`mt-4 max-w-[14rem] font-semibold text-[color:var(--accent-light)] ${getMetricValueClassName(
                   formatCurrency(overview.estimatedImportedRevenue),
@@ -358,16 +376,41 @@ export default async function DashboardPage() {
                 {formatCurrency(overview.estimatedImportedRevenue)}
               </p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                {hasImportedData
-                  ? "Revenue currently visible from the booked appointments attached to this workspace."
-                  : "Revenue appears as soon as Seller can see booked appointments and apply the deal value already locked in activation."}
+                {hasRevenueProofVisible
+                  ? "This is the revenue already visible from booked appointments currently in view."
+                  : "This number becomes real as soon as Seller can see booked appointments and apply the value per booking already locked in activation."}
               </p>
+              <div className="mt-5 space-y-3 border-t border-[rgba(255,255,255,0.08)] pt-4">
+                {[
+                  {
+                    label: "Booked appointments",
+                    value:
+                      overview.bookedAppointments > 0
+                        ? `${overview.bookedAppointments} visible`
+                        : "Not visible yet",
+                  },
+                  {
+                    label: "Value per booking",
+                    value: dealValueLabel,
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="text-[color:var(--text-muted)]">{item.label}</span>
+                    <span className="font-semibold text-[color:var(--foreground)]">
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
               <div className="mt-5">
                 <DocumentNavigationLink
-                  className={`${hasImportedData ? "rev-button-secondary" : "rev-button-primary"} w-full justify-center px-5 py-3 text-sm`}
+                  className={`${hasRevenueProofVisible ? "rev-button-secondary" : "rev-button-primary"} w-full justify-center px-5 py-3 text-sm`}
                   href="/app/imports"
                 >
-                  {hasImportedData ? "Refresh booking inputs" : "Open Booking Inputs"}
+                  {hasRevenueProofVisible ? "Refresh booked proof" : "Add booked proof"}
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -377,69 +420,62 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
         <MetricCard
-          label="Lead base visible"
-          note="Client records currently available for REVORY Seller to read as the live lead base."
-          value={leadBaseValue}
-        />
-        <MetricCard
-          label="Booked appointments"
-          note="Appointments already visible as booked outcomes inside this workspace."
+          label="Booked proof"
+          note="Booked appointments currently carrying the revenue number above."
           value={bookedAppointmentsValue}
         />
         <MetricCard
-          label="Lead advance rate"
-          note="Appears once REVORY Seller has enough real lead-to-booking movement to measure it honestly."
-          value={bookingRateValue}
+          label="Revenue per booking"
+          note="The dollar value REVORY uses to turn each visible booking into revenue proof."
+          value={dealValueLabel}
         />
         <MetricCard
-          label="Lead response time"
-          note="Appears once REVORY Seller starts receiving real speed coverage from the live motion."
-          value={speedSignalValue}
+          label="Main offer live"
+          note="The one commercial offer currently generating the booked outcomes behind this read."
+          value={mainOfferLabel}
+        />
+        <MetricCard
+          label="Booking path"
+          note="The single path REVORY Seller keeps reinforcing toward a booked appointment."
+          value={bookingPathMetricLabel}
         />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.82fr)]">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]">
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Why this revenue is believable
+                Why revenue is believable
               </p>
               <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                REVORY Seller does not treat revenue as a floating KPI. The number exists because activation locked the booking path, imported data made booked outcomes visible, and deal value turned those outcomes into money.
+                REVORY Seller only lets revenue lead when the path underneath is already legible: booking path locked, booked outcomes visible, and value per booking attached.
               </p>
             </div>
-            <RevoryStatusBadge tone={hasImportedData ? "accent" : "neutral"}>
-              {hasImportedData ? "Attribution path visible" : "Attribution path pending"}
+            <RevoryStatusBadge tone={hasRevenueProofVisible ? "accent" : "neutral"}>
+              {hasRevenueProofVisible ? "Confidence visible" : "Confidence building"}
             </RevoryStatusBadge>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[
               {
-                label: "Activation",
-                note: "Main offer, lead source, booking path, and deal value were locked before the workspace went live.",
-                value: activationSetup.isCompleted ? "Locked" : "Pending",
+                label: "Booking path locked",
+                note: "Main offer, booking path, and value per booking were locked before the workspace went live.",
+                value: activationSetup.isCompleted ? "Locked" : "Next",
               },
               {
-                label: "Booked outcomes",
-                note: "Appointments visible in this workspace are the booked outcomes behind the revenue read.",
+                label: "Booked proof visible",
+                note: "Appointments visible in this workspace are the booked outcomes carrying the revenue read.",
                 value:
                   overview.bookedAppointments > 0
                     ? `${overview.bookedAppointments} visible`
-                    : "Booked outcomes pending",
+                    : "Awaiting booked proof",
               },
               {
-                label: "Deal value",
-                note: "One booked appointment translates into money through the revenue baseline defined in activation.",
-                value: activationSetup.averageDealValue
-                  ? formatCurrency(Number(activationSetup.averageDealValue))
-                  : "Awaiting value",
-              },
-              {
-                label: "Revenue read",
-                note: "The executive number stays short because the attribution path is already established underneath it.",
-                value: formatCurrency(overview.estimatedImportedRevenue),
+                label: "Revenue baseline",
+                note: "This is the dollar value attached to each visible booking in the revenue number above.",
+                value: dealValueLabel,
               },
             ].map((item) => (
               <div
@@ -457,13 +493,43 @@ export default async function DashboardPage() {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-5 md:p-6">
-          <p className="rev-label">Executive read</p>
+          <p className="rev-label">Commercial read</p>
           <p className="mt-3 text-[1.05rem] font-semibold text-[color:var(--foreground)]">
-            Revenue stays dominant, but it now reads as the result of the Seller motion instead of as an isolated dashboard number.
+            One dominant revenue number on top. Just enough booked proof underneath to make the read convincing, not analytical.
           </p>
           <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-            The dashboard remains executive-first on purpose. Attribution is explained just enough to build trust, without turning the product into analytics-heavy BI.
+            Revenue stays first on purpose. The dashboard explains the number just enough to support the booking promise, without turning REVORY Seller into BI.
           </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
+              <p className="rev-label">Booked proof in view</p>
+              <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                {overview.bookedAppointments > 0
+                  ? `${overview.bookedAppointments} booked`
+                  : "Proof next"}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
+              <p className="rev-label">Revenue proof visible</p>
+              <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
+                {revenueProofLabel}
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 border-t border-[rgba(255,255,255,0.08)] pt-4">
+            <p className="rev-label">Next commercial move</p>
+            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
+              {nextLeveragePoint}
+            </p>
+            <div className="mt-5">
+              <DocumentNavigationLink
+                className={hasRevenueProofVisible ? "rev-button-secondary" : "rev-button-primary"}
+                href="/app/imports"
+              >
+                {hasRevenueProofVisible ? "Review booked proof" : "Add booked proof"}
+              </DocumentNavigationLink>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -471,18 +537,18 @@ export default async function DashboardPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-              Lead-to-booking motion
+              Revenue path
             </p>
             <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
-              The Seller core is the motion itself. Sources stay in the product only to feed this path, not to become the center of the experience.
+              The dashboard only needs three proof points to feel trustworthy: visible lead base, locked booking path, and visible booked outcome.
             </p>
           </div>
-          <RevoryStatusBadge tone={hasImportedData ? "accent" : "neutral"}>
-            {hasImportedData ? "Motion active" : "Motion waiting on visibility"}
+          <RevoryStatusBadge tone={hasRevenueProofVisible ? "accent" : "neutral"}>
+            {hasRevenueProofVisible ? "Commercial path visible" : "Commercial path opening"}
           </RevoryStatusBadge>
         </div>
 
-        <div className="mt-5 grid gap-3 xl:grid-cols-5">
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
           {motionStages.map((item) => (
             <MotionStageCard
               key={item.stage}
@@ -501,14 +567,14 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Booking inputs
+                Booked visibility
               </p>
               <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                Upload freshness stays readable here because it supports the Seller motion, not because it is the product center.
+                These files stay visible here only because they explain the revenue read with booked proof. They make the value feel earned, not estimated.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
-              {overview.importSources.length > 0 ? "Input active" : "Input pending"}
+              {overview.importSources.length > 0 ? "Proof active" : "Proof building"}
             </RevoryStatusBadge>
           </div>
 
@@ -532,7 +598,7 @@ export default async function DashboardPage() {
                           {source.templateLabel}
                         </p>
                         <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
-                          {source.fileName ?? "No file name saved"}
+                          {source.fileName ?? "File name unavailable"}
                         </p>
                       </div>
                       <span
@@ -567,7 +633,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Success rows
+                            Visible rows
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.successRows}
@@ -575,7 +641,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Review rows
+                            Needs review
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.errorRows}
@@ -583,7 +649,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Total rows
+                            Rows received
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.totalRows}
@@ -598,14 +664,14 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No booked outcomes visible yet
+                No booked proof visible yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                The live Seller view is ready for booked appointments. Open Booking Inputs, add the file you already have, and let REVORY Seller connect booking visibility to revenue.
+                Booking Inputs lets you add the file you already have so booked appointments become visible and the revenue number can stop feeling abstract.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open Booking Inputs
+                  Add booked proof
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -615,37 +681,26 @@ export default async function DashboardPage() {
         <section className="min-w-0 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
           <div className="space-y-2">
             <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-              Next leverage point
+              Commercial guardrails
             </p>
             <p className="max-w-[28rem] text-sm leading-6 text-[color:var(--text-muted)]">
-              Keep the next obvious move readable without turning the product into a queue.
+              The dashboard stays narrow on purpose so the revenue read feels commercial, not back-office.
             </p>
           </div>
 
-          <div className="mt-5 rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-5">
-            <p className="rev-label">Recommended move</p>
-            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
-              {nextLeveragePoint}
-            </p>
-            <div className="mt-5">
-              <DocumentNavigationLink
-                className={hasImportedData ? "rev-button-secondary" : "rev-button-primary"}
-                href="/app/imports"
-              >
-                {hasImportedData ? "Review booking inputs" : "Open Booking Inputs"}
-              </DocumentNavigationLink>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-1">
             {[
               {
                 label: "One main offer",
-                note: "Seller stays narrow around one guided booking motion per client.",
+                note: "Seller stays commercially narrow around one guided booking motion per client.",
               },
               {
                 label: "Revenue-first read",
-                note: "Money stays dominant while source and booking context remain secondary.",
+                note: "Money stays dominant while context remains secondary and supportive.",
+              },
+              {
+                label: "Booked proof",
+                note: "Uploads and booked appointments only stay visible because they make the number believable.",
               },
             ].map((item) => (
               <div
@@ -669,36 +724,36 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Booking context
+                Commercial context
               </p>
               <p className="mt-1 max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                Short business context that keeps the dashboard readable and revenue-connected.
+                Short business context that keeps the revenue number legible at a glance.
               </p>
             </div>
-            <RevoryStatusBadge tone={hasImportedData ? "real" : "neutral"}>
-              {hasImportedData ? "Revenue-connected" : "Signal pending"}
+            <RevoryStatusBadge tone={hasRevenueProofVisible ? "real" : "neutral"}>
+              {hasRevenueProofVisible ? "Revenue-linked" : "Signal building"}
             </RevoryStatusBadge>
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <ContextCard
               label="Main offer"
-              note="Seller stays narrow around one main offer at a time."
+              note="Seller stays commercially narrow around one offer at a time."
               value={mainOfferLabel}
             />
             <ContextCard
               label="Booking path"
-              note="The guided flow keeps one explicit booking destination instead of multiple competing routes."
+              note="The dashboard keeps one explicit booking destination instead of multiple competing routes."
               value={bookingPathLabel}
             />
             <ContextCard
               label="Lead base"
-              note="Current visible base available for booking and revenue visibility."
+              note="Visible lead base currently supporting the booking and revenue read."
               value={`${overview.clientsImported} client records`}
             />
             <ContextCard
-              label="Booked outcomes in view"
-              note="Upcoming appointments currently visible as the live result of the booking path."
+              label="Upcoming bookings"
+              note="The next booked appointments currently visible as the live result of the booking path."
               value={`${overview.upcomingAppointments} upcoming`}
             />
           </div>
@@ -708,7 +763,7 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Appointments in view
+                Upcoming booked appointments
               </p>
               <p className="mt-1 max-w-[32rem] text-sm leading-6 text-[color:var(--text-muted)]">
                 The next booked appointments currently visible inside this workspace.
@@ -717,7 +772,7 @@ export default async function DashboardPage() {
             <RevoryStatusBadge tone={overview.upcomingAppointments > 0 ? "real" : "neutral"}>
               {overview.upcomingAppointments > 0
                 ? `${overview.upcomingAppointments} scheduled`
-                : "Awaiting schedule"}
+                : "Calendar building"}
             </RevoryStatusBadge>
           </div>
 
@@ -736,7 +791,7 @@ export default async function DashboardPage() {
                       {appointment.clientName}
                     </p>
                     <p className="mt-1 truncate text-sm text-[color:var(--text-muted)]">
-                      {appointment.serviceName ?? "Imported appointment"} -{" "}
+                      {appointment.serviceName ?? "Booked appointment"} -{" "}
                       {formatAppointmentDate(appointment.scheduledAt)}
                     </p>
                   </div>
@@ -749,14 +804,14 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No upcoming bookings visible yet
+                No booked calendar visible yet
               </p>
               <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Add the first appointments upload so REVORY Seller can make upcoming bookings visible in the live Seller view.
+                Add the first booked-visibility file so the dashboard can show a live booked calendar behind the revenue read.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                  Open Booking Inputs
+                  Add booked proof
                 </DocumentNavigationLink>
               </div>
             </div>
@@ -767,10 +822,10 @@ export default async function DashboardPage() {
       <section className="space-y-4">
         <div>
           <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-            Secondary signals
+            Signals that turn on later
           </p>
           <p className="mt-1 max-w-[42rem] text-sm leading-6 text-[color:var(--text-muted)]">
-            These stay secondary until REVORY Seller has the lead and response events needed to measure them honestly.
+            These support confidence once Seller has enough live motion, but they stay secondary to revenue and booked proof.
           </p>
         </div>
 
@@ -784,12 +839,12 @@ export default async function DashboardPage() {
             title="Lead advance rate"
           />
           <SignalCard
-            note="Surfaces once Seller can connect cleaner booking outcomes to the active source path."
+            note="Surfaces once Seller can connect cleaner booked outcomes to the active booking path."
             title="Booked appointments"
           />
           <SignalCard
-            note="Surfaces once Seller can compare which lead paths are feeding the healthiest booking pipeline."
-            title="Source performance"
+            note="Surfaces once Seller can compare which active paths are feeding the healthiest booked pipeline."
+            title="Booking path health"
           />
         </div>
       </section>

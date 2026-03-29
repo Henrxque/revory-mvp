@@ -11,5 +11,5 @@ export default async function PrivateAppEntryPage() {
     redirect(buildSignInRedirectPath("/app"));
   }
 
-  redirect(getInitialAppPath(appContext));
+  redirect(await getInitialAppPath(appContext));
 }

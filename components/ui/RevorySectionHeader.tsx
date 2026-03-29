@@ -18,14 +18,14 @@ export function RevorySectionHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 xl:items-end">
       <div className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-[color:var(--accent)]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[color:var(--accent)]">
           {eyebrow}
         </p>
-        <h3 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)] md:text-[2.8rem]">
+        <h3 className="rev-display-section max-w-[28rem]">
           {title}
         </h3>
         {description ? (
-          <p className="max-w-[46rem] text-sm leading-7 text-[color:var(--text-muted)]">
+          <p className="max-w-[40rem] text-sm leading-7 text-[color:var(--text-muted)]">
             {description}
           </p>
         ) : null}

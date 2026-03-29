@@ -125,7 +125,7 @@ function buildMappingConfirmationBlockingMessage(
   );
 
   if (confirmedPreview.duplicateSourceHeaders.length > 0) {
-    return `Remove duplicate source headers before importing: ${confirmedPreview.duplicateSourceHeaders.join(
+    return `Remove duplicate source headers before continuing: ${confirmedPreview.duplicateSourceHeaders.join(
       ", ",
     )}.`;
   }
@@ -137,13 +137,13 @@ function buildMappingConfirmationBlockingMessage(
   }
 
   if (confirmedPreview.missingRequiredColumns.length > 0) {
-    return `Map the required fields before importing: ${confirmedPreview.missingRequiredColumns
+    return `Map the required fields before continuing: ${confirmedPreview.missingRequiredColumns
       .map((column) => formatImportColumnLabel(column))
       .join(", ")}.`;
   }
 
   if (confirmedPreview.missingIdentityPath) {
-    return "Map at least one client identifier before importing.";
+    return "Map at least one client identifier before continuing.";
   }
 
   return null;
@@ -159,7 +159,7 @@ export async function uploadCsvFile(
     if (!appContext) {
       return {
         message:
-          "Your REVORY session expired before the import could finish. Sign in again and retry the current file.",
+          "Your REVORY session expired before the visibility update could finish. Sign in again and retry the current file.",
         requiresReauth: true,
         status: "error",
       };
@@ -167,7 +167,7 @@ export async function uploadCsvFile(
 
     if (!appContext.activationSetup.isCompleted) {
       return {
-        message: "Finish workspace activation before importing CSV files.",
+        message: "Finish workspace activation before updating booked visibility.",
         status: "error",
       };
     }
@@ -179,7 +179,7 @@ export async function uploadCsvFile(
 
     if (typeof templateKeyValue !== "string" || !isTemplateKey(templateKeyValue)) {
       return {
-        message: "Select a valid REVORY CSV import type before uploading.",
+        message: "Select a valid REVORY CSV lane before continuing.",
         status: "error",
       };
     }
@@ -193,21 +193,21 @@ export async function uploadCsvFile(
 
     if (getFileExtension(fileValue.name) !== REVORY_CSV_ALLOWED_EXTENSION) {
       return {
-        message: "Upload a file with the .csv extension.",
+        message: "Use a file with the .csv extension.",
         status: "error",
       };
     }
 
     if (fileValue.size > REVORY_CSV_MAX_FILE_SIZE_BYTES) {
       return {
-        message: "The CSV file is larger than the current REVORY upload limit.",
+        message: "The CSV file is larger than the current REVORY file limit.",
         status: "error",
       };
     }
 
     if (rawMappingDecisionDraft && !mappingDecisionDraft) {
       return {
-        message: "REVORY could not confirm the final mapping for this import.",
+        message: "REVORY could not confirm the final mapping for this file.",
         status: "error",
       };
     }
@@ -332,10 +332,10 @@ export async function uploadCsvFile(
         ? buildAssistedImportExecutionMappingSummary(mappingDecisionDraft)
         : undefined,
       message: hasPartialErrors
-        ? "CSV imported with partial row rejection. Review the rows that still need correction."
+        ? "Booked visibility updated with partial row rejection. Review the rows that still need correction."
         : mappingDecisionDraft
-          ? "CSV imported successfully using the confirmed mapping for this execution."
-          : "CSV imported successfully for this REVORY source.",
+          ? "Booked visibility updated successfully using the confirmed mapping for this file."
+          : "Booked visibility updated successfully for this file.",
       importedAt: dataSource.lastImportedAt?.toISOString() ?? new Date().toISOString(),
       status: persistenceResult.finalStatus,
       warnings: combinedWarnings,
@@ -345,7 +345,7 @@ export async function uploadCsvFile(
 
     return {
       message:
-        "REVORY could not complete this import right now. Refresh the session and retry the current file.",
+        "REVORY could not finish this visibility update right now. Refresh the session and retry the current file.",
       status: "error",
     };
   }

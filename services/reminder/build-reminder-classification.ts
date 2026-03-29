@@ -102,7 +102,7 @@ function buildReminderCandidate(
     operationalState: buildPreparedOperationalState(),
     providerName: appointment.providerName,
     reasonCode: "outside_reminder_window",
-    // This is an auxiliary visibility bucket, not a primary operational action bucket.
+    // This is an auxiliary visibility bucket, not a primary booking guidance bucket.
     reminderState: "scheduled_later",
     requiresAttention: false,
     scheduledAt: appointment.scheduledAt,

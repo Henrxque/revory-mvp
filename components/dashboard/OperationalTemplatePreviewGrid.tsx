@@ -12,10 +12,10 @@ export function OperationalTemplatePreviewGrid({
   return (
     <section className="space-y-4">
       <RevorySectionHeader
-        badgeLabel="Guided preparation"
+        badgeLabel="Guided base"
         badgeTone="neutral"
-        description="Each category keeps a short booking playbook, a preparation state, and a controlled preview. This is preparation, not live outreach delivery."
-        eyebrow="Booking Playbook"
+        description="Each category keeps a short guided base, a readiness state, and a controlled preview. This stays secondary and does not imply live delivery."
+        eyebrow="Controlled Preview"
         title="Preview and guidance stay separate."
       />
 

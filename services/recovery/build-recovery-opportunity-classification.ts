@@ -58,7 +58,7 @@ function buildPrimaryOpportunityReason(
       code: "no_show_without_rebooking",
       description:
         "The client missed the appointment and there is no later scheduled visit in the current workspace.",
-      label: "Missed appointment without rebooking",
+      label: "Missed appointment with no return booking",
     };
   }
 
@@ -66,7 +66,7 @@ function buildPrimaryOpportunityReason(
     code: "canceled_without_rebooking",
     description:
       "The appointment was canceled and there is no later scheduled visit in the current workspace.",
-    label: "Canceled without rebooking",
+    label: "Canceled appointment with no return booking",
   };
 }
 
@@ -110,8 +110,8 @@ function buildRecoveryOpportunity(
     reasons.push({
       code: "blocked_missing_email",
       description:
-        "REVORY found the follow-up opportunity, but there is no usable email path for the client in the current MVP.",
-      label: "Follow-up blocked by missing email",
+        "REVORY found the return-to-booking opportunity, but there is no usable email path for the client in the current MVP.",
+      label: "Return-to-booking blocked by missing email",
     });
   }
 

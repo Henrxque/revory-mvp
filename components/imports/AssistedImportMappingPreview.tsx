@@ -89,7 +89,7 @@ function getDecisionBadgeLabel(decisionState: AssistedImportDecisionState) {
 function getDecisionCopy(decision: AssistedImportDecision) {
   switch (decision.decisionState) {
     case "kept_confident_match":
-      return "REVORY matched this field with confidence and the current mapping keeps it as suggested.";
+      return "REVORY matched this field with confidence and the current mapping keeps that confident match.";
     case "mapped_by_user":
       return "The current mapping differs from the original suggestion and now reflects the user's choice.";
     case "suggested_pending_confirmation":
@@ -317,7 +317,7 @@ export function AssistedImportMappingPreview({
                     {confirmationDraft.keptConfidentMatchCount}
                   </p>
                   <p className="text-sm text-[color:var(--text-muted)]">
-                    Kept as suggested
+                    Confident matches kept
                   </p>
                 </div>
                 <div>

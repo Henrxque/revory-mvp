@@ -6,6 +6,20 @@ import { prisma } from "@/db/prisma";
 import { csvUploadSourceNames } from "@/services/imports/csv-upload-source-config";
 import type { RevoryCsvTemplateKey } from "@/types/imports";
 
+type CsvUploadSourceSignal = Pick<DataSource, "lastImportSuccessRowCount" | "status">;
+
+export function hasLiveCsvUploadSource(source: CsvUploadSourceSignal | null) {
+  if (!source) {
+    return false;
+  }
+
+  return (
+    (source.lastImportSuccessRowCount ?? 0) > 0 ||
+    source.status === "IMPORTED" ||
+    source.status === "CONNECTED"
+  );
+}
+
 export async function getCsvUploadSources(
   workspaceId: string,
 ): Promise<Record<RevoryCsvTemplateKey, DataSource | null>> {

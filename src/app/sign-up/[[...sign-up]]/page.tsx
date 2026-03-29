@@ -13,9 +13,9 @@ import {
 } from "@/services/auth/redirects";
 
 const signUpHighlights = [
-  "MedSpa-first onboarding",
-  "CSV-ready workspace",
-  "Premium private shell",
+  "MedSpa-first activation",
+  "Booked proof path",
+  "Revenue view when ready",
 ];
 
 const signUpSteps = [
@@ -26,13 +26,13 @@ const signUpSteps = [
   },
   {
     label: "02",
-    title: "Move through setup",
+    title: "Move through activation",
     text: "The guided path keeps activation narrow, opinionated, and coherent with the MVP.",
   },
   {
     label: "03",
-    title: "Reach the imported dashboard",
-    text: "Setup, imports, and dashboard visibility stay tied together from the first session.",
+    title: "Reach the revenue view",
+    text: "Activation, booked proof, and the revenue view stay tied together from the first session.",
   },
 ];
 
@@ -66,9 +66,9 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                 className="rev-button-secondary px-4 py-2 text-xs"
                 href="/"
               >
-                Back to home
+                Back to REVORY
               </Link>
-              <RevoryStatusBadge tone="accent">New workspace</RevoryStatusBadge>
+              <RevoryStatusBadge tone="accent">Seller workspace</RevoryStatusBadge>
             </div>
           </div>
 
@@ -86,16 +86,16 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           <div className="mt-8 space-y-5">
             <p className="rev-kicker">Guided activation</p>
             <div className="space-y-3">
-              <h1 className="max-w-2xl font-[family:var(--font-display)] text-4xl leading-[0.94] text-[color:var(--foreground)] md:text-5xl">
+              <h1 className="rev-display-hero max-w-[32rem]">
                 Start the workspace and move into the{" "}
                 <span className="italic text-[color:var(--accent-light)]">
-                  REVORY setup flow.
+                  REVORY Seller path.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
                 Account creation is the front door to the protected product
-                flow. From here, the workspace is created, setup is guided, and
-                the imported dashboard becomes the destination.
+                flow. From here, the workspace is created, activation is guided,
+                booked proof becomes visible, and the revenue view becomes the destination.
               </p>
             </div>
           </div>
@@ -119,12 +119,12 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           <div className="space-y-5">
             <div className="space-y-3">
               <p className="rev-kicker">Account creation</p>
-              <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)] md:text-4xl">
+              <h2 className="rev-display-panel max-w-[22rem]">
                 Start a REVORY workspace.
               </h2>
               <p className="max-w-xl text-sm leading-7 text-[#beb7ca]">
-                Create the account tied to the workspace so setup, imports, and
-                activation state remain consistent from the first session.
+                Create the account tied to the workspace so activation, booked proof, and
+                revenue visibility remain consistent from the first session.
               </p>
             </div>
 
@@ -134,15 +134,15 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                   <p className="text-xl font-semibold text-[color:var(--foreground)]">
                     {googleAuthConfigured
                       ? "Start with Google"
-                      : "Auth setup required locally"}
+                      : "Google sign-in unavailable in this build"}
                   </p>
                   <RevoryStatusBadge tone={googleAuthConfigured ? "real" : "future"}>
-                    {googleAuthConfigured ? "Google auth ready" : "Needs local config"}
+                    {googleAuthConfigured ? "Google auth ready" : "Local build"}
                   </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
                   Create the REVORY workspace with the Google account that will
-                  stay connected to setup, imports, and booking visibility.
+                  stay connected to activation, booked proof, and revenue visibility.
                 </p>
 
                 {googleAuthConfigured ? (
@@ -155,7 +155,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                 ) : (
                   <div className="mt-6 rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] p-4">
                     <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                      Google auth is not configured locally yet
+                      Google sign-in is unavailable in this local build
                     </p>
                     <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
                       Add <code>AUTH_GOOGLE_CLIENT_ID</code>,{" "}

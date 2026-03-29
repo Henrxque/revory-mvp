@@ -105,12 +105,12 @@ const operationalTemplateDefinitions: Record<
       "We noticed your {{service_name}} did not happen as planned.",
       "If you want to come back in, reply to this email and we can help with the next step.",
     ].join("\n"),
-    categoryLabel: "Follow-up",
+    categoryLabel: "Return to booking",
     description:
-      "A narrow follow-up starting point for recent disruptions, without pretending REVORY already runs an automated rescheduling engine.",
+      "A narrow return-to-booking starting point for recent disruptions, without pretending REVORY already runs an automated recovery engine.",
     key: "recovery",
     placeholders: ["client_first_name", "service_name"],
-    title: "Follow-up template",
+    title: "Return-to-booking template",
   },
   reminder: {
     body: [
@@ -360,8 +360,8 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Prepared base, with blockers"
-            : "Prepared base",
+            ? "Guidance ready, with blockers"
+            : "Guidance ready",
           suggestedNextStep:
             hasMixedBlockedPaths
               ? "Use the base confirmation message for the actionable appointments, then resolve the missing email path on the blocked confirmations."
@@ -374,7 +374,7 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Needs setup first",
+          outreachStateLabel: "Needs path cleanup",
           suggestedNextStep:
             "Tighten the client email base first so eligible confirmation paths can move from blocked to actionable.",
         };
@@ -385,7 +385,7 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Preparation in place",
+          outreachStateLabel: "Guidance in place",
           suggestedNextStep:
             "The template base is already in place; this category turns live as appointments move into the confirmation window.",
         };
@@ -395,7 +395,7 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Visible in model",
+        outreachStateLabel: "Visible in guidance",
         suggestedNextStep:
           "Keep the message base ready. Confirmation becomes actionable once appointments enter the active window.",
       };
@@ -406,8 +406,8 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Prepared base, with blockers"
-            : "Prepared base",
+            ? "Guidance ready, with blockers"
+            : "Guidance ready",
           suggestedNextStep:
             hasMixedBlockedPaths
               ? "Use the reminder base for the actionable appointments, then resolve the missing email path on the blocked reminders."
@@ -420,7 +420,7 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Needs setup first",
+          outreachStateLabel: "Needs path cleanup",
           suggestedNextStep:
             "Fix the client email path first so reminder guidance can move from visible to actionable.",
         };
@@ -431,7 +431,7 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Preparation in place",
+          outreachStateLabel: "Guidance in place",
           suggestedNextStep:
             "The reminder template is already prepared; it becomes live as the schedule moves closer.",
         };
@@ -441,7 +441,7 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Visible in model",
+        outreachStateLabel: "Visible in guidance",
         suggestedNextStep:
           "Keep the reminder base available. It activates once the schedule reaches the reminder window.",
       };
@@ -452,12 +452,12 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Prepared base, with blockers"
-            : "Prepared base",
+            ? "Guidance ready, with blockers"
+            : "Guidance ready",
           suggestedNextStep:
             hasMixedBlockedPaths
-              ? "Use the follow-up message for the actionable opportunities, then resolve the missing email path on the blocked disruptions."
-              : "Use the follow-up message as a narrow primary booking path for recent disruptions.",
+              ? "Use the return-to-booking note for the actionable opportunities, then resolve the missing email path on the blocked disruptions."
+              : "Use the return-to-booking note as a narrow primary booking path for recent disruptions.",
         };
       }
 
@@ -466,9 +466,9 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Needs setup first",
+          outreachStateLabel: "Needs path cleanup",
           suggestedNextStep:
-            "Follow-up is surfaced, but it still needs a usable email path before the message base becomes usable.",
+            "Return-to-booking guidance is surfaced, but it still needs a usable email path before this base can support the path cleanly.",
         };
       }
 
@@ -477,9 +477,9 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Preparation in place",
+          outreachStateLabel: "Guidance in place",
           suggestedNextStep:
-            "The follow-up base is already shaped, but it stays intentionally narrow and non-automated in this MVP.",
+            "The return-to-booking base is already shaped, but it stays intentionally narrow and non-automated in this MVP.",
         };
       }
 
@@ -487,9 +487,9 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Visible in model",
+        outreachStateLabel: "Visible in guidance",
         suggestedNextStep:
-          "Follow-up stays available as a controlled template foundation without pretending there is already a rebooking engine.",
+          "Return-to-booking stays available as a controlled guidance base without pretending there is already a live recovery engine.",
       };
     case "review_request":
       if (readiness.stage === "ready") {
@@ -498,8 +498,8 @@ function resolveTemplateOutreachState(
           liveItemCount,
           outreachState: "ready",
           outreachStateLabel: hasMixedBlockedPaths
-            ? "Prepared base, with blockers"
-            : "Prepared base",
+            ? "Guidance ready, with blockers"
+            : "Guidance ready",
           suggestedNextStep:
             hasMixedBlockedPaths
               ? "Use the feedback-request base for the actionable visits, then resolve the missing email or feedback destination on the blocked paths."
@@ -512,7 +512,7 @@ function resolveTemplateOutreachState(
           blockedReason,
           liveItemCount,
           outreachState: "recommended",
-          outreachStateLabel: "Needs setup first",
+          outreachStateLabel: "Needs path cleanup",
           suggestedNextStep:
             blockedReason === "Missing feedback destination"
               ? "Configure the Google feedback link first so the request can move from visible to actionable."
@@ -525,7 +525,7 @@ function resolveTemplateOutreachState(
           blockedReason: null,
           liveItemCount,
           outreachState: "prepared",
-          outreachStateLabel: "Preparation in place",
+          outreachStateLabel: "Guidance in place",
           suggestedNextStep:
             "The eligibility base is already being read; the template is ready to support the first feedback-request layer as soon as the path is clean.",
         };
@@ -535,7 +535,7 @@ function resolveTemplateOutreachState(
         blockedReason: null,
         liveItemCount,
         outreachState: "detected",
-        outreachStateLabel: "Visible in model",
+        outreachStateLabel: "Visible in guidance",
         suggestedNextStep:
           "Keep the feedback base narrow and honest. It remains eligibility-first until more of the delivery layer is live.",
       };

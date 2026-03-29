@@ -371,22 +371,22 @@ function buildCategoryCards(
         input.recovery.blockedMissingEmailCount > 0
           ? `${input.recovery.opportunityCount} recent disruptions were surfaced; ${input.recovery.readyForRecoveryCount} are already ready and ${input.recovery.blockedMissingEmailCount} stay blocked by missing email.`
           : input.recovery.opportunityCount > 0
-            ? `${input.recovery.opportunityCount} recent disruptions were surfaced as initial follow-up opportunities, not as an automated rebooking engine.`
-          : "No recent disruptions currently qualify for near-term follow-up.",
+            ? `${input.recovery.opportunityCount} recent disruptions were surfaced as initial return-to-booking opportunities, not as an automated rebooking engine.`
+          : "No recent disruptions currently qualify for a near-term return-to-booking path.",
       emptyLabel: "Nothing active",
       kindLabel: "Opportunity",
       key: "recovery",
       nextAction:
         input.recovery.readyForRecoveryCount > 0 &&
         input.recovery.blockedMissingEmailCount > 0
-          ? "Use the actionable follow-up paths first, then tighten the email base for the blocked opportunities."
+          ? "Use the actionable return-to-booking paths first, then tighten the email base for the blocked opportunities."
           : input.recovery.readyForRecoveryCount > 0
-          ? "Use follow-up as a guided return-to-booking opportunity, not as a call-center flow."
+          ? "Use this as a guided return-to-booking opportunity, not as a call-center flow."
           : input.recovery.blockedMissingEmailCount > 0
-            ? "Tighten the email base first; follow-up stays visible but blocked."
-            : "Keep follow-up narrow and tied to the imported schedule quality.",
+            ? "Tighten the email base first; the return-to-booking path stays visible but blocked."
+            : "Keep the return-to-booking path narrow and tied to the visible booked base.",
       readiness: recoveryReadiness,
-      title: "Follow-up opportunities",
+      title: "Return-to-booking opportunities",
     }),
     buildCategoryCard({
       blockedCount:
@@ -555,15 +555,15 @@ function buildRecoveryPriorityItems(
     return {
       blockedReason: readiness.blockedReason,
       categoryKey: "recovery",
-      categoryLabel: "Follow-up",
+      categoryLabel: "Return to booking",
       clientName: item.clientName,
       estimatedRevenue: item.estimatedRevenue,
       id: item.appointmentId,
-      insight: item.reasons[0]?.label ?? "Follow-up opportunity surfaced",
+      insight: item.reasons[0]?.label ?? "Return-to-booking opportunity surfaced",
       nextAction:
         item.recoveryState === "blocked_missing_email"
-          ? "Add a patient email before REVORY can support follow-up here."
-          : "Keep this disrupted visit visible for the first follow-up layer.",
+          ? "Add a patient email before REVORY can support the return-to-booking path here."
+          : "Keep this disrupted visit visible for the first return-to-booking layer.",
       providerName: item.providerName,
       readinessLabel: readiness.readinessLabel,
       readinessState: readiness.readinessState,
@@ -647,51 +647,51 @@ function buildPrioritySummary(
   if (!input.hasAppointmentBase) {
     return {
       description:
-        "REVORY already knows how to classify confirmation, reminders, at-risk signals, follow-up, and feedback eligibility. This layer turns on as soon as the workspace has appointments to monitor.",
-      headline: "Booking visibility starts after the first appointments upload.",
+        "This layer should stay secondary until booked proof exists. REVORY Seller should open with booked visibility and revenue confidence before any deeper guidance tries to matter.",
+      headline: "Seller guidance starts after the first booked appointments become visible.",
       suggestedNextAction:
-        "Open Booking Inputs and bring in the first appointments CSV so the booking layer has something real to read.",
+        "Open Booking Inputs and bring in the first booked-visibility file so Seller has something real to read.",
     };
   }
 
   if (priorityItems.length === 0) {
     return {
       description:
-        "The imported base is live, but no current appointment, disruption, or completed visit needs booking attention right now.",
-      headline: "The current schedule looks calm.",
+        "Booked proof is visible, but nothing currently needs a guided next move. This layer should stay quiet unless a narrow booking signal is worth surfacing.",
+      headline: "The current booked base looks calm.",
       suggestedNextAction:
-        "Keep the imported schedule fresh so REVORY can keep surfacing trustworthy booking signals.",
+        "Keep booked visibility fresh so REVORY can keep surfacing trustworthy booking signals.",
     };
   }
 
   if (input.atRisk.attentionNowCount > 0) {
     return {
       description:
-        "REVORY has already surfaced a small group of appointments that deserves a closer look now. The short list below follows priority order: at-risk first, then reminder, confirmation, follow-up, and feedback visibility.",
-      headline: "A small set of appointments needs attention now.",
+        "REVORY has surfaced a short group of booked appointments that deserves a closer look now. This should remain a supporting read, not an operating queue.",
+      headline: "A small set of booked outcomes needs attention now.",
       suggestedNextAction:
         blockedCount > 0
-          ? "Start with the blocked contact paths, then review the tight-window appointments while there is still time to protect the slot."
-          : "Start with the attention-now items first, then move through the remaining guided paths below.",
+          ? "Start with the blocked contact paths, then review the clearest booked outcomes while there is still time to protect the slot."
+          : "Start with the clearest attention-now items first, then keep the rest as secondary guidance.",
     };
   }
 
   if (blockedCount > 0) {
     return {
       description:
-        "The main booking friction right now is data readiness. REVORY can already see which paths can move next, but some remain blocked by missing email or missing feedback destination.",
-      headline: "Signals are live, but some paths are still blocked.",
+        "The main booking friction right now is contact readiness. REVORY can already see where guidance could help next, but some paths still lack enough contact detail to move cleanly.",
+      headline: "Some booking paths are visible, but still blocked.",
       suggestedNextAction:
-        "Tighten the client contact base first so confirmation, reminders, follow-up, and feedback can progress cleanly.",
+        "Tighten the client contact base first so the visible booking paths can progress cleanly.",
     };
   }
 
   return {
     description:
-        "The first booking guidance layer is live. REVORY is surfacing what is actionable next without turning the product into a CRM, inbox, or workflow builder.",
-    headline: "The workspace already has guided booking signals.",
+        "A short Seller guidance layer is live. REVORY is surfacing what can move next without turning the product into a CRM, inbox, or broader workflow builder.",
+    headline: "The workspace already has a guided booking read.",
     suggestedNextAction:
-      "Use the surfaced categories below to understand what is ready, what is blocked, and what REVORY suggests next.",
+      "Use this layer as a short supporting read of what can move now, what is blocked, and what REVORY suggests next.",
   };
 }
 

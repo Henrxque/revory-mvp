@@ -60,16 +60,16 @@ const stepBody: Record<
 > = {
   activation: {
     checklist: [
-      "Review the booking pillars before turning the workspace into a live Seller system.",
-      "Confirm REVORY has enough context to read booking motion and revenue clearly.",
-      "Keep activation short, explicit, and self-service.",
+      "Review the activation pillars before turning the workspace into a live Seller system.",
+      "Confirm REVORY has enough context to read booked appointments and revenue clearly.",
+      "Keep go-live short, explicit, and self-service.",
     ],
     summary:
-      "This final step locks the booking pillars and turns the workspace into a live REVORY Seller environment.",
+      "This final step locks the activation pillars and turns the workspace into a live REVORY Seller environment.",
     whyItMatters:
-      "Activation is where setup stops feeling administrative and starts feeling like a live Seller system. The customer should feel ready to track paid leads, booked appointments, and revenue context.",
+      "Activation is where guided choices stop feeling administrative and start feeling like a live Seller system. The customer should feel ready to track paid leads, booked appointments, and revenue outcome.",
     next:
-      "After activation, the dashboard becomes the home for revenue visibility, booking performance, and the next leverage point.",
+      "After activation, the dashboard becomes the home for revenue visibility, booked appointments, and the next commercial move.",
   },
   channel: {
     checklist: [
@@ -82,7 +82,7 @@ const stepBody: Record<
     whyItMatters:
       "A premium self-service system removes ambiguity early. One default path makes the booking handoff explicit, cleaner to launch, and easier to trust.",
     next:
-      "Next, REVORY Seller sets the revenue baseline tied to each booked appointment.",
+      "Next, REVORY Seller sets the value tied to each booked appointment.",
   },
   mode: {
     checklist: [
@@ -106,27 +106,27 @@ const stepBody: Record<
     summary:
       "This step stores the revenue baseline tied to one booked appointment.",
     whyItMatters:
-      "Seller should feel connected to money from the first session. A clear deal value keeps the dashboard centered on revenue instead of generic activity.",
+      "Seller should feel connected to money from the first session. A clear value per booking keeps the dashboard centered on revenue instead of generic activity.",
     next:
-      "Once deal value is set, REVORY Seller can lock the booking voice and move to final activation.",
+      "Once value per booking is set, REVORY Seller can lock the booking voice and move to final activation.",
   },
   source: {
     checklist: [
-      "Make the source path obvious before the customer reaches Sources and Mapping.",
+      "Make the lead entry path obvious before the customer reaches Booking Inputs.",
       "Keep supported input types explicit and narrow.",
-      "Position imports as guided, not technical.",
+      "Position uploads as guided, not technical.",
     ],
     summary:
-      "This choice tells REVORY Seller where lead and booking context will come from first.",
+      "This choice tells REVORY Seller where live lead context will come from first.",
     whyItMatters:
-      "The product only feels premium when activation starts from real demand. A clear lead source connects Seller to the actual booking pipeline instead of a vague setup state.",
+      "The product only feels premium when activation starts from real demand. A clear lead entry connects Seller to the actual booking pipeline instead of a vague setup state.",
     next:
-      "After the lead source is chosen, REVORY Seller sets the primary booking path.",
+      "After the lead entry is chosen, REVORY Seller locks the primary booking path.",
   },
   template: {
     checklist: [
       "Start with one main offer instead of spreading attention across multiple services.",
-      "Keep the setup focused on what the clinic wants to book first.",
+      "Keep activation focused on what the clinic wants to book first.",
       "Make the first choice feel confident, narrow, and low-friction.",
     ],
     summary:
@@ -134,7 +134,7 @@ const stepBody: Record<
     whyItMatters:
       "A narrow product feels easier to trust. One main offer tells the customer REVORY Seller is built to drive one booking outcome well instead of trying to cover every service at once.",
     next:
-      "After locking the main offer, REVORY Seller connects the lead source feeding that booking motion.",
+      "After locking the main offer, REVORY Seller connects the lead entry feeding that booking motion.",
   },
 };
 
@@ -142,9 +142,9 @@ const optionCardClassName =
   "flex cursor-pointer items-start gap-3 rounded-[22px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4 transition hover:border-[color:var(--border-accent)] hover:bg-[color:var(--background-card-hover)]";
 
 const sourceTypeLabels: Record<string, string> = {
-  APPOINTMENTS_CSV: "CSV upload",
+  APPOINTMENTS_CSV: "Appointments upload",
   CLIENTS_CSV: "Client export",
-  MANUAL_IMPORT: "Guided import",
+  MANUAL_IMPORT: "Guided CSV upload",
 };
 
 const modeLabels: Record<string, string> = {
@@ -221,7 +221,7 @@ export default async function OnboardingStepPage({
           </button>
         ) : (
           <span className="text-sm text-[color:var(--text-muted)]">
-            This is the first step.
+            Activation starts here.
           </span>
         )
       }
@@ -237,7 +237,7 @@ export default async function OnboardingStepPage({
       <div className="space-y-5">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Pillar role</p>
+            <p className="rev-label">Commercial role</p>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
               {currentStepBody.summary}
             </p>
@@ -257,7 +257,7 @@ export default async function OnboardingStepPage({
                 key={item}
                 className="rev-card-soft rounded-[22px] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]"
               >
-                <p className="rev-label">Guardrail {index + 1}</p>
+                <p className="rev-label">Activation guardrail {index + 1}</p>
                 <p className="mt-3">{item}</p>
               </div>
             ))}
@@ -270,7 +270,7 @@ export default async function OnboardingStepPage({
         ) : null}
 
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
-          <span className="rev-label">What this unlocks next</span>
+          <span className="rev-label">What this unlocks in Seller</span>
           <p className="mt-3">{currentStepBody.next}</p>
         </div>
 
@@ -319,17 +319,17 @@ export default async function OnboardingStepPage({
               {[
                 {
                   value: "APPOINTMENTS_CSV",
-                  label: "CSV upload",
-                  note: "Recommended when the workspace already has exports and wants guided activation inside REVORY Seller.",
+                  label: "Appointments upload",
+                  note: "Recommended when the workspace already has exports and wants the fastest path to booked visibility inside REVORY Seller.",
                 },
                 {
                   value: "CLIENTS_CSV",
                   label: "Client export",
-                  note: "Recommended when the workspace wants to start from client records and keep lead-to-booking context visible.",
+                  note: "Recommended when the workspace wants to start from client records and make the lead base visible before the booking handoff.",
                 },
                 {
                   value: "MANUAL_IMPORT",
-                  label: "Guided import",
+                  label: "Guided CSV upload",
                   note: "Fallback for exports that need one guided pass before Seller can read the booking path cleanly.",
                 },
               ].map((option) => (
@@ -391,7 +391,7 @@ export default async function OnboardingStepPage({
             <div className="space-y-3">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[color:var(--foreground)]">
-                  Revenue tied to one booked appointment
+                  Value tied to one booked appointment
                 </span>
                 <input
                   className="rev-input-field"
@@ -402,7 +402,7 @@ export default async function OnboardingStepPage({
                 />
               </label>
               <p className="text-sm text-[color:var(--text-muted)]">
-                Set the average revenue tied to one booked appointment. Keep it directional so Seller can read money clearly from day one.
+                Set the value tied to one booked appointment. Keep it directional so Seller can read money clearly from day one.
               </p>
             </div>
           ) : null}
@@ -450,9 +450,9 @@ export default async function OnboardingStepPage({
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)] p-4">
-                  <p className="rev-label">Booking pillars locked for go-live</p>
+                  <p className="rev-label">What goes live with Seller</p>
                   <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                    These are the core choices REVORY Seller will use to read demand, guide the booking motion, and frame revenue visibility from the first session.
+                    These are the core choices REVORY Seller will use to read demand, guide the booking motion, and frame booked appointments and revenue visibility from the first session.
                   </p>
                 </div>
 
@@ -463,7 +463,7 @@ export default async function OnboardingStepPage({
                       value: mainOfferLabels[selectedTemplate] || "Not selected",
                     },
                     {
-                      label: "Lead source",
+                      label: "Lead entry",
                       value:
                         (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) ||
                         "Not selected",
@@ -476,8 +476,8 @@ export default async function OnboardingStepPage({
                         "Not selected",
                     },
                     {
-                      label: "Deal value",
-                      value: formattedDealValue ?? "Not configured",
+                      label: "Value per booking",
+                      value: formattedDealValue ?? "Not set",
                     },
                   ].map((item) => (
                     <div
@@ -500,7 +500,7 @@ export default async function OnboardingStepPage({
                     {(selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Not selected"}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                    Seller reads demand from this source first.
+                    Seller reads demand from this path first.
                   </p>
                 </div>
                 <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
@@ -518,7 +518,7 @@ export default async function OnboardingStepPage({
                     Booked appointment + revenue
                   </p>
                   <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                    Dashboard visibility starts from booked outcomes, not from generic setup completion.
+                    Dashboard visibility starts from booked outcomes, not from generic activation completion.
                   </p>
                 </div>
               </div>
@@ -526,7 +526,7 @@ export default async function OnboardingStepPage({
               <div className="grid gap-3 md:grid-cols-2">
                 {[
                   {
-                    label: "Brand voice",
+                    label: "Seller voice",
                     value:
                       (selectedRecommendedModeKey &&
                         modeLabels[selectedRecommendedModeKey]) ||
@@ -534,7 +534,7 @@ export default async function OnboardingStepPage({
                   },
                   {
                     label: "Activation outcome",
-                    value: "Dashboard becomes the live home for booking and revenue visibility.",
+                    value: "Dashboard becomes the live home for booked appointments and revenue visibility.",
                   },
                 ].map((item) => (
                   <div
@@ -550,13 +550,13 @@ export default async function OnboardingStepPage({
               </div>
 
               <div className="rev-feedback-warning">
-                If the booking pillars are present, activation will mark this workspace as live and send the customer into the Seller view where the booking path becomes the natural destination of the flow.
+                If the activation pillars are present, go-live will mark this workspace as live and send the customer into the Seller view where booked appointments and revenue become visible.
               </div>
 
               <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
                 <p className="rev-label">Why revenue appears after activation</p>
                 <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-                  REVORY Seller does not invent revenue from setup alone. Activation locks the booking path, the imported appointment base makes booked outcomes visible, and deal value turns those visible bookings into the executive revenue read.
+                  REVORY Seller does not invent revenue from activation alone. Activation locks the booking path, the imported appointment base makes booked outcomes visible, and value per booking turns those visible bookings into the executive revenue read.
                 </p>
               </div>
             </div>

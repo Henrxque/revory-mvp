@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 
 type AppSidebarProps = Readonly<{
-  activationLabel: string;
+  activationStatus: string;
+  bookingInputsStatus: string;
   currentStepTitle: string;
-  leadSourcesStatus: string;
   userEmail: string;
   workspaceName: string;
   workspaceStatus: string;
@@ -37,7 +37,10 @@ type SidebarGroup = {
   label: string;
 };
 
-const navGroups = (leadSourcesStatus: string): SidebarGroup[] => [
+const navGroups = (
+  activationStatus: string,
+  bookingInputsStatus: string,
+): SidebarGroup[] => [
     {
       label: "Seller",
       items: [
@@ -50,18 +53,18 @@ const navGroups = (leadSourcesStatus: string): SidebarGroup[] => [
           href: "/app/imports",
           icon: "appointments",
           label: "Booking Inputs",
-          status: leadSourcesStatus,
+          status: bookingInputsStatus,
         },
       ],
     },
     {
-      label: "Setup",
+      label: "Activation",
       items: [
         {
           href: "/app/setup",
           icon: "settings",
-          label: "Seller Setup",
-          status: "Configured",
+          label: "Activation Path",
+          status: activationStatus,
         },
       ],
     },
@@ -117,7 +120,20 @@ function getWorkspaceInitials(workspaceName: string) {
 }
 
 function formatWorkspaceStatus(status: string) {
-  return status.toUpperCase();
+  switch (status) {
+    case "ACTIVE":
+      return "Live";
+    case "DRAFT":
+      return "Draft";
+    case "PAUSED":
+      return "Paused";
+    default:
+      return status
+        .toLowerCase()
+        .split("_")
+        .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+        .join(" ");
+  }
 }
 
 function getStatusTone(status?: string) {
@@ -125,11 +141,15 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Visible") {
+  if (status === "Proof active" || status === "Activated") {
     return "success";
   }
 
-  if (status === "Ready for upload") {
+  if (status === "Proof ready" || status === "Activating") {
+    return "warning";
+  }
+
+  if (status === "Proof next") {
     return "warning";
   }
 
@@ -137,9 +157,9 @@ function getStatusTone(status?: string) {
 }
 
 export function AppSidebar({
-  activationLabel,
+  activationStatus,
+  bookingInputsStatus,
   currentStepTitle,
-  leadSourcesStatus,
   userEmail,
   workspaceName,
   workspaceStatus,
@@ -152,12 +172,12 @@ export function AppSidebar({
       <div className="border-b border-[color:var(--border)] px-5 py-[1.125rem]">
         <RevoryLogo compact />
         <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-          Premium booking acceleration
+          Premium booking acceleration system
         </p>
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-        {navGroups(leadSourcesStatus).map((group) => (
+        {navGroups(activationStatus, bookingInputsStatus).map((group) => (
           <div key={group.label} className="space-y-1">
             <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-subtle)]">
               {group.label}
@@ -219,35 +239,35 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <div className="border-t border-[color:var(--border)] px-4 py-4">
-        <div className="rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 py-3.5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-sm font-semibold text-[color:var(--accent-light)]">
+      <div className="border-t border-[color:var(--border)] px-4 py-3.5">
+        <div className="rounded-[18px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-[13px] font-semibold text-[color:var(--accent-light)]">
               {workspaceInitials}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-[color:var(--foreground)]">
+              <p className="truncate text-[12.5px] font-semibold text-[color:var(--foreground)]">
                 {workspaceName}
               </p>
-
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
-                  {activationLabel}
-                </span>
-                <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
-                  {formatWorkspaceStatus(workspaceStatus)}
-                </span>
-              </div>
-
-              <p className="mt-2 truncate text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+              <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.15em] text-[color:var(--text-subtle)]">
                 {currentStepTitle}
-              </p>
-              <p className="mt-1 truncate text-[11px] text-[color:var(--text-muted)]">
-                {userEmail}
               </p>
             </div>
           </div>
+
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+              {activationStatus}
+            </span>
+            <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+              {formatWorkspaceStatus(workspaceStatus)}
+            </span>
+          </div>
+
+          <p className="mt-2 truncate text-[11px] text-[color:var(--text-muted)]">
+                {userEmail}
+          </p>
         </div>
       </div>
     </aside>

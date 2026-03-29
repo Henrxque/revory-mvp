@@ -14,8 +14,8 @@ import {
 
 const signInHighlights = [
   "Protected workspace",
-  "Setup resumes in place",
-  "Imported dashboard ready",
+  "Booked proof stays connected",
+  "Revenue view when live",
 ];
 
 const signInSteps = [
@@ -26,13 +26,13 @@ const signInSteps = [
   },
   {
     label: "02",
-    title: "Resume the product path",
-    text: "Setup, imports, and dashboard state stay tied to the same MedSpa-first flow.",
+    title: "Resume the Seller path",
+    text: "Activation, booked proof, and the revenue view stay tied to the same MedSpa-first flow.",
   },
   {
     label: "03",
-    title: "Continue with the imported base",
-    text: "The authenticated area already knows whether the workspace should go to setup or dashboard.",
+    title: "Continue from the right next move",
+    text: "The authenticated area already knows whether the workspace should reopen activation, Booking Inputs, or the revenue view.",
   },
 ];
 
@@ -66,7 +66,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 className="rev-button-secondary px-4 py-2 text-xs"
                 href="/"
               >
-                Back to home
+                Back to REVORY
               </Link>
               <RevoryStatusBadge tone="accent">Workspace access</RevoryStatusBadge>
             </div>
@@ -84,16 +84,16 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
 
           <div className="mt-8 space-y-5">
-            <p className="rev-kicker">Protected product flow</p>
+            <p className="rev-kicker">Protected Seller access</p>
             <div className="space-y-3">
-              <h1 className="max-w-2xl font-[family:var(--font-display)] text-4xl leading-[0.94] text-[color:var(--foreground)] md:text-5xl">
+              <h1 className="rev-display-hero max-w-[32rem]">
                 Sign in and continue from the{" "}
                 <span className="italic text-[color:var(--accent-light)]">
                   same REVORY workspace.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                REVORY keeps onboarding, imports, and dashboard visibility
+                REVORY keeps activation, booked proof, and revenue visibility
                 inside one protected MedSpa-first flow. Authentication should
                 feel like part of the product, not a detached utility screen.
               </p>
@@ -119,12 +119,12 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           <div className="space-y-5">
             <div className="space-y-3">
               <p className="rev-kicker">Authentication</p>
-              <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)] md:text-4xl">
-                Access the REVORY workspace.
+              <h2 className="rev-display-panel max-w-[24rem]">
+                Access the REVORY Seller workspace.
               </h2>
               <p className="max-w-xl text-sm leading-7 text-[#beb7ca]">
                 Use the same account tied to the workspace context so redirects,
-                setup state, and imported data remain coherent.
+                activation state, booked proof, and revenue visibility remain coherent.
               </p>
             </div>
 
@@ -134,15 +134,15 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   <p className="text-xl font-semibold text-[color:var(--foreground)]">
                     {googleAuthConfigured
                       ? "Continue with Google"
-                      : "Auth setup required locally"}
+                      : "Google sign-in unavailable in this build"}
                   </p>
                   <RevoryStatusBadge tone={googleAuthConfigured ? "real" : "future"}>
-                    {googleAuthConfigured ? "Google auth ready" : "Needs local config"}
+                    {googleAuthConfigured ? "Google auth ready" : "Local build"}
                   </RevoryStatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
                   Use the same Google account tied to your REVORY workspace so
-                  setup, imports, and dashboard state stay connected.
+                  activation, booked proof, and the revenue view stay connected.
                 </p>
 
                 {googleAuthConfigured ? (
@@ -155,7 +155,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 ) : (
                   <div className="mt-6 rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] p-4">
                     <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                      Google auth is not configured locally yet
+                      Google sign-in is unavailable in this local build
                     </p>
                     <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
                       Add <code>AUTH_GOOGLE_CLIENT_ID</code>,{" "}
@@ -167,7 +167,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d5cede]">
-                    Same workspace path
+                    Same Seller path
                   </span>
                   <span className="rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d5cede]">
                     Google OAuth

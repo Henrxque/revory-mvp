@@ -168,6 +168,30 @@ body::before {
   color: var(--text-subtle);
 }
 
+.rev-display-hero,
+.rev-display-panel,
+.rev-display-section {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: var(--foreground);
+}
+
+.rev-display-hero {
+  font-size: clamp(1.82rem, 2.65vw, 2.7rem);
+  line-height: 0.98;
+}
+
+.rev-display-panel {
+  font-size: clamp(1.5rem, 2vw, 2.05rem);
+  line-height: 1;
+}
+
+.rev-display-section {
+  font-size: clamp(1.34rem, 1.65vw, 1.8rem);
+  line-height: 1.02;
+}
+
 .rev-button-primary,
 .rev-button-secondary,
 .rev-button-ghost {

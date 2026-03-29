@@ -1,9 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
+import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
+import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { getCsvUploadSources } from "@/services/imports/get-csv-upload-sources";
+import {
+  getCsvUploadSources,
+  hasLiveCsvUploadSource,
+} from "@/services/imports/get-csv-upload-sources";
 import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
@@ -49,61 +54,135 @@ export default async function ImportsPage() {
   }
 
   const uploadSources = await getCsvUploadSources(appContext.workspace.id);
+  const hasBookedProofVisible = hasLiveCsvUploadSource(uploadSources.appointments);
+  const hasLeadBaseVisible = hasLiveCsvUploadSource(uploadSources.clients);
+  const quickState = [
+    {
+      label: "Booked proof",
+      note: hasBookedProofVisible
+        ? "Visible in revenue read"
+        : "Needed for revenue read",
+      tone: hasBookedProofVisible ? "real" : "future",
+      value: hasBookedProofVisible ? "Visible" : "Next",
+    },
+    {
+      label: "Lead base",
+      note: hasLeadBaseVisible ? "Supporting context" : "Optional after proof",
+      tone: hasLeadBaseVisible ? "real" : "neutral",
+      value: hasLeadBaseVisible ? "Visible" : "Optional now",
+    },
+  ] as const;
+  const isRevenueSupported = hasBookedProofVisible;
 
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
-      <section className="rev-card-soft rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <div className="space-y-6">
-          <div className="max-w-[880px] space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="rev-kicker">Booking Inputs</p>
-              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
-                Booked visibility
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+          <div className="space-y-5">
+            <div className="max-w-[41rem] space-y-3.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="rev-kicker">Booking Inputs</p>
+                <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+                  Booked proof
+                </span>
+                <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
+                  {isRevenueSupported ? "Revenue read supported" : "Revenue read next"}
+                </span>
+              </div>
+
+              <h1 className="rev-display-hero max-w-[30rem]">
+                {hasBookedProofVisible
+                  ? "Keep booked proof clean behind revenue."
+                  : "Bring booked proof behind revenue."}
+              </h1>
+
+              <p className="max-w-[35rem] text-sm leading-6 text-[color:var(--text-muted)] md:text-[15px]">
+                {hasBookedProofVisible
+                  ? "Use this page to refresh booked visibility while keeping Seller narrow, premium, and commercially clear."
+                  : "This is the shortest bridge from a live Seller workspace to a revenue read that feels real."}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              {quickState.map((item) => (
+                <div
+                  key={item.label}
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2"
+                >
+                  <span className="text-[11px] font-medium text-[color:var(--foreground)]">
+                    {item.label}
+                  </span>
+                  <RevoryStatusBadge tone={item.tone}>{item.value}</RevoryStatusBadge>
+                </div>
+              ))}
+              <span className="inline-flex min-h-8 items-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] text-[color:var(--text-muted)]">
+                {isRevenueSupported ? "Revenue context is grounded" : "Revenue context opens after proof"}
               </span>
             </div>
 
-            <h1 className="max-w-[700px] font-[family:var(--font-display)] text-[clamp(2.3rem,4vw,3.8rem)] leading-[0.94] text-[color:var(--foreground)]">
-              Bring booked outcomes into view with one clean upload path.
-            </h1>
-
-            <p className="max-w-[600px] text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
-              Upload the CSV you already have, review the detected headers, and
-              confirm the final mapping before REVORY Seller turns that upload
-              into visible booked appointments, clearer booking motion, and
-              revenue context.
-            </p>
+            <div className="flex flex-wrap gap-3">
+              <DocumentNavigationLink
+                className={hasBookedProofVisible ? "rev-button-primary" : "rev-button-secondary"}
+                href="/app/dashboard"
+              >
+                Open Revenue View
+              </DocumentNavigationLink>
+            </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
+          <aside className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5">
+            <p className="rev-label">Current booking-input state</p>
+            <div className="mt-4 space-y-3">
+              {quickState.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.015)] px-3.5 py-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12px] font-semibold text-[color:var(--foreground)]">{item.label}</p>
+                    <RevoryStatusBadge tone={item.tone}>{item.value}</RevoryStatusBadge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-[color:var(--text-muted)]">{item.note}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 border-t border-[color:var(--border)] pt-4 text-xs leading-6 text-[color:var(--text-muted)]">
+              Keep this page narrow: booked proof first, lead-base support second.
+            </p>
+          </aside>
+        </div>
+
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
             {[
               {
-                label: "Booked visibility first",
-                text: "This page exists to put real booked outcomes in view, not to become the center of the product.",
+                label: "Booked proof first",
+                text: "Start with appointments. This is what makes Seller commercially real from session one.",
               },
               {
-                label: "Guided review",
-                text: "Headers are reviewed before anything is allowed to shape the booking path.",
+                label: "Guided matching",
+                text: "Headers are reviewed before any row is allowed to shape booked visibility.",
               },
               {
-                label: "Clean handoff",
-                text: "Mapping blockers, review rows, and final confirmation stay explicit before anything reaches the live Seller view.",
+                label: "Lead-base support",
+                text: hasLeadBaseVisible
+                  ? "Client records are already supporting the lead base behind the revenue read."
+                  : "Lead-base data can come right after booked proof when you need stronger context.",
               },
               {
-                label: "Revenue linkage",
-                text: "Once booked outcomes are visible, deal value is what lets REVORY Seller turn that motion into a trusted revenue read.",
+                label: "Revenue handoff",
+                text: "Value per booking is what turns booked proof into the dashboard revenue read.",
               },
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-4 py-4"
+                className="min-h-[8.75rem] rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
               >
                 <p className="rev-label">{item.label}</p>
-                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-3 max-w-[27rem] text-sm leading-6 text-[color:var(--text-muted)]">
                   {item.text}
                 </p>
               </div>
             ))}
-          </div>
         </div>
       </section>
 

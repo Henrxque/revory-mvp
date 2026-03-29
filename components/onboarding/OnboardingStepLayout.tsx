@@ -49,20 +49,22 @@ export function OnboardingStepLayout({
         <div className="space-y-6">
           <div className="space-y-3">
             <p className="rev-kicker">Activation integrity</p>
-            <h2 className="font-[family:var(--font-display)] text-3xl leading-none text-[color:var(--foreground)]">
-              Turn six guided choices into one live booking system.
+            <h2 className="rev-display-panel max-w-[14rem]">
+              Turn six activation choices into one clear booking path.
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              Main offer, lead source, booking path, and deal value are not admin
-              fields here. They are the pillars REVORY Seller uses to move paid
-              leads toward booked appointments.
+              Main offer, lead entry, booking path, and value per booking are
+              not admin fields here. They are the activation pillars REVORY
+              Seller uses to move paid leads toward booked appointments. Once
+              those pillars are locked, booked proof becomes visible in Booking
+              Inputs and the revenue view closes the commercial read.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="rev-label">Progress</p>
+                <p className="rev-label">Activation progress</p>
                 <p className="text-sm font-semibold text-[color:var(--foreground)]">
                   {currentStepIndex + 1} / {stepKeys.length}
                 </p>
@@ -76,10 +78,11 @@ export function OnboardingStepLayout({
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="rev-label">Seller guardrails</p>
+              <p className="rev-label">Activation guardrails</p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
                 One clear decision per step. One booking motion. No CRM sprawl,
-                no channel maze, no heavy ops setup.
+                no channel maze, no heavy ops rollout, and no extra demo detour
+                before Seller can show booked proof and revenue clearly.
               </p>
             </div>
           </div>
@@ -125,7 +128,7 @@ export function OnboardingStepLayout({
                           : "text-[color:var(--text-muted)]"
                     }`}
                   >
-                    {isCurrent ? "Current pillar" : isDone ? "Locked in" : "Up next"}
+                    {isCurrent ? "Current move" : isDone ? "Locked" : "Up next"}
                   </p>
                 </div>
               );
@@ -140,7 +143,7 @@ export function OnboardingStepLayout({
         <div className="rev-shell-hero rev-accent-mist-soft rounded-[28px] p-6">
           <div className="space-y-3">
             <p className="rev-kicker">{step.eyebrow}</p>
-            <h2 className="font-[family:var(--font-display)] text-4xl leading-none text-[color:var(--foreground)] md:text-5xl">
+            <h2 className="rev-display-hero max-w-[30rem]">
               {step.title}
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-[color:var(--text-muted)] md:text-base">
@@ -151,14 +154,14 @@ export function OnboardingStepLayout({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Booking pillar</p>
+            <p className="rev-label">Commercial pillar</p>
             <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
               {step.fieldLabel}
             </p>
           </div>
 
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Activation effect</p>
+            <p className="rev-label">Booking outcome</p>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
               {step.helperText}
             </p>
@@ -181,8 +184,8 @@ export function OnboardingStepLayout({
 const stepKeyLabels: Record<OnboardingStepKey, string> = {
   activation: "Activation",
   channel: "Booking Path",
-  deal_value: "Deal Value",
-  mode: "Brand Voice",
-  source: "Lead Source",
+  deal_value: "Value Per Booking",
+  mode: "Seller Voice",
+  source: "Lead Entry",
   template: "Main Offer",
 };

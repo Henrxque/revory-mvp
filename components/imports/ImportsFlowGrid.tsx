@@ -55,7 +55,7 @@ export function ImportsFlowGrid({
   return (
     <div className={isFocusedLayout ? "grid min-w-0 gap-6" : "grid min-w-0 gap-6 2xl:grid-cols-2"}>
       <CsvUploadCard
-        helperText="Booked appointments CSV that brings the live booking view into focus with guided column matching."
+        helperText="Use the booked appointments export first so the revenue read stays grounded in visible proof."
         lastUpload={appointmentsLastUpload}
         onActivityChange={handleAppointmentsActivityChange}
         templateHref={`/templates/${revoryCsvTemplateDefinitions.appointments.fileName}`}
@@ -64,7 +64,7 @@ export function ImportsFlowGrid({
       />
 
       <CsvUploadCard
-        helperText="Lead and patient records that give REVORY Seller the base it needs before the booking handoff becomes visible."
+        helperText="Add lead and patient records after booked proof when you want stronger lead-base support."
         lastUpload={clientsLastUpload}
         onActivityChange={handleClientsActivityChange}
         templateHref={`/templates/${revoryCsvTemplateDefinitions.clients.fileName}`}
