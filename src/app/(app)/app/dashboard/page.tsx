@@ -1,9 +1,11 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
+import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
 import {
   getOnboardingStepPath,
@@ -40,8 +42,26 @@ function formatMonthChip() {
   }).format(new Date());
 }
 
-function formatSourceStatus(status: string) {
-  return status.toLowerCase().replaceAll("_", " ");
+function formatProofSupportStatus(status: string) {
+  const normalized = status.toLowerCase();
+
+  if (
+    normalized.includes("imported") ||
+    normalized.includes("completed") ||
+    normalized.includes("connected")
+  ) {
+    return "Supporting revenue";
+  }
+
+  if (normalized.includes("review") || normalized.includes("warning")) {
+    return "Needs cleanup";
+  }
+
+  return "Proof pending";
+}
+
+function formatProofSupportLabel(type: string) {
+  return type === "APPOINTMENTS_CSV" ? "Booked proof input" : "Lead-base support";
 }
 
 function formatAppointmentDate(value: Date) {
@@ -229,7 +249,7 @@ function MotionStageCard({
         </div>
         <RevoryStatusBadge tone={badgeTone}>{status}</RevoryStatusBadge>
       </div>
-      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{detail}</p>
+      <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">{detail}</p>
     </div>
   );
 }
@@ -246,7 +266,7 @@ function SignalCard({ note, title }: SignalCardProps) {
       <p className="mt-3 text-base font-semibold leading-6 text-[color:var(--foreground)]">
         {title}
       </p>
-      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+      <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{note}</p>
     </div>
   );
 }
@@ -264,7 +284,7 @@ function ContextCard({ label, note, value }: ContextCardProps) {
       <p className="mt-3 text-[1.1rem] font-semibold leading-6 text-[color:var(--foreground)]">
         {value}
       </p>
-      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+      <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{note}</p>
     </div>
   );
 }
@@ -299,6 +319,12 @@ export default async function DashboardPage() {
       : null,
   );
   const revenueProofLabel = formatRevenueProofLabel(overview.estimatedImportedRevenue);
+  const dashboardDecisionSupport = buildDashboardDecisionSupport({
+    bookingPathLabel,
+    dealValueLabel,
+    mainOfferLabel,
+    overview,
+  });
   const nextLeveragePoint = !hasRevenueProofVisible
     ? "Open Booking Inputs and add booked proof first. That is the shortest path to a revenue view that feels commercially real."
     : overview.upcomingAppointments === 0
@@ -375,7 +401,7 @@ export default async function DashboardPage() {
               >
                 {formatCurrency(overview.estimatedImportedRevenue)}
               </p>
-              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 {hasRevenueProofVisible
                   ? "This is the revenue already visible from booked appointments currently in view."
                   : "This number becomes real as soon as Seller can see booked appointments and apply the value per booking already locked in activation."}
@@ -425,8 +451,8 @@ export default async function DashboardPage() {
           value={bookedAppointmentsValue}
         />
         <MetricCard
-          label="Revenue per booking"
-          note="The dollar value REVORY uses to turn each visible booking into revenue proof."
+          label="Value per booking"
+          note="The configured dollar value REVORY applies to each visible booking in the revenue read."
           value={dealValueLabel}
         />
         <MetricCard
@@ -440,6 +466,8 @@ export default async function DashboardPage() {
           value={bookingPathMetricLabel}
         />
       </section>
+
+      <RevoryDecisionSupportCard read={dashboardDecisionSupport} />
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]">
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5 md:p-6">
@@ -473,8 +501,8 @@ export default async function DashboardPage() {
                     : "Awaiting booked proof",
               },
               {
-                label: "Revenue baseline",
-                note: "This is the dollar value attached to each visible booking in the revenue number above.",
+                label: "Configured value per booking",
+                note: "This configured baseline is what REVORY applies to each visible booking in the revenue number above.",
                 value: dealValueLabel,
               },
             ].map((item) => (
@@ -486,7 +514,7 @@ export default async function DashboardPage() {
                 <p className="mt-3 text-[1.05rem] font-semibold text-[color:var(--foreground)]">
                   {item.value}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
               </div>
             ))}
           </div>
@@ -497,7 +525,7 @@ export default async function DashboardPage() {
           <p className="mt-3 text-[1.05rem] font-semibold text-[color:var(--foreground)]">
             One dominant revenue number on top. Just enough booked proof underneath to make the read convincing, not analytical.
           </p>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+          <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
             Revenue stays first on purpose. The dashboard explains the number just enough to support the booking promise, without turning REVORY Seller into BI.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -518,7 +546,7 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-5 border-t border-[rgba(255,255,255,0.08)] pt-4">
             <p className="rev-label">Next commercial move</p>
-            <p className="mt-3 text-sm leading-6 text-[color:var(--foreground)]">
+            <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--foreground)]">
               {nextLeveragePoint}
             </p>
             <div className="mt-5">
@@ -567,14 +595,14 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Booked visibility
+                Revenue proof support
               </p>
               <p className="mt-1 max-w-[34rem] text-sm leading-6 text-[color:var(--text-muted)]">
-                These files stay visible here only because they explain the revenue read with booked proof. They make the value feel earned, not estimated.
+                These inputs stay visible here only because they substantiate the revenue read: booked proof first, supporting lead context second. They make the number feel earned, not merely configured.
               </p>
             </div>
             <RevoryStatusBadge tone={overview.importSources.length > 0 ? "real" : "neutral"}>
-              {overview.importSources.length > 0 ? "Proof active" : "Proof building"}
+              {overview.importSources.length > 0 ? "Support visible" : "Support next"}
             </RevoryStatusBadge>
           </div>
 
@@ -595,10 +623,12 @@ export default async function DashboardPage() {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                          {source.templateLabel}
+                          {formatProofSupportLabel(source.type)}
                         </p>
                         <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
-                          {source.fileName ?? "File name unavailable"}
+                          {source.fileName
+                            ? `Latest pass: ${source.fileName}`
+                            : "Latest pass unavailable"}
                         </p>
                       </div>
                       <span
@@ -610,7 +640,7 @@ export default async function DashboardPage() {
                               : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]"
                         }`}
                       >
-                        {formatSourceStatus(source.status)}
+                        {formatProofSupportStatus(source.status)}
                       </span>
                     </div>
 
@@ -625,7 +655,7 @@ export default async function DashboardPage() {
                       <div className="grid divide-y divide-[color:var(--border)] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Coverage
+                            Confidence kept
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {progressPercent}%
@@ -633,7 +663,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Visible rows
+                            Visible records
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.successRows}
@@ -641,7 +671,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Needs review
+                            Held back
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.errorRows}
@@ -649,7 +679,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="px-3 py-3">
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-                            Rows received
+                            Records checked
                           </p>
                           <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
                             {source.totalRows}
@@ -664,10 +694,10 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-5 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-5 py-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                No booked proof visible yet
+                No revenue proof support visible yet
               </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-                Booking Inputs lets you add the file you already have so booked appointments become visible and the revenue number can stop feeling abstract.
+              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
+                Booking Inputs lets you add the booked proof already on hand so the revenue read can move from configured potential to visible proof.
               </p>
               <div className="mt-4">
                 <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
@@ -710,7 +740,7 @@ export default async function DashboardPage() {
                 <p className="text-sm font-semibold text-[color:var(--foreground)]">
                   {item.label}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                   {item.note}
                 </p>
               </div>
@@ -806,7 +836,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
                 No booked calendar visible yet
               </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                 Add the first booked-visibility file so the dashboard can show a live booked calendar behind the revenue read.
               </p>
               <div className="mt-4">
@@ -851,3 +881,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

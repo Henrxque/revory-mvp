@@ -1,4 +1,4 @@
-import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
+﻿import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import type { RevoryOperationalSurface } from "@/types/operations";
@@ -37,7 +37,7 @@ function SnapshotCard({ label, note, tone, value }: SnapshotCardProps) {
       <p className="mt-3 text-[1.65rem] font-semibold leading-none text-[color:var(--foreground)]">
         {value}
       </p>
-      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{note}</p>
+      <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">{note}</p>
     </div>
   );
 }
@@ -108,12 +108,12 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="max-w-3xl">
               <p className="rev-label">Containment decision</p>
-              <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
+              <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--foreground)]">
                 {surface.hasAppointmentBase
                   ? "This surface is intentionally constrained to a short supporting read. If it returns to the product later, it should stay outcome-aware and clearly secondary to revenue and booked proof."
                   : "This surface stays intentionally contained until booked visibility exists. The MVP should keep leading with Booking Inputs and the revenue view instead of opening a broader guidance layer too early."}
               </p>
-              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 {surface.hasAppointmentBase
                   ? surface.prioritySummary.suggestedNextAction
                   : "Bring the first booked-visibility file into REVORY Seller before this guidance layer is allowed to matter."}
@@ -133,3 +133,4 @@ export function OperationalSurface({ surface }: OperationalSurfaceProps) {
     </section>
   );
 }
+

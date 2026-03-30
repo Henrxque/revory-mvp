@@ -1,9 +1,11 @@
-import type { Prisma } from "@prisma/client";
+﻿import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayout";
+import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { buildActivationStepRead } from "@/services/decision-support/build-activation-step-read";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
   getOnboardingStep,
@@ -202,6 +204,14 @@ export default async function OnboardingStepPage({
     appContext.activationSetup.recommendedModeKey ?? "MODE_A";
   const selectedDataSourceType = sourceSelection?.type ?? null;
   const formattedDealValue = formatDealValue(selectedAverageDealValue);
+  const activationStepRead = buildActivationStepRead({
+    averageDealValue: selectedAverageDealValue,
+    primaryChannel: selectedPrimaryChannel,
+    recommendedModeKey: selectedRecommendedModeKey,
+    selectedDataSourceType,
+    selectedTemplate,
+    stepKey: currentStepKey,
+  });
 
   return (
     <OnboardingStepLayout
@@ -238,14 +248,14 @@ export default async function OnboardingStepPage({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
             <p className="rev-label">Commercial role</p>
-            <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
+            <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--text-muted)]">
               {currentStepBody.summary}
             </p>
           </div>
 
           <div className="rev-card rounded-[24px] p-5">
             <p className="rev-label">Why this changes booking performance</p>
-            <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">
+            <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--text-muted)]">
               {currentStepBody.whyItMatters}
             </p>
           </div>
@@ -273,6 +283,8 @@ export default async function OnboardingStepPage({
           <span className="rev-label">What this unlocks in Seller</span>
           <p className="mt-3">{currentStepBody.next}</p>
         </div>
+
+        <RevoryDecisionSupportCard read={activationStepRead} />
 
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
           {currentStepKey === "template" ? (
@@ -451,7 +463,7 @@ export default async function OnboardingStepPage({
               <div className="space-y-3">
                 <div className="rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)] p-4">
                   <p className="rev-label">What goes live with Seller</p>
-                  <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                     These are the core choices REVORY Seller will use to read demand, guide the booking motion, and frame booked appointments and revenue visibility from the first session.
                   </p>
                 </div>
@@ -499,7 +511,7 @@ export default async function OnboardingStepPage({
                   <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
                     {(selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Not selected"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                     Seller reads demand from this path first.
                   </p>
                 </div>
@@ -508,7 +520,7 @@ export default async function OnboardingStepPage({
                   <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
                     {(selectedPrimaryChannel && channelLabels[selectedPrimaryChannel]) || "Not selected"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                     This stays the natural booking destination of the guided flow.
                   </p>
                 </div>
@@ -517,7 +529,7 @@ export default async function OnboardingStepPage({
                   <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
                     Booked appointment + revenue
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                     Dashboard visibility starts from booked outcomes, not from generic activation completion.
                   </p>
                 </div>
@@ -555,7 +567,7 @@ export default async function OnboardingStepPage({
 
               <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
                 <p className="rev-label">Why revenue appears after activation</p>
-                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                   REVORY Seller does not invent revenue from activation alone. Activation locks the booking path, the imported appointment base makes booked outcomes visible, and value per booking turns those visible bookings into the executive revenue read.
                 </p>
               </div>
@@ -566,3 +578,4 @@ export default async function OnboardingStepPage({
     </OnboardingStepLayout>
   );
 }
+

@@ -1,4 +1,4 @@
-import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
+﻿import { RevorySectionHeader } from "@/components/ui/RevorySectionHeader";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import type { RevoryOperationalTemplatePreview } from "@/types/operational-template";
 
@@ -49,7 +49,7 @@ export function OperationalTemplatePreviewGrid({
                   <p className="text-lg font-semibold text-[color:var(--foreground)]">
                     {preview.title}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                     {preview.description}
                   </p>
                   <p className="mt-3 text-xs text-[color:var(--text-soft)]">
@@ -63,21 +63,21 @@ export function OperationalTemplatePreviewGrid({
             <div className="mt-4 grid gap-4 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4 md:grid-cols-[1.1fr_0.9fr]">
               <div>
                 <p className="rev-label">Guidance</p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--foreground)]">
                   {preview.suggestedNextStep}
                 </p>
               </div>
               <div className="border-t border-[color:var(--border)] pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
                 <p className="rev-label">State</p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--foreground)]">
                   {preview.outreachStateLabel}
                 </p>
                 {preview.blockedReason ? (
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--warning)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--warning)]">
                     Blocked by {preview.blockedReason.toLowerCase()}
                   </p>
                 ) : (
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                     No blocker is shaping this base right now.
                   </p>
                 )}
@@ -117,3 +117,4 @@ export function OperationalTemplatePreviewGrid({
     </section>
   );
 }
+

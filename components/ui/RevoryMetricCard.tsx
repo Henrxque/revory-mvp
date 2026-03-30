@@ -1,4 +1,4 @@
-import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+﻿import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 
 type RevoryMetricCardProps = Readonly<{
   description: string;
@@ -24,9 +24,10 @@ export function RevoryMetricCard({
       <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
         {value}
       </p>
-      <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+      <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
         {description}
       </p>
     </div>
   );
 }
+

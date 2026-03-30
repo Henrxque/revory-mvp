@@ -289,17 +289,17 @@ export default async function SetupPage() {
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)]">
             <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-5">
               <p className="rev-label">Why activation matters</p>
-              <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
+              <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--foreground)]">
                 {activationContextCopy}
               </p>
-              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 {activationContextSupportCopy}
               </p>
             </div>
 
             <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-5">
               <p className="rev-label">{nextMoveLabel}</p>
-              <p className="mt-3 text-sm leading-7 text-[color:var(--foreground)]">
+              <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--foreground)]">
                 {appContext.activationSetup.isCompleted
                   ? hasBookedProofVisible
                     ? "Booked proof is already visible. Open the revenue view for the cleanest commercial read, or return to Booking Inputs whenever you want to refresh that proof."
@@ -352,7 +352,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
               {item.detail}
             </p>
-            <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+            <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">{item.note}</p>
           </div>
         ))}
       </section>
@@ -378,7 +378,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               {sourceLabel ?? "Lead entry next"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               This is the starting point REVORY Seller reads before it can guide the booking motion.
             </p>
           </div>
@@ -388,7 +388,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               {bookingPathLabel ?? "Booking path next"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               This is the main handoff REVORY Seller treats as the natural destination of the guided path.
             </p>
           </div>
@@ -398,7 +398,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               Booked appointment
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               Value per booking then turns each visible booking into a revenue read instead of a generic activity signal.
             </p>
           </div>
@@ -434,7 +434,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               Seller activation locked
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               Activation integrity keeps main offer, lead entry, booking path, and value per booking inside one narrow system.
             </p>
           </div>
@@ -444,7 +444,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               {bookingPathLabel ?? "Booking path next"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               Seller pushes the lead into one explicit booking destination instead of spreading motion across multiple lanes.
             </p>
           </div>
@@ -454,7 +454,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               Booked appointment
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               Bookings are the live proof point behind the revenue read.
             </p>
           </div>
@@ -464,7 +464,7 @@ export default async function SetupPage() {
             <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
               {dealValueLabel ?? "Value per booking next"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               Value per booking is what turns each visible booking into a clean revenue signal on the dashboard.
             </p>
           </div>
@@ -497,7 +497,7 @@ export default async function SetupPage() {
                   </p>
                   <RevoryStatusBadge tone="real">Locked</RevoryStatusBadge>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
                 <SetupItemDetail detail={item.detail} tone="configured" />
               </div>
             ))}
@@ -532,7 +532,7 @@ export default async function SetupPage() {
                     </p>
                     <RevoryStatusBadge tone="future">Next</RevoryStatusBadge>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
                   <SetupItemDetail detail={item.detail} tone="pending" />
                 </div>
               ))}
@@ -542,7 +542,7 @@ export default async function SetupPage() {
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
                 Activation path is clear.
               </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                 The booking pillars are already locked, so this page now works as a clean checkpoint rather than an active to-do list.
               </p>
             </div>
@@ -577,7 +577,7 @@ export default async function SetupPage() {
                   {item.ready ? "Live" : "Building"}
                 </RevoryStatusBadge>
               </div>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">{item.note}</p>
+              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
               <SetupItemDetail detail={item.detail} tone={item.ready ? "configured" : "pending"} />
             </div>
           ))}
@@ -624,7 +624,7 @@ export default async function SetupPage() {
                 <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
                   {step.title}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                   {step.description}
                 </p>
               </div>
@@ -635,4 +635,5 @@ export default async function SetupPage() {
     </div>
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { AssistedImportMappingPreview } from "@/components/imports/AssistedImportMappingPreview";
+import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import {
   buildAssistedImportConfirmationDraft,
   buildAssistedImportPayloadFromCsv,
@@ -27,6 +28,7 @@ import {
   formatUploadSizeLimit,
 } from "@/lib/imports/csv-upload";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { buildImportDecisionSupport } from "@/services/decision-support/build-import-decision-support";
 import { validateCsvStructure } from "@/services/imports/validate-csv-structure";
 import { uploadCsvFile } from "@/src/app/(app)/app/imports/actions";
 import {
@@ -398,6 +400,25 @@ export function CsvUploadCard({
     templateKey === "appointments"
       ? "This section describes only the file that just finished. The higher summary block continues to show the latest booked proof state saved for this lane."
       : "This section describes only the file that just finished. The higher summary block continues to show the latest lead-base state saved for this lane.";
+  const decisionSupportRead = useMemo(
+    () =>
+      buildImportDecisionSupport({
+        confirmationDraft,
+        currentPreview,
+        lastUpload,
+        selectedFileName,
+        templateKey,
+        uploadState: statusState,
+      }),
+    [
+      confirmationDraft,
+      currentPreview,
+      lastUpload,
+      selectedFileName,
+      statusState,
+      templateKey,
+    ],
+  );
 
   useEffect(() => {
     onActivityChange?.(isFlowActive);
@@ -733,6 +754,8 @@ export function CsvUploadCard({
           </div>
         </div>
 
+        <RevoryDecisionSupportCard read={decisionSupportRead} />
+
         {assistedPayload && currentPreview && confirmationDraft ? (
           <AssistedImportMappingPreview
             confirmationDraft={confirmationDraft}
@@ -752,7 +775,7 @@ export function CsvUploadCard({
                 <h3 className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
                   Confirm the mapping before visibility updates.
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                   REVORY will use the mapping confirmed in this step for the
                   current file only. This check does not create persistent
                   mapping memory for the workspace.
@@ -840,7 +863,7 @@ export function CsvUploadCard({
                 <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
                   {inProgressTitle}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                   Keep this page open while the current file finishes
                   processing. The detailed result will appear below as soon as
                   REVORY returns.
@@ -917,7 +940,7 @@ export function CsvUploadCard({
                 <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
                   {currentResultTitle}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                   {currentResultBody}
                 </p>
               </div>
@@ -1075,3 +1098,4 @@ export function CsvUploadCard({
     </section>
   );
 }
+

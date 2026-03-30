@@ -1,4 +1,4 @@
-import type { OnboardingStep, OnboardingStepKey } from "@/services/onboarding/wizard-steps";
+﻿import type { OnboardingStep, OnboardingStepKey } from "@/services/onboarding/wizard-steps";
 
 type OnboardingStepLayoutProps = Readonly<{
   children?: React.ReactNode;
@@ -79,7 +79,7 @@ export function OnboardingStepLayout({
 
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <p className="rev-label">Activation guardrails</p>
-              <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 One clear decision per step. One booking motion. No CRM sprawl,
                 no channel maze, no heavy ops rollout, and no extra demo detour
                 before Seller can show booked proof and revenue clearly.
@@ -162,7 +162,7 @@ export function OnboardingStepLayout({
 
           <div className="rev-card rounded-[24px] p-5">
             <p className="rev-label">Booking outcome</p>
-            <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
               {step.helperText}
             </p>
           </div>
@@ -189,3 +189,4 @@ const stepKeyLabels: Record<OnboardingStepKey, string> = {
   source: "Lead Entry",
   template: "Main Offer",
 };
+

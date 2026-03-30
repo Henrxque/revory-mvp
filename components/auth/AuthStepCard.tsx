@@ -1,4 +1,4 @@
-type AuthStepCardProps = Readonly<{
+﻿type AuthStepCardProps = Readonly<{
   className?: string;
   label: string;
   text: string;
@@ -24,8 +24,9 @@ export function AuthStepCard({
         <p className="mt-4 text-[1.05rem] font-semibold leading-7 text-[color:var(--foreground)]">
           {title}
         </p>
-        <p className="mt-3 text-sm leading-7 text-[#b7afc5]">{text}</p>
+        <p className="mt-2.5 text-sm leading-[1.6] text-[#b7afc5]">{text}</p>
       </div>
     </div>
   );
 }
+

@@ -252,3 +252,56 @@ The column `activation_setups.averageDealValue` does not exist in the current da
  GET /api/auth/session 200 in 44ms (next.js: 29ms, application-code: 16ms)
  GET /api/auth/session 200 in 48ms (next.js: 22ms, application-code: 26ms)
  GET /api/auth/session 200 in 53ms (next.js: 24ms, application-code: 30ms)
+✓ Compiled in 587ms
+✓ Compiled in 1750ms
+✓ Compiled in 101ms
+ GET /api/auth/session 200 in 482ms (next.js: 113ms, application-code: 369ms)
+ GET /app/imports 200 in 506ms (next.js: 231ms, application-code: 275ms)
+ GET /app/imports 200 in 91ms (next.js: 4ms, application-code: 86ms)
+ GET /app/imports 200 in 66ms (next.js: 5ms, application-code: 61ms)
+ GET /app/imports 200 in 85ms (next.js: 4ms, application-code: 80ms)
+ GET /app/imports 200 in 54ms (next.js: 3ms, application-code: 51ms)
+ GET /app/imports 200 in 58ms (next.js: 4ms, application-code: 55ms)
+ GET /app/imports 200 in 245ms (next.js: 2ms, application-code: 242ms)
+ GET /api/auth/session 200 in 42ms (next.js: 15ms, application-code: 27ms)
+✓ Compiled in 105ms
+ GET /app/imports 200 in 132ms (next.js: 5ms, application-code: 128ms)
+✓ Compiled in 103ms
+ GET /app/imports 200 in 72ms (next.js: 3ms, application-code: 69ms)
+ GET /api/auth/session 200 in 92ms (next.js: 66ms, application-code: 26ms)
+ GET /app/setup 200 in 156ms (next.js: 38ms, application-code: 118ms)
+ GET /app/dashboard 200 in 416ms (next.js: 110ms, application-code: 305ms)
+ GET /api/auth/session 200 in 43ms (next.js: 20ms, application-code: 23ms)
+ GET /app/dashboard 200 in 339ms (next.js: 120ms, application-code: 219ms)
+ GET /app/dashboard 200 in 109ms (next.js: 4ms, application-code: 106ms)
+✓ Compiled in 205ms
+ GET /app/dashboard 200 in 137ms (next.js: 5ms, application-code: 132ms)
+ GET /app/dashboard 200 in 293ms (next.js: 116ms, application-code: 177ms)
+✓ Compiled in 229ms
+ GET /api/auth/session 200 in 60ms (next.js: 36ms, application-code: 24ms)
+ GET /app/dashboard 200 in 699ms (next.js: 3ms, application-code: 697ms)
+ GET /api/auth/session 200 in 32ms (next.js: 15ms, application-code: 17ms)
+ GET /app/imports 200 in 228ms (next.js: 142ms, application-code: 86ms)
+ GET /app/setup 200 in 227ms (next.js: 114ms, application-code: 114ms)
+ GET /app/imports 200 in 42ms (next.js: 3ms, application-code: 40ms)
+ GET /app/setup 200 in 53ms (next.js: 2ms, application-code: 51ms)
+ GET /api/auth/session 200 in 37ms (next.js: 20ms, application-code: 17ms)
+ GET /app/imports 200 in 63ms (next.js: 3ms, application-code: 60ms)
+ GET /api/auth/session 200 in 75ms (next.js: 38ms, application-code: 37ms)
+✓ Compiled in 182ms
+ GET /app/imports 200 in 307ms (next.js: 161ms, application-code: 147ms)
+ GET /api/auth/session 200 in 41ms (next.js: 26ms, application-code: 15ms)
+ GET /app/imports 200 in 346ms (next.js: 3ms, application-code: 343ms)
+ GET /api/auth/session 200 in 43ms (next.js: 25ms, application-code: 19ms)
+ GET /api/auth/session 200 in 40ms (next.js: 22ms, application-code: 19ms)
+ GET /app/imports 200 in 91ms (next.js: 3ms, application-code: 89ms)
+ GET /api/auth/session 200 in 41ms (next.js: 18ms, application-code: 23ms)
+ GET /api/auth/session 200 in 46ms (next.js: 19ms, application-code: 27ms)
+✓ Compiled in 172ms
+ GET /app/imports 200 in 228ms (next.js: 133ms, application-code: 95ms)
+✓ Compiled in 101ms
+ GET /api/auth/session 200 in 47ms (next.js: 21ms, application-code: 26ms)
+ GET /api/auth/session 200 in 83ms (next.js: 68ms, application-code: 15ms)
+ GET /app/setup 200 in 214ms (next.js: 3ms, application-code: 211ms)
+ GET /api/auth/session 200 in 44ms (next.js: 24ms, application-code: 20ms)
+ GET /app/imports 200 in 195ms (next.js: 111ms, application-code: 83ms)

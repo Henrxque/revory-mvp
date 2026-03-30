@@ -142,11 +142,11 @@ export default async function ImportsPage() {
                     <p className="text-[12px] font-semibold text-[color:var(--foreground)]">{item.label}</p>
                     <RevoryStatusBadge tone={item.tone}>{item.value}</RevoryStatusBadge>
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-[color:var(--text-muted)]">{item.note}</p>
+                  <p className="mt-1.5 text-xs leading-[1.45] text-[color:var(--text-muted)]">{item.note}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-4 border-t border-[color:var(--border)] pt-4 text-xs leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-3 border-t border-[color:var(--border)] pt-3 text-xs leading-[1.5] text-[color:var(--text-muted)]">
               Keep this page narrow: booked proof first, lead-base support second.
             </p>
           </aside>
@@ -175,10 +175,10 @@ export default async function ImportsPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="min-h-[8.75rem] rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4"
+                className="min-h-[7.5rem] rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5"
               >
                 <p className="rev-label">{item.label}</p>
-                <p className="mt-3 max-w-[27rem] text-sm leading-6 text-[color:var(--text-muted)]">
+                <p className="mt-1.5 max-w-[27rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
                   {item.text}
                 </p>
               </div>

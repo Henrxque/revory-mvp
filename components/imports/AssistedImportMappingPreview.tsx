@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   formatImportColumnLabel,
@@ -237,7 +237,7 @@ export function AssistedImportMappingPreview({
           <h3 className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
             Review the proposed mapping before import.
           </h3>
-          <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+          <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
             REVORY shows its first suggested mapping. You keep it, adjust it, or leave
             a field out before the file can move to final confirmation.
           </p>
@@ -250,12 +250,12 @@ export function AssistedImportMappingPreview({
               <p className="mt-2 truncate text-base font-semibold text-[color:var(--foreground)]">
                 {selectedFileName ?? "Awaiting source file"}
               </p>
-              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                 {currentPreview.totalHeaderCount} header
                 {currentPreview.totalHeaderCount === 1 ? "" : "s"} detected.
               </p>
               {currentPreview.duplicateSourceHeaders.length > 0 ? (
-                <p className="mt-2 text-sm leading-6 text-[color:var(--danger)]">
+                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--danger)]">
                   Duplicate header names found: {currentPreview.duplicateSourceHeaders.join(", ")}.
                 </p>
               ) : null}
@@ -357,7 +357,7 @@ export function AssistedImportMappingPreview({
                 className={`rounded-[18px] border px-4 py-4 ${getToneClassName(item.tone)}`}
               >
                 <p className="text-sm font-semibold">{item.title}</p>
-                <p className="mt-2 text-sm leading-6">{item.body}</p>
+                <p className="mt-1.5 text-sm leading-[1.5]">{item.body}</p>
               </div>
             ))}
           </div>
@@ -371,7 +371,7 @@ export function AssistedImportMappingPreview({
             <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
               Keep the suggestion or make the final decision.
             </p>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               The right column is the only field that controls what goes into the
               import. Everything else is context for that choice.
             </p>
@@ -412,7 +412,7 @@ export function AssistedImportMappingPreview({
                       <p className="text-base font-semibold text-[color:var(--foreground)]">
                         {decision.sourceHeader}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                      <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                         Uploaded header detected in this file.
                       </p>
                     </div>
@@ -435,7 +435,7 @@ export function AssistedImportMappingPreview({
                         <p className="text-sm font-semibold text-[color:var(--foreground)]">
                           {formatImportColumnLabel(decision.systemSuggestedColumn)}
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                        <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                           {decision.systemReason}
                         </p>
                       </div>
@@ -444,7 +444,7 @@ export function AssistedImportMappingPreview({
                         <p className="text-sm font-semibold text-[color:var(--foreground)]">
                           No safe suggestion yet
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                        <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
                           REVORY could not match this header with enough confidence,
                           so the final choice remains open.
                         </p>
@@ -506,7 +506,7 @@ export function AssistedImportMappingPreview({
                           ? formatImportColumnLabel(decision.finalTargetColumn)
                           : "Ignored for now"}
                       </p>
-                      <p className="mt-2 text-sm leading-6">
+                      <p className="mt-1.5 text-sm leading-[1.5]">
                         {getDecisionCopy(decision)}
                       </p>
                       <p className="mt-2 text-xs uppercase tracking-[0.14em] opacity-80">
@@ -523,3 +523,4 @@ export function AssistedImportMappingPreview({
     </div>
   );
 }
+
