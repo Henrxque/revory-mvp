@@ -1,3 +1,4 @@
+import { getTemplateSelectionAssist } from "@/services/operations/get-template-selection-assist";
 import type { RevoryAtRiskClassification } from "@/types/at-risk";
 import type { RevoryConfirmationClassification } from "@/types/confirmation";
 import {
@@ -16,6 +17,7 @@ import type {
   RevoryOperationalTemplatePlaceholderDefinition,
   RevoryOperationalTemplatePlaceholderKey,
   RevoryOperationalTemplatePreview,
+  RevoryTemplateObjectionCode,
 } from "@/types/operational-template";
 import type { RevoryRecoveryOpportunityClassification } from "@/types/recovery";
 import type { RevoryReminderClassification } from "@/types/reminder";
@@ -289,6 +291,33 @@ function renderTemplateBody(
 
     return body.replaceAll(placeholder.token, replacement);
   }, definition.body);
+}
+
+function extractReplyBlock(body: string) {
+  const lines = body.split("\n");
+
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const line = lines[index]?.trim();
+
+    if (line) {
+      return line;
+    }
+  }
+
+  return "";
+}
+
+function replaceReplyBlock(body: string, replyBlock: string) {
+  const lines = body.split("\n");
+
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    if (lines[index]?.trim()) {
+      lines[index] = replyBlock;
+      return lines.join("\n");
+    }
+  }
+
+  return replyBlock;
 }
 
 function collectReasonCodes(states: RevoryOperationalState[]) {
@@ -597,16 +626,38 @@ function buildOperationalTemplatePreview(
   definition: RevoryOperationalTemplateDefinition,
   context: TemplateContext | null,
   preparationState: TemplatePreparationState,
+  selectionAssist: {
+    confidenceBand: "low" | "medium" | "high";
+    isRecommended: boolean;
+    objectionCode: RevoryTemplateObjectionCode;
+    replyBlock: string;
+  } | null,
 ): RevoryOperationalTemplatePreview {
   const previewContext = context ?? sampleFallbackContext[definition.key];
+  const defaultBody = renderTemplateBody(definition, previewContext);
+  const defaultReplyBlock = extractReplyBlock(defaultBody);
+  const activeReplyBlock =
+    selectionAssist && selectionAssist.isRecommended
+      ? selectionAssist.replyBlock
+      : defaultReplyBlock;
 
   return {
     blockedReason: preparationState.blockedReason,
-    body: renderTemplateBody(definition, previewContext),
+    body:
+      selectionAssist && selectionAssist.isRecommended
+        ? replaceReplyBlock(defaultBody, activeReplyBlock)
+        : defaultBody,
     categoryLabel: definition.categoryLabel,
+    confidenceBand: selectionAssist?.isRecommended
+      ? selectionAssist.confidenceBand
+      : null,
     description: definition.description,
+    isRecommended: Boolean(selectionAssist?.isRecommended),
     key: definition.key,
     liveItemCount: preparationState.liveItemCount,
+    objectionCode: selectionAssist?.isRecommended
+      ? selectionAssist.objectionCode
+      : null,
     outreachState: preparationState.outreachState,
     outreachStateLabel: preparationState.outreachStateLabel,
     placeholders: definition.placeholders.map(
@@ -614,6 +665,9 @@ function buildOperationalTemplatePreview(
     ),
     previewMode: context ? "live_preview" : "controlled_sample",
     previewModeLabel: context ? "Current example" : "Sample preview",
+    replyBlock: activeReplyBlock,
+    replyBlockMode:
+      selectionAssist && selectionAssist.isRecommended ? "adapted" : "default",
     suggestedNextStep: preparationState.suggestedNextStep,
     title: definition.title,
   };
@@ -637,18 +691,51 @@ function buildTemplatePreparationState(
   }
 }
 
-export function buildOperationalTemplatePreviews(
+export async function buildOperationalTemplatePreviews(
   input: BuildOperationalTemplatePreviewsInput,
-): RevoryOperationalTemplatePreview[] {
+): Promise<RevoryOperationalTemplatePreview[]> {
+  const candidates = (
+    Object.values(
+      operationalTemplateDefinitions,
+    ) as RevoryOperationalTemplateDefinition[]
+  ).map((definition) => {
+    const context = getTemplateContext(definition.key, input);
+    const previewContext = context ?? sampleFallbackContext[definition.key];
+    const defaultBody = renderTemplateBody(definition, previewContext);
+    const preparationState = buildTemplatePreparationState(definition.key, input);
+
+    return {
+      blockedReason: preparationState.blockedReason,
+      key: definition.key,
+      liveItemCount: preparationState.liveItemCount,
+      outreachState: preparationState.outreachState,
+      replyBlock: extractReplyBlock(defaultBody),
+      suggestedNextStep: preparationState.suggestedNextStep,
+      title: definition.title,
+    };
+  });
+  const selectionAssist = await getTemplateSelectionAssist(candidates);
+
   return (
     Object.values(
       operationalTemplateDefinitions,
     ) as RevoryOperationalTemplateDefinition[]
-  ).map((definition) =>
-    buildOperationalTemplatePreview(
+  ).map((definition) => {
+    const assistForDefinition =
+      selectionAssist && selectionAssist.recommendedTemplateKey === definition.key
+        ? {
+            confidenceBand: selectionAssist.confidenceBand,
+            isRecommended: true,
+            objectionCode: selectionAssist.objectionCode,
+            replyBlock: selectionAssist.replyBlock,
+          }
+        : null;
+
+    return buildOperationalTemplatePreview(
       definition,
       getTemplateContext(definition.key, input),
       buildTemplatePreparationState(definition.key, input),
-    ),
-  );
+      assistForDefinition,
+    );
+  });
 }

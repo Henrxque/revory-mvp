@@ -346,7 +346,7 @@ export function buildAssistedImportPreview(
   const exactTemplateColumns = getRevoryCsvTemplateColumns(templateKey);
   const exactTemplateMatch =
     detectedHeaders.length === exactTemplateColumns.length &&
-    detectedHeaders.every((header, index) => header === exactTemplateColumns[index]);
+    exactTemplateColumns.every((header) => detectedHeaders.includes(header));
   const matchedWithConfidenceCount = mappingOptions.filter(
     (option) => option.matchStatus === "matched_with_confidence",
   ).length;

@@ -1,0 +1,253 @@
+{
+  "finishedAt": "2026-04-01T22:28:35.113Z",
+  "publicEvidence": {
+    "screenshot": "C:\\Users\\hriqu\\Documents\\revory-mvp\\.tmp\\final-flow-smoke-2026-04-01\\app-redirect-signin.png"
+  },
+  "results": [
+    {
+      "scenario": "1. Workspace novo sem activation concluido",
+      "status": "PASS",
+      "observed": {
+        "bookingInputsStatus": "Proof next",
+        "initialPath": "/app/setup/template",
+        "proofVisible": false,
+        "setupBookingPathLabel": null,
+        "subtitle": "Activation in progress: Step 1 of 6"
+      },
+      "expected": {
+        "bookingInputsStatus": "Proof next",
+        "initialPath": "/app/setup/template",
+        "proofVisible": false,
+        "setupBookingPathLabel": null
+      },
+      "impact": "critical",
+      "files": [
+        "services/app/get-initial-app-path.ts",
+        "src/app/(app)/app/layout.tsx",
+        "src/app/(app)/app/setup/page.tsx"
+      ]
+    },
+    {
+      "scenario": "2. Activation concluido sem appointments importados",
+      "status": "PASS",
+      "observed": {
+        "heroCta": {
+          "href": "#booking-inputs-flow",
+          "label": "Start booked proof"
+        },
+        "initialPath": "/app/imports",
+        "proofVisible": false,
+        "shellSubtitle": "Seller workspace live, booked proof next",
+        "sidebarStatus": "Proof ready"
+      },
+      "expected": {
+        "heroCta": "Start booked proof",
+        "initialPath": "/app/imports",
+        "shellSubtitle": "Seller workspace live, booked proof next",
+        "sidebarStatus": "Proof ready"
+      },
+      "impact": "critical",
+      "files": [
+        "src/app/(app)/app/setup/actions.ts",
+        "services/app/get-initial-app-path.ts",
+        "src/app/(app)/app/imports/page.tsx",
+        "src/app/(app)/app/layout.tsx"
+      ]
+    },
+    {
+      "scenario": "3. Importar apenas lead base / clients",
+      "status": "PASS",
+      "observed": {
+        "bookedProofSource": null,
+        "initialPath": "/app/imports",
+        "leadBaseSourceType": "CLIENTS_CSV",
+        "proofVisible": false,
+        "shellSubtitle": "Seller workspace live, booked proof next",
+        "sidebarStatus": "Proof ready"
+      },
+      "expected": {
+        "bookedProofSource": null,
+        "initialPath": "/app/imports",
+        "proofVisible": false,
+        "sidebarStatus": "Proof ready"
+      },
+      "impact": "critical",
+      "files": [
+        "services/app/get-initial-app-path.ts",
+        "src/app/(app)/app/layout.tsx",
+        "services/dashboard/get-dashboard-overview.ts",
+        "src/app/(app)/app/dashboard/page.tsx"
+      ]
+    },
+    {
+      "scenario": "4. Importar appointments validos com booked outcomes",
+      "status": "PASS",
+      "observed": {
+        "bookedAppointments": 2,
+        "bookedProofSourceType": "APPOINTMENTS_CSV",
+        "initialPath": "/app/dashboard",
+        "leadBaseSourceType": "CLIENTS_CSV",
+        "proofVisible": true,
+        "shellSubtitle": "Seller workspace live with booked proof",
+        "sidebarStatus": "Proof active"
+      },
+      "expected": {
+        "initialPath": "/app/dashboard",
+        "proofVisible": true,
+        "sidebarStatus": "Proof active"
+      },
+      "impact": "critical",
+      "files": [
+        "services/app/get-initial-app-path.ts",
+        "src/app/(app)/app/layout.tsx",
+        "services/dashboard/get-dashboard-overview.ts",
+        "src/app/(app)/app/dashboard/page.tsx"
+      ]
+    },
+    {
+      "scenario": "5. Appointments sem estimatedRevenue com averageDealValue configurado",
+      "status": "PASS",
+      "observed": {
+        "bookedAppointments": 2,
+        "proofVisibleCount": 2,
+        "revenue": 800
+      },
+      "expected": {
+        "bookedAppointments": 2,
+        "revenue": 800
+      },
+      "impact": "critical",
+      "files": [
+        "services/dashboard/get-dashboard-overview.ts",
+        "src/app/(app)/app/dashboard/page.tsx",
+        "src/app/(app)/app/setup/page.tsx"
+      ]
+    },
+    {
+      "scenario": "6. Appointments com canceled / no_show",
+      "status": "PASS",
+      "observed": {
+        "bookedAppointments": 1,
+        "canceledAppointments": 1,
+        "proofVisibleCount": 1,
+        "revenue": 400
+      },
+      "expected": {
+        "bookedAppointments": 1,
+        "revenue": 400
+      },
+      "impact": "critical",
+      "files": [
+        "services/proof/get-booked-proof-read.ts",
+        "services/dashboard/get-dashboard-overview.ts"
+      ]
+    },
+    {
+      "scenario": "7. Channel/default honesty",
+      "status": "PASS",
+      "observed": {
+        "channelReadTitle": "Email is the recommended default booking path.",
+        "hasBookingPathConfirmed": false,
+        "setupBookingPathLabel": null
+      },
+      "expected": {
+        "channelReadTitle": "Email is the recommended default booking path.",
+        "hasBookingPathConfirmed": false,
+        "setupBookingPathLabel": null
+      },
+      "impact": "important",
+      "files": [
+        "src/app/(app)/app/setup/page.tsx",
+        "src/app/(app)/app/setup/[step]/page.tsx",
+        "services/decision-support/build-activation-step-read.ts"
+      ]
+    },
+    {
+      "scenario": "8. Source step neutro",
+      "status": "PASS",
+      "observed": {
+        "signalOne": {
+          "label": "Lead entry",
+          "note": "This still needs one explicit choice.",
+          "value": "Lead entry next"
+        },
+        "title": "Lead entry is still the missing activation choice."
+      },
+      "expected": {
+        "signalOneValue": "Lead entry next",
+        "title": "Lead entry is still the missing activation choice."
+      },
+      "impact": "important",
+      "files": [
+        "services/decision-support/build-activation-step-read.ts",
+        "src/app/(app)/app/setup/[step]/page.tsx"
+      ]
+    },
+    {
+      "scenario": "9. Booking Inputs hero CTA logic",
+      "status": "PASS",
+      "observed": {
+        "noProof": {
+          "href": "#booking-inputs-flow",
+          "label": "Start booked proof"
+        },
+        "proofLive": {
+          "href": "/app/dashboard",
+          "label": "Open Revenue View"
+        },
+        "sourcePresent": {
+          "href": "#booking-inputs-flow",
+          "label": "Review booked proof"
+        }
+      },
+      "expected": {
+        "noProof": {
+          "href": "#booking-inputs-flow",
+          "label": "Start booked proof"
+        },
+        "proofLive": {
+          "href": "/app/dashboard",
+          "label": "Open Revenue View"
+        },
+        "sourcePresent": {
+          "href": "#booking-inputs-flow",
+          "label": "Review booked proof"
+        }
+      },
+      "impact": "important",
+      "files": [
+        "src/app/(app)/app/imports/page.tsx"
+      ]
+    },
+    {
+      "scenario": "10. Official mapping header order",
+      "status": "PASS",
+      "observed": {
+        "exactTemplateMatch": true,
+        "detectedHeaders": [
+          "scheduled_at",
+          "appointment_external_id",
+          "client_email",
+          "client_full_name",
+          "client_external_id",
+          "status",
+          "service_name",
+          "provider_name",
+          "estimated_revenue",
+          "booked_at",
+          "canceled_at",
+          "location_name",
+          "source_notes",
+          "client_phone"
+        ]
+      },
+      "expected": {
+        "exactTemplateMatch": true
+      },
+      "impact": "polish",
+      "files": [
+        "services/imports/build-assisted-import-payload.ts"
+      ]
+    }
+  ]
+}

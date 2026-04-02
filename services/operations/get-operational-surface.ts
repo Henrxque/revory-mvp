@@ -22,7 +22,7 @@ export async function getOperationalSurface(
       getReviewRequestEligibilityClassification(workspaceId, now),
     ]);
 
-  return buildOperationalSurface({
+  return await buildOperationalSurface({
     atRisk,
     confirmation,
     hasAppointmentBase,

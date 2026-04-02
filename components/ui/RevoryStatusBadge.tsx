@@ -19,7 +19,7 @@ export function RevoryStatusBadge({
 }: RevoryStatusBadgeProps) {
   return (
     <span
-      className={`inline-flex min-h-7 items-center rounded-[12px] border px-2.5 py-1 text-[10px] font-semibold leading-tight whitespace-nowrap ${toneClasses[tone]}`}
+      className={`inline-flex min-h-6 items-center rounded-[11px] border px-2.5 py-[0.35rem] text-[9px] font-semibold leading-tight whitespace-nowrap ${toneClasses[tone]}`}
     >
       {children}
     </span>

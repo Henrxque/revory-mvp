@@ -5,7 +5,7 @@ import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayo
 import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { buildActivationStepRead } from "@/services/decision-support/build-activation-step-read";
+import { getActivationStepRead } from "@/services/decision-support/get-activation-step-read";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
   getOnboardingStep,
@@ -179,7 +179,7 @@ export default async function OnboardingStepPage({
   }
 
   if (appContext.activationSetup.isCompleted) {
-    redirect("/app/dashboard");
+    redirect("/app");
   }
 
   const currentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
@@ -204,7 +204,7 @@ export default async function OnboardingStepPage({
     appContext.activationSetup.recommendedModeKey ?? "MODE_A";
   const selectedDataSourceType = sourceSelection?.type ?? null;
   const formattedDealValue = formatDealValue(selectedAverageDealValue);
-  const activationStepRead = buildActivationStepRead({
+  const activationStepRead = await getActivationStepRead({
     averageDealValue: selectedAverageDealValue,
     primaryChannel: selectedPrimaryChannel,
     recommendedModeKey: selectedRecommendedModeKey,
@@ -283,8 +283,6 @@ export default async function OnboardingStepPage({
           <span className="rev-label">What this unlocks in Seller</span>
           <p className="mt-3">{currentStepBody.next}</p>
         </div>
-
-        <RevoryDecisionSupportCard read={activationStepRead} />
 
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4 text-sm leading-6 text-[color:var(--text-muted)]">
           {currentStepKey === "template" ? (
@@ -574,6 +572,8 @@ export default async function OnboardingStepPage({
             </div>
           ) : null}
         </div>
+
+        <RevoryDecisionSupportCard read={activationStepRead} surface="activation" />
       </div>
     </OnboardingStepLayout>
   );

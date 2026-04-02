@@ -13,7 +13,7 @@ const confirmationBlockedState = buildBlockedOperationalState(["missing_patient_
 const reviewReadyState = buildReadyOperationalState();
 const reviewBlockedState = buildBlockedOperationalState(["missing_patient_email"]);
 
-const surface = buildOperationalSurface({
+const surface = await buildOperationalSurface({
   atRisk: {
     atRiskCount: 0,
     attentionNowCount: 0,

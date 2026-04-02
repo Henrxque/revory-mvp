@@ -10,6 +10,10 @@ export type RevoryDecisionSupportRead = {
   badgeLabel: string;
   detectedObjection: string;
   eyebrow: string;
+  fallbackLabel: string;
+  fallbackNote: string;
+  guardrailLabel: string;
+  guardrailNote: string;
   nextBestAction: string;
   recommendedPath: string;
   signals: RevoryDecisionSupportSignal[];

@@ -18,6 +18,7 @@ import {
   onboardingSteps,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
+import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 
 function formatSourceLabel(value: DataSourceType | null) {
   switch (value) {
@@ -142,67 +143,72 @@ export default async function SetupPage() {
   }
 
   const dataSource = await getOnboardingDataSource(appContext.workspace.id);
-  const uploadSources = await getCsvUploadSources(appContext.workspace.id);
+  const [uploadSources, bookedProofRead] = await Promise.all([
+    getCsvUploadSources(appContext.workspace.id),
+    getBookedProofRead(appContext.workspace.id),
+  ]);
   const currentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
   const currentStep = getOnboardingStep(currentStepKey);
+  const currentStepIndex = onboardingSteps.findIndex(
+    (candidate) => candidate.key === currentStepKey,
+  );
+  const channelStepIndex = onboardingSteps.findIndex(
+    (candidate) => candidate.key === "channel",
+  );
+  const hasBookingPathConfirmed =
+    appContext.activationSetup.isCompleted || currentStepIndex > channelStepIndex;
   const continueSetupHref = getOnboardingStepPath(currentStepKey);
   const sourceLabel = formatSourceLabel(dataSource?.type ?? null);
   const mainOfferLabel = formatMainOfferLabel(appContext.activationSetup.selectedTemplate);
-  const bookingPathLabel = formatBookingPathLabel(appContext.activationSetup.primaryChannel);
+  const bookingPathLabel = hasBookingPathConfirmed
+    ? formatBookingPathLabel(appContext.activationSetup.primaryChannel)
+    : null;
   const brandVoiceLabel = formatBrandVoiceLabel(appContext.activationSetup.recommendedModeKey);
   const dealValueLabel = formatDealValue(appContext.activationSetup.averageDealValue ?? null);
   const sourceNeedsReview =
     Boolean(dataSource?.type) &&
     !isSupportedOnboardingSourceType(dataSource?.type ?? null);
-  const hasBookedProofVisible = hasLiveCsvUploadSource(uploadSources.appointments);
+  const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
+  const hasAppointmentsSourceReady = hasLiveCsvUploadSource(uploadSources.appointments);
 
   const setupItems: SetupItem[] = [
     {
-      detail: mainOfferLabel ?? "Main offer next",
+      detail: mainOfferLabel ?? "Offer pending",
       label: "Main offer",
-      note: "Defines the one offer REVORY Seller should help book first.",
+      note: "One main offer.",
       ready: Boolean(mainOfferLabel),
       type: "pillar",
     },
     {
-      detail: bookingPathLabel ?? "Booking path next",
+      detail: bookingPathLabel ?? "Path pending",
       label: "Booking path",
-      note: "Defines the exact route REVORY Seller should push leads into when it is time to convert interest into a booked appointment.",
+      note: "One booking path.",
       ready: Boolean(bookingPathLabel),
       type: "pillar",
     },
     {
       detail: sourceNeedsReview
         ? "Current lead entry needs review"
-        : sourceLabel ?? "Lead entry next",
+        : sourceLabel ?? "Source pending",
       label: "Lead entry",
       note: sourceNeedsReview
-        ? "This workspace still carries a lead-entry type that the live Seller flow does not support yet."
-        : "Sets where Seller reads initial demand and hands qualified lead flow into the booking path.",
+        ? "Unsupported input type."
+        : "Input source for booking flow.",
       ready: Boolean(sourceLabel) && !sourceNeedsReview,
       type: "pillar",
     },
     {
-      detail: dealValueLabel ?? "Value per booking next",
+      detail: dealValueLabel ?? "Value pending",
       label: "Value per booking",
-      note: "Turns each booked appointment into visible revenue proof from day one.",
+      note: "Revenue value anchor.",
       ready: Boolean(appContext.activationSetup.averageDealValue),
       type: "pillar",
     },
     {
-      detail: brandVoiceLabel ?? "Voice next",
+      detail: brandVoiceLabel ?? "Voice pending",
       label: "Seller voice",
-      note: "Keeps the booking motion consistent without turning Seller into a builder.",
+      note: "Tone consistency.",
       ready: Boolean(brandVoiceLabel),
-      type: "support",
-    },
-    {
-      detail: appContext.activationSetup.isCompleted
-        ? "Workspace already activated"
-        : `Current step: ${currentStep.title}`,
-      label: "Go-live status",
-      note: "Shows whether the activation pillars are already active in the live Seller workspace.",
-      ready: appContext.activationSetup.isCompleted,
       type: "support",
     },
   ];
@@ -211,285 +217,265 @@ export default async function SetupPage() {
   const supportItems = setupItems.filter((item) => item.type === "support");
   const configuredPillars = pillarItems.filter((item) => item.ready);
   const pendingPillars = pillarItems.filter((item) => !item.ready);
+  const configuredSupportItems = supportItems.filter((item) => item.ready);
+  const pendingSupportItems = supportItems.filter((item) => !item.ready);
+  const corePathLocked = configuredPillars.length === pillarItems.length;
+  const revenuePathLocked =
+    appContext.activationSetup.isCompleted &&
+    corePathLocked &&
+    hasBookedProofVisible &&
+    Boolean(dealValueLabel);
   const setupHeroTitle = appContext.activationSetup.isCompleted
-    ? hasBookedProofVisible
-      ? "Your Seller booking engine is already live."
-      : "Your Seller booking engine is live. Booked proof is next."
-    : "Turn activation into booked appointments and revenue visibility.";
+    ? "Seller activation live."
+    : "Activation path in progress.";
   const setupHeroDescription = appContext.activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "This page keeps the activation pillars readable without dragging you back into the guided path."
-      : "Activation is complete. The next move that makes Seller feel commercially real is bringing booked proof into view before you lean on the revenue read."
-    : "Main offer, lead entry, booking path, and value per booking are the activation pillars that turn REVORY Seller from setup into a live booking and revenue path.";
-  const activationContextCopy = appContext.activationSetup.isCompleted
+      ? "Core path locked. Revenue support visible."
+      : hasAppointmentsSourceReady
+        ? "Core path locked. Booked proof still needs a clean pass."
+        : "Core path locked. Booked proof still missing."
+    : `${configuredPillars.length}/${pillarItems.length} core pillars locked.`;
+  const missingItems = [
+    ...pendingPillars,
+    ...pendingSupportItems,
+    ...(!hasBookedProofVisible
+      ? [
+          {
+            detail: hasAppointmentsSourceReady
+              ? "Review appointments file"
+              : "Add booked appointments file",
+            label: "Booked proof",
+            note: hasAppointmentsSourceReady
+              ? "Booked outcomes still are not visible."
+              : "Needed for revenue support.",
+            ready: false,
+            type: "support" as const,
+          },
+        ]
+      : []),
+  ];
+  const readyItems = [
+    ...configuredPillars,
+    ...configuredSupportItems,
+    ...(hasBookedProofVisible
+      ? [
+          {
+            detail: "Visible in Booking Inputs",
+            label: "Booked proof",
+            note: "Revenue support is live.",
+            ready: true,
+            type: "support" as const,
+          },
+        ]
+      : []),
+  ];
+  const nextMove = appContext.activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Activation is complete. Dashboard and Booking Inputs already use the live Seller state."
-      : "Activation is complete. The next thing that makes Seller feel commercially real is booked proof."
-    : `REVORY Seller is still waiting on activation integrity. The current move is "${currentStep.title}".`;
-  const activationContextSupportCopy = appContext.activationSetup.isCompleted
-    ? hasBookedProofVisible
-      ? "You can keep working from the revenue view or Booking Inputs without reopening the guided path."
-      : "Open Booking Inputs next so Seller can make booked appointments visible before the revenue view carries the commercial story."
-    : "The path stays narrow on purpose: one main offer, one lead entry, one booking path, one value per booking, one Seller voice, then go live.";
-  const nextMoveLabel = appContext.activationSetup.isCompleted
-    ? "Best next workspace move"
-    : "Next activation move";
+      ? {
+          description: "Keep proof fresh behind revenue.",
+          href: "/app/imports",
+          label: "Refresh booked proof",
+          title: "Refresh booked proof",
+        }
+      : {
+          description: hasAppointmentsSourceReady
+            ? "Review the appointments pass so booked outcomes become visible."
+            : "Add booked proof to complete revenue support.",
+          href: "/app/imports",
+          label: hasAppointmentsSourceReady ? "Review booked proof" : "Add booked proof",
+          title: hasAppointmentsSourceReady ? "Review booked proof" : "Add booked proof",
+        }
+    : {
+        description: `Finish "${currentStep.title}" to lock activation.`,
+        href: continueSetupHref,
+        label: "Continue activation",
+        title:
+          !mainOfferLabel
+            ? "Set main offer"
+            : !bookingPathLabel
+              ? "Set booking path"
+              : !dealValueLabel
+                ? "Set booking value"
+                : "Continue activation",
+      };
   const activationSnapshot = [
     {
       label: "Workspace state",
       tone: appContext.activationSetup.isCompleted ? ("real" as const) : ("future" as const),
-      value: appContext.activationSetup.isCompleted ? "Live" : "In progress",
+      value: appContext.activationSetup.isCompleted ? "Live" : "Pending",
     },
     {
       label: "Booked proof",
       tone: hasBookedProofVisible ? ("real" as const) : ("future" as const),
-      value: hasBookedProofVisible ? "Visible" : "Next",
+      value: hasBookedProofVisible ? "Live" : "Pending",
     },
     {
-      label: "Current step",
-      tone: "neutral" as const,
-      value: currentStep.eyebrow,
+      label: "Core path",
+      tone: corePathLocked ? ("real" as const) : ("future" as const),
+      value: corePathLocked ? "Locked" : "Missing",
+    },
+    {
+      label: "Missing items",
+      tone: missingItems.length > 0 ? ("future" as const) : ("real" as const),
+      value: missingItems.length > 0 ? `${missingItems.length}` : "0",
     },
   ] as const;
 
   return (
     <div className="space-y-6">
-      <section className="rev-card-soft rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <div className="space-y-5">
-          <div className="max-w-[40rem] space-y-3.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="rev-kicker">Activation integrity</p>
-              <RevoryStatusBadge tone={appContext.activationSetup.isCompleted ? "real" : "future"}>
-                {appContext.activationSetup.isCompleted ? "Activated" : "Activation in progress"}
-              </RevoryStatusBadge>
-              <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
-                {configuredPillars.length}/{pillarItems.length} pillars locked
-              </span>
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-6">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+          <div className="space-y-4">
+            <div className="max-w-[36rem] space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+                  Activation
+                </p>
+                <RevoryStatusBadge tone={appContext.activationSetup.isCompleted ? "real" : "future"}>
+                  {appContext.activationSetup.isCompleted ? "Activated" : "In progress"}
+                </RevoryStatusBadge>
+                <span className="inline-flex min-h-6 items-center rounded-[11px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-2.5 py-[0.35rem] text-[9px] font-medium text-[color:var(--text-muted)]">
+                  {configuredPillars.length}/{pillarItems.length} core locked
+                </span>
+              </div>
+              <h1 className="rev-display-hero max-w-[24rem]">{setupHeroTitle}</h1>
+              <p className="max-w-[30rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
+                {setupHeroDescription}
+              </p>
             </div>
-            <h1 className="rev-display-hero max-w-[31rem]">
-              {setupHeroTitle}
-            </h1>
-            <p className="max-w-[35rem] text-sm leading-6 text-[color:var(--text-muted)] md:text-[15px]">
-              {setupHeroDescription}
+
+            <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+              {activationSnapshot.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3 py-2.5"
+                >
+                  <p className="text-[11px] font-medium text-[color:var(--foreground)]">{item.label}</p>
+                  <RevoryStatusBadge tone={item.tone}>{item.value}</RevoryStatusBadge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+            <p className="rev-label">Next move</p>
+            <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+              {nextMove.title}
             </p>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-3">
-            {activationSnapshot.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3"
-              >
-                <p className="text-[12px] font-medium text-[color:var(--foreground)]">{item.label}</p>
-                <RevoryStatusBadge tone={item.tone}>{item.value}</RevoryStatusBadge>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)]">
-            <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-5">
-              <p className="rev-label">Why activation matters</p>
-              <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--foreground)]">
-                {activationContextCopy}
-              </p>
-              <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
-                {activationContextSupportCopy}
-              </p>
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
+              {nextMove.description}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <DocumentNavigationLink className="rev-button-primary" href={nextMove.href}>
+                {nextMove.label}
+              </DocumentNavigationLink>
+              {appContext.activationSetup.isCompleted && hasBookedProofVisible ? (
+                <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
+                  Booking Inputs
+                </DocumentNavigationLink>
+              ) : null}
             </div>
-
-            <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-5">
-              <p className="rev-label">{nextMoveLabel}</p>
-              <p className="mt-2.5 text-sm leading-[1.6] text-[color:var(--foreground)]">
-                {appContext.activationSetup.isCompleted
-                  ? hasBookedProofVisible
-                    ? "Booked proof is already visible. Open the revenue view for the cleanest commercial read, or return to Booking Inputs whenever you want to refresh that proof."
-                    : "Activation is already complete. The cleanest next move is Booking Inputs so Seller can make booked proof visible before you lean on the revenue view."
-                  : `Continue from "${currentStep.title}" to finish the activation pillars cleanly.`}
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                {appContext.activationSetup.isCompleted ? (
-                  hasBookedProofVisible ? (
-                    <>
-                      <DocumentNavigationLink className="rev-button-primary" href="/app/dashboard">
-                        Open Revenue View
-                      </DocumentNavigationLink>
-                      <DocumentNavigationLink className="rev-button-secondary" href="/app/imports">
-                        Review Booking Inputs
-                      </DocumentNavigationLink>
-                    </>
-                  ) : (
-                    <DocumentNavigationLink className="rev-button-primary" href="/app/imports">
-                      Add booked proof
-                    </DocumentNavigationLink>
-                  )
-                ) : (
-                  <DocumentNavigationLink className="rev-button-primary" href={continueSetupHref}>
-                    Continue activation
-                  </DocumentNavigationLink>
-                )}
-              </div>
-            </div>
-          </div>
+          </aside>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-4">
         {pillarItems.map((item) => (
           <div
             key={item.label}
-            className={`min-w-0 overflow-hidden rounded-[24px] border p-5 ${
+            className={`min-w-0 overflow-hidden rounded-[18px] border p-3.5 ${
               item.ready
                 ? "border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)]"
                 : "border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.06)]"
             }`}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <p className="rev-label">{item.label}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+                {item.label}
+              </p>
               <RevoryStatusBadge tone={item.ready ? "real" : "future"}>
-                {item.ready ? "Locked" : "Next"}
+                {item.ready ? "Locked" : "Pending"}
               </RevoryStatusBadge>
             </div>
-            <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
+            <p className="mt-2.5 text-[15px] font-semibold leading-[1.35] text-[color:var(--foreground)]">
               {item.detail}
             </p>
-            <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">{item.note}</p>
+            <p className="mt-1.5 text-[12px] leading-[1.45] text-[color:var(--text-muted)]">{item.note}</p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Booked appointment path
+              Activation chains
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Activation should make the path to booking obvious: where the lead enters, which path Seller reinforces, and what eventually counts as visible revenue proof.
+              Proof path first, revenue path second.
             </p>
           </div>
-          <RevoryStatusBadge tone={bookingPathLabel ? "accent" : "future"}>
-            {bookingPathLabel ? "Path defined" : "Path next"}
+          <RevoryStatusBadge tone={revenuePathLocked ? "real" : "future"}>
+            {revenuePathLocked ? "Revenue path locked" : "Revenue path pending"}
           </RevoryStatusBadge>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
-          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
-            <p className="rev-label">01 • Lead enters</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              {sourceLabel ?? "Lead entry next"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              This is the starting point REVORY Seller reads before it can guide the booking motion.
-            </p>
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+            <p className="rev-label">Booked path</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                {sourceLabel ?? "Lead entry pending"}
+              </span>
+              <span className="text-xs text-[color:var(--text-subtle)]">→</span>
+              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                {bookingPathLabel ?? "Booking path pending"}
+              </span>
+              <span className="text-xs text-[color:var(--text-subtle)]">→</span>
+              <span className="inline-flex items-center rounded-[12px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                Booked proof
+              </span>
+            </div>
           </div>
 
-          <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
-            <p className="rev-label">02 • Seller guides</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              {bookingPathLabel ?? "Booking path next"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              This is the main handoff REVORY Seller treats as the natural destination of the guided path.
-            </p>
-          </div>
-
-          <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
-            <p className="rev-label">03 • Booking lands</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              Booked appointment
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              Value per booking then turns each visible booking into a revenue read instead of a generic activity signal.
-            </p>
+          <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+            <p className="rev-label">Revenue path</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-[12px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                Booked proof
+              </span>
+              <span className="text-xs text-[color:var(--text-subtle)]">→</span>
+              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                {dealValueLabel ?? "Value pending"}
+              </span>
+              <span className="text-xs text-[color:var(--text-subtle)]">→</span>
+              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+                Revenue view
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Revenue outcome path
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              REVORY Seller should make revenue feel earned and explainable from the first session, not decorative or delayed.
-            </p>
-          </div>
-          <RevoryStatusBadge
-            tone={
-              bookingPathLabel && dealValueLabel && appContext.activationSetup.isCompleted
-                ? "real"
-                : "future"
-            }
-          >
-            {bookingPathLabel && dealValueLabel && appContext.activationSetup.isCompleted
-              ? "Revenue path locked"
-              : "Revenue path opening"}
-          </RevoryStatusBadge>
-        </div>
-
-        <div className="mt-5 grid gap-3 md:grid-cols-4">
-          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
-            <p className="rev-label">01 • Activation</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              Seller activation locked
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              Activation integrity keeps main offer, lead entry, booking path, and value per booking inside one narrow system.
-            </p>
-          </div>
-
-          <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
-            <p className="rev-label">02 • Booking path</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              {bookingPathLabel ?? "Booking path next"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              Seller pushes the lead into one explicit booking destination instead of spreading motion across multiple lanes.
-            </p>
-          </div>
-
-          <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
-            <p className="rev-label">03 • Booked outcome</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              Booked appointment
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              Bookings are the live proof point behind the revenue read.
-            </p>
-          </div>
-
-          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4">
-            <p className="rev-label">04 • Revenue</p>
-            <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-              {dealValueLabel ?? "Value per booking next"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              Value per booking is what turns each visible booking into a clean revenue signal on the dashboard.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)] xl:items-start">
-        <div className="min-w-0 overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+      <section className="grid gap-3.5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:items-start">
+        <div className="min-w-0 overflow-hidden rounded-[26px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
             <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Activation pillars already locked
+              Ready now
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              The parts of the Seller engine that are already ready to shape booked appointments and revenue outcome.
+              Active setup status.
             </p>
           </div>
-            <RevoryStatusBadge tone="real">{configuredPillars.length} locked</RevoryStatusBadge>
+            <RevoryStatusBadge tone="real">{readyItems.length}</RevoryStatusBadge>
           </div>
 
-          <div className="mt-5 space-y-3">
-            {configuredPillars.map((item) => (
+          <div className="mt-4 space-y-2.5">
+            {readyItems.map((item) => (
               <div
-                key={item.label}
-                className="min-w-0 overflow-hidden rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4"
+                key={`${item.type}-${item.label}`}
+                className="min-w-0 overflow-hidden rounded-[18px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-3.5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <p className="min-w-0 flex-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -497,42 +483,42 @@ export default async function SetupPage() {
                   </p>
                   <RevoryStatusBadge tone="real">Locked</RevoryStatusBadge>
                 </div>
-                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
+                <p className="mt-1 text-[12px] leading-[1.45] text-[color:var(--text-muted)]">{item.note}</p>
                 <SetupItemDetail detail={item.detail} tone="configured" />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="min-w-0 overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+        <div className="min-w-0 overflow-hidden rounded-[26px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
             <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              What still blocks go-live
+              Missing now
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              The missing pieces that still prevent Seller from starting with a clean paid-lead-to-booked-appointment motion.
+              Items still blocking full activation read.
             </p>
           </div>
-            <RevoryStatusBadge tone={pendingPillars.length > 0 ? "future" : "neutral"}>
-              {pendingPillars.length > 0 ? `${pendingPillars.length} next` : "All clear"}
+            <RevoryStatusBadge tone={missingItems.length > 0 ? "future" : "neutral"}>
+              {missingItems.length > 0 ? `${missingItems.length}` : "0"}
             </RevoryStatusBadge>
           </div>
 
-          {pendingPillars.length > 0 ? (
-            <div className="mt-5 space-y-3">
-              {pendingPillars.map((item) => (
+          {missingItems.length > 0 ? (
+            <div className="mt-4 space-y-2.5">
+              {missingItems.map((item) => (
                 <div
-                  key={item.label}
-                  className="min-w-0 overflow-hidden rounded-[20px] border border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.06)] p-4"
+                  key={`${item.type}-${item.label}`}
+                  className="min-w-0 overflow-hidden rounded-[18px] border border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.06)] p-3.5"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <p className="min-w-0 flex-1 text-sm font-semibold text-[color:var(--foreground)]">
                       {item.label}
                     </p>
-                    <RevoryStatusBadge tone="future">Next</RevoryStatusBadge>
+                    <RevoryStatusBadge tone="future">Pending</RevoryStatusBadge>
                   </div>
-                  <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
+                  <p className="mt-1 text-[12px] leading-[1.45] text-[color:var(--text-muted)]">{item.note}</p>
                   <SetupItemDetail detail={item.detail} tone="pending" />
                 </div>
               ))}
@@ -540,58 +526,24 @@ export default async function SetupPage() {
           ) : (
             <div className="mt-5 min-w-0 overflow-hidden rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-5">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                Activation path is clear.
+                No blockers.
               </p>
               <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                The booking pillars are already locked, so this page now works as a clean checkpoint rather than an active to-do list.
+                Activation status is clean.
               </p>
             </div>
           )}
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Support layer
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Supporting context that keeps the activation path consistent after the core pillars are locked.
-            </p>
-          </div>
-          <RevoryStatusBadge tone={supportItems.every((item) => item.ready) ? "real" : "neutral"}>
-            {supportItems.filter((item) => item.ready).length} of {supportItems.length} ready
-          </RevoryStatusBadge>
-        </div>
-
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {supportItems.map((item) => (
-            <div
-              key={item.label}
-              className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <p className="text-sm font-semibold text-[color:var(--foreground)]">{item.label}</p>
-                <RevoryStatusBadge tone={item.ready ? "real" : "neutral"}>
-                  {item.ready ? "Live" : "Building"}
-                </RevoryStatusBadge>
-              </div>
-              <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">{item.note}</p>
-              <SetupItemDetail detail={item.detail} tone={item.ready ? "configured" : "pending"} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-5">
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-[1rem] font-medium text-[color:var(--foreground)]">
-              Activation path
+              Progress path
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              A short read of the activation path without forcing the guided flow open.
+              Step status only.
             </p>
           </div>
           <RevoryStatusBadge tone={appContext.activationSetup.isCompleted ? "real" : "future"}>
@@ -599,19 +551,16 @@ export default async function SetupPage() {
           </RevoryStatusBadge>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
           {onboardingSteps.map((step) => {
             const stepIndex = onboardingSteps.findIndex((candidate) => candidate.key === step.key);
-            const currentIndex = onboardingSteps.findIndex(
-              (candidate) => candidate.key === currentStepKey,
-            );
-            const isCompleted = appContext.activationSetup.isCompleted || stepIndex < currentIndex;
+            const isCompleted = appContext.activationSetup.isCompleted || stepIndex < currentStepIndex;
             const isCurrent = !appContext.activationSetup.isCompleted && step.key === currentStepKey;
 
             return (
               <div
                 key={step.key}
-                className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-4"
+                className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-3.5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="rev-label">{step.eyebrow}</p>
@@ -621,11 +570,8 @@ export default async function SetupPage() {
                     {isCompleted ? "Done" : isCurrent ? "Current" : "Up next"}
                   </RevoryStatusBadge>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
+                <p className="mt-2.5 text-sm font-semibold text-[color:var(--foreground)]">
                   {step.title}
-                </p>
-                <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                  {step.description}
                 </p>
               </div>
             );

@@ -695,13 +695,13 @@ function buildPrioritySummary(
   };
 }
 
-export function buildOperationalSurface(
+export async function buildOperationalSurface(
   input: BuildOperationalSurfaceInput,
-): RevoryOperationalSurface {
+): Promise<RevoryOperationalSurface> {
   const categoryCards = buildCategoryCards(input);
   const priorityItems = buildPriorityItems(input);
   const blockedCount = getBlockedAppointmentIds(input).size;
-  const templatePreviews = buildOperationalTemplatePreviews(input);
+  const templatePreviews = await buildOperationalTemplatePreviews(input);
   const readinessSummary = {
     blockedCount,
     nextActionCount: priorityItems.length,

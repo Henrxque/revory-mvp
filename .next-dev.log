@@ -305,3 +305,4 @@ The column `activation_setups.averageDealValue` does not exist in the current da
  GET /app/setup 200 in 214ms (next.js: 3ms, application-code: 211ms)
  GET /api/auth/session 200 in 44ms (next.js: 24ms, application-code: 20ms)
  GET /app/imports 200 in 195ms (next.js: 111ms, application-code: 83ms)
+ GET /api/auth/session 200 in 50ms (next.js: 32ms, application-code: 18ms)

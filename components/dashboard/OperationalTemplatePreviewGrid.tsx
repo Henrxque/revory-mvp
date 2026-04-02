@@ -29,6 +29,9 @@ export function OperationalTemplatePreviewGrid({
               <div className="max-w-[34rem] space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <RevoryStatusBadge tone="neutral">{preview.categoryLabel}</RevoryStatusBadge>
+                  {preview.isRecommended ? (
+                    <RevoryStatusBadge tone="accent">Best fit</RevoryStatusBadge>
+                  ) : null}
                   <RevoryStatusBadge
                     tone={
                       preview.outreachState === "ready"
@@ -96,6 +99,18 @@ export function OperationalTemplatePreviewGrid({
                   <p key={`${preview.key}-${index}`}>{line || "\u00A0"}</p>
                 ))}
               </div>
+            </div>
+
+            <div className="mt-4 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="rev-label">Closing line</p>
+                <span className="text-xs text-[color:var(--text-soft)]">
+                  {preview.replyBlockMode === "adapted" ? "Tuned line" : "Base line"}
+                </span>
+              </div>
+              <p className="mt-2.5 text-sm leading-[1.5] text-[color:var(--foreground)]">
+                {preview.replyBlock}
+              </p>
             </div>
 
             <div className="mt-4">

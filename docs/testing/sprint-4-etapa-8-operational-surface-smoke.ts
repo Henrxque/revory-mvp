@@ -8,7 +8,7 @@ import {
 
 const now = new Date("2026-03-22T15:00:00.000Z");
 
-const surface = buildOperationalSurface({
+const surface = await buildOperationalSurface({
   atRisk: {
     atRiskCount: 2,
     attentionNowCount: 1,

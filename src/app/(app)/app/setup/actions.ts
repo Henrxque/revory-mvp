@@ -82,7 +82,7 @@ async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
   }
 
   if (appContext.activationSetup.isCompleted) {
-    redirect("/app/dashboard");
+    redirect("/app");
   }
 
   const currentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
@@ -193,12 +193,12 @@ export async function submitOnboardingStep(formData: FormData) {
         redirect(`${getOnboardingStepPath(currentStepKey)}?error=activation`);
       }
 
-      redirect("/app/dashboard");
+      redirect("/app");
     }
   }
 
   if (!nextStepKey) {
-    redirect("/app/dashboard");
+    redirect("/app");
   }
 
   redirect(getOnboardingStepPath(nextStepKey));
@@ -225,7 +225,7 @@ export async function goToNextOnboardingStep(formData: FormData) {
   const nextStepKey = getNextOnboardingStepKey(currentStepKey);
 
   if (!nextStepKey) {
-    redirect("/app/dashboard");
+    redirect("/app");
   }
 
   await setCurrentOnboardingStep(workspaceId, nextStepKey);

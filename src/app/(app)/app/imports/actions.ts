@@ -179,7 +179,7 @@ export async function uploadCsvFile(
 
     if (typeof templateKeyValue !== "string" || !isTemplateKey(templateKeyValue)) {
       return {
-        message: "Select a valid REVORY CSV lane before continuing.",
+        message: "Select a valid REVORY CSV input before continuing.",
         status: "error",
       };
     }

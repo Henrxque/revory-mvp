@@ -10,7 +10,7 @@ type BuildDashboardDecisionSupportInput = {
 
 function formatCurrency(value: number | null) {
   if (value === null || !Number.isFinite(value)) {
-    return "Awaiting booked proof";
+    return "Revenue pending";
   }
 
   return new Intl.NumberFormat("en-US", {
@@ -29,12 +29,18 @@ export function buildDashboardDecisionSupport({
 
   if (overview.bookedAppointments === 0) {
     return {
-      badgeLabel: "Guided recommendation",
+      badgeLabel: "Seller guidance",
       detectedObjection:
-        "Revenue still reads as configured potential until booked appointments are visible in the workspace.",
-      eyebrow: "Controlled Read",
+        "Revenue still reads like configured potential until booked appointments are visible.",
+      eyebrow: "Revenue read",
+      fallbackLabel: "If proof softens",
+      fallbackNote:
+        "If booked proof is still missing, Seller keeps revenue waiting and points back to Booking Inputs.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote:
+        "This recommendation only uses proof already visible inside the workspace.",
       nextBestAction:
-        "Open Booking Inputs and add the appointments file first. That is the shortest move that turns this page from setup-backed promise into visible commercial proof.",
+        "Open Booking Inputs and add the appointments file first. That is the shortest move from setup to visible commercial proof.",
       recommendedPath: "Booking Inputs -> booked proof -> revenue view",
       signals: [
         {
@@ -54,18 +60,24 @@ export function buildDashboardDecisionSupport({
         },
       ],
       summary:
-        "The dashboard is the safest place for an executive read, but it should stay honest: one recommendation, one main objection, and only the proof points already available in the product.",
-      title: "Booked proof is still the missing link in the revenue story.",
+        "Keep the read simple: booked proof first, then let revenue lead.",
+      title: "Booked proof is still the missing link.",
       tone: "future",
     };
   }
 
   if (overview.upcomingAppointments === 0) {
     return {
-      badgeLabel: "Guided recommendation",
+      badgeLabel: "Seller guidance",
       detectedObjection:
-        "Revenue proof is visible, but a thin booked calendar can make the workspace feel less current during demo.",
-      eyebrow: "Controlled Read",
+        "Revenue proof is visible, but a thin booked calendar can make the workspace feel less current in demo.",
+      eyebrow: "Revenue read",
+      fallbackLabel: "If proof softens",
+      fallbackNote:
+        "If the calendar stays thin, Seller keeps the next move on refreshing booked proof only.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote:
+        "This recommendation stays inside the current proof layer: revenue, booked appointments, and one refresh move.",
       nextBestAction:
         "Refresh booked visibility so the revenue number keeps a live appointment layer underneath it. Seller looks strongest when revenue and upcoming bookings still agree.",
       recommendedPath: "Refresh booked proof -> keep revenue and calendar aligned",
@@ -87,17 +99,23 @@ export function buildDashboardDecisionSupport({
         },
       ],
       summary:
-        "The product now has enough proof to justify a short executive recommendation without drifting into analytics or operational triage.",
-      title: "Revenue proof is visible, but the live calendar is thin.",
+        "One refresh keeps the revenue read current without adding operational weight.",
+      title: "Revenue is visible, but the live calendar is thin.",
       tone: "accent",
     };
   }
 
   return {
-    badgeLabel: "Guided recommendation",
+    badgeLabel: "Seller guidance",
     detectedObjection:
-      "The main risk now is stale proof. If booked visibility ages, the revenue number stops feeling earned as quickly as it became convincing.",
-    eyebrow: "Controlled Read",
+      "The main risk now is stale proof behind the revenue number.",
+    eyebrow: "Revenue read",
+    fallbackLabel: "If proof softens",
+    fallbackNote:
+      "If proof quality drops, Seller falls back to the same narrow move: refresh booked proof.",
+    guardrailLabel: "Seller stays narrow",
+    guardrailNote:
+      "The dashboard keeps one recommendation, one path, and one proof chain.",
     nextBestAction:
       "Keep booked visibility fresh and keep the read narrow. Seller is strongest when the demo can move from revenue to proof to next move in one short sequence.",
     recommendedPath: "Revenue -> proof -> one clear next move",
@@ -119,8 +137,8 @@ export function buildDashboardDecisionSupport({
       },
     ],
     summary:
-      "This read makes the dashboard feel more intelligent by naming the highest-leverage commercial move, but it stays contained to the proof the workspace already has.",
-    title: "The revenue read already has visible proof underneath.",
+      "Keep the proof fresh and the next move short.",
+    title: "The revenue read already feels commercially credible.",
     tone: "real",
   };
 }

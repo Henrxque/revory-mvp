@@ -7,6 +7,15 @@ import { csvUploadSourceNames } from "@/services/imports/csv-upload-source-confi
 
 export type DashboardOverview = {
   bookedAppointments: number;
+  bookedProofSource: {
+    errorRows: number;
+    fileName: string | null;
+    importedAt: Date | null;
+    status: string;
+    successRows: number;
+    totalRows: number;
+    type: DataSourceType;
+  } | null;
   canceledAppointments: number;
   clientsImported: number;
   estimatedImportedRevenue: number | null;
@@ -25,6 +34,15 @@ export type DashboardOverview = {
     totalRows: number;
     type: DataSourceType;
   }>;
+  leadBaseSource: {
+    errorRows: number;
+    fileName: string | null;
+    importedAt: Date | null;
+    status: string;
+    successRows: number;
+    totalRows: number;
+    type: DataSourceType;
+  } | null;
   appointmentsMonitored: number;
   upcomingList: Array<{
     clientName: string;
@@ -55,19 +73,31 @@ function resolveClientName(client: {
 
 export async function getDashboardOverview(
   workspaceId: string,
+  averageDealValue: number | null = null,
 ): Promise<DashboardOverview> {
   const now = new Date();
   const [
     bookedAppointments,
+    bookedRevenueRows,
     appointmentCount,
     clientCount,
     upcomingAppointments,
     canceledAppointments,
-    revenueAggregate,
     dataSources,
     upcomingList,
   ] = await Promise.all([
     prisma.appointment.count({
+      where: {
+        status: {
+          in: [AppointmentStatus.SCHEDULED, AppointmentStatus.COMPLETED],
+        },
+        workspaceId,
+      },
+    }),
+    prisma.appointment.findMany({
+      select: {
+        estimatedRevenue: true,
+      },
       where: {
         status: {
           in: [AppointmentStatus.SCHEDULED, AppointmentStatus.COMPLETED],
@@ -97,17 +127,6 @@ export async function getDashboardOverview(
     prisma.appointment.count({
       where: {
         status: AppointmentStatus.CANCELED,
-        workspaceId,
-      },
-    }),
-    prisma.appointment.aggregate({
-      _sum: {
-        estimatedRevenue: true,
-      },
-      where: {
-        estimatedRevenue: {
-          not: null,
-        },
         workspaceId,
       },
     }),
@@ -154,34 +173,59 @@ export async function getDashboardOverview(
       },
     }),
   ]);
+  let estimatedImportedRevenue: number | null = null;
+  let hasRevenueSupport = false;
+
+  for (const row of bookedRevenueRows) {
+    if (row.estimatedRevenue !== null) {
+      estimatedImportedRevenue =
+        (estimatedImportedRevenue ?? 0) + Number(row.estimatedRevenue);
+      hasRevenueSupport = true;
+      continue;
+    }
+
+    if (averageDealValue !== null) {
+      estimatedImportedRevenue = (estimatedImportedRevenue ?? 0) + averageDealValue;
+      hasRevenueSupport = true;
+    }
+  }
+
+  if (!hasRevenueSupport) {
+    estimatedImportedRevenue = null;
+  }
+
+  const importSources = dataSources.map((source) => ({
+    errorRows: source.lastImportErrorRowCount,
+    fileName: source.lastImportFileName,
+    importedAt: source.lastImportedAt,
+    status: source.status,
+    successRows: source.lastImportSuccessRowCount,
+    templateLabel:
+      source.type === DataSourceType.APPOINTMENTS_CSV
+        ? "Appointments CSV"
+        : "Clients CSV",
+    totalRows: source.lastImportRowCount,
+    type: source.type,
+  }));
+  const bookedProofSource =
+    importSources.find((source) => source.type === DataSourceType.APPOINTMENTS_CSV) ?? null;
+  const leadBaseSource =
+    importSources.find((source) => source.type === DataSourceType.CLIENTS_CSV) ?? null;
 
   return {
     bookedAppointments,
+    bookedProofSource,
     appointmentsMonitored: appointmentCount,
     canceledAppointments,
     clientsImported: clientCount,
-    estimatedImportedRevenue:
-      revenueAggregate._sum.estimatedRevenue !== null
-        ? Number(revenueAggregate._sum.estimatedRevenue)
-        : null,
+    estimatedImportedRevenue,
     futureMetricsReady: {
       confirmationRate: false,
       revenueProtected: false,
       revenueRecovered: false,
     },
-    importSources: dataSources.map((source) => ({
-      errorRows: source.lastImportErrorRowCount,
-      fileName: source.lastImportFileName,
-      importedAt: source.lastImportedAt,
-      status: source.status,
-      successRows: source.lastImportSuccessRowCount,
-      templateLabel:
-        source.type === DataSourceType.APPOINTMENTS_CSV
-          ? "Appointments CSV"
-          : "Clients CSV",
-      totalRows: source.lastImportRowCount,
-      type: source.type,
-    })),
+    importSources,
+    leadBaseSource,
     upcomingList: upcomingList.map((appointment) => ({
       clientName: resolveClientName(appointment.client),
       id: appointment.id,

@@ -55,7 +55,7 @@ export function ImportsFlowGrid({
   return (
     <div className={isFocusedLayout ? "grid min-w-0 gap-6" : "grid min-w-0 gap-6 2xl:grid-cols-2"}>
       <CsvUploadCard
-        helperText="Use the booked appointments export first so the revenue read stays grounded in visible proof."
+        helperText="Booked proof for revenue."
         lastUpload={appointmentsLastUpload}
         onActivityChange={handleAppointmentsActivityChange}
         templateHref={`/templates/${revoryCsvTemplateDefinitions.appointments.fileName}`}
@@ -64,7 +64,7 @@ export function ImportsFlowGrid({
       />
 
       <CsvUploadCard
-        helperText="Add lead and patient records after booked proof when you want stronger lead-base support."
+        helperText="Support after booked proof."
         lastUpload={clientsLastUpload}
         onActivityChange={handleClientsActivityChange}
         templateHref={`/templates/${revoryCsvTemplateDefinitions.clients.fileName}`}

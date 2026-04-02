@@ -153,17 +153,17 @@ body::before {
 }
 
 .rev-kicker {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
 .rev-label {
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-subtle);
 }
@@ -178,18 +178,18 @@ body::before {
 }
 
 .rev-display-hero {
-  font-size: clamp(1.82rem, 2.65vw, 2.7rem);
-  line-height: 0.98;
+  font-size: clamp(1.62rem, 2.25vw, 2.36rem);
+  line-height: 1.01;
 }
 
 .rev-display-panel {
-  font-size: clamp(1.5rem, 2vw, 2.05rem);
-  line-height: 1;
+  font-size: clamp(1.36rem, 1.8vw, 1.86rem);
+  line-height: 1.02;
 }
 
 .rev-display-section {
-  font-size: clamp(1.34rem, 1.65vw, 1.8rem);
-  line-height: 1.02;
+  font-size: clamp(1.18rem, 1.48vw, 1.58rem);
+  line-height: 1.05;
 }
 
 .rev-button-primary,
@@ -199,8 +199,8 @@ body::before {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  padding: 0.8rem 1.35rem;
-  font-size: 0.9rem;
+  padding: 0.72rem 1.2rem;
+  font-size: 0.86rem;
   font-weight: 600;
   transition:
     background-color 0.18s ease,

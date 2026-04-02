@@ -5,12 +5,11 @@ import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { getCsvUploadSources } from "@/services/imports/get-csv-upload-sources";
-import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
   getOnboardingStep,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
+import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -38,14 +37,14 @@ function formatWorkspaceStatus(status: string) {
 }
 
 function resolveBookingInputsStatus(
-  onboardingSourceExists: boolean,
-  hasSuccessfulImport: boolean,
+  activationCompleted: boolean,
+  hasBookedProofVisible: boolean,
 ) {
-  if (hasSuccessfulImport) {
+  if (hasBookedProofVisible) {
     return "Proof active";
   }
 
-  if (onboardingSourceExists) {
+  if (activationCompleted) {
     return "Proof ready";
   }
 
@@ -62,23 +61,11 @@ export default async function PrivateAppLayout({
   }
 
   const { activationSetup, user, workspace } = appContext;
-  const [onboardingSource, csvSources] = await Promise.all([
-    getOnboardingDataSource(workspace.id),
-    getCsvUploadSources(workspace.id),
-  ]);
-  const csvSourceList = Object.values(csvSources).filter(
-    (source): source is NonNullable<(typeof csvSources)[keyof typeof csvSources]> =>
-      Boolean(source),
-  );
-  const hasSuccessfulImport = csvSourceList.some(
-    (source) =>
-      (source.lastImportSuccessRowCount ?? 0) > 0 ||
-      source.status === "IMPORTED" ||
-      source.status === "CONNECTED",
-  );
+  const bookedProofRead = await getBookedProofRead(workspace.id);
+  const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
   const bookingInputsStatus = resolveBookingInputsStatus(
-    Boolean(onboardingSource),
-    hasSuccessfulImport,
+    activationSetup.isCompleted,
+    hasBookedProofVisible,
   );
   const currentStep = getOnboardingStep(
     resolveOnboardingStepKey(activationSetup.currentStep),
@@ -89,7 +76,7 @@ export default async function PrivateAppLayout({
   const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
   const activationBadgeLabel = activationStatus;
   const workspaceSubtitle = activationSetup.isCompleted
-    ? bookingInputsStatus === "Proof active"
+    ? hasBookedProofVisible
       ? "Seller workspace live with booked proof"
       : "Seller workspace live, booked proof next"
     : `Activation in progress: ${currentStep.eyebrow}`;
@@ -122,22 +109,16 @@ export default async function PrivateAppLayout({
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-2 xl:flex-nowrap">
-                <div className="flex flex-wrap items-center gap-1.5 rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-2 py-1.5">
-                  <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
-                    MedSpa-first
-                  </span>
-                  <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
-                    Booking-first
-                  </span>
+                <div className="flex flex-wrap items-center gap-1.5 rounded-[13px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-1.5 py-1.5">
                   <RevoryStatusBadge tone={activationSetup.isCompleted ? "accent" : "neutral"}>
                     {activationBadgeLabel}
                   </RevoryStatusBadge>
-                  <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--text-muted)]">
+                  <span className="inline-flex min-h-6 items-center rounded-[11px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-2.5 py-[0.35rem] text-[9px] font-medium uppercase tracking-[0.14em] text-[color:var(--text-muted)]">
                     {formatWorkspaceStatus(workspace.status)}
                   </span>
                 </div>
 
-                <div className="flex min-w-[12.75rem] items-center gap-2 rounded-[16px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-2 py-1.5">
+                <div className="flex min-w-[12.25rem] items-center gap-2 rounded-[15px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-2 py-1.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-[12px] font-semibold text-[color:var(--accent-light)]">
                     {accountInitial}
                   </div>

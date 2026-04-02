@@ -22,7 +22,7 @@ type BuildImportDecisionSupportInput = {
   uploadState: RevoryCsvUploadActionState;
 };
 
-function getLaneLabel(templateKey: RevoryCsvTemplateKey) {
+function getSupportLabel(templateKey: RevoryCsvTemplateKey) {
   return templateKey === "appointments" ? "booked proof" : "lead-base support";
 }
 
@@ -34,56 +34,65 @@ export function buildImportDecisionSupport({
   templateKey,
   uploadState,
 }: BuildImportDecisionSupportInput): RevoryDecisionSupportRead {
-  const laneLabel = getLaneLabel(templateKey);
+  const supportLabel = getSupportLabel(templateKey);
   const isAppointments = templateKey === "appointments";
   const latestVisibleRows = lastUpload?.successRows ?? 0;
   const latestHeldRows = lastUpload?.errorRows ?? 0;
 
   if (uploadState.status === "imported" && uploadState.importSummary) {
     return {
-      badgeLabel: "Guided recommendation",
+      badgeLabel: "Controlled read",
       detectedObjection:
         uploadState.importSummary.errorRows > 0
-          ? "Held rows still limit this lane's trust."
-          : "This pass is clean, but this lane still needs fresh files over time.",
-      eyebrow: "Controlled Read",
+          ? "Held rows still need review."
+          : "Pass clean and visible.",
+      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      fallbackLabel: "If confidence softens",
+      fallbackNote:
+        isAppointments
+          ? "If proof weakens, keep revenue unchanged until the next clean pass."
+          : "If support weakens, keep lead base secondary.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote: "Proof first. Lead support second.",
       nextBestAction:
         isAppointments
           ? uploadState.importSummary.errorRows > 0
-            ? "Use this result as the stronger booked-proof base, then correct the held-back rows on the next pass before you lean harder on revenue."
-            : "Booked proof is stronger. If the appointments look right, open Revenue View next."
+            ? "Keep this pass and clear held rows on the next upload."
+            : "Proof is clean. Open Revenue View."
           : uploadState.importSummary.errorRows > 0
-            ? "Keep this lead-base pass and clean held rows only when stronger support is needed."
-            : "Lead-base support is cleaner. Keep it secondary to booked proof.",
+            ? "Keep this pass and clean held rows only when needed."
+            : "Support is clean. Keep it secondary to proof.",
       recommendedPath: isAppointments
-        ? "Booked proof lane -> revenue view"
-        : "Lead-base support -> revenue context only if needed",
+        ? "Booked proof -> revenue view"
+        : "Lead base -> support revenue context",
       signals: [
         {
-          label: "Rows visible",
-          note: "This is the current file contribution that made it into the lane.",
+          label: isAppointments ? "Proof strength" : "Current support",
+          note: isAppointments
+            ? "Rows now visible in proof."
+            : "Rows now visible in support.",
           value: `${uploadState.importSummary.successRows}`,
         },
         {
-          label: "Rows held back",
-          note: "Rows held back stay outside the live view until corrected.",
+          label: "What needs review",
+          note: "Held rows remain outside the live view.",
           value: `${uploadState.importSummary.errorRows}`,
         },
         {
-          label: "Lane effect",
+          label: "Current support",
           note: isAppointments
-            ? "Appointments are what make revenue proof believable."
-            : "Lead-base support should stay secondary to booked proof.",
+            ? "Appointments anchor revenue proof."
+            : "Lead base stays secondary.",
           value: isAppointments ? "Revenue support" : "Context support",
         },
       ],
       summary:
         isAppointments
-          ? "This read translates the current file into the revenue story without opening a broad console."
-          : "This read keeps client files useful, but secondary to booked proof.",
+          ? "Revenue proof updated."
+          : "Lead-base support updated.",
       title: isAppointments
-        ? "The current file strengthened booked proof."
-        : "The current file strengthened lead-base support.",
+        ? "Booked proof updated."
+        : "Lead-base support updated.",
       tone: uploadState.importSummary.errorRows > 0 ? "future" : "real",
     };
   }
@@ -96,129 +105,140 @@ export function buildImportDecisionSupport({
       currentPreview.duplicateSourceHeaders.length > 0;
 
     return {
-      badgeLabel: "Guided recommendation",
+      badgeLabel: "Controlled read",
       detectedObjection:
         currentPreview.missingRequiredColumns.length > 0
-          ? "Required Seller fields are still missing."
+          ? "Required fields are missing."
           : currentPreview.missingIdentityPath
-            ? "Seller still needs one client identifier."
+            ? "Add one client identifier."
             : currentPreview.duplicateTargets.length > 0 || currentPreview.duplicateSourceHeaders.length > 0
-              ? "Header ambiguity still blocks a trustworthy pass."
+              ? "Resolve duplicate header mapping."
               : confirmationDraft.suggestedPendingConfirmationCount > 0
-                ? "Suggested matches still need one quick confirmation."
-                : "No material blocker is left in this file.",
-      eyebrow: "Controlled Read",
+                ? "Review suggested matches."
+                : "No blocker left.",
+      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      fallbackLabel: "If confidence softens",
+      fallbackNote: "Nothing goes live before final confirmation.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote: "Read headers, confirm mapping, then make visible.",
       nextBestAction:
         currentPreview.exactTemplateMatch
-          ? "This file already matches the official REVORY structure. Open final review and keep the pass short."
+          ? "Open final review and confirm."
           : confirmationDraft.suggestedPendingConfirmationCount > 0
-            ? `Review the ${confirmationDraft.suggestedPendingConfirmationCount} suggested field${confirmationDraft.suggestedPendingConfirmationCount === 1 ? "" : "s"}, then confirm.`
-            : "The mapping looks clean. Open final review to apply this file.",
+            ? `Confirm ${confirmationDraft.suggestedPendingConfirmationCount} suggested field${confirmationDraft.suggestedPendingConfirmationCount === 1 ? "" : "s"}.`
+            : "Mapping clean. Open final review.",
       recommendedPath: currentPreview.exactTemplateMatch
-        ? "Official mapping -> final review -> visibility update"
-        : "Guided mapping -> final review -> visibility update",
+        ? "Official mapping -> final review -> make visible"
+        : "Guided mapping -> final review -> make visible",
       signals: [
         {
-          label: "Confident matches",
-          note: "Fields REVORY already matched with high confidence.",
+          label: "Proof strength",
+          note: "High-confidence matches.",
           value: `${confirmationDraft.keptConfidentMatchCount}`,
         },
         {
-          label: "Still to confirm",
-          note: "Short manual review keeps this lane honest instead of automatic.",
+          label: "What needs review",
+          note: "Suggested fields pending your confirmation.",
           value: `${confirmationDraft.suggestedPendingConfirmationCount}`,
         },
         {
-          label: "Lane target",
+          label: "Current support",
           note: isAppointments
-            ? "Appointments should become visible before the revenue read carries the story."
-            : "Client records should stay supporting context behind booked proof.",
+            ? "Proof should go live before revenue read."
+            : "Lead base should stay support-only.",
           value: isAppointments ? "Booked proof" : "Lead base",
         },
       ],
       summary: blockingTitle
-        ? "This read isolates the main blocker so the risk stays clear."
-        : "This read keeps file-fit review short: confirm risky headers, then move forward.",
+        ? "One blocker, one next move."
+        : "Mapping looks ready.",
       title: blockingTitle
-        ? `REVORY found the main blocker in this ${laneLabel} file.`
+        ? `Blocker found in ${supportLabel}.`
         : currentPreview.exactTemplateMatch
-          ? `This ${laneLabel} file already fits Seller cleanly.`
-          : `REVORY found the high-confidence shape of this ${laneLabel} file.`,
+          ? `${supportLabel} fits cleanly.`
+          : `${supportLabel} mapped with high confidence.`,
       tone: blockingTitle ? "future" : currentPreview.exactTemplateMatch ? "real" : "accent",
     };
   }
 
   if (selectedFileName) {
     return {
-      badgeLabel: "Guided recommendation",
-      detectedObjection:
-        "File selected, but nothing should look live before header review.",
-      eyebrow: "Controlled Read",
-      nextBestAction:
-        "Wait for file-fit read to finish. Next decision is mapping review.",
-      recommendedPath: "File read -> mapping review -> controlled visibility update",
+      badgeLabel: "Controlled read",
+      detectedObjection: "File selected. Not live yet.",
+      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      fallbackLabel: "If confidence softens",
+      fallbackNote: "Live state stays unchanged until final confirmation.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote: "Read stays contained to this file.",
+      nextBestAction: "Wait for header read, then confirm mapping.",
+      recommendedPath: "Read file -> review mapping -> make visible",
       signals: [
         {
           label: "Current file",
-          note: "This is the file currently under review.",
+          note: "File under review.",
           value: selectedFileName,
         },
         {
-          label: "Lane",
-          note: "Each lane stays narrow on purpose.",
+          label: "Current support",
+          note: "This read stays narrow.",
           value: isAppointments ? "Booked proof" : "Lead base",
         },
         {
-          label: "Live effect",
-          note: "Nothing becomes visible until the short review is confirmed.",
+          label: "Current effect",
+          note: "Nothing changes in live view yet.",
           value: "Not live yet",
         },
       ],
-      summary:
-        "This read keeps orientation while REVORY parses the file.",
-      title: `REVORY is reading the ${laneLabel} file fit.`,
+      summary: "Reading current file.",
+      title: `Reading ${supportLabel} file.`,
       tone: "accent",
     };
   }
 
   return {
-    badgeLabel: "Guided recommendation",
+    badgeLabel: "Controlled read",
     detectedObjection:
       isAppointments
-        ? "Without appointments, the revenue read stays weak."
-        : "Lead-base support should not be the first move.",
-    eyebrow: "Controlled Read",
+        ? "Revenue read needs booked proof."
+        : "Lead base should not be first move.",
+    eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+    fallbackLabel: "If confidence softens",
+    fallbackNote:
+      isAppointments
+        ? "Without proof, revenue stays pending."
+        : "Without support, keep proof as the main read.",
+    guardrailLabel: "Seller stays narrow",
+    guardrailNote: "Booked proof stays primary. Lead base stays secondary.",
     nextBestAction:
       isAppointments
-        ? "Start with the appointments file first. It is the shortest path to booked proof."
-        : "Add client records only after booked proof, when stronger context is needed.",
+        ? "Upload appointments first."
+        : "Add clients after proof when needed.",
     recommendedPath: isAppointments
-      ? "Appointments upload -> booked proof -> revenue view"
-      : "Lead-base support after booked proof",
+      ? "Upload appointments -> booked proof -> revenue view"
+      : "Lead base after booked proof",
     signals: [
       {
-        label: "Latest visible rows",
-        note: "Saved state for this lane, if one exists.",
+        label: "Current support",
+        note: "Rows visible from latest pass.",
         value: `${latestVisibleRows}`,
       },
       {
-        label: "Latest held rows",
-        note: "Rows held back in the last saved pass.",
+        label: "What needs review",
+        note: "Rows held from latest pass.",
         value: `${latestHeldRows}`,
       },
       {
-        label: "Lane role",
+        label: "Support role",
         note: isAppointments
-          ? "This lane carries the strongest proof value in the product."
-          : "This lane stays supportive, not central.",
+          ? "Main proof read."
+          : "Secondary support read.",
         value: isAppointments ? "Primary proof" : "Secondary support",
       },
     ],
-    summary:
-      "Controlled guidance: one recommendation, one blocker, one next move.",
+    summary: "State, next move, and support.",
     title: isAppointments
-      ? "Booked proof is still the highest-value next move."
-      : "Lead-base support belongs after booked proof.",
+      ? "Booked proof is the next move."
+      : "Lead base comes after proof.",
     tone: isAppointments ? "accent" : "neutral",
   };
 }
