@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
@@ -40,6 +41,88 @@ function toUploadSummary(
     status: source.status,
     totalRows: source.lastImportRowCount,
   };
+}
+
+type ImportsHeroFallback = Readonly<{
+  heroCtaLabel: string;
+  heroSummary: string;
+  heroTitle: string;
+  nextMoveHeadline: string;
+  nextMoveNote: string;
+}>;
+
+type ImportsNextMoveInput = Readonly<{
+  fallback: ImportsHeroFallback;
+  hasAppointmentsSourceReady: boolean;
+  hasBookedProofVisible: boolean;
+  hasLeadBaseVisible: boolean;
+  isRevenueSupported: boolean;
+}>;
+
+function ImportsNextMoveSection({
+  headline,
+  note,
+}: Readonly<{
+  headline: string;
+  note: string;
+}>) {
+  return (
+    <div className="mt-3 border-t border-[color:var(--border)] pt-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+        Next move
+      </p>
+      <p className="mt-1.5 text-sm font-semibold text-[color:var(--foreground)]">
+        {headline}
+      </p>
+      <p className="mt-1 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
+        {note}
+      </p>
+    </div>
+  );
+}
+
+async function ImportsNextMoveSectionAsync({
+  fallback,
+  hasAppointmentsSourceReady,
+  hasBookedProofVisible,
+  hasLeadBaseVisible,
+  isRevenueSupported,
+}: ImportsNextMoveInput) {
+  const allowedIntents: readonly RevoryIntentCode[] = hasBookedProofVisible
+    ? hasLeadBaseVisible
+      ? ["REFRESH_BOOKED_PROOF", "ADD_LEAD_BASE_SUPPORT", "OPEN_REVENUE_VIEW"]
+      : ["ADD_LEAD_BASE_SUPPORT", "OPEN_REVENUE_VIEW", "REFRESH_BOOKED_PROOF"]
+    : hasAppointmentsSourceReady
+      ? ["REVIEW_BOOKED_PROOF", "START_BOOKED_PROOF"]
+      : ["START_BOOKED_PROOF"];
+  const allowedObjections: readonly RevoryObjectionCode[] = hasBookedProofVisible
+    ? hasLeadBaseVisible
+      ? ["NO_ACTIVE_BLOCKER", "SUPPORT_SHOULD_STAY_SECONDARY"]
+      : ["NO_ACTIVE_BLOCKER"]
+    : hasAppointmentsSourceReady
+      ? ["PROOF_SOURCE_NEEDS_REVIEW", "PROOF_NOT_VISIBLE"]
+      : hasLeadBaseVisible
+        ? ["LEAD_BASE_ONLY", "PROOF_NOT_VISIBLE"]
+        : ["PROOF_NOT_VISIBLE"];
+  const classification = await requestBoundedIntentClassification({
+    allowedIntents,
+    allowedObjections,
+    context: {
+      hasAppointmentsSourceReady,
+      hasBookedProofVisible,
+      hasLeadBaseVisible,
+      isRevenueSupported,
+    },
+    useCase: "imports",
+  });
+  const classifiedHero = applyImportsIntentClassification(fallback, classification);
+
+  return (
+    <ImportsNextMoveSection
+      headline={classifiedHero.nextMoveHeadline}
+      note={classifiedHero.nextMoveNote}
+    />
+  );
 }
 
 export default async function ImportsPage() {
@@ -110,53 +193,27 @@ export default async function ImportsPage() {
           headline: "Start booked proof",
           note: "Upload appointments file first.",
         };
-  const allowedIntents: readonly RevoryIntentCode[] = hasBookedProofVisible
-    ? hasLeadBaseVisible
-      ? ["REFRESH_BOOKED_PROOF", "ADD_LEAD_BASE_SUPPORT", "OPEN_REVENUE_VIEW"]
-      : ["ADD_LEAD_BASE_SUPPORT", "OPEN_REVENUE_VIEW", "REFRESH_BOOKED_PROOF"]
-    : hasAppointmentsSourceReady
-      ? ["REVIEW_BOOKED_PROOF", "START_BOOKED_PROOF"]
-      : ["START_BOOKED_PROOF"];
-  const allowedObjections: readonly RevoryObjectionCode[] = hasBookedProofVisible
-    ? hasLeadBaseVisible
-      ? ["NO_ACTIVE_BLOCKER", "SUPPORT_SHOULD_STAY_SECONDARY"]
-      : ["NO_ACTIVE_BLOCKER"]
-    : hasAppointmentsSourceReady
-      ? ["PROOF_SOURCE_NEEDS_REVIEW", "PROOF_NOT_VISIBLE"]
-      : hasLeadBaseVisible
-        ? ["LEAD_BASE_ONLY", "PROOF_NOT_VISIBLE"]
-        : ["PROOF_NOT_VISIBLE"];
-  const classification = await requestBoundedIntentClassification({
-    allowedIntents,
-    allowedObjections,
-    context: {
-      hasAppointmentsSourceReady,
-      hasBookedProofVisible,
-      hasLeadBaseVisible,
-      isRevenueSupported,
-    },
-    useCase: "imports",
-  });
-  const classifiedHero = applyImportsIntentClassification(
-    {
-      heroCtaLabel: hasBookedProofVisible ? "Open Revenue View" : hasAppointmentsSourceReady ? "Review booked proof" : "Start booked proof",
-      heroSummary,
-      heroTitle,
-      nextMoveHeadline: nextMove.headline,
-      nextMoveNote: nextMove.note,
-    },
-    classification,
-  );
+  const fallbackHero = {
+    heroCtaLabel: hasBookedProofVisible
+      ? "Open Revenue View"
+      : hasAppointmentsSourceReady
+        ? "Review booked proof"
+        : "Start booked proof",
+    heroSummary,
+    heroTitle,
+    nextMoveHeadline: nextMove.headline,
+    nextMoveNote: nextMove.note,
+  };
   const heroCta = hasBookedProofVisible
     ? {
         className: "rev-button-primary",
         href: "/app/dashboard",
-        label: classifiedHero.heroCtaLabel,
+        label: fallbackHero.heroCtaLabel,
       }
     : {
         className: "rev-button-secondary",
         href: "#booking-inputs-flow",
-        label: classifiedHero.heroCtaLabel,
+        label: fallbackHero.heroCtaLabel,
       };
   const stateSnapshot = [
     ...quickState,
@@ -184,10 +241,10 @@ export default async function ImportsPage() {
                 </span>
               </div>
 
-              <h1 className="rev-display-hero max-w-[22rem]">{classifiedHero.heroTitle}</h1>
+              <h1 className="rev-display-hero max-w-[22rem]">{fallbackHero.heroTitle}</h1>
 
               <p className="max-w-[30rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                {classifiedHero.heroSummary}
+                {fallbackHero.heroSummary}
               </p>
             </div>
 
@@ -234,17 +291,22 @@ export default async function ImportsPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-3 border-t border-[color:var(--border)] pt-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                Next move
-              </p>
-              <p className="mt-1.5 text-sm font-semibold text-[color:var(--foreground)]">
-                {classifiedHero.nextMoveHeadline}
-              </p>
-              <p className="mt-1 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                {classifiedHero.nextMoveNote}
-              </p>
-            </div>
+            <Suspense
+              fallback={
+                <ImportsNextMoveSection
+                  headline={fallbackHero.nextMoveHeadline}
+                  note={fallbackHero.nextMoveNote}
+                />
+              }
+            >
+              <ImportsNextMoveSectionAsync
+                fallback={fallbackHero}
+                hasAppointmentsSourceReady={hasAppointmentsSourceReady}
+                hasBookedProofVisible={hasBookedProofVisible}
+                hasLeadBaseVisible={hasLeadBaseVisible}
+                isRevenueSupported={isRevenueSupported}
+              />
+            </Suspense>
           </aside>
         </div>
       </section>

@@ -1,10 +1,12 @@
 ﻿import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayout";
 import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { buildActivationStepRead } from "@/services/decision-support/build-activation-step-read";
 import { getActivationStepRead } from "@/services/decision-support/get-activation-step-read";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import {
@@ -166,6 +168,35 @@ const mainOfferLabels: Record<string, string> = {
   LASER_SKIN: "Laser & Skin",
 };
 
+type ActivationDecisionSupportProps = Readonly<{
+  averageDealValue: Prisma.Decimal | null;
+  primaryChannel: string | null;
+  recommendedModeKey: string | null;
+  selectedDataSourceType: string | null;
+  selectedTemplate: string | null;
+  stepKey: (typeof onboardingSteps)[number]["key"];
+}>;
+
+async function ActivationDecisionSupport({
+  averageDealValue,
+  primaryChannel,
+  recommendedModeKey,
+  selectedDataSourceType,
+  selectedTemplate,
+  stepKey,
+}: ActivationDecisionSupportProps) {
+  const read = await getActivationStepRead({
+    averageDealValue,
+    primaryChannel,
+    recommendedModeKey,
+    selectedDataSourceType,
+    selectedTemplate,
+    stepKey,
+  });
+
+  return <RevoryDecisionSupportCard read={read} surface="activation" />;
+}
+
 export default async function OnboardingStepPage({
   params,
   searchParams,
@@ -204,7 +235,7 @@ export default async function OnboardingStepPage({
     appContext.activationSetup.recommendedModeKey ?? "MODE_A";
   const selectedDataSourceType = sourceSelection?.type ?? null;
   const formattedDealValue = formatDealValue(selectedAverageDealValue);
-  const activationStepRead = await getActivationStepRead({
+  const activationStepFallbackRead = buildActivationStepRead({
     averageDealValue: selectedAverageDealValue,
     primaryChannel: selectedPrimaryChannel,
     recommendedModeKey: selectedRecommendedModeKey,
@@ -573,7 +604,23 @@ export default async function OnboardingStepPage({
           ) : null}
         </div>
 
-        <RevoryDecisionSupportCard read={activationStepRead} surface="activation" />
+        <Suspense
+          fallback={
+            <RevoryDecisionSupportCard
+              read={activationStepFallbackRead}
+              surface="activation"
+            />
+          }
+        >
+          <ActivationDecisionSupport
+            averageDealValue={selectedAverageDealValue}
+            primaryChannel={selectedPrimaryChannel}
+            recommendedModeKey={selectedRecommendedModeKey}
+            selectedDataSourceType={selectedDataSourceType}
+            selectedTemplate={selectedTemplate}
+            stepKey={currentStepKey}
+          />
+        </Suspense>
       </div>
     </OnboardingStepLayout>
   );

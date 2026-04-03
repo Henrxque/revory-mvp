@@ -1,8 +1,11 @@
 import "server-only";
 
+import {
+  getLlmRuntimeStatus,
+  logLlmProviderStateOnce,
+} from "@/services/llm/get-llm-runtime-status";
+
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const DEFAULT_MODEL = process.env.REVORY_LLM_MODEL?.trim() || "gpt-5-mini";
-const DEFAULT_TIMEOUT_MS = Number(process.env.REVORY_LLM_TIMEOUT_MS ?? "2500");
 const DEFAULT_MAX_OUTPUT_TOKENS = 220;
 const MAX_ATTEMPTS = 2;
 const loggedWarnings = new Set<string>();
@@ -25,10 +28,6 @@ function logFallbackOnce(useCase: string, reason: string) {
 
   loggedWarnings.add(key);
   console.warn(`[revory-llm] ${useCase} fallback: ${reason}`);
-}
-
-function isFeatureEnabled() {
-  return process.env.REVORY_LLM_ENABLED !== "false";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -73,16 +72,16 @@ async function requestStructuredOutputAttempt<T>(
   input: RequestBoundedStructuredOutputInput<T>,
   attempt: number,
 ): Promise<T | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const runtimeStatus = getLlmRuntimeStatus();
+  logLlmProviderStateOnce(runtimeStatus);
 
-  if (!apiKey) {
+  if (!runtimeStatus.apiKeyPresent) {
     logFallbackOnce(input.useCase, "missing_openai_api_key");
     return null;
   }
 
-  const timeoutMs = Number.isFinite(DEFAULT_TIMEOUT_MS) ? DEFAULT_TIMEOUT_MS : 2500;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), runtimeStatus.timeoutMs);
   const startedAt = Date.now();
 
   try {
@@ -102,10 +101,7 @@ async function requestStructuredOutputAttempt<T>(
           },
         ],
         max_output_tokens: DEFAULT_MAX_OUTPUT_TOKENS,
-        model: DEFAULT_MODEL,
-        reasoning: {
-          effort: "low",
-        },
+        model: runtimeStatus.model,
         store: false,
         text: {
           format: {
@@ -118,7 +114,7 @@ async function requestStructuredOutputAttempt<T>(
       }),
       cache: "no-store",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY?.trim()}`,
         "Content-Type": "application/json",
       },
       method: "POST",
@@ -185,7 +181,10 @@ async function requestStructuredOutputAttempt<T>(
 export async function requestBoundedStructuredOutput<T>(
   input: RequestBoundedStructuredOutputInput<T>,
 ): Promise<T | null> {
-  if (!isFeatureEnabled()) {
+  const runtimeStatus = getLlmRuntimeStatus();
+  logLlmProviderStateOnce(runtimeStatus);
+
+  if (!runtimeStatus.featureEnabled) {
     logFallbackOnce(input.useCase, "feature_disabled");
     return null;
   }

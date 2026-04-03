@@ -44,7 +44,7 @@ export function RevoryDecisionSupportCard({
           </div>
 
           <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 md:min-h-[6.2rem]">
-            <p className="rev-label">Next move</p>
+            <p className="rev-label">Shortest path</p>
             <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--foreground)]">
               {read.recommendedPath}
             </p>
@@ -73,17 +73,11 @@ export function RevoryDecisionSupportCard({
 
   const isActivation = surface === "activation";
   const isDashboard = surface === "dashboard";
-  const labels = isActivation
-    ? {
-        blocker: "Keep tight",
-        nextMove: "Next move",
-        path: "From here",
-      }
-    : {
-        blocker: "Main blocker",
-        nextMove: "Next move",
-        path: "Shortest path",
-      };
+  const labels = {
+    blocker: "Main blocker",
+    nextMove: "Next move",
+    path: "Shortest path",
+  };
 
   const shellClassName = isActivation
     ? "rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] p-4"
@@ -180,8 +174,8 @@ export function RevoryDecisionSupportCard({
       </div>
 
       <div
-        className={`rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.015)] ${
-          isActivation ? "mt-3 px-3.5 py-3" : "mt-3.5 px-4 py-3.5"
+        className={`border-t border-[rgba(255,255,255,0.06)] ${
+          isActivation ? "mt-3 pt-3" : "mt-3.5 pt-3.5"
         }`}
       >
         <p className="text-xs leading-[1.5] text-[color:var(--text-muted)]">

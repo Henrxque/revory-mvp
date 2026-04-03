@@ -1,15 +1,18 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardDecisionSupport } from "@/services/decision-support/get-dashboard-decision-support";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
 import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
+import type { RevoryDecisionSupportRead } from "@/types/decision-support";
 
 function formatCurrency(value: number | null) {
   if (value === null) {
@@ -160,6 +163,50 @@ function SignalCard({ hint, label, value }: SignalCardProps) {
   );
 }
 
+type DashboardDecisionSupportProps = Readonly<{
+  bookingPathLabel: string;
+  dealValueLabel: string;
+  mainOfferLabel: string;
+  overview: Awaited<ReturnType<typeof getDashboardOverview>>;
+}>;
+
+function DashboardNextMoveAside({
+  read,
+}: Readonly<{
+  read: RevoryDecisionSupportRead;
+}>) {
+  return (
+    <aside className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+      <p className="rev-label">Next move</p>
+      <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
+        {read.title}
+      </p>
+      <p className="mt-2 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+        {read.nextBestAction}
+      </p>
+      <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-subtle)]">
+        {read.recommendedPath}
+      </p>
+    </aside>
+  );
+}
+
+async function DashboardNextMoveAsideAsync({
+  bookingPathLabel,
+  dealValueLabel,
+  mainOfferLabel,
+  overview,
+}: DashboardDecisionSupportProps) {
+  const read = await getDashboardDecisionSupport({
+    bookingPathLabel,
+    dealValueLabel,
+    mainOfferLabel,
+    overview,
+  });
+
+  return <DashboardNextMoveAside read={read} />;
+}
+
 export default async function DashboardPage() {
   const appContext = await getAppContext();
 
@@ -190,7 +237,7 @@ export default async function DashboardPage() {
   const dealValueLabel = formatDealValue(configuredValuePerBooking);
   const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
   const bookingPathLabel = formatBookingPathLabel(activationSetup.primaryChannel);
-  const decisionSupportRead = await getDashboardDecisionSupport({
+  const fallbackDecisionSupportRead = buildDashboardDecisionSupport({
     bookingPathLabel,
     dealValueLabel,
     mainOfferLabel,
@@ -301,7 +348,7 @@ export default async function DashboardPage() {
             </h1>
 
             <p className="max-w-[33rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              {decisionSupportRead.summary}
+              {fallbackDecisionSupportRead.summary}
             </p>
           </div>
 
@@ -448,18 +495,14 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <aside className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
-          <p className="rev-label">Next move</p>
-          <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
-            {decisionSupportRead.title}
-          </p>
-          <p className="mt-2 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-            {decisionSupportRead.nextBestAction}
-          </p>
-          <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-subtle)]">
-            {decisionSupportRead.recommendedPath}
-          </p>
-        </aside>
+        <Suspense fallback={<DashboardNextMoveAside read={fallbackDecisionSupportRead} />}>
+          <DashboardNextMoveAsideAsync
+            bookingPathLabel={bookingPathLabel}
+            dealValueLabel={dealValueLabel}
+            mainOfferLabel={mainOfferLabel}
+            overview={overview}
+          />
+        </Suspense>
       </section>
 
       {overview.upcomingList.length > 0 ? (
