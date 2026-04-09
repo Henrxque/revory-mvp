@@ -27,6 +27,45 @@ export function buildDashboardDecisionSupport({
 }: BuildDashboardDecisionSupportInput): RevoryDecisionSupportRead {
   const revenueLabel = formatCurrency(overview.estimatedImportedRevenue);
 
+  if (overview.supportIntegrity.degradedSections.length > 0 && overview.bookedAppointments > 0) {
+    return {
+      badgeLabel: "Seller guidance",
+      detectedObjection:
+        "A support layer is temporarily thinner, which can weaken confidence if the workspace starts explaining the failure instead of protecting the core read.",
+      eyebrow: "Revenue read",
+      fallbackLabel: "If support stays thin",
+      fallbackNote:
+        "Seller keeps the dashboard anchored in booked proof and revenue, then points back to one refresh move only.",
+      guardrailLabel: "Seller stays narrow",
+      guardrailNote:
+        "The safest move stays inside proof refresh. Seller does not widen the workflow when support layers are limited.",
+      nextBestAction:
+        "Refresh booked proof and keep the commercial read short. Revenue and booked proof are still safe to show while the thinner support layer recovers.",
+      recommendedPath: "Revenue -> booked proof -> refresh support",
+      signals: [
+        {
+          label: "Core read",
+          note: "Revenue and booked proof remain visible.",
+          value: revenueLabel,
+        },
+        {
+          label: "Support layer",
+          note: "Auxiliary reads are thinner right now.",
+          value: `${overview.supportIntegrity.degradedSections.length} limited`,
+        },
+        {
+          label: "Booking path",
+          note: "The operational route stays the same.",
+          value: bookingPathLabel,
+        },
+      ],
+      summary:
+        "Keep the revenue story calm, visible, and backed by one refresh move.",
+      title: "The core value read is still intact.",
+      tone: "neutral",
+    };
+  }
+
   if (overview.bookedAppointments === 0) {
     return {
       badgeLabel: "Seller guidance",
@@ -66,7 +105,7 @@ export function buildDashboardDecisionSupport({
     };
   }
 
-  if (overview.upcomingAppointments === 0) {
+  if (overview.upcomingRead.appointments === 0) {
     return {
       badgeLabel: "Seller guidance",
       detectedObjection:
@@ -95,7 +134,7 @@ export function buildDashboardDecisionSupport({
         {
           label: "Upcoming bookings",
           note: "This is the live calendar layer still visible right now.",
-          value: `${overview.upcomingAppointments}`,
+          value: `${overview.upcomingRead.appointments}`,
         },
       ],
       summary:

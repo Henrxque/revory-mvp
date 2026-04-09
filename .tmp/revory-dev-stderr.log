@@ -1,0 +1,122 @@
+[next-auth][warn][NEXTAUTH_URL] 
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][error][JWT_SESSION_ERROR] 
+https://next-auth.js.org/errors#jwt_session_error decryption operation failed {
+  message: 'decryption operation failed',
+  stack: 'JWEDecryptionFailed: decryption operation failed\n' +
+    '    at gcmDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:4194:15)\n' +
+    '    at decrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:4217:20)\n' +
+    '    at flattenedDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:5714:52)\n' +
+    '    at async compactDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:5768:23)\n' +
+    '    at async jwtDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:7230:23)\n' +
+    '    at async Object.decode (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:15004:25)\n' +
+    '    at async Object.session (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:16317:34)\n' +
+    '    at async AuthHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:18314:37)\n' +
+    '    at async getServerSession (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:20043:21)\n' +
+    '    at async syncAuthenticatedUser (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__027.98j._.js:345:21)\n' +
+    '    at async C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__027.98j._.js:496:18',
+  name: 'JWEDecryptionFailed'
+}
+[next-auth][error][JWT_SESSION_ERROR] 
+https://next-auth.js.org/errors#jwt_session_error decryption operation failed {
+  message: 'decryption operation failed',
+  stack: 'JWEDecryptionFailed: decryption operation failed\n' +
+    '    at gcmDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:4194:15)\n' +
+    '    at decrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:4217:20)\n' +
+    '    at flattenedDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:5714:52)\n' +
+    '    at async compactDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:5768:23)\n' +
+    '    at async jwtDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:7230:23)\n' +
+    '    at async Object.decode (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:15004:25)\n' +
+    '    at async Object.session (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:16317:34)\n' +
+    '    at async AuthHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:18314:37)\n' +
+    '    at async getServerSession (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__03.928c._.js:20043:21)\n' +
+    '    at async SignInPage (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\ssr\\[root-of-the-server]__0qnhx9r._.js:379:21)',
+  name: 'JWEDecryptionFailed'
+}
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[next-auth][warn][NEXTAUTH_URL] 
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][error][JWT_SESSION_ERROR] 
+https://next-auth.js.org/errors#jwt_session_error decryption operation failed {
+  message: 'decryption operation failed',
+  stack: 'JWEDecryptionFailed: decryption operation failed\n' +
+    '    at gcmDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:734:15)\n' +
+    '    at decrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:757:20)\n' +
+    '    at flattenedDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:2254:52)\n' +
+    '    at async compactDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:2308:23)\n' +
+    '    at async jwtDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:3770:23)\n' +
+    '    at async Object.decode (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:725:25)\n' +
+    '    at async Object.session (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:2038:34)\n' +
+    '    at async AuthHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3184:37)\n' +
+    '    at async NextAuthRouteHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3501:30)\n' +
+    '    at async NextAuth._args$ (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3536:24)\n' +
+    '    at async AppRouteRouteModule.do (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:5:40732)\n' +
+    '    at async AppRouteRouteModule.handle (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:5:47861)\n' +
+    '    at async responseGenerator (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13627:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:1:227216)\n' +
+    '    at async handleResponse (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13690:32)\n' +
+    '    at async Module.handler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13744:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1454:9)\n' +
+    '    at async DevServer.renderPageComponent (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1506:24)\n' +
+    '    at async DevServer.renderToResponseImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1556:32)\n' +
+    '    at async DevServer.pipeImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1043:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\next-server.js:338:17)\n' +
+    '    at async DevServer.handleRequestImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:934:17)\n' +
+    '    at async C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:394:20\n' +
+    '    at async Span.traceAsyncFn (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\trace\\trace.js:164:20)\n' +
+    '    at async DevServer.handleRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:390:24)\n' +
+    '    at async invokeRender (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:253:21)\n' +
+    '    at async handleRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:452:24)\n' +
+    '    at async requestHandlerImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:501:13)\n' +
+    '    at async Server.requestListener (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\start-server.js:225:13)',
+  name: 'JWEDecryptionFailed'
+}
+[next-auth][error][JWT_SESSION_ERROR] 
+https://next-auth.js.org/errors#jwt_session_error decryption operation failed {
+  message: 'decryption operation failed',
+  stack: 'JWEDecryptionFailed: decryption operation failed\n' +
+    '    at gcmDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:734:15)\n' +
+    '    at decrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:757:20)\n' +
+    '    at flattenedDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:2254:52)\n' +
+    '    at async compactDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:2308:23)\n' +
+    '    at async jwtDecrypt (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_jose_dist_node_cjs_0wmi9~u._.js:3770:23)\n' +
+    '    at async Object.decode (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:725:25)\n' +
+    '    at async Object.session (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:2038:34)\n' +
+    '    at async AuthHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3184:37)\n' +
+    '    at async NextAuthRouteHandler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3501:30)\n' +
+    '    at async NextAuth._args$ (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next-auth_13zb4xx._.js:3536:24)\n' +
+    '    at async AppRouteRouteModule.do (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:5:40732)\n' +
+    '    at async AppRouteRouteModule.handle (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:5:47861)\n' +
+    '    at async responseGenerator (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13627:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.dev.js:1:227216)\n' +
+    '    at async handleResponse (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13690:32)\n' +
+    '    at async Module.handler (C:\\Users\\hriqu\\Documents\\revory-mvp\\.next\\dev\\server\\chunks\\node_modules_next_134j~.d._.js:13744:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1454:9)\n' +
+    '    at async DevServer.renderPageComponent (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1506:24)\n' +
+    '    at async DevServer.renderToResponseImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1556:32)\n' +
+    '    at async DevServer.pipeImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:1043:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\next-server.js:338:17)\n' +
+    '    at async DevServer.handleRequestImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\base-server.js:934:17)\n' +
+    '    at async C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:394:20\n' +
+    '    at async Span.traceAsyncFn (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\trace\\trace.js:164:20)\n' +
+    '    at async DevServer.handleRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:390:24)\n' +
+    '    at async invokeRender (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:253:21)\n' +
+    '    at async handleRequest (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:452:24)\n' +
+    '    at async requestHandlerImpl (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\router-server.js:501:13)\n' +
+    '    at async Server.requestListener (C:\\Users\\hriqu\\Documents\\revory-mvp\\node_modules\\next\\dist\\server\\lib\\start-server.js:225:13)',
+  name: 'JWEDecryptionFailed'
+}
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "/brand/revory-logo-mark.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+^C^C

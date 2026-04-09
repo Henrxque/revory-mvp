@@ -1,0 +1,18 @@
+{
+  "workspaceName": "LUMINA AESTHETICS",
+  "planKey": "GROWTH",
+  "billingStatus": "ACTIVE",
+  "clientsCount": 200,
+  "supportClients": 200,
+  "supportedBooked": 62,
+  "appointmentsImportedRows": 72,
+  "clientsImportedRows": 196,
+  "monthlyBooked": {
+    "2025-11": 6,
+    "2025-12": 8,
+    "2026-01": 10,
+    "2026-02": 9,
+    "2026-03": 13,
+    "2026-04": 16
+  }
+}

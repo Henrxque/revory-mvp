@@ -79,7 +79,7 @@ export function buildImportDecisionSupport({
           value: `${uploadState.importSummary.errorRows}`,
         },
         {
-          label: "Current support",
+          label: "Role in Seller",
           note: isAppointments
             ? "Appointments anchor revenue proof."
             : "Lead base stays secondary.",
@@ -142,7 +142,7 @@ export function buildImportDecisionSupport({
           value: `${confirmationDraft.suggestedPendingConfirmationCount}`,
         },
         {
-          label: "Current support",
+          label: "Role in Seller",
           note: isAppointments
             ? "Proof should go live before revenue read."
             : "Lead base should stay support-only.",
@@ -179,7 +179,7 @@ export function buildImportDecisionSupport({
           value: selectedFileName,
         },
         {
-          label: "Current support",
+          label: "Role in Seller",
           note: "This read stays narrow.",
           value: isAppointments ? "Booked proof" : "Lead base",
         },
@@ -218,7 +218,7 @@ export function buildImportDecisionSupport({
       : "Lead base after booked proof",
     signals: [
       {
-        label: "Current support",
+        label: "Visible now",
         note: "Rows visible from latest pass.",
         value: `${latestVisibleRows}`,
       },
@@ -228,7 +228,7 @@ export function buildImportDecisionSupport({
         value: `${latestHeldRows}`,
       },
       {
-        label: "Support role",
+        label: "Role in Seller",
         note: isAppointments
           ? "Main proof read."
           : "Secondary support read.",

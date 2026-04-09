@@ -151,47 +151,49 @@ export default async function ImportsPage() {
     {
       label: "Booked proof",
       note: hasBookedProofVisible
-        ? "Live in revenue view"
+        ? "Primary proof lane is live"
         : hasAppointmentsSourceReady
-          ? "Source present, outcomes still not visible"
-          : "Required for revenue",
+          ? "Appointments file is in, proof still needs review"
+          : "Start here for revenue",
       tone: hasBookedProofVisible ? "real" : "future",
       value: hasBookedProofVisible ? "Live" : hasAppointmentsSourceReady ? "Review" : "Pending",
     },
     {
-      label: "Lead base",
-      note: hasLeadBaseVisible ? "Context visible" : "Optional support",
+      label: "Lead base support",
+      note: hasLeadBaseVisible ? "Secondary support is visible" : "Add only when needed",
       tone: hasLeadBaseVisible ? "real" : "neutral",
       value: hasLeadBaseVisible ? "Live" : "Ready",
     },
   ] as const;
   const isRevenueSupported = hasBookedProofVisible;
   const heroTitle = hasBookedProofVisible
-    ? "Keep revenue proof clean."
-    : "Start revenue proof.";
-  const heroSummary = hasBookedProofVisible
-    ? "Proof first. Lead support second."
+    ? "Keep proof clean behind revenue."
     : hasAppointmentsSourceReady
-      ? "Proof source is present, but booked outcomes still need a clean pass."
-      : "Upload proof first. Lead support second.";
+      ? "Turn this file into booked proof."
+      : "Start with booked appointments.";
+  const heroSummary = hasBookedProofVisible
+    ? "Booked proof stays first. Lead-base support stays secondary."
+    : hasAppointmentsSourceReady
+      ? "The appointments file is in. Review booked outcomes so revenue can read real bookings."
+      : "Upload booked appointments first so Seller can turn paid demand into visible booked proof.";
   const nextMove = hasBookedProofVisible
     ? hasLeadBaseVisible
       ? {
           headline: "Refresh booked proof",
-          note: "Update files when booked data changes.",
+          note: "Update booked appointments when the revenue picture changes.",
         }
       : {
           headline: "Add lead base",
-          note: "Optional support after proof is live.",
+          note: "Add lead context after booked proof is already live.",
         }
     : hasAppointmentsSourceReady
       ? {
           headline: "Review booked proof",
-          note: "The appointments source is present, but booked outcomes still are not supporting revenue.",
+          note: "The appointments file is present, but booked outcomes still are not supporting revenue.",
         }
       : {
           headline: "Start booked proof",
-          note: "Upload appointments file first.",
+          note: "Upload booked appointments first.",
         };
   const fallbackHero = {
     heroCtaLabel: hasBookedProofVisible
@@ -218,7 +220,7 @@ export default async function ImportsPage() {
   const stateSnapshot = [
     ...quickState,
     {
-      label: "Revenue read",
+      label: "Revenue view",
       note: isRevenueSupported ? "Ready now" : "Opens after proof",
       tone: isRevenueSupported ? "real" : "future",
       value: isRevenueSupported ? "Ready" : "Pending",
@@ -234,10 +236,10 @@ export default async function ImportsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="rev-kicker">Booking Inputs</p>
                 <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] text-[color:var(--accent-light)]">
-                  Booked proof
+                  Proof first
                 </span>
                 <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] text-[color:var(--text-muted)]">
-                  {isRevenueSupported ? "Revenue read supported" : "Revenue read next"}
+                  {hasLeadBaseVisible ? "Lead support live" : "Lead support optional"}
                 </span>
               </div>
 
@@ -261,7 +263,7 @@ export default async function ImportsPage() {
                 </div>
               ))}
               <span className="inline-flex min-h-7 items-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-2.5 py-[0.35rem] text-[10px] text-[color:var(--text-muted)]">
-                {isRevenueSupported ? "Revenue read ready" : "Revenue read pending"}
+                {isRevenueSupported ? "Revenue ready" : "Revenue pending"}
               </span>
             </div>
 
@@ -276,7 +278,7 @@ export default async function ImportsPage() {
           </div>
 
           <aside className="rounded-[22px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-4.5">
-            <p className="rev-label">Current support</p>
+              <p className="rev-label">Input snapshot</p>
             <div className="mt-3 space-y-2">
               {stateSnapshot.map((item) => (
                 <div

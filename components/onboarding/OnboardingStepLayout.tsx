@@ -2,6 +2,7 @@
 
 type OnboardingStepLayoutProps = Readonly<{
   children?: React.ReactNode;
+  contextPanel?: React.ReactNode;
   currentStepKey: OnboardingStepKey;
   formAction?: (formData: FormData) => void | Promise<void>;
   formFields?: React.ReactNode;
@@ -32,6 +33,7 @@ function getStepState(
 
 export function OnboardingStepLayout({
   children,
+  contextPanel,
   currentStepKey,
   formAction,
   formFields,
@@ -48,16 +50,15 @@ export function OnboardingStepLayout({
       <aside className="rev-shell-hero rounded-[28px] p-5">
         <div className="space-y-6">
           <div className="space-y-3">
-            <p className="rev-kicker">Activation integrity</p>
+            <p className="rev-kicker">Activation</p>
             <h2 className="rev-display-panel max-w-[14rem]">
-              Turn six activation choices into one clear booking path.
+              Set six choices. Launch one booking system.
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              Main offer, lead entry, booking path, and value per booking are
-              not admin fields here. They are the activation pillars REVORY
-              Seller uses to move paid leads toward booked appointments. Once
-              those pillars are locked, booked proof becomes visible in Booking
-              Inputs and the revenue view closes the commercial read.
+              REVORY Seller stays narrow on purpose: one main offer, one lead
+              entry, one booking path, and one value per booking. That gives
+              paid leads a faster path to booked appointments and gives revenue
+              a clearer read.
             </p>
           </div>
 
@@ -78,11 +79,11 @@ export function OnboardingStepLayout({
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="rev-label">Activation guardrails</p>
+              <p className="rev-label">Why it stays short</p>
               <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 One clear decision per step. One booking motion. No CRM sprawl,
-                no channel maze, no heavy ops rollout, and no extra demo detour
-                before Seller can show booked proof and revenue clearly.
+                no heavy setup project, and no extra detour before Seller can
+                show booked appointments and revenue clearly.
               </p>
             </div>
           </div>
@@ -152,16 +153,18 @@ export function OnboardingStepLayout({
           </div>
         </div>
 
+        {contextPanel}
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Commercial pillar</p>
+            <p className="rev-label">What you are setting</p>
             <p className="mt-3 text-lg font-semibold text-[color:var(--foreground)]">
               {step.fieldLabel}
             </p>
           </div>
 
           <div className="rev-card rounded-[24px] p-5">
-            <p className="rev-label">Booking outcome</p>
+            <p className="rev-label">Why it matters</p>
             <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
               {step.helperText}
             </p>
@@ -187,6 +190,6 @@ const stepKeyLabels: Record<OnboardingStepKey, string> = {
   deal_value: "Value Per Booking",
   mode: "Seller Voice",
   source: "Lead Entry",
-  template: "Main Offer",
+  template: "Clinic + Offer",
 };
 

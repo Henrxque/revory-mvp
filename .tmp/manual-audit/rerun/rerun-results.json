@@ -1,0 +1,133 @@
+{
+  "checkedAt": "2026-04-09T16:57:44.254Z",
+  "expectedResults": {
+    "workspaceName": "LUMINA AESTHETICS",
+    "planKey": "GROWTH",
+    "billingStatus": "ACTIVE",
+    "clientsCount": 200,
+    "supportClients": 200,
+    "supportedBooked": 62,
+    "appointmentsImportedRows": 72,
+    "clientsImportedRows": 196,
+    "monthlyBooked": {
+      "2025-11": 6,
+      "2025-12": 8,
+      "2026-01": 10,
+      "2026-02": 9,
+      "2026-03": 13,
+      "2026-04": 16
+    }
+  },
+  "fixtures": {
+    "appointments6mo": "C:\\Users\\hriqu\\Documents\\revory-mvp\\scripts\\fixtures\\clean-rerun\\appointments-6mo.csv",
+    "appointmentsSmoke": "C:\\Users\\hriqu\\Documents\\revory-mvp\\scripts\\fixtures\\clean-rerun\\appointments-smoke.csv",
+    "clients6mo": "C:\\Users\\hriqu\\Documents\\revory-mvp\\scripts\\fixtures\\clean-rerun\\clients-6mo.csv",
+    "clientsSmoke": "C:\\Users\\hriqu\\Documents\\revory-mvp\\scripts\\fixtures\\clean-rerun\\clients-smoke.csv"
+  },
+  "verified": {
+    "activation": {
+      "id": "cmnrpz02t00t7bm9sa20004gg",
+      "workspaceId": "cmnrpyyrq00t5bm9skxi90bu4",
+      "currentStep": "activation",
+      "selectedTemplate": "INJECTABLES",
+      "primaryChannel": "EMAIL",
+      "googleReviewsUrl": null,
+      "averageDealValue": "650",
+      "recommendedModeKey": "MODE_A",
+      "isCompleted": true,
+      "activatedAt": "2026-04-09T16:57:11.060Z",
+      "createdAt": "2026-04-09T16:56:54.053Z",
+      "updatedAt": "2026-04-09T16:57:11.063Z"
+    },
+    "clientsCount": 200,
+    "dataSources": [
+      {
+        "lastImportErrorRowCount": 0,
+        "lastImportFileName": null,
+        "lastImportRowCount": 0,
+        "lastImportSuccessRowCount": 0,
+        "status": "PENDING",
+        "type": "APPOINTMENTS_CSV"
+      },
+      {
+        "lastImportErrorRowCount": 0,
+        "lastImportFileName": "appointments-6mo.csv",
+        "lastImportRowCount": 72,
+        "lastImportSuccessRowCount": 72,
+        "status": "IMPORTED",
+        "type": "APPOINTMENTS_CSV"
+      },
+      {
+        "lastImportErrorRowCount": 0,
+        "lastImportFileName": "clients-6mo.csv",
+        "lastImportRowCount": 196,
+        "lastImportSuccessRowCount": 196,
+        "status": "IMPORTED",
+        "type": "CLIENTS_CSV"
+      }
+    ],
+    "email": "lumina.rerun.qa+1775753810663@example.com",
+    "explicitRevenue": 2600,
+    "medSpa": {
+      "id": "cmnrpz6so00tdbm9ssaqpf6db",
+      "workspaceId": "cmnrpyyrq00t5bm9skxi90bu4",
+      "brandName": "LUMINA AESTHETICS",
+      "businessType": "MedSpa",
+      "timezone": "America/New_York",
+      "phone": null,
+      "addressLine": null,
+      "city": null,
+      "state": null,
+      "createdAt": "2026-04-09T16:57:02.760Z",
+      "updatedAt": "2026-04-09T16:57:02.760Z"
+    },
+    "monthly": {
+      "2026-04": {
+        "booked": 16,
+        "canceled": 1,
+        "noShow": 3,
+        "total": 20
+      },
+      "2025-11": {
+        "booked": 6,
+        "canceled": 0,
+        "noShow": 2,
+        "total": 8
+      },
+      "2025-12": {
+        "booked": 8,
+        "canceled": 0,
+        "noShow": 2,
+        "total": 10
+      },
+      "2026-01": {
+        "booked": 10,
+        "canceled": 0,
+        "noShow": 1,
+        "total": 11
+      },
+      "2026-02": {
+        "booked": 9,
+        "canceled": 0,
+        "noShow": 3,
+        "total": 12
+      },
+      "2026-03": {
+        "booked": 13,
+        "canceled": 0,
+        "noShow": 2,
+        "total": 15
+      }
+    },
+    "supportClients": 200,
+    "supportedBooked": 62
+  },
+  "workspace": {
+    "billingStatus": "ACTIVE",
+    "currentPeriodEnd": "2026-12-31T23:59:59.000Z",
+    "id": "cmnrpyyrq00t5bm9skxi90bu4",
+    "name": "LUMINA AESTHETICS",
+    "planKey": "GROWTH",
+    "status": "ACTIVE"
+  }
+}

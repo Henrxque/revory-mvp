@@ -1,0 +1,197 @@
+full_name,external_id,email,phone,last_visit_at,total_visits,tags,notes
+Ava Reyes,m1-client-001,m1-client-001@lumina.example.com,3055550001,2025-11-01T15:00:00Z,1,meta ads;lip filler;price,Month 1 lead. Main objection/read: price.
+Mia Hart,m1-client-002,m1-client-002@lumina.example.com,3055550002,2025-11-02T15:00:00Z,1,meta ads;lip filler;want to think,Month 1 lead. Main objection/read: want to think.
+Luna Lane,m1-client-003,m1-client-003@lumina.example.com,3055550003,2025-11-03T15:00:00Z,1,meta ads;lip filler;timing,Month 1 lead. Main objection/read: timing.
+Sofia Stone,m1-client-004,m1-client-004@lumina.example.com,3055550004,2025-11-04T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 1 lead. Main objection/read: procedure doubt.
+Ella Cole,m1-client-005,m1-client-005@lumina.example.com,3055550005,2025-11-05T15:00:00Z,1,meta ads;lip filler;availability,Month 1 lead. Main objection/read: availability.
+Chloe Brooks,m1-client-006,m1-client-006@lumina.example.com,3055550006,2025-11-06T15:00:00Z,1,meta ads;lip filler;low response,Month 1 lead. Main objection/read: low response.
+Grace Rivera,m1-client-007,m1-client-007@lumina.example.com,3055550007,,0,meta ads;lip filler;high intent,Month 1 lead. Main objection/read: high intent.
+Zoe Price,m1-client-008,m1-client-008@lumina.example.com,3055550008,,0,meta ads;lip filler;price,Month 1 lead. Main objection/read: price.
+Mila Blake,m1-client-009,m1-client-009@lumina.example.com,3055550009,,0,meta ads;lip filler;want to think,Month 1 lead. Main objection/read: want to think.
+Nora Monroe,m1-client-010,m1-client-010@lumina.example.com,3055550010,,0,meta ads;lip filler;timing,Month 1 lead. Main objection/read: timing.
+Ruby Parker,m1-client-011,m1-client-011@lumina.example.com,3055550011,,0,meta ads;lip filler;procedure doubt,Month 1 lead. Main objection/read: procedure doubt.
+Lily James,m1-client-012,m1-client-012@lumina.example.com,3055550012,,0,meta ads;lip filler;availability,Month 1 lead. Main objection/read: availability.
+Eva Diaz,m1-client-013,m1-client-013@lumina.example.com,3055550013,,0,meta ads;lip filler;low response,Month 1 lead. Main objection/read: low response.
+Aria Lopez,m1-client-014,m1-client-014@lumina.example.com,3055550014,,0,meta ads;lip filler;high intent,Month 1 lead. Main objection/read: high intent.
+Layla Foster,m1-client-015,m1-client-015@lumina.example.com,3055550015,,0,meta ads;lip filler;price,Month 1 lead. Main objection/read: price.
+Camila Coleman,m1-client-016,m1-client-016@lumina.example.com,3055550016,,0,meta ads;lip filler;want to think,Month 1 lead. Main objection/read: want to think.
+Isla Ward,m1-client-017,m1-client-017@lumina.example.com,3055550017,,0,meta ads;lip filler;timing,Month 1 lead. Main objection/read: timing.
+Nova Fox,m1-client-018,m1-client-018@lumina.example.com,3055550018,,0,meta ads;lip filler;procedure doubt,Month 1 lead. Main objection/read: procedure doubt.
+Stella Young,m1-client-019,m1-client-019@lumina.example.com,3055550019,,0,meta ads;lip filler;availability,Month 1 lead. Main objection/read: availability.
+Hazel Bell,m1-client-020,m1-client-020@lumina.example.com,3055550020,,0,meta ads;lip filler;low response,Month 1 lead. Main objection/read: low response.
+Ava Reyes,m1-client-021,m1-client-021@lumina.example.com,3055550021,,0,meta ads;lip filler;high intent,Month 1 lead. Main objection/read: high intent.
+Mia Hart,m1-client-022,m1-client-022@lumina.example.com,3055550022,,0,meta ads;lip filler;price,Month 1 lead. Main objection/read: price.
+Luna Lane,m2-client-001,m2-client-001@lumina.example.com,3055550023,2025-12-01T15:00:00Z,1,meta ads;lip filler;want to think,Month 2 lead. Main objection/read: want to think.
+Sofia Stone,m2-client-002,m2-client-002@lumina.example.com,3055550024,2025-12-02T15:00:00Z,1,meta ads;lip filler;timing,Month 2 lead. Main objection/read: timing.
+Ella Cole,m2-client-003,m2-client-003@lumina.example.com,3055550025,2025-12-03T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 2 lead. Main objection/read: procedure doubt.
+Chloe Brooks,m2-client-004,m2-client-004@lumina.example.com,3055550026,2025-12-04T15:00:00Z,1,meta ads;lip filler;availability,Month 2 lead. Main objection/read: availability.
+Grace Rivera,m2-client-005,m2-client-005@lumina.example.com,3055550027,2025-12-05T15:00:00Z,1,meta ads;lip filler;low response,Month 2 lead. Main objection/read: low response.
+Zoe Price,m2-client-006,m2-client-006@lumina.example.com,3055550028,2025-12-06T15:00:00Z,1,meta ads;lip filler;high intent,Month 2 lead. Main objection/read: high intent.
+Mila Blake,m2-client-007,m2-client-007@lumina.example.com,3055550029,2025-12-07T15:00:00Z,1,meta ads;lip filler;price,Month 2 lead. Main objection/read: price.
+Nora Monroe,m2-client-008,m2-client-008@lumina.example.com,3055550030,2025-12-08T15:00:00Z,1,meta ads;lip filler;want to think,Month 2 lead. Main objection/read: want to think.
+Ruby Parker,m2-client-009,m2-client-009@lumina.example.com,3055550031,,0,meta ads;lip filler;timing,Month 2 lead. Main objection/read: timing.
+Lily James,m2-client-010,m2-client-010@lumina.example.com,3055550032,,0,meta ads;lip filler;procedure doubt,Month 2 lead. Main objection/read: procedure doubt.
+Eva Diaz,m2-client-011,m2-client-011@lumina.example.com,3055550033,,0,meta ads;lip filler;availability,Month 2 lead. Main objection/read: availability.
+Aria Lopez,m2-client-012,m2-client-012@lumina.example.com,3055550034,,0,meta ads;lip filler;low response,Month 2 lead. Main objection/read: low response.
+Layla Foster,m2-client-013,m2-client-013@lumina.example.com,3055550035,,0,meta ads;lip filler;high intent,Month 2 lead. Main objection/read: high intent.
+Camila Coleman,m2-client-014,m2-client-014@lumina.example.com,3055550036,,0,meta ads;lip filler;price,Month 2 lead. Main objection/read: price.
+Isla Ward,m2-client-015,m2-client-015@lumina.example.com,3055550037,,0,meta ads;lip filler;want to think,Month 2 lead. Main objection/read: want to think.
+Nova Fox,m2-client-016,m2-client-016@lumina.example.com,3055550038,,0,meta ads;lip filler;timing,Month 2 lead. Main objection/read: timing.
+Stella Young,m2-client-017,m2-client-017@lumina.example.com,3055550039,,0,meta ads;lip filler;procedure doubt,Month 2 lead. Main objection/read: procedure doubt.
+Hazel Bell,m2-client-018,m2-client-018@lumina.example.com,3055550040,,0,meta ads;lip filler;availability,Month 2 lead. Main objection/read: availability.
+Ava Reyes,m2-client-019,m2-client-019@lumina.example.com,3055550041,,0,meta ads;lip filler;low response,Month 2 lead. Main objection/read: low response.
+Mia Hart,m2-client-020,m2-client-020@lumina.example.com,3055550042,,0,meta ads;lip filler;high intent,Month 2 lead. Main objection/read: high intent.
+Luna Lane,m2-client-021,m2-client-021@lumina.example.com,3055550043,,0,meta ads;lip filler;price,Month 2 lead. Main objection/read: price.
+Sofia Stone,m2-client-022,m2-client-022@lumina.example.com,3055550044,,0,meta ads;lip filler;want to think,Month 2 lead. Main objection/read: want to think.
+Ella Cole,m2-client-023,m2-client-023@lumina.example.com,3055550045,,0,meta ads;lip filler;timing,Month 2 lead. Main objection/read: timing.
+Chloe Brooks,m2-client-024,m2-client-024@lumina.example.com,3055550046,,0,meta ads;lip filler;procedure doubt,Month 2 lead. Main objection/read: procedure doubt.
+Grace Rivera,m2-client-025,m2-client-025@lumina.example.com,3055550047,,0,meta ads;lip filler;availability,Month 2 lead. Main objection/read: availability.
+Zoe Price,m2-client-026,m2-client-026@lumina.example.com,3055550048,,0,meta ads;lip filler;low response,Month 2 lead. Main objection/read: low response.
+Mila Blake,m2-client-027,m2-client-027@lumina.example.com,3055550049,,0,meta ads;lip filler;high intent,Month 2 lead. Main objection/read: high intent.
+Nora Monroe,m2-client-028,m2-client-028@lumina.example.com,3055550050,,0,meta ads;lip filler;price,Month 2 lead. Main objection/read: price.
+Ruby Parker,m3-client-001,m3-client-001@lumina.example.com,3055550051,2026-01-01T15:00:00Z,1,meta ads;lip filler;want to think,Month 3 lead. Main objection/read: want to think.
+Lily James,m3-client-002,m3-client-002@lumina.example.com,3055550052,2026-01-02T15:00:00Z,1,meta ads;lip filler;timing,Month 3 lead. Main objection/read: timing.
+Eva Diaz,m3-client-003,m3-client-003@lumina.example.com,3055550053,2026-01-03T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 3 lead. Main objection/read: procedure doubt.
+Aria Lopez,m3-client-004,m3-client-004@lumina.example.com,3055550054,2026-01-04T15:00:00Z,1,meta ads;lip filler;availability,Month 3 lead. Main objection/read: availability.
+Layla Foster,m3-client-005,m3-client-005@lumina.example.com,3055550055,2026-01-05T15:00:00Z,1,meta ads;lip filler;low response,Month 3 lead. Main objection/read: low response.
+Camila Coleman,m3-client-006,m3-client-006@lumina.example.com,3055550056,2026-01-06T15:00:00Z,1,meta ads;lip filler;high intent,Month 3 lead. Main objection/read: high intent.
+Isla Ward,m3-client-007,m3-client-007@lumina.example.com,3055550057,2026-01-07T15:00:00Z,1,meta ads;lip filler;price,Month 3 lead. Main objection/read: price.
+Nova Fox,m3-client-008,m3-client-008@lumina.example.com,3055550058,2026-01-08T15:00:00Z,1,meta ads;lip filler;want to think,Month 3 lead. Main objection/read: want to think.
+Stella Young,m3-client-009,m3-client-009@lumina.example.com,3055550059,2026-01-09T15:00:00Z,1,meta ads;lip filler;timing,Month 3 lead. Main objection/read: timing.
+Hazel Bell,m3-client-010,m3-client-010@lumina.example.com,3055550060,2026-01-10T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 3 lead. Main objection/read: procedure doubt.
+Ava Reyes,m3-client-011,m3-client-011@lumina.example.com,3055550061,,0,meta ads;lip filler;availability,Month 3 lead. Main objection/read: availability.
+Mia Hart,m3-client-012,m3-client-012@lumina.example.com,3055550062,,0,meta ads;lip filler;low response,Month 3 lead. Main objection/read: low response.
+Luna Lane,m3-client-013,m3-client-013@lumina.example.com,3055550063,,0,meta ads;lip filler;high intent,Month 3 lead. Main objection/read: high intent.
+Sofia Stone,m3-client-014,m3-client-014@lumina.example.com,3055550064,,0,meta ads;lip filler;price,Month 3 lead. Main objection/read: price.
+Ella Cole,m3-client-015,m3-client-015@lumina.example.com,3055550065,,0,meta ads;lip filler;want to think,Month 3 lead. Main objection/read: want to think.
+Chloe Brooks,m3-client-016,m3-client-016@lumina.example.com,3055550066,,0,meta ads;lip filler;timing,Month 3 lead. Main objection/read: timing.
+Grace Rivera,m3-client-017,m3-client-017@lumina.example.com,3055550067,,0,meta ads;lip filler;procedure doubt,Month 3 lead. Main objection/read: procedure doubt.
+Zoe Price,m3-client-018,m3-client-018@lumina.example.com,3055550068,,0,meta ads;lip filler;availability,Month 3 lead. Main objection/read: availability.
+Mila Blake,m3-client-019,m3-client-019@lumina.example.com,3055550069,,0,meta ads;lip filler;low response,Month 3 lead. Main objection/read: low response.
+Nora Monroe,m3-client-020,m3-client-020@lumina.example.com,3055550070,,0,meta ads;lip filler;high intent,Month 3 lead. Main objection/read: high intent.
+Ruby Parker,m3-client-021,m3-client-021@lumina.example.com,3055550071,,0,meta ads;lip filler;price,Month 3 lead. Main objection/read: price.
+Lily James,m3-client-022,m3-client-022@lumina.example.com,3055550072,,0,meta ads;lip filler;want to think,Month 3 lead. Main objection/read: want to think.
+Eva Diaz,m3-client-023,m3-client-023@lumina.example.com,3055550073,,0,meta ads;lip filler;timing,Month 3 lead. Main objection/read: timing.
+Aria Lopez,m3-client-024,m3-client-024@lumina.example.com,3055550074,,0,meta ads;lip filler;procedure doubt,Month 3 lead. Main objection/read: procedure doubt.
+Layla Foster,m3-client-025,m3-client-025@lumina.example.com,3055550075,,0,meta ads;lip filler;availability,Month 3 lead. Main objection/read: availability.
+Camila Coleman,m3-client-026,m3-client-026@lumina.example.com,3055550076,,0,meta ads;lip filler;low response,Month 3 lead. Main objection/read: low response.
+Isla Ward,m3-client-027,m3-client-027@lumina.example.com,3055550077,,0,meta ads;lip filler;high intent,Month 3 lead. Main objection/read: high intent.
+Nova Fox,m3-client-028,m3-client-028@lumina.example.com,3055550078,,0,meta ads;lip filler;price,Month 3 lead. Main objection/read: price.
+Stella Young,m3-client-029,m3-client-029@lumina.example.com,3055550079,,0,meta ads;lip filler;want to think,Month 3 lead. Main objection/read: want to think.
+Hazel Bell,m3-client-030,m3-client-030@lumina.example.com,3055550080,,0,meta ads;lip filler;timing,Month 3 lead. Main objection/read: timing.
+Ava Reyes,m3-client-031,m3-client-031@lumina.example.com,3055550081,,0,meta ads;lip filler;procedure doubt,Month 3 lead. Main objection/read: procedure doubt.
+Mia Hart,m3-client-032,m3-client-032@lumina.example.com,3055550082,,0,meta ads;lip filler;availability,Month 3 lead. Main objection/read: availability.
+Luna Lane,m3-client-033,m3-client-033@lumina.example.com,3055550083,,0,meta ads;lip filler;low response,Month 3 lead. Main objection/read: low response.
+Sofia Stone,m3-client-034,m3-client-034@lumina.example.com,3055550084,,0,meta ads;lip filler;high intent,Month 3 lead. Main objection/read: high intent.
+Ella Cole,m4-client-001,m4-client-001@lumina.example.com,3055550085,2026-02-01T15:00:00Z,1,meta ads;lip filler;price,Month 4 lead. Main objection/read: price.
+Chloe Brooks,m4-client-002,m4-client-002@lumina.example.com,3055550086,2026-02-02T15:00:00Z,1,meta ads;lip filler;want to think,Month 4 lead. Main objection/read: want to think.
+Grace Rivera,m4-client-003,m4-client-003@lumina.example.com,3055550087,2026-02-03T15:00:00Z,1,meta ads;lip filler;timing,Month 4 lead. Main objection/read: timing.
+Zoe Price,m4-client-004,m4-client-004@lumina.example.com,3055550088,2026-02-04T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 4 lead. Main objection/read: procedure doubt.
+Mila Blake,m4-client-005,m4-client-005@lumina.example.com,3055550089,2026-02-05T15:00:00Z,1,meta ads;lip filler;availability,Month 4 lead. Main objection/read: availability.
+Nora Monroe,m4-client-006,m4-client-006@lumina.example.com,3055550090,2026-02-06T15:00:00Z,1,meta ads;lip filler;low response,Month 4 lead. Main objection/read: low response.
+Ruby Parker,m4-client-007,m4-client-007@lumina.example.com,3055550091,2026-02-07T15:00:00Z,1,meta ads;lip filler;high intent,Month 4 lead. Main objection/read: high intent.
+Lily James,m4-client-008,m4-client-008@lumina.example.com,3055550092,2026-02-08T15:00:00Z,1,meta ads;lip filler;price,Month 4 lead. Main objection/read: price.
+Eva Diaz,m4-client-009,m4-client-009@lumina.example.com,3055550093,2026-02-09T15:00:00Z,1,meta ads;lip filler;want to think,Month 4 lead. Main objection/read: want to think.
+Aria Lopez,m4-client-010,m4-client-010@lumina.example.com,3055550094,,0,meta ads;lip filler;timing,Month 4 lead. Main objection/read: timing.
+Layla Foster,m4-client-011,m4-client-011@lumina.example.com,3055550095,,0,meta ads;lip filler;procedure doubt,Month 4 lead. Main objection/read: procedure doubt.
+Camila Coleman,m4-client-012,m4-client-012@lumina.example.com,3055550096,,0,meta ads;lip filler;availability,Month 4 lead. Main objection/read: availability.
+Isla Ward,m4-client-013,m4-client-013@lumina.example.com,3055550097,,0,meta ads;lip filler;low response,Month 4 lead. Main objection/read: low response.
+Nova Fox,m4-client-014,m4-client-014@lumina.example.com,3055550098,,0,meta ads;lip filler;high intent,Month 4 lead. Main objection/read: high intent.
+Stella Young,m4-client-015,m4-client-015@lumina.example.com,3055550099,,0,meta ads;lip filler;price,Month 4 lead. Main objection/read: price.
+Hazel Bell,m4-client-016,m4-client-016@lumina.example.com,3055550100,,0,meta ads;lip filler;want to think,Month 4 lead. Main objection/read: want to think.
+Ava Reyes,m4-client-017,m4-client-017@lumina.example.com,3055550101,,0,meta ads;lip filler;timing,Month 4 lead. Main objection/read: timing.
+Mia Hart,m4-client-018,m4-client-018@lumina.example.com,3055550102,,0,meta ads;lip filler;procedure doubt,Month 4 lead. Main objection/read: procedure doubt.
+Luna Lane,m4-client-019,m4-client-019@lumina.example.com,3055550103,,0,meta ads;lip filler;availability,Month 4 lead. Main objection/read: availability.
+Sofia Stone,m4-client-020,m4-client-020@lumina.example.com,3055550104,,0,meta ads;lip filler;low response,Month 4 lead. Main objection/read: low response.
+Ella Cole,m4-client-021,m4-client-021@lumina.example.com,3055550105,,0,meta ads;lip filler;high intent,Month 4 lead. Main objection/read: high intent.
+Chloe Brooks,m4-client-022,m4-client-022@lumina.example.com,3055550106,,0,meta ads;lip filler;price,Month 4 lead. Main objection/read: price.
+Grace Rivera,m4-client-023,m4-client-023@lumina.example.com,3055550107,,0,meta ads;lip filler;want to think,Month 4 lead. Main objection/read: want to think.
+Zoe Price,m4-client-024,m4-client-024@lumina.example.com,3055550108,,0,meta ads;lip filler;timing,Month 4 lead. Main objection/read: timing.
+Mila Blake,m4-client-025,m4-client-025@lumina.example.com,3055550109,,0,meta ads;lip filler;procedure doubt,Month 4 lead. Main objection/read: procedure doubt.
+Nora Monroe,m4-client-026,m4-client-026@lumina.example.com,3055550110,,0,meta ads;lip filler;availability,Month 4 lead. Main objection/read: availability.
+Ruby Parker,m4-client-027,m4-client-027@lumina.example.com,3055550111,,0,meta ads;lip filler;low response,Month 4 lead. Main objection/read: low response.
+Lily James,m4-client-028,m4-client-028@lumina.example.com,3055550112,,0,meta ads;lip filler;high intent,Month 4 lead. Main objection/read: high intent.
+Eva Diaz,m4-client-029,m4-client-029@lumina.example.com,3055550113,,0,meta ads;lip filler;price,Month 4 lead. Main objection/read: price.
+Aria Lopez,m4-client-030,m4-client-030@lumina.example.com,3055550114,,0,meta ads;lip filler;want to think,Month 4 lead. Main objection/read: want to think.
+Layla Foster,m4-client-031,m4-client-031@lumina.example.com,3055550115,,0,meta ads;lip filler;timing,Month 4 lead. Main objection/read: timing.
+Camila Coleman,m5-client-001,m5-client-001@lumina.example.com,3055550116,2026-03-01T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Isla Ward,m5-client-002,m5-client-002@lumina.example.com,3055550117,2026-03-02T15:00:00Z,1,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Nova Fox,m5-client-003,m5-client-003@lumina.example.com,3055550118,2026-03-03T15:00:00Z,1,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Stella Young,m5-client-004,m5-client-004@lumina.example.com,3055550119,2026-03-04T15:00:00Z,1,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Hazel Bell,m5-client-005,m5-client-005@lumina.example.com,3055550120,2026-03-05T15:00:00Z,1,meta ads;lip filler;price,Month 5 lead. Main objection/read: price.
+Ava Reyes,m5-client-006,m5-client-006@lumina.example.com,3055550121,2026-03-06T15:00:00Z,1,meta ads;lip filler;want to think,Month 5 lead. Main objection/read: want to think.
+Mia Hart,m5-client-007,m5-client-007@lumina.example.com,3055550122,2026-03-07T15:00:00Z,1,meta ads;lip filler;timing,Month 5 lead. Main objection/read: timing.
+Luna Lane,m5-client-008,m5-client-008@lumina.example.com,3055550123,2026-03-08T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Sofia Stone,m5-client-009,m5-client-009@lumina.example.com,3055550124,2026-03-09T15:00:00Z,1,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Ella Cole,m5-client-010,m5-client-010@lumina.example.com,3055550125,2026-03-10T15:00:00Z,1,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Chloe Brooks,m5-client-011,m5-client-011@lumina.example.com,3055550126,2026-03-11T15:00:00Z,1,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Grace Rivera,m5-client-012,m5-client-012@lumina.example.com,3055550127,2026-03-12T15:00:00Z,1,meta ads;lip filler;price,Month 5 lead. Main objection/read: price.
+Zoe Price,m5-client-013,m5-client-013@lumina.example.com,3055550128,2026-03-13T15:00:00Z,1,meta ads;lip filler;want to think,Month 5 lead. Main objection/read: want to think.
+Mila Blake,m5-client-014,m5-client-014@lumina.example.com,3055550129,,0,meta ads;lip filler;timing,Month 5 lead. Main objection/read: timing.
+Nora Monroe,m5-client-015,m5-client-015@lumina.example.com,3055550130,,0,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Ruby Parker,m5-client-016,m5-client-016@lumina.example.com,3055550131,,0,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Lily James,m5-client-017,m5-client-017@lumina.example.com,3055550132,,0,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Eva Diaz,m5-client-018,m5-client-018@lumina.example.com,3055550133,,0,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Aria Lopez,m5-client-019,m5-client-019@lumina.example.com,3055550134,,0,meta ads;lip filler;price,Month 5 lead. Main objection/read: price.
+Layla Foster,m5-client-020,m5-client-020@lumina.example.com,3055550135,,0,meta ads;lip filler;want to think,Month 5 lead. Main objection/read: want to think.
+Camila Coleman,m5-client-021,m5-client-021@lumina.example.com,3055550136,,0,meta ads;lip filler;timing,Month 5 lead. Main objection/read: timing.
+Isla Ward,m5-client-022,m5-client-022@lumina.example.com,3055550137,,0,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Nova Fox,m5-client-023,m5-client-023@lumina.example.com,3055550138,,0,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Stella Young,m5-client-024,m5-client-024@lumina.example.com,3055550139,,0,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Hazel Bell,m5-client-025,m5-client-025@lumina.example.com,3055550140,,0,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Ava Reyes,m5-client-026,m5-client-026@lumina.example.com,3055550141,,0,meta ads;lip filler;price,Month 5 lead. Main objection/read: price.
+Mia Hart,m5-client-027,m5-client-027@lumina.example.com,3055550142,,0,meta ads;lip filler;want to think,Month 5 lead. Main objection/read: want to think.
+Luna Lane,m5-client-028,m5-client-028@lumina.example.com,3055550143,,0,meta ads;lip filler;timing,Month 5 lead. Main objection/read: timing.
+Sofia Stone,m5-client-029,m5-client-029@lumina.example.com,3055550144,,0,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Ella Cole,m5-client-030,m5-client-030@lumina.example.com,3055550145,,0,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Chloe Brooks,m5-client-031,m5-client-031@lumina.example.com,3055550146,,0,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Grace Rivera,m5-client-032,m5-client-032@lumina.example.com,3055550147,,0,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Zoe Price,m5-client-033,m5-client-033@lumina.example.com,3055550148,,0,meta ads;lip filler;price,Month 5 lead. Main objection/read: price.
+Mila Blake,m5-client-034,m5-client-034@lumina.example.com,3055550149,,0,meta ads;lip filler;want to think,Month 5 lead. Main objection/read: want to think.
+Nora Monroe,m5-client-035,m5-client-035@lumina.example.com,3055550150,,0,meta ads;lip filler;timing,Month 5 lead. Main objection/read: timing.
+Ruby Parker,m5-client-036,m5-client-036@lumina.example.com,3055550151,,0,meta ads;lip filler;procedure doubt,Month 5 lead. Main objection/read: procedure doubt.
+Lily James,m5-client-037,m5-client-037@lumina.example.com,3055550152,,0,meta ads;lip filler;availability,Month 5 lead. Main objection/read: availability.
+Eva Diaz,m5-client-038,m5-client-038@lumina.example.com,3055550153,,0,meta ads;lip filler;low response,Month 5 lead. Main objection/read: low response.
+Aria Lopez,m5-client-039,m5-client-039@lumina.example.com,3055550154,,0,meta ads;lip filler;high intent,Month 5 lead. Main objection/read: high intent.
+Layla Foster,m6-client-001,m6-client-001@lumina.example.com,3055550155,2026-04-01T15:00:00Z,1,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Camila Coleman,m6-client-002,m6-client-002@lumina.example.com,3055550156,2026-04-02T15:00:00Z,1,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Isla Ward,m6-client-003,m6-client-003@lumina.example.com,3055550157,2026-04-03T15:00:00Z,1,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Nova Fox,m6-client-004,m6-client-004@lumina.example.com,3055550158,2026-04-04T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Stella Young,m6-client-005,m6-client-005@lumina.example.com,3055550159,2026-04-05T15:00:00Z,1,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Hazel Bell,m6-client-006,m6-client-006@lumina.example.com,3055550160,2026-04-06T15:00:00Z,1,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Ava Reyes,m6-client-007,m6-client-007@lumina.example.com,3055550161,2026-04-07T15:00:00Z,1,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.
+Mia Hart,m6-client-008,m6-client-008@lumina.example.com,3055550162,2026-04-08T15:00:00Z,1,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Luna Lane,m6-client-009,m6-client-009@lumina.example.com,3055550163,2026-04-09T15:00:00Z,1,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Sofia Stone,m6-client-010,m6-client-010@lumina.example.com,3055550164,2026-04-10T15:00:00Z,1,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Ella Cole,m6-client-011,m6-client-011@lumina.example.com,3055550165,2026-04-11T15:00:00Z,1,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Chloe Brooks,m6-client-012,m6-client-012@lumina.example.com,3055550166,2026-04-12T15:00:00Z,1,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Grace Rivera,m6-client-013,m6-client-013@lumina.example.com,3055550167,2026-04-13T15:00:00Z,1,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Zoe Price,m6-client-014,m6-client-014@lumina.example.com,3055550168,2026-04-14T15:00:00Z,1,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.
+Mila Blake,m6-client-015,m6-client-015@lumina.example.com,3055550169,,0,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Nora Monroe,m6-client-016,m6-client-016@lumina.example.com,3055550170,,0,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Ruby Parker,m6-client-017,m6-client-017@lumina.example.com,3055550171,,0,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Lily James,m6-client-018,m6-client-018@lumina.example.com,3055550172,,0,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Eva Diaz,m6-client-019,m6-client-019@lumina.example.com,3055550173,,0,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Aria Lopez,m6-client-020,m6-client-020@lumina.example.com,3055550174,,0,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Layla Foster,m6-client-021,m6-client-021@lumina.example.com,3055550175,,0,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.
+Camila Coleman,m6-client-022,m6-client-022@lumina.example.com,3055550176,,0,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Isla Ward,m6-client-023,m6-client-023@lumina.example.com,3055550177,,0,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Nova Fox,m6-client-024,m6-client-024@lumina.example.com,3055550178,,0,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Stella Young,m6-client-025,m6-client-025@lumina.example.com,3055550179,,0,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Hazel Bell,m6-client-026,m6-client-026@lumina.example.com,3055550180,,0,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Ava Reyes,m6-client-027,m6-client-027@lumina.example.com,3055550181,,0,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Mia Hart,m6-client-028,m6-client-028@lumina.example.com,3055550182,,0,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.
+Luna Lane,m6-client-029,m6-client-029@lumina.example.com,3055550183,,0,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Sofia Stone,m6-client-030,m6-client-030@lumina.example.com,3055550184,,0,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Ella Cole,m6-client-031,m6-client-031@lumina.example.com,3055550185,,0,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Chloe Brooks,m6-client-032,m6-client-032@lumina.example.com,3055550186,,0,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Grace Rivera,m6-client-033,m6-client-033@lumina.example.com,3055550187,,0,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Zoe Price,m6-client-034,m6-client-034@lumina.example.com,3055550188,,0,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Mila Blake,m6-client-035,m6-client-035@lumina.example.com,3055550189,,0,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.
+Nora Monroe,m6-client-036,m6-client-036@lumina.example.com,3055550190,,0,meta ads;lip filler;price,Month 6 lead. Main objection/read: price.
+Ruby Parker,m6-client-037,m6-client-037@lumina.example.com,3055550191,,0,meta ads;lip filler;want to think,Month 6 lead. Main objection/read: want to think.
+Lily James,m6-client-038,m6-client-038@lumina.example.com,3055550192,,0,meta ads;lip filler;timing,Month 6 lead. Main objection/read: timing.
+Eva Diaz,m6-client-039,m6-client-039@lumina.example.com,3055550193,,0,meta ads;lip filler;procedure doubt,Month 6 lead. Main objection/read: procedure doubt.
+Aria Lopez,m6-client-040,m6-client-040@lumina.example.com,3055550194,,0,meta ads;lip filler;availability,Month 6 lead. Main objection/read: availability.
+Layla Foster,m6-client-041,m6-client-041@lumina.example.com,3055550195,,0,meta ads;lip filler;low response,Month 6 lead. Main objection/read: low response.
+Camila Coleman,m6-client-042,m6-client-042@lumina.example.com,3055550196,,0,meta ads;lip filler;high intent,Month 6 lead. Main objection/read: high intent.

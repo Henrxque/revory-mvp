@@ -56,6 +56,7 @@ export async function persistClientsImport({
           externalId: row.normalizedRow.externalId,
           fullName: row.normalizedRow.fullName,
           lastVisitAt: row.normalizedRow.lastVisitAt,
+          leadBaseSupport: true,
           notes: row.normalizedRow.notes,
           phone: row.normalizedRow.phone,
           tags: row.normalizedRow.tags,

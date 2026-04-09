@@ -8,6 +8,7 @@ type PersistImportedClientInput = {
   externalId: string | null;
   fullName: string;
   lastVisitAt?: Date | null;
+  leadBaseSupport: boolean;
   notes?: string | null;
   phone: string | null;
   tags?: string[];
@@ -53,6 +54,11 @@ function buildClientUpdateData(input: PersistImportedClientInput): Prisma.Client
           totalVisits: input.totalVisits,
         }
       : {}),
+    ...(input.leadBaseSupport
+      ? {
+          hasLeadBaseSupport: true,
+        }
+      : {}),
     ...(input.notes
       ? {
           notes: input.notes,
@@ -80,6 +86,7 @@ function buildClientCreateData(input: PersistImportedClientInput): Prisma.Client
     },
     externalId: input.externalId,
     fullName: input.fullName,
+    hasLeadBaseSupport: input.leadBaseSupport,
     email: input.email,
     phone: input.phone,
     lastVisitAt: input.lastVisitAt ?? null,

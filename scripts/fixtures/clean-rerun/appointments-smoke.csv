@@ -1,0 +1,5 @@
+appointment_external_id,client_full_name,client_external_id,client_email,client_phone,scheduled_at,status,service_name,provider_name,estimated_revenue,booked_at,canceled_at,location_name,source_notes
+appt-001,Ana Reyes,client-001,ana@example.com,3055550001,2026-04-10T14:00:00Z,SCHEDULED,Lip Filler,Dr. Lux,650,2026-04-08T12:00:00Z,,Miami,High intent from Meta
+appt-002,Mia Stone,client-002,mia@example.com,3055550002,2026-04-11T16:00:00Z,COMPLETED,Lip Filler,Dr. Lux,650,2026-04-08T13:00:00Z,,Miami,Booked fast
+appt-003,Olivia Hart,client-003,olivia@example.com,3055550003,2026-04-12T18:00:00Z,NO_SHOW,Lip Filler,Dr. Lux,650,2026-04-08T14:00:00Z,,Miami,Lead disappeared
+appt-004,Sofia Lane,client-004,sofia@example.com,3055550004,2026-04-13T15:30:00Z,CANCELED,Lip Filler,Dr. Lux,650,2026-04-08T15:00:00Z,2026-04-10T12:00:00Z,Miami,Price objection

@@ -25,6 +25,30 @@ function formatCurrency(value: number | null) {
   }).format(value);
 }
 
+function formatLimitedCurrency(value: number | null, unavailableLabel = "Unavailable") {
+  if (value === null) {
+    return unavailableLabel;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    style: "currency",
+  }).format(value);
+}
+
+function formatCompactCurrency(value: number | null) {
+  if (value === null) {
+    return "Value pending";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    notation: "compact",
+    style: "currency",
+  }).format(value);
+}
+
 function formatDealValue(value: number | null) {
   if (value === null || !Number.isFinite(value)) {
     return "Value pending";
@@ -84,7 +108,7 @@ function formatSourceStatus(status: string) {
 
   if (normalized.includes("review") || normalized.includes("warning")) {
     return {
-      label: "Review",
+      label: "Needs review",
       tone: "future" as const,
     };
   }
@@ -163,9 +187,55 @@ function SignalCard({ hint, label, value }: SignalCardProps) {
   );
 }
 
+type MomentumMonthCardProps = Readonly<{
+  bookedAppointments: number;
+  estimatedRevenue: number | null;
+  isStrongest: boolean;
+  label: string;
+}>;
+
+function MomentumMonthCard({
+  bookedAppointments,
+  estimatedRevenue,
+  isStrongest,
+  label,
+}: MomentumMonthCardProps) {
+  return (
+    <div
+      className={`rounded-[20px] border p-4 ${
+        isStrongest
+          ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.06)]"
+          : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
+      }`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="rev-label">{label}</p>
+        {isStrongest ? <RevoryStatusBadge tone="accent">Best month</RevoryStatusBadge> : null}
+      </div>
+
+      <p className="mt-3 text-[1.7rem] font-semibold leading-none text-[color:var(--foreground)]">
+        {bookedAppointments}
+      </p>
+      <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+        {bookedAppointments === 1 ? "booked appointment" : "booked appointments"}
+      </p>
+
+      <div className="mt-4 border-t border-[color:var(--border)] pt-3">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+          Revenue read
+        </p>
+        <p className="mt-1.5 text-sm font-semibold text-[color:var(--foreground)]">
+          {formatCompactCurrency(estimatedRevenue)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 type DashboardDecisionSupportProps = Readonly<{
   bookingPathLabel: string;
   dealValueLabel: string;
+  fallbackRead: RevoryDecisionSupportRead;
   mainOfferLabel: string;
   overview: Awaited<ReturnType<typeof getDashboardOverview>>;
 }>;
@@ -194,15 +264,24 @@ function DashboardNextMoveAside({
 async function DashboardNextMoveAsideAsync({
   bookingPathLabel,
   dealValueLabel,
+  fallbackRead,
   mainOfferLabel,
   overview,
 }: DashboardDecisionSupportProps) {
-  const read = await getDashboardDecisionSupport({
-    bookingPathLabel,
-    dealValueLabel,
-    mainOfferLabel,
-    overview,
-  });
+  let read = fallbackRead;
+
+  try {
+    read = await getDashboardDecisionSupport({
+      bookingPathLabel,
+      dealValueLabel,
+      mainOfferLabel,
+      overview,
+    });
+  } catch (error) {
+    console.warn("[dashboard] next-move layer degraded", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   return <DashboardNextMoveAside read={read} />;
 }
@@ -252,7 +331,7 @@ export default async function DashboardPage() {
   const nextMove = (() => {
     if (!hasMainOfferLocked) {
       return {
-        cta: "Review Activation Path",
+        cta: "Finish Activation",
         headline: "Set main offer",
         href: "/app/setup",
         note: "Lock one offer to keep Seller narrow.",
@@ -261,7 +340,7 @@ export default async function DashboardPage() {
 
     if (!hasBookingPathLocked) {
       return {
-        cta: "Review Activation Path",
+        cta: "Finish Activation",
         headline: "Set booking path",
         href: "/app/setup",
         note: "Lock one path before revenue read.",
@@ -270,7 +349,7 @@ export default async function DashboardPage() {
 
     if (!hasBookingValueLocked) {
       return {
-        cta: "Review Activation Path",
+        cta: "Finish Activation",
         headline: "Set booking value",
         href: "/app/setup",
         note: "Complete the revenue anchor.",
@@ -305,26 +384,59 @@ export default async function DashboardPage() {
 
   const supportingSignals = [
     {
-      hint: "Visible booked outcomes",
+      hint: "Booked appointments visible",
       label: "Booked proof",
       value: overview.bookedAppointments > 0 ? overview.bookedAppointments : "Pending",
     },
     {
-      hint: "Applied per booking",
+      hint: "Revenue baseline applied",
       label: "Value per booking",
       value: dealValueLabel,
     },
     {
-      hint: "Current commercial focus",
+      hint: "Offer pushed first",
       label: "Main offer",
       value: mainOfferLabel,
     },
     {
-      hint: "Primary conversion route",
+      hint: "Primary route into booking",
       label: "Booking path",
       value: bookingPathLabel,
     },
   ] as const;
+  const attributionRead = overview.attributionRead;
+  const executiveRead = overview.executiveRead;
+  const recentMomentum = overview.recentMomentum;
+  const retentionRead = overview.retentionRead;
+  const renewalRead = overview.renewalRead;
+  const strongestMonthLabel = recentMomentum.strongestMonthLabel;
+  const longitudinalSummary = hasBookedProofVisible
+    ? recentMomentum.bookedAppointments > 0
+      ? `${recentMomentum.bookedAppointments} booked appointments are visible across ${recentMomentum.windowLabel.toLowerCase()}.`
+      : "Booked proof is live, but recent monthly proof is still thin."
+    : "Recent momentum becomes defensible after booked proof is visible.";
+  const longitudinalAsideTitle = hasBookedProofVisible
+    ? recentMomentum.bookedAppointments > 0
+      ? "Value is easier to defend over time"
+      : "Live proof still needs more time depth"
+    : "Longitudinal proof starts after booked proof";
+  const longitudinalAsideNote = hasBookedProofVisible
+    ? recentMomentum.bookedAppointments > 0
+      ? strongestMonthLabel
+        ? `${strongestMonthLabel} is currently the strongest visible month in this short read.`
+        : "Seller keeps this read short until more booked proof accumulates."
+      : "The revenue snapshot is working, but the longitudinal layer still needs more visible bookings."
+    : "Once booked appointments are visible, Seller starts defending value over time instead of only in one snapshot.";
+  const attributionSummary = hasBookedProofVisible
+    ? attributionRead.status === "degraded"
+      ? "Revenue is still visible, but attribution support is temporarily unavailable in this read."
+      : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
+          attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
+        ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport} booked appointments already carry lead-base support behind the revenue read.`
+      : attributionRead.bookedAppointmentsWithIdentity > 0
+        ? "Booked proof is visible, but lead-base support is still thin behind the revenue read."
+        : "Booked proof is visible, but attribution clarity is still thin."
+    : "Attribution clarity becomes useful after booked proof is visible.";
 
   return (
     <div className="space-y-5">
@@ -343,8 +455,8 @@ export default async function DashboardPage() {
 
             <h1 className="rev-display-hero max-w-[31rem]">
               {hasBookedProofVisible
-                ? "Booked revenue is visible."
-                : "Booked proof unlocks revenue."}
+                ? "See booked appointments in revenue."
+                : "Revenue starts with booked proof."}
             </h1>
 
             <p className="max-w-[33rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
@@ -353,7 +465,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
-            <p className="rev-label">Revenue now</p>
+            <p className="rev-label">Booked revenue now</p>
             <p className="mt-3 text-[clamp(2.2rem,3.2vw,3rem)] font-semibold leading-none text-[color:var(--accent-light)]">
               {revenueLabel}
             </p>
@@ -363,7 +475,7 @@ export default async function DashboardPage() {
                 <span className="text-[color:var(--text-muted)]">Booked appointments</span>
                 <span className="font-semibold text-[color:var(--foreground)]">
                   {overview.bookedAppointments > 0
-                    ? `${overview.bookedAppointments} visible`
+                    ? `${overview.bookedAppointments} booked`
                     : "Pending"}
                 </span>
               </div>
@@ -387,6 +499,95 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+              Executive read
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              {executiveRead.summary}
+            </p>
+          </div>
+          <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
+            {hasBookedProofVisible ? "Readable" : "Pending"}
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {executiveRead.tiles.map((tile) => (
+            <SignalCard
+              hint={tile.hint}
+              key={tile.label}
+              label={tile.label}
+              value={tile.value}
+            />
+          ))}
+        </div>
+
+        <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
+          <p className="text-sm font-semibold text-[color:var(--foreground)]">
+            {executiveRead.headline}
+          </p>
+          <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+            Seller keeps this read short: booked revenue first, then the strongest support still available.
+          </p>
+        </div>
+
+        <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                {overview.commercialSafeguard.headline}
+              </p>
+              <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+                {overview.commercialSafeguard.summary}
+              </p>
+            </div>
+            <RevoryStatusBadge tone={overview.commercialSafeguard.status === "stable" ? "real" : "neutral"}>
+              {overview.commercialSafeguard.status === "stable" ? "Stable" : "Watch"}
+            </RevoryStatusBadge>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2.5">
+            <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
+              {overview.commercialSafeguard.coreReadLabel}
+            </RevoryStatusBadge>
+            <RevoryStatusBadge
+              tone={overview.commercialSafeguard.status === "stable" ? "neutral" : "future"}
+            >
+              {overview.commercialSafeguard.supportLabel}
+            </RevoryStatusBadge>
+            {overview.commercialSafeguard.status === "watch" ? (
+              <DocumentNavigationLink
+                className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[12px] font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.06)]"
+                href={overview.commercialSafeguard.actionHref}
+              >
+                {overview.commercialSafeguard.actionLabel}
+              </DocumentNavigationLink>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {overview.supportIntegrity.degradedSections.length > 0 ? (
+        <section className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-4 py-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                {overview.supportIntegrity.headline}
+              </p>
+              <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+                {overview.supportIntegrity.summary}
+              </p>
+            </div>
+            <RevoryStatusBadge tone="neutral">
+              {overview.supportIntegrity.degradedSections.length} limited
+            </RevoryStatusBadge>
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {supportingSignals.map((signal) => (
           <SignalCard
@@ -396,6 +597,234 @@ export default async function DashboardPage() {
             value={signal.value}
           />
         ))}
+      </section>
+
+      <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+              Attribution clarity
+            </p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              {attributionSummary}
+            </p>
+          </div>
+          <RevoryStatusBadge
+            tone={
+              attributionRead.status === "degraded"
+                ? "neutral"
+                : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
+                    attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
+                ? "real"
+                : attributionRead.bookedAppointmentsWithIdentity > 0
+                  ? "future"
+                  : "neutral"
+            }
+          >
+            {attributionRead.status === "degraded"
+              ? "Limited"
+              : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
+                  attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
+              ? "Supported"
+              : attributionRead.bookedAppointmentsWithIdentity > 0
+                ? "Thin"
+                : "Pending"}
+          </RevoryStatusBadge>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <SignalCard
+              hint="Clients carrying usable lead context"
+              label="Lead-base clients"
+              value={
+                attributionRead.status === "degraded"
+                  ? "Unavailable"
+                  : attributionRead.leadBaseClients && attributionRead.leadBaseClients > 0
+                    ? attributionRead.leadBaseClients
+                    : "Pending"
+              }
+            />
+          <SignalCard
+            hint="Booked proof already backed by lead-base support"
+            label="Booked with lead support"
+            value={
+              attributionRead.status === "degraded"
+                ? "Unavailable"
+                : hasBookedProofVisible &&
+                    attributionRead.bookedAppointmentsWithLeadBaseSupport !== null
+                  ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport}/${overview.bookedAppointments}`
+                : "Pending"
+            }
+          />
+          <SignalCard
+            hint="Booked revenue already tied to supported lead context"
+            label="Revenue with lead support"
+            value={formatLimitedCurrency(attributionRead.revenueWithLeadBaseSupport)}
+          />
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
+            <p className="rev-label">Booked with identity</p>
+            <p className="mt-2 text-[1.35rem] font-semibold text-[color:var(--foreground)]">
+              {hasBookedProofVisible
+                ? `${attributionRead.bookedAppointmentsWithIdentity}/${overview.bookedAppointments}`
+                : "Pending"}
+            </p>
+            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+              {attributionRead.identityCoveragePercent !== null
+                ? `${attributionRead.identityCoveragePercent}% of visible booked appointments already have client identity attached.`
+                : "Identity coverage appears after booked proof is visible."}
+            </p>
+          </div>
+
+          <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
+            <p className="rev-label">Support coverage</p>
+            <p className="mt-2 text-[1.35rem] font-semibold text-[color:var(--foreground)]">
+              {attributionRead.status === "degraded"
+                ? "Unavailable"
+                : attributionRead.leadBaseCoveragePercent !== null
+                ? `${attributionRead.leadBaseCoveragePercent}%`
+                : "Pending"}
+            </p>
+            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+              {attributionRead.status === "degraded"
+                ? "Lead-base support is temporarily unavailable, but revenue and booked proof remain readable."
+                : attributionRead.leadBaseCoveragePercent !== null
+                ? "Visible booked proof already backed by lead-base support."
+                : "Lead-base coverage becomes defensible after proof is visible."}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+                Recent booked momentum
+              </p>
+              <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+                {longitudinalSummary}
+              </p>
+            </div>
+            <RevoryStatusBadge tone={recentMomentum.bookedAppointments > 0 ? "real" : "future"}>
+              {recentMomentum.windowLabel}
+            </RevoryStatusBadge>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {recentMomentum.timeline.map((month) => (
+              <MomentumMonthCard
+                bookedAppointments={month.bookedAppointments}
+                estimatedRevenue={month.estimatedRevenue}
+                isStrongest={Boolean(
+                  strongestMonthLabel && strongestMonthLabel === month.label && month.bookedAppointments > 0,
+                )}
+                key={month.monthKey}
+                label={month.label}
+              />
+            ))}
+          </div>
+        </div>
+
+        <aside className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] p-4">
+          <p className="rev-label">Renewal read</p>
+          <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
+            {renewalRead.headline}
+          </p>
+          <p className="mt-2 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+            {renewalRead.summary}
+          </p>
+
+          <div className="mt-4 space-y-2 border-t border-[color:var(--border)] pt-3.5">
+            {renewalRead.supportPoints.map((point) => (
+              <div
+                className="flex items-center justify-between gap-3 rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-2.5"
+                key={point.label}
+              >
+                <span className="text-xs text-[color:var(--text-muted)]">{point.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-[color:var(--foreground)]">
+                    {point.value}
+                  </span>
+                  <RevoryStatusBadge tone={point.tone}>
+                    {point.statusLabel}
+                  </RevoryStatusBadge>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+              Retention defense
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+              {retentionRead.headline}
+            </p>
+            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+              {retentionRead.summary}
+            </p>
+            <div className="mt-3 space-y-2">
+              {retentionRead.checkpoints.map((checkpoint) => (
+                <div
+                  className="flex items-center justify-between gap-3 rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3 py-2"
+                  key={checkpoint.label}
+                >
+                  <span className="text-xs text-[color:var(--text-muted)]">{checkpoint.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-[color:var(--foreground)]">
+                      {checkpoint.value}
+                    </span>
+                    <RevoryStatusBadge tone={checkpoint.tone}>
+                      {checkpoint.tone === "real"
+                        ? "Healthy"
+                        : checkpoint.tone === "future"
+                          ? "Thin"
+                          : "Building"}
+                    </RevoryStatusBadge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+              Revenue defense
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+              {longitudinalAsideTitle}
+            </p>
+            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+              {longitudinalAsideNote}
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[color:var(--text-muted)]">
+              <span>
+                Booked in view:{" "}
+                <span className="font-semibold text-[color:var(--foreground)]">
+                  {recentMomentum.bookedAppointments > 0
+                    ? `${recentMomentum.bookedAppointments} booked`
+                    : "Pending"}
+                </span>
+              </span>
+              <span>
+                Revenue in view:{" "}
+                <span className="font-semibold text-[color:var(--foreground)]">
+                  {formatCurrency(recentMomentum.estimatedRevenue)}
+                </span>
+              </span>
+              <span>
+                Strongest month:{" "}
+                <span className="font-semibold text-[color:var(--foreground)]">
+                  {strongestMonthLabel ?? "Still building"}
+                </span>
+              </span>
+            </div>
+          </div>
+        </aside>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -425,7 +854,7 @@ export default async function DashboardPage() {
                         <p className="text-sm font-semibold text-[color:var(--foreground)]">
                           {formatSourceLabel(bookedProofSource.type)}
                         </p>
-                        <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
+                  <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
                           {bookedProofSource.fileName ?? "File unavailable"}
                         </p>
                       </div>
@@ -440,13 +869,13 @@ export default async function DashboardPage() {
                     </div>
 
                     <div className="mt-3 grid gap-2 text-xs text-[color:var(--text-muted)] sm:grid-cols-3">
-                      <span>Coverage {progressPercent}%</span>
-                      <span>Visible {bookedProofSource.successRows}</span>
-                      <span>Review {bookedProofSource.errorRows}</span>
+                      <span>Proof kept {progressPercent}%</span>
+                      <span>Booked visible {bookedProofSource.successRows}</span>
+                      <span>Needs review {bookedProofSource.errorRows}</span>
                     </div>
                     {!hasBookedProofVisible ? (
                       <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-muted)]">
-                        The appointments source is present, but booked outcomes are still not visible in the revenue read.
+                        The appointments file is in, but booked outcomes still are not visible enough to support revenue.
                       </p>
                     ) : null}
                   </div>
@@ -458,7 +887,7 @@ export default async function DashboardPage() {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                        Lead base support
+                        Lead-base support
                       </p>
                       <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
                         {leadBaseSource.fileName ?? "File unavailable"}
@@ -472,13 +901,13 @@ export default async function DashboardPage() {
                   </div>
 
                   <div className="mt-3 grid gap-2 text-xs text-[color:var(--text-muted)] sm:grid-cols-3">
-                    <span>Rows {leadBaseSource.totalRows}</span>
-                    <span>Visible {leadBaseSource.successRows}</span>
-                    <span>Review {leadBaseSource.errorRows}</span>
+                    <span>Lead rows {leadBaseSource.totalRows}</span>
+                    <span>Support visible {leadBaseSource.successRows}</span>
+                    <span>Needs review {leadBaseSource.errorRows}</span>
                   </div>
 
                   <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-muted)]">
-                    Lead base stays secondary. It adds context without promoting booked proof on its own.
+                    Lead base stays secondary. It adds context without acting as booked proof.
                   </p>
                 </div>
               ) : null}
@@ -489,7 +918,7 @@ export default async function DashboardPage() {
                 Booked proof pending
               </p>
               <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-                Upload appointments file to ground revenue with visible booked outcomes.
+                Upload booked appointments so revenue can read real bookings, not activity alone.
               </p>
             </div>
           )}
@@ -499,22 +928,35 @@ export default async function DashboardPage() {
           <DashboardNextMoveAsideAsync
             bookingPathLabel={bookingPathLabel}
             dealValueLabel={dealValueLabel}
+            fallbackRead={fallbackDecisionSupportRead}
             mainOfferLabel={mainOfferLabel}
             overview={overview}
           />
         </Suspense>
       </section>
 
-      {overview.upcomingList.length > 0 ? (
+      {overview.upcomingRead.status === "degraded" ? (
         <section className="rounded-[22px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
               Upcoming bookings
             </p>
-            <RevoryStatusBadge tone="real">{overview.upcomingAppointments} scheduled</RevoryStatusBadge>
+            <RevoryStatusBadge tone="neutral">Limited</RevoryStatusBadge>
+          </div>
+          <p className="mt-3 text-sm leading-[1.45] text-[color:var(--text-muted)]">
+            Upcoming bookings are temporarily unavailable in this read. Booked proof and revenue stay live.
+          </p>
+        </section>
+      ) : overview.upcomingRead.list.length > 0 ? (
+        <section className="rounded-[22px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+              Upcoming bookings
+            </p>
+            <RevoryStatusBadge tone="real">{overview.upcomingRead.appointments} scheduled</RevoryStatusBadge>
           </div>
           <div className="mt-4 space-y-2.5">
-            {overview.upcomingList.slice(0, 3).map((appointment) => (
+            {overview.upcomingRead.list.slice(0, 3).map((appointment) => (
               <div
                 className="flex items-center gap-3 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3"
                 key={appointment.id}

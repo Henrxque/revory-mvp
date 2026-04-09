@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import {
@@ -36,19 +37,31 @@ function formatWorkspaceStatus(status: string) {
   }
 }
 
+function getPlanBadgeTone(planKey: string | null | undefined) {
+  if (planKey === "GROWTH") {
+    return "accent" as const;
+  }
+
+  if (planKey === "PREMIUM") {
+    return "future" as const;
+  }
+
+  return "neutral" as const;
+}
+
 function resolveBookingInputsStatus(
   activationCompleted: boolean,
   hasBookedProofVisible: boolean,
 ) {
   if (hasBookedProofVisible) {
-    return "Proof active";
+    return "Proof live";
   }
 
   if (activationCompleted) {
-    return "Proof ready";
+    return "Proof next";
   }
 
-  return "Proof next";
+  return "Proof pending";
 }
 
 export default async function PrivateAppLayout({
@@ -61,6 +74,12 @@ export default async function PrivateAppLayout({
   }
 
   const { activationSetup, user, workspace } = appContext;
+  const billingSummary = getWorkspaceBillingSummary(workspace);
+
+  if (!billingSummary.hasActiveAccess) {
+    redirect("/start");
+  }
+
   const bookedProofRead = await getBookedProofRead(workspace.id);
   const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
   const bookingInputsStatus = resolveBookingInputsStatus(
@@ -71,15 +90,19 @@ export default async function PrivateAppLayout({
     resolveOnboardingStepKey(activationSetup.currentStep),
   );
   const currentStepTitle = activationSetup.isCompleted
-    ? "Seller live"
+    ? hasBookedProofVisible
+      ? "Revenue ready"
+      : "Booked proof next"
     : currentStep.title;
   const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
   const activationBadgeLabel = activationStatus;
   const workspaceSubtitle = activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Seller workspace live with booked proof"
-      : "Seller workspace live, booked proof next"
-    : `Activation in progress: ${currentStep.eyebrow}`;
+      ? "Booked proof is live and revenue is ready."
+      : "Activation is live. Add booked proof to open revenue."
+    : `Activation is in progress. ${currentStep.title} comes next.`;
+  const currentPlanSignal =
+    billingSummary.plan?.inAppSignal ?? "Billing keeps Seller live.";
   const accountInitial = getAccountInitial(user.email);
 
   return (
@@ -129,7 +152,23 @@ export default async function PrivateAppLayout({
                     <p className="max-w-[10.5rem] truncate text-[13px] font-semibold text-[color:var(--foreground)]">
                       {user.email}
                     </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      {billingSummary.plan ? (
+                        <RevoryStatusBadge tone={getPlanBadgeTone(billingSummary.planKey)}>
+                          {billingSummary.plan.label}
+                        </RevoryStatusBadge>
+                      ) : null}
+                      <p className="text-[10px] leading-5 text-[color:var(--text-muted)]">
+                        {currentPlanSignal}
+                      </p>
+                    </div>
                   </div>
+                  <a
+                    className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[12px] font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.06)]"
+                    href="/api/billing/portal"
+                  >
+                    Billing
+                  </a>
                   <AuthSignOutButton compact />
                 </div>
               </div>

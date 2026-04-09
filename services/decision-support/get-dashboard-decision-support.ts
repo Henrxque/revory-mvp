@@ -33,7 +33,7 @@ export async function getDashboardDecisionSupport({
       ? overview.bookedProofSource
         ? ["REVIEW_BOOKED_PROOF", "START_BOOKED_PROOF"]
         : ["START_BOOKED_PROOF"]
-      : overview.upcomingAppointments === 0
+      : overview.upcomingRead.appointments === 0
         ? ["REFRESH_BOOKED_PROOF", "ADD_LEAD_BASE_SUPPORT"]
         : ["REFRESH_BOOKED_PROOF", "OPEN_REVENUE_VIEW", "ADD_LEAD_BASE_SUPPORT"];
   const allowedObjections: readonly RevoryObjectionCode[] =
@@ -41,7 +41,7 @@ export async function getDashboardDecisionSupport({
       ? overview.leadBaseSource
         ? ["PROOF_NOT_VISIBLE", "LEAD_BASE_ONLY", "PROOF_SOURCE_NEEDS_REVIEW"]
         : ["PROOF_NOT_VISIBLE", "PROOF_SOURCE_NEEDS_REVIEW"]
-      : overview.upcomingAppointments === 0
+      : overview.upcomingRead.appointments === 0
         ? ["THIN_BOOKING_CALENDAR", "SUPPORT_SHOULD_STAY_SECONDARY", "NO_ACTIVE_BLOCKER"]
         : ["NO_ACTIVE_BLOCKER", "SUPPORT_SHOULD_STAY_SECONDARY"];
   const classification = await requestBoundedIntentClassification({
@@ -56,7 +56,7 @@ export async function getDashboardDecisionSupport({
       hasBookedProofSource: overview.bookedProofSource !== null,
       leadBaseVisible: overview.leadBaseSource !== null,
       mainOfferLabel,
-      upcomingAppointments: overview.upcomingAppointments,
+      upcomingAppointments: overview.upcomingRead.appointments,
     },
     useCase: "dashboard",
   });
@@ -76,7 +76,7 @@ export async function getDashboardDecisionSupport({
       hasBookedProofSource: overview.bookedProofSource !== null,
       leadBaseVisible: overview.leadBaseSource !== null,
       mainOfferLabel,
-      upcomingAppointments: overview.upcomingAppointments,
+      upcomingAppointments: overview.upcomingRead.appointments,
     },
     fallback: toDecisionSupportPatch(classifiedRead),
     prompt:

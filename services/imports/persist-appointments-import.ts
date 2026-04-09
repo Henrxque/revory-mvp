@@ -183,6 +183,7 @@ export async function persistAppointmentsImport({
           email: row.normalizedRow.clientEmail,
           externalId: row.normalizedRow.clientExternalId,
           fullName: row.normalizedRow.clientFullName,
+          leadBaseSupport: false,
           phone: row.normalizedRow.clientPhone,
           workspaceId,
         });

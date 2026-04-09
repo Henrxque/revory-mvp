@@ -1,13 +1,13 @@
 export const onboardingSteps = [
   {
     key: "template",
-    title: "Choose Your Main Offer",
+    title: "Set Clinic + Main Offer",
     eyebrow: "Step 1 of 6",
     description:
-      "Choose the one offer REVORY Seller should move from paid lead to booked appointment first.",
-    fieldLabel: "Main offer",
+      "Name the clinic and choose the one offer REVORY Seller should push from paid lead to booked appointment first.",
+    fieldLabel: "Clinic + main offer",
     helperText:
-      "One focused offer keeps the booking motion narrow, premium, and easier to trust.",
+      "This anchors Seller to a real MedSpa and one clear booking goal from the start.",
     ctaLabel: "Continue",
   },
   {
@@ -15,10 +15,10 @@ export const onboardingSteps = [
     title: "Choose Your Lead Entry",
     eyebrow: "Step 2 of 6",
     description:
-      "Choose where REVORY Seller should read live demand first so activation starts from real lead flow.",
+      "Choose where REVORY Seller should read paid demand first so activation starts from real lead flow.",
     fieldLabel: "Lead entry",
     helperText:
-      "Choose the cleanest path to bring live demand into Seller without turning activation into a technical project.",
+      "Choose the cleanest path to bring real demand into Seller without turning setup into a technical project.",
     ctaLabel: "Continue",
   },
   {
@@ -29,7 +29,7 @@ export const onboardingSteps = [
       "Set the primary path REVORY Seller should reinforce when a lead is ready to move toward booking.",
     fieldLabel: "Booking path",
     helperText:
-      "A single primary path keeps the booking system predictable. Email stays the default; SMS remains assisted when available.",
+      "A single primary path keeps booking fast and predictable. Email stays the default; SMS remains assisted when available.",
     ctaLabel: "Continue",
   },
   {
@@ -48,10 +48,10 @@ export const onboardingSteps = [
     title: "Choose Your Booking Voice",
     eyebrow: "Step 5 of 6",
     description:
-      "Choose the tone REVORY Seller should carry while guiding leads through the booking motion.",
+      "Choose the tone REVORY Seller should carry while guiding leads toward the first booking step.",
     fieldLabel: "Seller voice",
     helperText:
-      "Keep the tone premium and controlled so the booking path feels consistent without needing a custom builder.",
+      "Keep the tone premium and controlled so the booking path feels consistent without needing extra setup.",
     ctaLabel: "Continue",
   },
   {
@@ -59,10 +59,10 @@ export const onboardingSteps = [
     title: "Go Live With Seller",
     eyebrow: "Step 6 of 6",
     description:
-      "Review the activation pillars, activate the workspace, and move into the live Seller revenue view.",
+      "Review the setup, activate the workspace, and move into the live Seller revenue view.",
     fieldLabel: "Activation readiness",
     helperText:
-      "Activation is the handoff from guided choices into a live booking-first system with visible booked outcomes and cleaner revenue visibility.",
+      "Activation is the handoff into a live booking-first system with visible booked outcomes and cleaner revenue visibility.",
     ctaLabel: "Go live with REVORY Seller",
   },
 ] as const;

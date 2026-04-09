@@ -141,15 +141,15 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Proof active" || status === "Activated") {
+  if (status === "Proof live" || status === "Activated") {
     return "success";
   }
 
-  if (status === "Proof ready" || status === "Activating") {
+  if (status === "Proof next" || status === "Activating") {
     return "warning";
   }
 
-  if (status === "Proof next") {
+  if (status === "Proof pending") {
     return "warning";
   }
 
@@ -172,7 +172,7 @@ export function AppSidebar({
       <div className="border-b border-[color:var(--border)] px-5 py-[1.125rem]">
         <RevoryLogo compact />
         <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
-          Premium booking acceleration system
+          Paid leads into booked appointments
         </p>
       </div>
 

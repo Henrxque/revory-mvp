@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
+    "env:check": "node scripts/check-environment-consistency.mjs",
+    "qa:clean-rerun": "node scripts/run-clean-rerun.mjs",
     "llm:env": "node scripts/check-llm-env.mjs",
     "llm:smoke": "node scripts/smoke-llm-bounded-runtime.mjs",
     "llm:qa": "node scripts/qa-llm-fallback-structured-output.mjs",
@@ -25,7 +27,8 @@
     "next-auth": "^4.24.13",
     "playwright": "^1.58.2",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "stripe": "^22.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.2.2",

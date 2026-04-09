@@ -19,6 +19,19 @@ enum WorkspaceStatus {
   PAUSED
 }
 
+enum BillingPlanKey {
+  BASIC
+  GROWTH
+  PREMIUM
+}
+
+enum BillingStatus {
+  INACTIVE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
 enum FlowModeKey {
   MODE_A
   MODE_B
@@ -113,6 +126,14 @@ model Workspace {
   status                WorkspaceStatus       @default(DRAFT)
   // Active mode effectively used by the workspace after activation.
   activeModeKey         FlowModeKey           @default(MODE_A)
+  // Minimal billing foundation for Stripe Checkout, webhook sync, and plan gating.
+  planKey               BillingPlanKey?
+  billingStatus         BillingStatus         @default(INACTIVE)
+  stripeCustomerId      String?               @unique
+  stripeSubscriptionId  String?               @unique
+  stripePriceId         String?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean               @default(false)
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   owner                 User                  @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
@@ -206,6 +227,7 @@ model Client {
   birthDate             DateTime?
   lastVisitAt           DateTime?
   totalVisits           Int?
+  hasLeadBaseSupport    Boolean               @default(false)
   tagsJson              Json?
   notes                 String?
   createdAt             DateTime              @default(now())

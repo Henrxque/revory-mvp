@@ -48,10 +48,12 @@ type CsvUploadCardProps = Readonly<{
     totalRows: number;
     status: string;
   } | null;
+  laneSummary: string;
   onActivityChange?: (isActive: boolean) => void;
   templateHref: string;
   templateKey: RevoryCsvTemplateKey;
   templateName: string;
+  tone: "primary" | "secondary";
 }>;
 
 function TemplateIcon({ templateKey }: Readonly<{ templateKey: RevoryCsvTemplateKey }>) {
@@ -257,10 +259,12 @@ function formatPreviewValidationMessage(messages: readonly string[]) {
 export function CsvUploadCard({
   helperText,
   lastUpload,
+  laneSummary,
   onActivityChange,
   templateHref,
   templateKey,
   templateName,
+  tone,
 }: CsvUploadCardProps) {
   const [serverState, formAction, isPending] = useActionState(
     uploadCsvFile,
@@ -320,6 +324,7 @@ export function CsvUploadCard({
   );
   const cardTitle =
     templateKey === "appointments" ? "Booked proof" : "Lead base";
+  const isPrimaryLane = tone === "primary";
   const processSteps = [
     { detail: "Read headers", step: "01" },
     { detail: "Confirm fit", step: "02" },
@@ -339,7 +344,7 @@ export function CsvUploadCard({
     }
 
     if (isConfirmationStepVisible) {
-      return { label: "Final review", tone: "accent" as const };
+      return { label: "Ready to confirm", tone: "accent" as const };
     }
 
     if (currentPreview && canSubmit) {
@@ -368,10 +373,11 @@ export function CsvUploadCard({
   const uploadPanelClassName = hasUploadContext
     ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))]"
     : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]";
+  const shellToneClassName = isPrimaryLane
+    ? "border-[rgba(194,9,90,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]"
+    : "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.012))]";
   const primaryActionLabel =
-    currentPreview?.exactTemplateMatch
-      ? "Open review"
-      : "Continue review";
+    currentPreview?.exactTemplateMatch ? "Open review" : "Continue review";
   const confirmationActionLabel =
     currentPreview?.exactTemplateMatch
       ? "Confirm and make visible"
@@ -383,11 +389,11 @@ export function CsvUploadCard({
   const visibleNowLabel =
     templateKey === "appointments" ? "Proof rows live" : "Rows live";
   const uploadLabel =
-    templateKey === "appointments" ? "Upload booked proof file" : "Upload lead-base file";
-  const currentUpdateLabel =
     templateKey === "appointments"
-      ? "Current proof update"
-      : "Current support update";
+      ? "Upload booked appointments file"
+      : "Upload lead-base support file";
+  const currentUpdateLabel =
+    templateKey === "appointments" ? "Current proof pass" : "Current support pass";
   const inProgressLabel =
     templateKey === "appointments"
       ? "Proof update in progress"
@@ -400,6 +406,10 @@ export function CsvUploadCard({
     templateKey === "appointments"
       ? "Result from the latest proof file."
       : "Result from the latest support file.";
+  const templateCtaLabel =
+    templateKey === "appointments" ? "Get proof template" : "Get support template";
+  const fileReadLabel =
+    templateKey === "appointments" ? "Selected proof file" : "Selected support file";
   const currentResultBody =
     templateKey === "appointments"
       ? "This result applies only to the current file."
@@ -511,7 +521,7 @@ export function CsvUploadCard({
     }
 
     if (!canOpenConfirmation) {
-      setClientError("Resolve the mapping blockers before moving to the final review.");
+      setClientError("Resolve the mapping blockers before confirming this file.");
       return;
     }
 
@@ -556,7 +566,7 @@ export function CsvUploadCard({
   }
 
   return (
-    <section className="rev-shell-panel relative flex h-full max-w-full min-w-0 flex-col overflow-hidden rounded-[34px] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.2)] md:p-6">
+    <section className={`rev-shell-panel relative flex h-full max-w-full min-w-0 flex-col overflow-hidden rounded-[34px] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.2)] md:p-6 ${shellToneClassName}`}>
       <div
         className={`pointer-events-none absolute top-0 h-40 w-40 rounded-full blur-3xl ${
           templateKey === "appointments"
@@ -567,9 +577,26 @@ export function CsvUploadCard({
 
       <div className="relative grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
         <div className="max-w-3xl space-y-3">
-          <p className="rev-kicker">{templateName}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="rev-kicker">{templateName}</p>
+            <span
+              className={`rounded-full border px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] ${
+                isPrimaryLane
+                  ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] text-[color:var(--accent-light)]"
+                  : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]"
+              }`}
+            >
+              {laneSummary}
+            </span>
+          </div>
           <div className="flex min-h-[5.75rem] flex-wrap items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[16px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.1)] text-[color:var(--accent-light)]">
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-[16px] border ${
+                isPrimaryLane
+                  ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.1)] text-[color:var(--accent-light)]"
+                  : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--foreground)]"
+              }`}
+            >
               <TemplateIcon templateKey={templateKey} />
             </div>
 
@@ -599,7 +626,7 @@ export function CsvUploadCard({
           href={templateHref}
         >
           <DownloadButtonIcon />
-          <span>Get template</span>
+          <span>{templateCtaLabel}</span>
         </Link>
       </div>
 
@@ -703,8 +730,8 @@ export function CsvUploadCard({
               <div className="space-y-2">
                 <p className="rev-label">{uploadLabel}</p>
                 <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
-                  Drop your CSV. REVORY reads headers first, then waits for
-                  your final confirmation.
+                  Upload one file, check the fit, then confirm what becomes
+                  visible in Seller.
                </p>
             </div>
             <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
@@ -741,7 +768,7 @@ export function CsvUploadCard({
 
             <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(12,11,15,0.42)] px-4 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                {currentPreview ? "Current file" : "Selected file"}
+                {currentPreview ? "Current file" : fileReadLabel}
               </p>
               <p className="mt-1 truncate text-sm font-medium text-[color:var(--foreground)]">
                 {selectedFileName ?? "No file selected"}
@@ -751,7 +778,7 @@ export function CsvUploadCard({
                   ? `${currentPreview.totalHeaderCount} header${
                       currentPreview.totalHeaderCount === 1 ? "" : "s"
                     } detected for review.`
-                  : "File stays local until confirmation."}
+                  : "Nothing goes live until you confirm this file."}
               </p>
             </div>
           </div>
@@ -774,9 +801,9 @@ export function CsvUploadCard({
           <div className="rev-card rounded-[28px] p-5 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-3xl">
-                <p className="rev-label">Final review</p>
+                <p className="rev-label">Confirm this file</p>
                 <h3 className="mt-2 text-[1.35rem] font-semibold leading-[1.15] text-[color:var(--foreground)]">
-                  Confirm mapping and make this file visible.
+                  Confirm the mapping and update Seller.
                 </h3>
                 <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                   This confirmation applies only to the current file.
@@ -947,7 +974,7 @@ export function CsvUploadCard({
               </div>
               <div className="rounded-[20px] border border-[rgba(46,204,134,0.22)] bg-[rgba(46,204,134,0.08)] px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                  Rows made visible
+                  Rows visible now
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
                   {statusState.importSummary.successRows}
@@ -955,7 +982,7 @@ export function CsvUploadCard({
               </div>
               <div className="rounded-[20px] border border-[rgba(245,166,35,0.25)] bg-[rgba(245,166,35,0.08)] px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-                  Rows held back
+                  Rows to review
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
                   {statusState.importSummary.errorRows}
@@ -1062,12 +1089,14 @@ export function CsvUploadCard({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
             {isConfirmationStepVisible
-              ? "Final check before making this file visible."
+              ? "Final check before Seller updates from this file."
               : currentPreview
               ? canSubmit
-                ? "Mapping ready. Open review to continue."
+                ? "Mapping ready. Confirm this file to continue."
                 : "Resolve blockers in the mapping preview to continue."
-              : "Use the official template when possible. If not, confirm mapping before visibility updates."}
+              : isPrimaryLane
+                ? "Use the proof template when possible. Seller should read booked proof before revenue."
+                : "Use the support template when needed. Lead base stays secondary to booked proof."}
           </p>
           {!isConfirmationStepVisible && currentPreview ? (
             <button

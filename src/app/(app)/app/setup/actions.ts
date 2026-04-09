@@ -10,6 +10,8 @@ import { redirect } from "next/navigation";
 
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { prisma } from "@/db/prisma";
+import { upsertMedSpaProfile } from "@/services/medspa/upsert-medspa-profile";
 import { completeActivationSetup } from "@/services/onboarding/complete-activation-setup";
 import { setCurrentOnboardingStep } from "@/services/onboarding/set-current-step";
 import { isSupportedOnboardingSourceType } from "@/services/onboarding/supported-onboarding-source-types";
@@ -66,6 +68,20 @@ function normalizeDealValue(value: string) {
   return new Prisma.Decimal(parsedValue);
 }
 
+function normalizeClinicName(value: string) {
+  const trimmedValue = value.trim().replace(/\s+/g, " ");
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (trimmedValue.length < 2) {
+    return null;
+  }
+
+  return trimmedValue.slice(0, 80);
+}
+
 async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
   const appContext = await getAppContext();
   const requestedStepKey =
@@ -107,11 +123,30 @@ export async function submitOnboardingStep(formData: FormData) {
   switch (currentStepKey) {
     case "template": {
       const selectedTemplate = formData.get("selectedTemplate");
+      const clinicNameInput = formData.get("clinicName");
+      const clinicName =
+        typeof clinicNameInput === "string" ? normalizeClinicName(clinicNameInput) : null;
 
-      if (typeof selectedTemplate !== "string" || !isTemplateValue(selectedTemplate)) {
+      if (
+        typeof selectedTemplate !== "string" ||
+        !isTemplateValue(selectedTemplate) ||
+        !clinicName
+      ) {
         redirect(`${getOnboardingStepPath(currentStepKey)}?error=template`);
       }
 
+      await prisma.workspace.update({
+        where: {
+          id: workspaceId,
+        },
+        data: {
+          name: clinicName,
+        },
+      });
+      await upsertMedSpaProfile({
+        brandName: clinicName,
+        workspaceId,
+      });
       await updateActivationSetup(workspaceId, {
         currentStep: nextStepKey ?? currentStepKey,
         isCompleted: false,

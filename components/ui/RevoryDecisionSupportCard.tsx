@@ -51,7 +51,7 @@ export function RevoryDecisionSupportCard({
           </div>
 
           <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 md:min-h-[6.2rem]">
-            <p className="rev-label">Current support</p>
+            <p className="rev-label">Proof strength</p>
             <p className="mt-1.5 text-[0.98rem] font-semibold text-[color:var(--foreground)]">
               {currentSupportSignal?.value ?? "Not visible yet"}
             </p>
