@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revory Team"
+  short_description: "Project subagents for the Revory Seller MVP"
+  default_prompt: "Use revory-team-lead to route the task to the best Revory specialist while preserving the MVP guardrails."
