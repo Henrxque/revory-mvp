@@ -1,29 +1,79 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { getAuthSession } from "@/auth";
+import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
-import { getAuthSession } from "@/auth";
+import { buildSignUpRedirectPath } from "@/services/auth/redirects";
+import { syncAuthenticatedUser } from "@/services/auth/sync-user";
 import { getStripeAppUrl, isStripeBillingConfigured } from "@/services/billing/stripe-runtime";
 import { syncWorkspaceBillingFromCheckoutSession } from "@/services/billing/stripe-sync";
 import {
-  getBillingPlanDefinition,
   getWorkspaceBillingSummary,
   normalizeBillingPlanKey,
 } from "@/services/billing/workspace-billing";
-import { buildSignUpRedirectPath } from "@/services/auth/redirects";
-import { syncAuthenticatedUser } from "@/services/auth/sync-user";
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 
 const billingPlans = ["BASIC", "GROWTH", "PREMIUM"] as const;
+
+const planPresentation = {
+  BASIC: {
+    ctaLabel: "Get Started",
+    features: [
+      "1 main offer",
+      "1 booking path",
+      "Lower lead volume",
+      "Revenue-first dashboard",
+      "Contained booking lane",
+      "Light async support",
+    ],
+    headerTone: "text-[#f3eef9]",
+    name: "Basic",
+    price: "$370",
+    toneClass:
+      "border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))]",
+  },
+  GROWTH: {
+    ctaLabel: "Start Your Booking Flow ->",
+    features: [
+      "Higher lead volume",
+      "Better result visibility",
+      "Stronger booking playbook",
+      "Stronger booking lane",
+      "Revenue-first dashboard",
+      "Best-fit core plan",
+      "Priority async support",
+    ],
+    headerTone: "text-white",
+    name: "Growth",
+    price: "$570",
+    toneClass:
+      "border-[rgba(194,9,90,0.36)] bg-[linear-gradient(145deg,rgba(25,22,32,0.98),rgba(194,9,90,0.05))] shadow-[0_0_40px_rgba(194,9,90,0.12)]",
+  },
+  PREMIUM: {
+    ctaLabel: "Review Premium Fit",
+    features: [
+      "For higher lead volume already proving fit",
+      "Priority async support",
+      "More room inside the same narrow model",
+      "Stronger attribution support",
+      "Stronger renewal read",
+      "Best once Seller value is already clear",
+    ],
+    headerTone: "text-[#f3eef9]",
+    name: "Premium",
+    price: "$999+",
+    toneClass:
+      "border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))]",
+  },
+} as const;
 
 type StartPageProps = Readonly<{
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
-function resolveSearchParam(
-  value: string | string[] | undefined,
-) {
+function resolveSearchParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
@@ -134,206 +184,129 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     );
 
   return (
-    <main className="min-h-screen px-6 py-10 md:px-8 md:py-14">
-      <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
-        <section className="rev-shell-hero rev-accent-mist flex flex-col rounded-[36px] p-7 md:p-9">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href="/">
+    <main className="min-h-screen px-5 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-[1260px]">
+        <div className="mx-auto mb-8 flex max-w-[1260px] flex-wrap items-center justify-between gap-4 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(20,18,26,0.72)] px-5 py-3.5 backdrop-blur">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link href="/" className="inline-flex shrink-0 items-center">
               <RevoryLogo />
             </Link>
+            <div className="hidden h-10 w-px bg-[rgba(255,255,255,0.08)] md:block" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9f96ae]">
+                Workspace
+              </p>
+              <p className="mt-1 truncate text-sm font-medium text-[color:var(--foreground)]">
+                {workspace.name}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <RevoryStatusBadge tone="accent">Seller billing</RevoryStatusBadge>
+            <RevoryStatusBadge tone={billingSummary.hasStripeIdentity ? "neutral" : "future"}>
+              {billingSummary.hasStripeIdentity ? "Stripe linked" : "Billing next"}
+            </RevoryStatusBadge>
+            <RevoryStatusBadge tone={isStripeBillingConfigured() ? "real" : "future"}>
+              {isStripeBillingConfigured() ? "Checkout ready" : "Stripe env missing"}
+            </RevoryStatusBadge>
+            <AuthSignOutButton callbackUrl="/" compact />
           </div>
+        </div>
 
-          <div className="mt-8 flex flex-wrap gap-2">
-            <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#cfc7db]">
-              Self-service checkout
-            </span>
-            <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#cfc7db]">
-              Stripe portal
-            </span>
-            <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#cfc7db]">
-              Workspace gating
-            </span>
-          </div>
-
-          <div className="mt-8 space-y-4">
-            <p className="rev-kicker">Billing activation</p>
-            <h1 className="rev-display-hero max-w-[32rem]">
-              Start Seller with the{" "}
-              <span className="italic text-[color:var(--accent-light)]">
-                plan that fits your booking flow.
-              </span>
-            </h1>
-            <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-              Stripe handles checkout, card updates, and cancellation. REVORY keeps
-              the path narrow: one plan, one active subscription, one clean move into setup.
-            </p>
-          </div>
-
-          <div className="mt-8 rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.025)] p-5 md:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#a39bb2]">
-                  Workspace
-                </p>
-                <p className="mt-1 text-lg font-semibold text-[color:var(--foreground)]">
-                  {workspace.name}
-                </p>
-              </div>
-              <RevoryStatusBadge tone={billingSummary.hasStripeIdentity ? "neutral" : "future"}>
-                {billingSummary.hasStripeIdentity ? "Stripe linked" : "Billing next"}
-              </RevoryStatusBadge>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <div className="rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9f96ae]">
-                  Current billing
-                </p>
-                <p className="mt-2 text-base font-semibold text-[color:var(--foreground)]">
-                  {billingSummary.plan?.label ?? "No active plan"}
-                </p>
-                <p className="mt-1 text-sm leading-7 text-[#c6bfd2]">
-                  Status: {billingSummary.billingStatus.toLowerCase().replaceAll("_", " ")}
-                </p>
-                {billingSummary.plan ? (
-                  <p className="mt-2 text-sm font-medium leading-6 text-[#e3ddea]">
-                    {billingSummary.plan.inAppSignal}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9f96ae]">
-                  Stripe runtime
-                </p>
-                <p className="mt-2 text-base font-semibold text-[color:var(--foreground)]">
-                  {isStripeBillingConfigured() ? "Checkout ready" : "Stripe env missing"}
-                </p>
-                <p className="mt-1 text-sm leading-7 text-[#c6bfd2]">
-                  App URL: {getStripeAppUrl()}
-                </p>
-              </div>
-            </div>
-          </div>
+        <section className="mx-auto max-w-[1260px] pb-4 text-center">
+          <p className="rev-kicker">Pricing</p>
         </section>
 
-        <section className="rev-accent-mist-soft rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
-          <div className="space-y-5">
-            <div className="space-y-3">
-              <p className="rev-kicker">Plans</p>
-              <h2 className="rev-display-panel max-w-[24rem]">
-                Choose a REVORY Seller plan.
-              </h2>
-              <p className="max-w-xl text-sm leading-7 text-[#beb7ca]">
-                The checkout stays inside Stripe. After payment, the workspace comes back
-                here, syncs billing, and opens the protected app flow.
+        {billingMessage ? (
+          <div className="mx-auto mb-6 max-w-[860px] rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-base font-semibold text-[color:var(--foreground)]">
+                {billingMessage.label}
               </p>
+              <RevoryStatusBadge tone={billingMessage.tone}>
+                {billingMessage.label}
+              </RevoryStatusBadge>
             </div>
+            <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
+              {billingMessage.text}
+            </p>
+          </div>
+        ) : null}
 
-            <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9f96ae]">
-                Plan read
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
-                Every plan keeps the same narrow Seller model: one offer, one booking path,
-                booked proof first, revenue read second. Higher plans do not widen the
-                product. They only add more room once Seller value is already visible.
-              </p>
-            </div>
+        <section className="mx-auto max-w-[1260px]">
+          <div className="grid gap-5 xl:grid-cols-3">
+            {billingPlans.map((planKey) => {
+              const presentation = planPresentation[planKey];
+              const isCurrentPlan = billingSummary.planKey === planKey;
 
-            {billingMessage ? (
-              <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-base font-semibold text-[color:var(--foreground)]">
-                    {billingMessage.label}
-                  </p>
-                  <RevoryStatusBadge tone={billingMessage.tone}>
-                    {billingMessage.label}
-                  </RevoryStatusBadge>
-                </div>
-                <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
-                  {billingMessage.text}
-                </p>
-              </div>
-            ) : null}
-
-            <div className="grid gap-4">
-              {billingPlans.map((planKey) => {
-                const plan = getBillingPlanDefinition(planKey)!;
-                const isCurrentPlan = billingSummary.planKey === planKey;
-
-                return (
-                  <div
-                    key={planKey}
-                    className={`rounded-[26px] border p-5 md:p-6 ${
-                      planKey === "GROWTH"
-                        ? "border-[rgba(194,9,90,0.45)] bg-[linear-gradient(180deg,rgba(194,9,90,0.08),rgba(255,255,255,0.02))]"
-                        : "border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]"
-                    }`}
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9f96ae]">
-                            {plan.fitLabel}
-                          </p>
-                          {planKey === "BASIC" ? (
-                            <RevoryStatusBadge tone="neutral">Lean core</RevoryStatusBadge>
-                          ) : null}
-                          {planKey === "PREMIUM" ? (
-                            <RevoryStatusBadge tone="future">Best after proof</RevoryStatusBadge>
-                          ) : null}
-                        </div>
-                        <p className="text-lg font-semibold text-[color:var(--foreground)]">
-                          {plan.label}
-                        </p>
-                        <p className="mt-1 text-sm leading-7 text-[#beb7ca]">
-                          {plan.framing}
-                        </p>
-                        <p
-                          className={`mt-3 text-sm font-medium leading-6 ${
-                            planKey === "GROWTH"
-                              ? "text-[color:var(--accent-light)]"
-                              : "text-[#e3ddea]"
-                          }`}
-                        >
-                          {plan.valueSignal}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {planKey === "GROWTH" ? (
-                          <RevoryStatusBadge tone="accent">{plan.fitLabel}</RevoryStatusBadge>
-                        ) : null}
-                        {isCurrentPlan ? (
-                          <RevoryStatusBadge tone="neutral">Selected</RevoryStatusBadge>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-2">
-                      {plan.supportPoints.map((point) => (
-                        <div
-                          className="rounded-[16px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.018)] px-3 py-2.5"
-                          key={point}
-                        >
-                          <p className="text-sm leading-6 text-[#d4cedd]">{point}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap items-center gap-3">
-                      <a
-                        className={planKey === "GROWTH" ? "rev-button-primary" : "rev-button-secondary"}
-                        href={`/api/billing/checkout?plan=${planKey.toLowerCase()}`}
-                      >
-                        {isCurrentPlan ? "Continue with this plan" : plan.ctaLabel}
-                      </a>
-                    </div>
+              return (
+                <div
+                  key={planKey}
+                  className={`flex h-full flex-col rounded-[18px] border px-7 py-8 text-left ${presentation.toneClass}`}
+                >
+                  <div className="min-h-10">
+                    {planKey === "GROWTH" ? (
+                      <span className="inline-flex rounded-[6px] bg-[color:var(--accent)] px-3.5 py-1.5 text-[0.74rem] font-bold uppercase tracking-[0.1em] text-white">
+                        Best Fit
+                      </span>
+                    ) : (
+                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
+                        {presentation.name}
+                      </p>
+                    )}
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="mt-1">
+                    {planKey === "GROWTH" ? (
+                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
+                        {presentation.name}
+                      </p>
+                    ) : null}
+                    <p
+                      className={`mt-3 font-[family:var(--font-display)] text-[clamp(2.8rem,3.2vw,3.65rem)] leading-none tracking-[-0.04em] ${presentation.headerTone}`}
+                    >
+                      {presentation.price}
+                    </p>
+                    <p className="mt-2.5 text-[0.92rem] leading-7 text-[#8f8aa4]">
+                      per month
+                    </p>
+                  </div>
+
+                  <div className="mt-6 h-px bg-[rgba(255,255,255,0.08)]" />
+
+                  <div className="mt-6 space-y-3.5">
+                    {presentation.features.map((feature) => (
+                      <div key={feature} className="flex items-start gap-3">
+                        <span className="mt-1 text-[1.35rem] leading-none text-[color:var(--accent-light)]">
+                          ✓
+                        </span>
+                        <p className="text-[0.93rem] leading-8 text-[#908aa3]">{feature}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto pt-7">
+                    <a
+                      className={`w-full ${planKey === "GROWTH" ? "rev-button-primary" : "rev-button-secondary"}`}
+                      href={`/api/billing/checkout?plan=${planKey.toLowerCase()}`}
+                    >
+                      {isCurrentPlan ? "Continue with this plan" : presentation.ctaLabel}
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mx-auto mt-6 max-w-[760px] text-center">
+            <p className="text-sm leading-7 text-[#7f798f]">
+              Stripe handles checkout, card updates, and cancellation. The paid account
+              returns directly into the protected app flow for {workspace.name}.
+            </p>
+            <p className="mt-2 text-xs leading-6 text-[#6f6a7d]">
+              App URL: {getStripeAppUrl()}
+            </p>
           </div>
         </section>
       </div>

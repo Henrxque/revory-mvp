@@ -12,6 +12,7 @@ const loggedWarnings = new Set<string>();
 
 type RequestBoundedStructuredOutputInput<T> = {
   context: Record<string, unknown>;
+  maxOutputTokens?: number;
   outputName: string;
   parse: (value: unknown) => T | null;
   prompt: string;
@@ -100,7 +101,7 @@ async function requestStructuredOutputAttempt<T>(
             role: "user",
           },
         ],
-        max_output_tokens: DEFAULT_MAX_OUTPUT_TOKENS,
+        max_output_tokens: input.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
         model: runtimeStatus.model,
         store: false,
         text: {

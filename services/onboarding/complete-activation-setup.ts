@@ -3,6 +3,7 @@ import "server-only";
 import { WorkspaceStatus, type ActivationSetup, type Workspace } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { syncLeadBookingOpportunitiesForClients } from "@/services/lead-booking/sync-lead-booking-opportunities";
 import { getOnboardingDataSource } from "@/services/onboarding/upsert-onboarding-data-source";
 import { isSupportedOnboardingSourceType } from "@/services/onboarding/supported-onboarding-source-types";
 
@@ -71,6 +72,21 @@ export async function completeActivationSetup(
       },
     }),
   ]);
+
+  const leadSupportClientIds = await prisma.client.findMany({
+    select: {
+      id: true,
+    },
+    where: {
+      hasLeadBaseSupport: true,
+      workspaceId,
+    },
+  });
+
+  await syncLeadBookingOpportunitiesForClients({
+    clientIds: leadSupportClientIds.map((client) => client.id),
+    workspaceId,
+  });
 
   return {
     activationSetup: updatedActivationSetup,

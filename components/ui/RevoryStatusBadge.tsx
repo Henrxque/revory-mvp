@@ -1,4 +1,5 @@
 type RevoryStatusBadgeProps = Readonly<{
+  className?: string;
   children: React.ReactNode;
   tone?: "accent" | "real" | "future" | "neutral";
 }>;
@@ -14,12 +15,13 @@ const toneClasses: Record<NonNullable<RevoryStatusBadgeProps["tone"]>, string> =
 };
 
 export function RevoryStatusBadge({
+  className,
   children,
   tone = "neutral",
 }: RevoryStatusBadgeProps) {
   return (
     <span
-      className={`inline-flex min-h-6 items-center rounded-[11px] border px-2.5 py-[0.35rem] text-[9px] font-semibold leading-tight whitespace-nowrap ${toneClasses[tone]}`}
+      className={`inline-flex min-h-6 items-center rounded-[11px] border px-2.5 py-[0.35rem] text-[9px] font-semibold leading-tight whitespace-nowrap ${toneClasses[tone]} ${className ?? ""}`}
     >
       {children}
     </span>

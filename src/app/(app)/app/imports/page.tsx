@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
+import { LeadBookingOpportunityList } from "@/components/lead-booking/LeadBookingOpportunityList";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -11,6 +12,7 @@ import {
   getCsvUploadSources,
   hasLiveCsvUploadSource,
 } from "@/services/imports/get-csv-upload-sources";
+import { getLeadIntakeRoutingRead } from "@/services/lead-booking/get-lead-intake-routing-read";
 import { requestBoundedIntentClassification } from "@/services/llm/request-bounded-intent-classification";
 import {
   getOnboardingStepPath,
@@ -81,6 +83,19 @@ function ImportsNextMoveSection({
   );
 }
 
+function formatLeadOpportunitySummaryTone(value: string) {
+  switch (value) {
+    case "ready":
+      return "real" as const;
+    case "blocked":
+      return "future" as const;
+    case "booked":
+      return "neutral" as const;
+    default:
+      return "accent" as const;
+  }
+}
+
 async function ImportsNextMoveSectionAsync({
   fallback,
   hasAppointmentsSourceReady,
@@ -140,9 +155,10 @@ export default async function ImportsPage() {
     );
   }
 
-  const [uploadSources, bookedProofRead] = await Promise.all([
+  const [uploadSources, bookedProofRead, leadIntakeRead] = await Promise.all([
     getCsvUploadSources(appContext.workspace.id),
     getBookedProofRead(appContext.workspace.id),
+    getLeadIntakeRoutingRead(appContext.workspace.id),
   ]);
   const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
   const hasAppointmentsSourceReady = hasLiveCsvUploadSource(uploadSources.appointments);
@@ -224,6 +240,26 @@ export default async function ImportsPage() {
       note: isRevenueSupported ? "Ready now" : "Opens after proof",
       tone: isRevenueSupported ? "real" : "future",
       value: isRevenueSupported ? "Ready" : "Pending",
+    },
+  ] as const;
+  const assistanceValueProof = [
+    {
+      label: "Ready reads",
+      note: "Can move on the current path",
+      tone: "real" as const,
+      value: leadIntakeRead.summary.ready,
+    },
+    {
+      label: "Handoffs opened",
+      note: "Seller participation already visible",
+      tone: "accent" as const,
+      value: leadIntakeRead.summary.handoffsOpened,
+    },
+    {
+      label: "Already booked",
+      note: "Resolved outside active booking work",
+      tone: "neutral" as const,
+      value: leadIntakeRead.summary.booked,
     },
   ] as const;
 
@@ -318,6 +354,173 @@ export default async function ImportsPage() {
           appointmentsLastUpload={toUploadSummary(uploadSources.appointments)}
           clientsLastUpload={toUploadSummary(uploadSources.clients)}
         />
+      </section>
+
+      <section className="rounded-[26px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] p-5 md:p-6">
+        <div className="space-y-5">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="rev-kicker">Booking assistance</p>
+              <RevoryStatusBadge tone="neutral">Ready read visible</RevoryStatusBadge>
+              <RevoryStatusBadge tone="neutral">Blocked reason visible</RevoryStatusBadge>
+              <RevoryStatusBadge tone="neutral">Suggested message bounded</RevoryStatusBadge>
+              <RevoryStatusBadge tone="neutral">Path assist visible</RevoryStatusBadge>
+            </div>
+            <h2 className="max-w-[34rem] text-[1.85rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[color:var(--foreground)]">
+              Keep booking assistance premium, bounded, and tied to the current path.
+            </h2>
+            <p className="max-w-[38rem] text-sm leading-[1.6] text-[color:var(--text-muted)]">
+              Seller shows what can move now, what is blocked, and which short next step fits the current booking path. Suggested message and assisted handoff stay visible only when the current read truly supports them.
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1.15fr)_repeat(2,minmax(0,1fr))]">
+            <div className="rounded-[24px] border border-[rgba(194,9,90,0.26)] bg-[linear-gradient(180deg,rgba(194,9,90,0.09),rgba(255,255,255,0.02))] px-4 py-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="rev-label">Ready now</p>
+                <RevoryStatusBadge tone={formatLeadOpportunitySummaryTone("ready")}>
+                  Can open path
+                </RevoryStatusBadge>
+              </div>
+              <p className="mt-3 text-[2rem] font-semibold leading-none tracking-[-0.05em] text-[color:var(--foreground)]">
+                {leadIntakeRead.summary.ready}
+              </p>
+              <p className="mt-2 max-w-[16rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                Opportunities already clear enough to use the current booking path with assisted guidance.
+              </p>
+            </div>
+
+            <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="rev-label">Blocked now</p>
+                <RevoryStatusBadge tone={formatLeadOpportunitySummaryTone("blocked")}>
+                  Needs a fix
+                </RevoryStatusBadge>
+              </div>
+              <p className="mt-3 text-[1.5rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
+                {leadIntakeRead.summary.blocked}
+              </p>
+              <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                Blocked opportunities stay visible with an explicit reason and a narrow next move.
+              </p>
+            </div>
+
+            <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="rev-label">Handoffs opened</p>
+                <RevoryStatusBadge tone="neutral">Seller signal</RevoryStatusBadge>
+              </div>
+              <p className="mt-3 text-[1.5rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
+                {leadIntakeRead.summary.handoffsOpened}
+              </p>
+              <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                Seller records when the current booking path was opened without pretending thread or follow-up.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.038),rgba(255,255,255,0.018))] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="max-w-[34rem]">
+                <p className="rev-label">Assistance value proof</p>
+                <p className="mt-1 text-base font-semibold text-[color:var(--foreground)]">
+                  Seller now shows booking participation without pretending broader sales automation.
+                </p>
+                <p className="mt-2 text-[11px] leading-[1.6] text-[color:var(--text-muted)]">
+                  This layer stays narrow on purpose: it shows what can move now, when Seller already opened the current booking path, and which leads are already booked instead of still being treated like active booking work.
+                </p>
+              </div>
+              <RevoryStatusBadge tone="neutral">Executive proof layer</RevoryStatusBadge>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {assistanceValueProof.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="rev-label">{item.label}</p>
+                    <RevoryStatusBadge tone={item.tone}>{item.note}</RevoryStatusBadge>
+                  </div>
+                  <p className="mt-2 text-[1.4rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3 py-1.5 text-[10px] font-medium text-[color:var(--text-muted)]">
+                {leadIntakeRead.summary.blocked} blocked reads stay visible with an explicit reason.
+              </span>
+              <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3 py-1.5 text-[10px] font-medium text-[color:var(--text-muted)]">
+                Suggested message stays bounded to the current booking step.
+              </span>
+            </div>
+          </div>
+
+          <aside className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.018))] p-5">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start">
+              <div className="space-y-4">
+                <div>
+                  <p className="rev-label">Booking assistance surface</p>
+                  <p className="mt-1 text-base font-semibold text-[color:var(--foreground)]">
+                    Priority booking reads
+                  </p>
+                  <p className="mt-2 text-[11px] leading-[1.55] text-[color:var(--text-muted)]">
+                    Seller keeps the list short, prioritizes what is most actionable, and avoids turning this area into CRM, inbox, or broad sales-automation surface.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  {[
+                    {
+                      label: "Main offer",
+                      note: "Workspace anchor",
+                      tone: "accent" as const,
+                      value: leadIntakeRead.mainOfferLabel,
+                    },
+                    {
+                      label: "Booking path",
+                      note: "Current path",
+                      tone: "neutral" as const,
+                      value: leadIntakeRead.bookingPathLabel,
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="rev-label">{item.label}</p>
+                        <RevoryStatusBadge tone={item.tone}>{item.note}</RevoryStatusBadge>
+                      </div>
+                      <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] p-4.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="rev-label">Priority booking list</p>
+                    <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+                      Current booking assistance snapshot
+                    </p>
+                  </div>
+                  <RevoryStatusBadge tone="neutral">
+                    {leadIntakeRead.opportunities.length} items shown
+                  </RevoryStatusBadge>
+                </div>
+                <LeadBookingOpportunityList opportunities={leadIntakeRead.opportunities} />
+              </div>
+            </div>
+          </aside>
+        </div>
       </section>
     </div>
   );

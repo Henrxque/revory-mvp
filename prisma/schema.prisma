@@ -102,6 +102,14 @@ enum MetricsPeriodType {
   MONTHLY
 }
 
+enum LeadBookingOpportunityStatus {
+  OPEN
+  READY
+  BLOCKED
+  BOOKED
+  CLOSED
+}
+
 model User {
   id              String          @id @default(cuid())
   clerkUserId     String?         @unique
@@ -119,40 +127,41 @@ model User {
 }
 
 model Workspace {
-  id                    String                @id @default(cuid())
-  name                  String
-  slug                  String                @unique
-  ownerUserId           String
-  status                WorkspaceStatus       @default(DRAFT)
+  id                       String                   @id @default(cuid())
+  name                     String
+  slug                     String                   @unique
+  ownerUserId              String
+  status                   WorkspaceStatus          @default(DRAFT)
   // Active mode effectively used by the workspace after activation.
-  activeModeKey         FlowModeKey           @default(MODE_A)
+  activeModeKey            FlowModeKey              @default(MODE_A)
   // Minimal billing foundation for Stripe Checkout, webhook sync, and plan gating.
-  planKey               BillingPlanKey?
-  billingStatus         BillingStatus         @default(INACTIVE)
-  stripeCustomerId      String?               @unique
-  stripeSubscriptionId  String?               @unique
-  stripePriceId         String?
-  currentPeriodEnd      DateTime?
-  cancelAtPeriodEnd     Boolean               @default(false)
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  owner                 User                  @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
-  medSpaProfile         MedSpaProfile?
-  activationSetup       ActivationSetup?
-  dataSources           DataSource[]
-  clients               Client[]
-  appointments          Appointment[]
-  automationRuns        AutomationRun[]
-  recoveryOpportunities RecoveryOpportunity[]
-  reviewRequests        ReviewRequest[]
-  metricsSnapshots      MetricsSnapshot[]
+  planKey                  BillingPlanKey?
+  billingStatus            BillingStatus            @default(INACTIVE)
+  stripeCustomerId         String?                  @unique
+  stripeSubscriptionId     String?                  @unique
+  stripePriceId            String?
+  currentPeriodEnd         DateTime?
+  cancelAtPeriodEnd        Boolean                  @default(false)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  owner                    User                     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  medSpaProfile            MedSpaProfile?
+  activationSetup          ActivationSetup?
+  dataSources              DataSource[]
+  clients                  Client[]
+  appointments             Appointment[]
+  automationRuns           AutomationRun[]
+  recoveryOpportunities    RecoveryOpportunity[]
+  reviewRequests           ReviewRequest[]
+  metricsSnapshots         MetricsSnapshot[]
+  leadBookingOpportunities LeadBookingOpportunity[]
 
   @@map("workspaces")
 }
 
 model MedSpaProfile {
   id           String    @id @default(cuid())
-  workspaceId   String    @unique
+  workspaceId  String    @unique
   brandName    String
   businessType String?
   timezone     String
@@ -169,43 +178,44 @@ model MedSpaProfile {
 
 model ActivationSetup {
   id                 String               @id @default(cuid())
-  workspaceId         String               @unique
-  currentStep         String               @default("profile")
-  selectedTemplate    String?
-  primaryChannel      CommunicationChannel @default(EMAIL)
-  googleReviewsUrl    String?
-  averageDealValue    Decimal?             @db.Decimal(10, 2)
+  workspaceId        String               @unique
+  currentStep        String               @default("profile")
+  selectedTemplate   String?
+  primaryChannel     CommunicationChannel @default(EMAIL)
+  googleReviewsUrl   String?
+  averageDealValue   Decimal?             @db.Decimal(10, 2)
   // Recommended mode suggested by the onboarding wizard before activation.
-  recommendedModeKey  FlowModeKey?
-  isCompleted         Boolean              @default(false)
-  activatedAt         DateTime?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  recommendedModeKey FlowModeKey?
+  isCompleted        Boolean              @default(false)
+  activatedAt        DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("activation_setups")
 }
 
 model DataSource {
-  id                 String           @id @default(cuid())
-  workspaceId        String
-  type               DataSourceType
-  name               String
-  status             DataSourceStatus @default(PENDING)
-  lastSyncAt         DateTime?
-  lastImportedAt     DateTime?
-  lastImportCompletedAt DateTime?
-  lastImportFileName String?
-  lastImportRowCount Int              @default(0)
-  lastImportSuccessRowCount Int       @default(0)
-  lastImportErrorRowCount Int         @default(0)
-  lastImportError    String?
-  configJson         Json?
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  workspace          Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  clients            Client[]
-  appointments       Appointment[]
+  id                        String                   @id @default(cuid())
+  workspaceId               String
+  type                      DataSourceType
+  name                      String
+  status                    DataSourceStatus         @default(PENDING)
+  lastSyncAt                DateTime?
+  lastImportedAt            DateTime?
+  lastImportCompletedAt     DateTime?
+  lastImportFileName        String?
+  lastImportRowCount        Int                      @default(0)
+  lastImportSuccessRowCount Int                      @default(0)
+  lastImportErrorRowCount   Int                      @default(0)
+  lastImportError           String?
+  configJson                Json?
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  workspace                 Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clients                   Client[]
+  appointments              Appointment[]
+  leadBookingOpportunities  LeadBookingOpportunity[]
 
   @@unique([workspaceId, name])
   @@index([workspaceId, type])
@@ -215,37 +225,38 @@ model DataSource {
 }
 
 model Client {
-  id                    String                @id @default(cuid())
-  workspaceId           String
-  dataSourceId          String?
-  externalId            String?
-  fullName              String?
-  firstName             String?
-  lastName              String?
-  email                 String?
-  phone                 String?
-  birthDate             DateTime?
-  lastVisitAt           DateTime?
-  totalVisits           Int?
-  hasLeadBaseSupport    Boolean               @default(false)
-  tagsJson              Json?
-  notes                 String?
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  dataSource            DataSource?           @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
-  appointments          Appointment[]
-  recoveryOpportunities RecoveryOpportunity[]
-  reviewRequests        ReviewRequest[]
+  id                     String                  @id @default(cuid())
+  workspaceId            String
+  dataSourceId           String?
+  externalId             String?
+  fullName               String?
+  firstName              String?
+  lastName               String?
+  email                  String?
+  phone                  String?
+  birthDate              DateTime?
+  lastVisitAt            DateTime?
+  totalVisits            Int?
+  hasLeadBaseSupport     Boolean                 @default(false)
+  tagsJson               Json?
+  notes                  String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  workspace              Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dataSource             DataSource?             @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+  appointments           Appointment[]
+  recoveryOpportunities  RecoveryOpportunity[]
+  reviewRequests         ReviewRequest[]
+  leadBookingOpportunity LeadBookingOpportunity?
 
+  // Effective uniqueness applies when externalId is present.
+  @@unique([workspaceId, externalId])
   // Application rule for the MVP: at least one of externalId, email, or phone must be present.
   @@index([workspaceId])
   @@index([workspaceId, dataSourceId])
   @@index([workspaceId, email])
   @@index([workspaceId, phone])
   @@index([workspaceId, lastVisitAt])
-  // Effective uniqueness applies when externalId is present.
-  @@unique([workspaceId, externalId])
   @@map("clients")
 }
 
@@ -264,7 +275,7 @@ model Appointment {
   providerName          String?
   locationName          String?
   sourceNotes           String?
-  estimatedRevenue      Decimal?                  @db.Decimal(10, 2)
+  estimatedRevenue      Decimal?              @db.Decimal(10, 2)
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -273,12 +284,12 @@ model Appointment {
   recoveryOpportunities RecoveryOpportunity[]
   reviewRequests        ReviewRequest[]
 
+  // Effective uniqueness applies when externalId is present.
+  @@unique([workspaceId, externalId])
   @@index([workspaceId, clientId])
   @@index([workspaceId, dataSourceId])
   @@index([workspaceId, scheduledAt])
   @@index([workspaceId, status, scheduledAt])
-  // Effective uniqueness applies when externalId is present.
-  @@unique([workspaceId, externalId])
   @@map("appointments")
 }
 
@@ -328,21 +339,21 @@ model RecoveryOpportunity {
 }
 
 model ReviewRequest {
-  id            String                @id @default(cuid())
+  id            String               @id @default(cuid())
   workspaceId   String
   clientId      String
   appointmentId String?
   modeKey       FlowModeKey?
-  status        ReviewRequestStatus   @default(PENDING)
-  channel       CommunicationChannel  @default(EMAIL)
-  requestedAt   DateTime              @default(now())
+  status        ReviewRequestStatus  @default(PENDING)
+  channel       CommunicationChannel @default(EMAIL)
+  requestedAt   DateTime             @default(now())
   deliveredAt   DateTime?
   completedAt   DateTime?
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  client        Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  appointment   Appointment?          @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  workspace     Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client        Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  appointment   Appointment?         @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, status, requestedAt])
   @@index([clientId])
@@ -374,4 +385,31 @@ model MetricsSnapshot {
   @@unique([workspaceId, periodType, periodStart, periodEnd])
   @@index([workspaceId, periodStart, periodEnd])
   @@map("metrics_snapshots")
+}
+
+model LeadBookingOpportunity {
+  id                 String                       @id @default(cuid())
+  workspaceId        String
+  clientId           String                       @unique
+  intakeDataSourceId String?
+  status             LeadBookingOpportunityStatus @default(OPEN)
+  intakeChannel      CommunicationChannel?
+  bookingPath        CommunicationChannel?
+  mainOfferKey       String?
+  intakeSourceType   DataSourceType?
+  intakeSourceName   String?
+  nextAction         String?
+  blockingReason     String?
+  handoffOpenedAt    DateTime?
+  openedAt           DateTime                     @default(now())
+  resolvedAt         DateTime?
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  workspace          Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client             Client                       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  intakeDataSource   DataSource?                  @relation(fields: [intakeDataSourceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, updatedAt])
+  @@index([workspaceId, intakeDataSourceId])
+  @@map("lead_booking_opportunities")
 }

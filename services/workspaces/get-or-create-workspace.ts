@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import {
   Prisma,
   WorkspaceStatus,
@@ -21,7 +22,7 @@ function buildInitialWorkspaceSlug(user: User) {
   return `revory-${user.id.slice(0, 12)}`;
 }
 
-export async function getOrCreateWorkspace(user: User): Promise<Workspace> {
+export const getOrCreateWorkspace = cache(async (user: User): Promise<Workspace> => {
   const existingWorkspace = await prisma.workspace.findFirst({
     where: {
       ownerUserId: user.id,
@@ -60,4 +61,4 @@ export async function getOrCreateWorkspace(user: User): Promise<Workspace> {
 
     throw error;
   }
-}
+});

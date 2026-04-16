@@ -148,13 +148,19 @@ function getProgressPercent(successRows: number, totalRows: number) {
   return Math.round((successRows / totalRows) * 100);
 }
 
-function formatAppointmentDate(value: Date) {
+function formatAppointmentDate(value: Date | string) {
+  const normalizedValue = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(normalizedValue.getTime())) {
+    return "Date unavailable";
+  }
+
   return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
     month: "short",
-  }).format(value);
+  }).format(normalizedValue);
 }
 
 function getInitials(name: string) {
@@ -183,6 +189,142 @@ function SignalCard({ hint, label, value }: SignalCardProps) {
         {value}
       </p>
       <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">{hint}</p>
+    </div>
+  );
+}
+
+type AttributionSignalCardProps = Readonly<{
+  hint: string;
+  isPrimary?: boolean;
+  label: string;
+  value: string | number;
+}>;
+
+function AttributionSignalCard({
+  hint,
+  isPrimary = false,
+  label,
+  value,
+}: AttributionSignalCardProps) {
+  const softValue = isSoftValue(value);
+
+  return (
+    <div
+      className={`min-w-0 rounded-[20px] border px-4 py-4 ${
+        isPrimary
+          ? "border-[rgba(194,9,90,0.18)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))]"
+          : softValue
+            ? "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))]"
+            : "border-[color:var(--border)] bg-[rgba(255,255,255,0.018)]"
+      }`}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+        {label}
+      </p>
+      <p
+        className={`mt-2.5 leading-none tracking-[-0.02em] ${
+          isPrimary
+            ? softValue
+              ? "text-[1.42rem] font-medium text-[color:var(--text-muted)]"
+              : "text-[1.95rem] font-semibold text-[color:var(--foreground)]"
+            : softValue
+              ? "text-[1.18rem] font-medium text-[color:var(--text-muted)]"
+              : "text-[1.45rem] font-semibold text-[color:var(--foreground)]"
+        }`}
+      >
+        {value}
+      </p>
+      <p
+        className={`mt-2.5 text-[13px] leading-[1.5] ${
+          softValue ? "text-[color:var(--text-subtle)]" : "text-[color:var(--text-muted)]"
+        }`}
+      >
+        {hint}
+      </p>
+      {softValue ? (
+        <div className="mt-3 h-px w-full bg-[linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]" />
+      ) : null}
+    </div>
+  );
+}
+
+function isSoftValue(value: string | number) {
+  if (typeof value === "number") {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  return (
+    normalized.includes("pending") ||
+    normalized.includes("unavailable") ||
+    normalized.includes("value pending") ||
+    /^0\/\d+$/.test(normalized) ||
+    normalized === "0%"
+  );
+}
+
+type ExecutiveSignalCardProps = Readonly<{
+  hint: string;
+  isPrimary?: boolean;
+  label: string;
+  value: string | number;
+}>;
+
+function ExecutiveSignalCard({
+  hint,
+  isPrimary = false,
+  label,
+  value,
+}: ExecutiveSignalCardProps) {
+  const softValue = isSoftValue(value);
+
+  return (
+    <div
+      className={`min-w-0 rounded-[22px] border px-5 py-4 ${
+        isPrimary
+          ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.08),rgba(255,255,255,0.03))] shadow-[0_18px_40px_rgba(0,0,0,0.18)]"
+          : softValue
+            ? "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))]"
+            : "border-[color:var(--border)] bg-[rgba(255,255,255,0.018)]"
+      }`}
+    >
+      <p
+        className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+          isPrimary
+            ? "text-[color:var(--accent-light)]"
+            : "text-[color:var(--text-subtle)]"
+        }`}
+      >
+        {label}
+      </p>
+      <p
+        className={`mt-3 tracking-[-0.03em] ${
+          isPrimary
+            ? softValue
+              ? "text-[1.95rem] font-medium leading-none text-[color:var(--text-muted)]"
+              : "text-[clamp(2.4rem,3vw,3.15rem)] font-semibold leading-none text-[color:var(--foreground)]"
+            : softValue
+              ? "text-[1.35rem] font-medium leading-none text-[color:var(--text-muted)]"
+              : "text-[1.9rem] font-semibold leading-none text-[color:var(--foreground)]"
+        }`}
+      >
+        {value}
+      </p>
+      <p
+        className={`mt-3 leading-[1.45] ${
+          isPrimary
+            ? "max-w-[20rem] text-sm text-[color:var(--text-muted)]"
+            : softValue
+              ? "max-w-[16rem] text-[13px] text-[color:var(--text-subtle)]"
+              : "max-w-[16rem] text-[13px] text-[color:var(--text-muted)]"
+        }`}
+      >
+        {hint}
+      </p>
+      {softValue ? (
+        <div className="mt-4 h-px w-full bg-[linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0))]" />
+      ) : null}
     </div>
   );
 }
@@ -499,25 +641,29 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
+      <section className="rounded-[26px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="max-w-[34rem]">
+            <p className="text-[1.02rem] font-semibold tracking-[-0.01em] text-[color:var(--foreground)]">
               Executive read
             </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+            <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
               {executiveRead.summary}
             </p>
           </div>
-          <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
+          <RevoryStatusBadge
+            className="mt-0.5 self-start rounded-full border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.08)] px-3 py-[0.42rem] text-[10px]"
+            tone={hasBookedProofVisible ? "real" : "future"}
+          >
             {hasBookedProofVisible ? "Readable" : "Pending"}
           </RevoryStatusBadge>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {executiveRead.tiles.map((tile) => (
-            <SignalCard
+        <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)_minmax(0,0.85fr)]">
+          {executiveRead.tiles.map((tile, index) => (
+            <ExecutiveSignalCard
               hint={tile.hint}
+              isPrimary={index === 0}
               key={tile.label}
               label={tile.label}
               value={tile.value}
@@ -525,47 +671,62 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
-          <p className="text-sm font-semibold text-[color:var(--foreground)]">
-            {executiveRead.headline}
-          </p>
-          <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-            Seller keeps this read short: booked revenue first, then the strongest support still available.
-          </p>
-        </div>
-
-        <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                {overview.commercialSafeguard.headline}
-              </p>
-              <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-                {overview.commercialSafeguard.summary}
-              </p>
-            </div>
-            <RevoryStatusBadge tone={overview.commercialSafeguard.status === "stable" ? "real" : "neutral"}>
-              {overview.commercialSafeguard.status === "stable" ? "Stable" : "Watch"}
-            </RevoryStatusBadge>
+        <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.015))] px-4 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+              Executive framing
+            </p>
+            <p className="mt-2.5 text-[15px] font-semibold leading-[1.35] text-[color:var(--foreground)]">
+              {executiveRead.headline}
+            </p>
+            <p className="mt-3 max-w-[24rem] text-sm leading-[1.55] text-[color:var(--text-muted)]">
+              Seller keeps this read short: booked revenue first, then the strongest support still available.
+            </p>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2.5">
-            <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
-              {overview.commercialSafeguard.coreReadLabel}
-            </RevoryStatusBadge>
-            <RevoryStatusBadge
-              tone={overview.commercialSafeguard.status === "stable" ? "neutral" : "future"}
-            >
-              {overview.commercialSafeguard.supportLabel}
-            </RevoryStatusBadge>
-            {overview.commercialSafeguard.status === "watch" ? (
-              <DocumentNavigationLink
-                className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[12px] font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.06)]"
-                href={overview.commercialSafeguard.actionHref}
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.015))] px-4 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="max-w-[32rem]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+                  Commercial safeguard
+                </p>
+                <p className="mt-2.5 text-[15px] font-semibold leading-[1.35] text-[color:var(--foreground)]">
+                {overview.commercialSafeguard.headline}
+                </p>
+                <p className="mt-3 text-sm leading-[1.55] text-[color:var(--text-muted)]">
+                {overview.commercialSafeguard.summary}
+                </p>
+              </div>
+              <RevoryStatusBadge
+                className="mt-0.5 self-start rounded-full px-3 py-[0.42rem] text-[10px]"
+                tone={overview.commercialSafeguard.status === "stable" ? "real" : "neutral"}
               >
-                {overview.commercialSafeguard.actionLabel}
-              </DocumentNavigationLink>
-            ) : null}
+                {overview.commercialSafeguard.status === "stable" ? "Stable" : "Watch"}
+              </RevoryStatusBadge>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <RevoryStatusBadge
+                className="min-h-7 rounded-full px-3 py-[0.4rem] text-[10px] tracking-[0.01em]"
+                tone={hasBookedProofVisible ? "real" : "future"}
+              >
+                {overview.commercialSafeguard.coreReadLabel}
+              </RevoryStatusBadge>
+              <RevoryStatusBadge
+                className="min-h-7 rounded-full px-3 py-[0.4rem] text-[10px] tracking-[0.01em]"
+                tone={overview.commercialSafeguard.status === "stable" ? "neutral" : "future"}
+              >
+                {overview.commercialSafeguard.supportLabel}
+              </RevoryStatusBadge>
+              {overview.commercialSafeguard.status === "watch" ? (
+                <DocumentNavigationLink
+                  className="inline-flex min-h-7 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-3 py-[0.4rem] text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.05)]"
+                  href={overview.commercialSafeguard.actionHref}
+                >
+                  {overview.commercialSafeguard.actionLabel}
+                </DocumentNavigationLink>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
@@ -588,112 +749,162 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {supportingSignals.map((signal) => (
-          <SignalCard
-            hint={signal.hint}
-            key={signal.label}
-            label={signal.label}
-            value={signal.value}
-          />
-        ))}
-      </section>
-
-      <section className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-              Attribution clarity
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              {attributionSummary}
-            </p>
-          </div>
-          <RevoryStatusBadge
-            tone={
-              attributionRead.status === "degraded"
-                ? "neutral"
-                : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
-                    attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
-                ? "real"
-                : attributionRead.bookedAppointmentsWithIdentity > 0
-                  ? "future"
-                  : "neutral"
-            }
-          >
-            {attributionRead.status === "degraded"
-              ? "Limited"
-              : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
-                  attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
-              ? "Supported"
-              : attributionRead.bookedAppointmentsWithIdentity > 0
-                ? "Thin"
-                : "Pending"}
-          </RevoryStatusBadge>
-        </div>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <SignalCard
-              hint="Clients carrying usable lead context"
-              label="Lead-base clients"
-              value={
-                attributionRead.status === "degraded"
-                  ? "Unavailable"
-                  : attributionRead.leadBaseClients && attributionRead.leadBaseClients > 0
-                    ? attributionRead.leadBaseClients
-                    : "Pending"
-              }
+      <section className="rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.026),rgba(255,255,255,0.012))] p-4 md:p-5">
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)]">
+          {supportingSignals.map((signal, index) => (
+            <AttributionSignalCard
+              hint={signal.hint}
+              isPrimary={index === 0}
+              key={signal.label}
+              label={signal.label}
+              value={signal.value}
             />
-          <SignalCard
-            hint="Booked proof already backed by lead-base support"
-            label="Booked with lead support"
-            value={
-              attributionRead.status === "degraded"
-                ? "Unavailable"
-                : hasBookedProofVisible &&
-                    attributionRead.bookedAppointmentsWithLeadBaseSupport !== null
-                  ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport}/${overview.bookedAppointments}`
-                : "Pending"
-            }
-          />
-          <SignalCard
-            hint="Booked revenue already tied to supported lead context"
-            label="Revenue with lead support"
-            value={formatLimitedCurrency(attributionRead.revenueWithLeadBaseSupport)}
-          />
+          ))}
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
-            <p className="rev-label">Booked with identity</p>
-            <p className="mt-2 text-[1.35rem] font-semibold text-[color:var(--foreground)]">
-              {hasBookedProofVisible
-                ? `${attributionRead.bookedAppointmentsWithIdentity}/${overview.bookedAppointments}`
-                : "Pending"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-              {attributionRead.identityCoveragePercent !== null
-                ? `${attributionRead.identityCoveragePercent}% of visible booked appointments already have client identity attached.`
-                : "Identity coverage appears after booked proof is visible."}
-            </p>
-          </div>
+        <div className="mt-4 border-t border-[rgba(255,255,255,0.06)] pt-4">
+          <div className="rounded-[24px] border border-[rgba(255,255,255,0.05)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="max-w-[36rem]">
+                <p className="text-[1.02rem] font-semibold tracking-[-0.01em] text-[color:var(--foreground)]">
+                  Attribution clarity
+                </p>
+                <p className="mt-1.5 text-sm leading-[1.52] text-[color:var(--text-muted)]">
+                  {attributionSummary}
+                </p>
+              </div>
+              <RevoryStatusBadge
+                className="mt-0.5 self-start rounded-full border-[rgba(245,166,35,0.18)] bg-[rgba(245,166,35,0.08)] px-3 py-[0.42rem] text-[10px]"
+                tone={
+                  attributionRead.status === "degraded"
+                    ? "neutral"
+                    : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
+                        attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
+                    ? "real"
+                    : attributionRead.bookedAppointmentsWithIdentity > 0
+                      ? "future"
+                      : "neutral"
+                }
+              >
+                {attributionRead.status === "degraded"
+                  ? "Limited"
+                  : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
+                      attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
+                  ? "Supported"
+                  : attributionRead.bookedAppointmentsWithIdentity > 0
+                    ? "Thin"
+                    : "Pending"}
+              </RevoryStatusBadge>
+            </div>
 
-          <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-3.5">
-            <p className="rev-label">Support coverage</p>
-            <p className="mt-2 text-[1.35rem] font-semibold text-[color:var(--foreground)]">
-              {attributionRead.status === "degraded"
-                ? "Unavailable"
-                : attributionRead.leadBaseCoveragePercent !== null
-                ? `${attributionRead.leadBaseCoveragePercent}%`
-                : "Pending"}
-            </p>
-            <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-              {attributionRead.status === "degraded"
-                ? "Lead-base support is temporarily unavailable, but revenue and booked proof remain readable."
-                : attributionRead.leadBaseCoveragePercent !== null
-                ? "Visible booked proof already backed by lead-base support."
-                : "Lead-base coverage becomes defensible after proof is visible."}
-            </p>
+            <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
+              <AttributionSignalCard
+                hint="Clients carrying usable lead context"
+                isPrimary
+                label="Lead-base clients"
+                value={
+                  attributionRead.status === "degraded"
+                    ? "Unavailable"
+                    : attributionRead.leadBaseClients && attributionRead.leadBaseClients > 0
+                      ? attributionRead.leadBaseClients
+                      : "Pending"
+                }
+              />
+              <AttributionSignalCard
+                hint="Booked proof already backed by lead-base support"
+                label="Booked with lead support"
+                value={
+                  attributionRead.status === "degraded"
+                    ? "Unavailable"
+                    : hasBookedProofVisible &&
+                        attributionRead.bookedAppointmentsWithLeadBaseSupport !== null
+                      ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport}/${overview.bookedAppointments}`
+                    : "Pending"
+                }
+              />
+              <AttributionSignalCard
+                hint="Booked revenue already tied to supported lead context"
+                label="Revenue with lead support"
+                value={formatLimitedCurrency(attributionRead.revenueWithLeadBaseSupport)}
+              />
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))] px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+                    Booked with identity
+                  </p>
+                  <RevoryStatusBadge
+                    className="self-start rounded-full px-3 py-[0.38rem] text-[10px]"
+                    tone={attributionRead.identityCoveragePercent !== null ? "neutral" : "future"}
+                  >
+                    {attributionRead.identityCoveragePercent !== null ? "Visible" : "Thin"}
+                  </RevoryStatusBadge>
+                </div>
+                <p
+                  className={`mt-3 leading-none tracking-[-0.02em] ${
+                    hasBookedProofVisible
+                      ? "text-[1.55rem] font-semibold text-[color:var(--foreground)]"
+                      : "text-[1.22rem] font-medium text-[color:var(--text-muted)]"
+                  }`}
+                >
+                  {hasBookedProofVisible
+                    ? `${attributionRead.bookedAppointmentsWithIdentity}/${overview.bookedAppointments}`
+                    : "Pending"}
+                </p>
+                <p className="mt-2.5 min-h-[3.25rem] text-sm leading-[1.52] text-[color:var(--text-muted)]">
+                  {attributionRead.identityCoveragePercent !== null
+                    ? `${attributionRead.identityCoveragePercent}% of visible booked appointments already have client identity attached.`
+                    : "Identity coverage appears after booked proof is visible."}
+                </p>
+              </div>
+
+              <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))] px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
+                    Support coverage
+                  </p>
+                  <RevoryStatusBadge
+                    className="self-start rounded-full px-3 py-[0.38rem] text-[10px]"
+                    tone={
+                      attributionRead.status === "degraded"
+                        ? "neutral"
+                        : attributionRead.leadBaseCoveragePercent !== null
+                          ? "real"
+                          : "future"
+                    }
+                  >
+                    {attributionRead.status === "degraded"
+                      ? "Limited"
+                      : attributionRead.leadBaseCoveragePercent !== null
+                        ? "Visible"
+                        : "Thin"}
+                  </RevoryStatusBadge>
+                </div>
+                <p
+                  className={`mt-3 leading-none tracking-[-0.02em] ${
+                    attributionRead.status === "degraded" ||
+                    attributionRead.leadBaseCoveragePercent === null
+                      ? "text-[1.22rem] font-medium text-[color:var(--text-muted)]"
+                      : "text-[1.55rem] font-semibold text-[color:var(--foreground)]"
+                  }`}
+                >
+                  {attributionRead.status === "degraded"
+                    ? "Unavailable"
+                    : attributionRead.leadBaseCoveragePercent !== null
+                    ? `${attributionRead.leadBaseCoveragePercent}%`
+                    : "Pending"}
+                </p>
+                <p className="mt-2.5 min-h-[3.25rem] text-sm leading-[1.52] text-[color:var(--text-muted)]">
+                  {attributionRead.status === "degraded"
+                    ? "Lead-base support is temporarily unavailable, but revenue and booked proof remain readable."
+                    : attributionRead.leadBaseCoveragePercent !== null
+                    ? "Visible booked proof already backed by lead-base support."
+                    : "Lead-base coverage becomes defensible after proof is visible."}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

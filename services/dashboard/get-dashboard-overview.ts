@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { AppointmentStatus, DataSourceType, Prisma } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
@@ -123,6 +125,49 @@ export type DashboardOverview = {
     }>;
   };
 };
+
+function reviveDate(value: Date | string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value;
+  }
+
+  const parsed = new Date(value);
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function reviveDashboardOverviewDates(overview: DashboardOverview): DashboardOverview {
+  return {
+    ...overview,
+    bookedProofSource: overview.bookedProofSource
+      ? {
+          ...overview.bookedProofSource,
+          importedAt: reviveDate(overview.bookedProofSource.importedAt),
+        }
+      : null,
+    importSources: overview.importSources.map((source) => ({
+      ...source,
+      importedAt: reviveDate(source.importedAt),
+    })),
+    leadBaseSource: overview.leadBaseSource
+      ? {
+          ...overview.leadBaseSource,
+          importedAt: reviveDate(overview.leadBaseSource.importedAt),
+        }
+      : null,
+    upcomingRead: {
+      ...overview.upcomingRead,
+      list: overview.upcomingRead.list.map((appointment) => ({
+        ...appointment,
+        scheduledAt: reviveDate(appointment.scheduledAt) ?? new Date(0),
+      })),
+    },
+  };
+}
 
 function getRecentMonthBuckets(count: number) {
   const now = new Date();
@@ -474,7 +519,7 @@ async function getUpcomingReadSnapshot(workspaceId: string) {
   }
 }
 
-export async function getDashboardOverview(
+async function getDashboardOverviewUncached(
   workspaceId: string,
   averageDealValue: number | null = null,
 ): Promise<DashboardOverview> {
@@ -915,3 +960,20 @@ export async function getDashboardOverview(
     upcomingRead,
   };
 }
+
+const getDashboardOverviewCached = unstable_cache(
+  async (workspaceId: string, averageDealValue: number | null = null) =>
+    getDashboardOverviewUncached(workspaceId, averageDealValue),
+  ["dashboard-overview"],
+  {
+    revalidate: 10,
+  },
+);
+
+export const getDashboardOverview = cache(async (
+  workspaceId: string,
+  averageDealValue: number | null = null,
+): Promise<DashboardOverview> =>
+  reviveDashboardOverviewDates(
+    await getDashboardOverviewCached(workspaceId, averageDealValue),
+  ));

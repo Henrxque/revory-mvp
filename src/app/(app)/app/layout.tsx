@@ -120,56 +120,53 @@ export default async function PrivateAppLayout({
         </div>
 
         <div className="min-w-0 space-y-5 overflow-x-clip">
-          <header className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(17,16,24,0.94)] px-4 py-2 shadow-[0_16px_60px_rgba(0,0,0,0.22)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <header className="rounded-[22px] border border-[rgba(255,255,255,0.05)] bg-[linear-gradient(180deg,rgba(19,18,25,0.98),rgba(15,14,21,0.97))] px-5 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.22)]">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
               <div className="min-w-0">
-                <p className="truncate text-[15px] font-semibold text-[color:var(--foreground)]">
+                <p className="truncate text-[18px] font-semibold tracking-[-0.03em] text-[color:var(--foreground)]">
                   {workspace.name}
                 </p>
-                <p className="mt-0.5 text-[11px] text-[color:var(--text-muted)]">
+                <p className="mt-1 text-[12px] leading-5 text-[#8f879f]">
                   {workspaceSubtitle}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-2 xl:flex-nowrap">
-                <div className="flex flex-wrap items-center gap-1.5 rounded-[13px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-1.5 py-1.5">
-                  <RevoryStatusBadge tone={activationSetup.isCompleted ? "accent" : "neutral"}>
-                    {activationBadgeLabel}
-                  </RevoryStatusBadge>
-                  <span className="inline-flex min-h-6 items-center rounded-[11px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-2.5 py-[0.35rem] text-[9px] font-medium uppercase tracking-[0.14em] text-[color:var(--text-muted)]">
-                    {formatWorkspaceStatus(workspace.status)}
-                  </span>
-                </div>
-
-                <div className="flex min-w-[12.25rem] items-center gap-2 rounded-[15px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-2 py-1.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-[12px] font-semibold text-[color:var(--accent-light)]">
+              <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-4 gap-y-2.5">
+                <div className="flex min-w-0 items-center gap-3 rounded-[16px] bg-[rgba(255,255,255,0.01)] px-2 py-1.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(224,16,106,0.07)] bg-[rgba(194,9,90,0.055)] text-[11px] font-semibold text-[color:var(--accent-light)]">
                     {accountInitial}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
-                      Account
-                    </span>
-                    <p className="max-w-[10.5rem] truncate text-[13px] font-semibold text-[color:var(--foreground)]">
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--foreground)]">
                       {user.email}
                     </p>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
                       {billingSummary.plan ? (
-                        <RevoryStatusBadge tone={getPlanBadgeTone(billingSummary.planKey)}>
+                        <RevoryStatusBadge
+                          className="min-h-6 rounded-full border-[rgba(224,16,106,0.12)] bg-[rgba(194,9,90,0.08)] px-2.5 py-[0.28rem] text-[9px] tracking-[0.12em] text-[color:var(--accent-light)]"
+                          tone={getPlanBadgeTone(billingSummary.planKey)}
+                        >
                           {billingSummary.plan.label}
                         </RevoryStatusBadge>
                       ) : null}
-                      <p className="text-[10px] leading-5 text-[color:var(--text-muted)]">
+                      <p className="min-w-0 text-[10px] leading-5 text-[#8f879f]">
                         {currentPlanSignal}
                       </p>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-2">
                   <a
-                    className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[12px] font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.06)]"
-                    href="/api/billing/portal"
+                    className="inline-flex min-h-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.045)] bg-[rgba(255,255,255,0.02)] px-3.5 py-1.5 text-[12px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,255,255,0.065)] hover:bg-[rgba(255,255,255,0.034)]"
+                    href="/app/setup"
                   >
-                    Billing
+                    Setup
                   </a>
-                  <AuthSignOutButton compact />
+                  <AuthSignOutButton
+                    className="min-h-8 border-transparent bg-transparent px-2.5 py-1.5 text-[12px] text-[#9690a2] hover:border-transparent hover:bg-[rgba(255,255,255,0.016)] hover:text-[color:var(--foreground)]"
+                    compact
+                  />
                 </div>
               </div>
             </div>

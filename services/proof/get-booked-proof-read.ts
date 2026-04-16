@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { AppointmentStatus } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
@@ -9,9 +11,9 @@ export type BookedProofRead = {
   visibleBookedAppointments: number;
 };
 
-export async function getBookedProofRead(
+const getBookedProofReadCached = unstable_cache(async (
   workspaceId: string,
-): Promise<BookedProofRead> {
+): Promise<BookedProofRead> => {
   const visibleBookedAppointments = await prisma.appointment.count({
     where: {
       status: {
@@ -25,4 +27,10 @@ export async function getBookedProofRead(
     hasBookedProofVisible: visibleBookedAppointments > 0,
     visibleBookedAppointments,
   };
-}
+}, ["booked-proof-read"], {
+  revalidate: 10,
+});
+
+export const getBookedProofRead = cache(async (
+  workspaceId: string,
+): Promise<BookedProofRead> => getBookedProofReadCached(workspaceId));

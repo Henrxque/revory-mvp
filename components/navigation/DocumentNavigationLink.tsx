@@ -7,19 +7,21 @@ type DocumentNavigationLinkProps = Readonly<
   AnchorHTMLAttributes<HTMLAnchorElement> & {
     children: ReactNode;
     href: string;
+    prefetch?: boolean;
   }
 >;
 
 export function DocumentNavigationLink({
   children,
   href,
+  prefetch = true,
   ...props
 }: DocumentNavigationLinkProps) {
   return (
     <Link
       {...props}
       href={href}
-      prefetch={false}
+      prefetch={prefetch}
     >
       {children}
     </Link>

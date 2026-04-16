@@ -1,21 +1,42 @@
 import "server-only";
 
-import type { ActivationSetup, Workspace } from "@prisma/client";
+import { Prisma, type ActivationSetup, type Workspace } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
 
 export async function getOrCreateActivationSetup(
   workspace: Workspace,
 ): Promise<ActivationSetup> {
-  return prisma.activationSetup.upsert({
+  const existingSetup = await prisma.activationSetup.findUnique({
     where: {
       workspaceId: workspace.id,
     },
-    update: {},
-    create: {
-      workspaceId: workspace.id,
-      currentStep: "template",
-      isCompleted: false,
-    },
   });
+
+  if (existingSetup) {
+    return existingSetup;
+  }
+
+  try {
+    return await prisma.activationSetup.create({
+      data: {
+        workspaceId: workspace.id,
+        currentStep: "template",
+        isCompleted: false,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return prisma.activationSetup.findUniqueOrThrow({
+        where: {
+          workspaceId: workspace.id,
+        },
+      });
+    }
+
+    throw error;
+  }
 }

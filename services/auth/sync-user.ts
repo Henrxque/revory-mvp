@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { UserStatus, type User as LocalUser } from "@prisma/client";
 
 import { getAuthSession } from "@/auth";
@@ -17,7 +18,7 @@ function normalizeFullName(name: string | null | undefined) {
   return normalized && normalized.length > 0 ? normalized : null;
 }
 
-export async function syncAuthenticatedUser(): Promise<LocalUser | null> {
+export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> => {
   const session = await getAuthSession();
   const sessionUser = session?.user;
   const authSubject = sessionUser?.id ?? null;
@@ -36,6 +37,16 @@ export async function syncAuthenticatedUser(): Promise<LocalUser | null> {
   });
 
   if (existingByAuthSubject) {
+    const shouldUpdate =
+      existingByAuthSubject.authProvider !== "google" ||
+      existingByAuthSubject.email !== email ||
+      existingByAuthSubject.fullName !== fullName ||
+      existingByAuthSubject.status !== UserStatus.ACTIVE;
+
+    if (!shouldUpdate) {
+      return existingByAuthSubject;
+    }
+
     return prisma.user.update({
       where: {
         id: existingByAuthSubject.id,
@@ -56,6 +67,16 @@ export async function syncAuthenticatedUser(): Promise<LocalUser | null> {
   });
 
   if (existingByEmail) {
+    const shouldUpdate =
+      existingByEmail.authProvider !== "google" ||
+      existingByEmail.authSubject !== authSubject ||
+      existingByEmail.fullName !== fullName ||
+      existingByEmail.status !== UserStatus.ACTIVE;
+
+    if (!shouldUpdate) {
+      return existingByEmail;
+    }
+
     return prisma.user.update({
       where: {
         id: existingByEmail.id,
@@ -78,4 +99,4 @@ export async function syncAuthenticatedUser(): Promise<LocalUser | null> {
       status: UserStatus.ACTIVE,
     },
   });
-}
+});

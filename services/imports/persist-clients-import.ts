@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/db/prisma";
 import { persistImportedClient } from "@/services/imports/persist-import-client";
+import { syncLeadBookingOpportunitiesForClients } from "@/services/lead-booking/sync-lead-booking-opportunities";
 import type {
   RevoryClientCsvRawRow,
   RevoryClientNormalizedRow,
@@ -84,6 +85,11 @@ export async function persistClientsImport({
       });
     }
   }
+
+  await syncLeadBookingOpportunitiesForClients({
+    clientIds: [...touchedClientIds],
+    workspaceId,
+  });
 
   return {
     createdAppointmentCount: 0,
