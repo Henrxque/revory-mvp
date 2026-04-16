@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getDailyBookingBriefRead } from "@/services/briefs/get-daily-booking-brief-read";
 import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardDecisionSupport } from "@/services/decision-support/get-dashboard-decision-support";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
@@ -447,10 +449,13 @@ export default async function DashboardPage() {
   const configuredValuePerBooking = activationSetup.averageDealValue
     ? Number(activationSetup.averageDealValue)
     : null;
-  const overview = await getDashboardOverview(
-    workspace.id,
-    configuredValuePerBooking,
-  );
+  const [overview, dailyBriefRead] = await Promise.all([
+    getDashboardOverview(
+      workspace.id,
+      configuredValuePerBooking,
+    ),
+    getDailyBookingBriefRead(workspace.id, activationSetup),
+  ]);
 
   const monthChip = formatMonthChip();
   const hasBookedProofVisible = overview.bookedAppointments > 0;
@@ -582,7 +587,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
+      <DailyBookingBrief read={dailyBriefRead} />
+
+      <section
+        id="revenue-view"
+        className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7"
+      >
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           <div className="max-w-[39rem] space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">

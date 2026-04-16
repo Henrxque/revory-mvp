@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
 import { LeadBookingOpportunityList } from "@/components/lead-booking/LeadBookingOpportunityList";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getDailyBookingBriefRead } from "@/services/briefs/get-daily-booking-brief-read";
 import { applyImportsIntentClassification } from "@/services/decision-support/apply-intent-classification";
 import {
   getCsvUploadSources,
@@ -155,10 +157,14 @@ export default async function ImportsPage() {
     );
   }
 
-  const [uploadSources, bookedProofRead, leadIntakeRead] = await Promise.all([
+  const [uploadSources, bookedProofRead, leadIntakeRead, dailyBriefRead] = await Promise.all([
     getCsvUploadSources(appContext.workspace.id),
     getBookedProofRead(appContext.workspace.id),
     getLeadIntakeRoutingRead(appContext.workspace.id),
+    getDailyBookingBriefRead(
+      appContext.workspace.id,
+      appContext.activationSetup,
+    ),
   ]);
   const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
   const hasAppointmentsSourceReady = hasLiveCsvUploadSource(uploadSources.appointments);
@@ -262,9 +268,14 @@ export default async function ImportsPage() {
       value: leadIntakeRead.summary.booked,
     },
   ] as const;
+  const briefTargetsBookingAssistance = dailyBriefRead.nextMove.href.includes(
+    "#booking-assistance-flow",
+  );
 
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
+      <DailyBookingBrief read={dailyBriefRead} />
+
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           <div className="space-y-4">
@@ -356,22 +367,30 @@ export default async function ImportsPage() {
         />
       </section>
 
-      <section className="rounded-[26px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] p-5 md:p-6">
+      <section
+        id="booking-assistance-flow"
+        className="rounded-[26px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] p-5 md:p-6"
+      >
         <div className="space-y-5">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="rev-kicker">Booking assistance</p>
-              <RevoryStatusBadge tone="neutral">Ready read visible</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">Blocked reason visible</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">Suggested message bounded</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">Path assist visible</RevoryStatusBadge>
+              {briefTargetsBookingAssistance ? (
+                <RevoryStatusBadge tone="accent">Today&apos;s focus</RevoryStatusBadge>
+              ) : null}
+              <RevoryStatusBadge tone="neutral">Bounded assist</RevoryStatusBadge>
             </div>
             <h2 className="max-w-[34rem] text-[1.85rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[color:var(--foreground)]">
-              Keep booking assistance premium, bounded, and tied to the current path.
+              Keep today&apos;s booking read premium, bounded, and tied to the current path.
             </h2>
             <p className="max-w-[38rem] text-sm leading-[1.6] text-[color:var(--text-muted)]">
               Seller shows what can move now, what is blocked, and which short next step fits the current booking path. Suggested message and assisted handoff stay visible only when the current read truly supports them.
             </p>
+            {briefTargetsBookingAssistance ? (
+              <p className="max-w-[36rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                Today&apos;s brief is already pointing here, so this surface should stay on the shortest current move: review the priority read, use the suggested message if it helps, and open the path only when the read is truly ready.
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-3 md:grid-cols-[minmax(0,1.15fr)_repeat(2,minmax(0,1fr))]">
@@ -424,13 +443,13 @@ export default async function ImportsPage() {
               <div className="max-w-[34rem]">
                 <p className="rev-label">Assistance value proof</p>
                 <p className="mt-1 text-base font-semibold text-[color:var(--foreground)]">
-                  Seller now shows booking participation without pretending broader sales automation.
+                  Seller now shows daily booking participation without pretending broader sales automation.
                 </p>
                 <p className="mt-2 text-[11px] leading-[1.6] text-[color:var(--text-muted)]">
                   This layer stays narrow on purpose: it shows what can move now, when Seller already opened the current booking path, and which leads are already booked instead of still being treated like active booking work.
                 </p>
               </div>
-              <RevoryStatusBadge tone="neutral">Executive proof layer</RevoryStatusBadge>
+              <RevoryStatusBadge tone="neutral">Bounded proof</RevoryStatusBadge>
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -466,10 +485,10 @@ export default async function ImportsPage() {
                 <div>
                   <p className="rev-label">Booking assistance surface</p>
                   <p className="mt-1 text-base font-semibold text-[color:var(--foreground)]">
-                    Priority booking reads
+                    Today&apos;s booking reads
                   </p>
                   <p className="mt-2 text-[11px] leading-[1.55] text-[color:var(--text-muted)]">
-                    Seller keeps the list short, prioritizes what is most actionable, and avoids turning this area into CRM, inbox, or broad sales-automation surface.
+                    Seller keeps the list short, prioritizes what is most actionable today, and avoids turning this area into CRM, inbox, or broad sales-automation surface.
                   </p>
                 </div>
 
@@ -509,11 +528,11 @@ export default async function ImportsPage() {
                   <div>
                     <p className="rev-label">Priority booking list</p>
                     <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-                      Current booking assistance snapshot
+                      Current booking read
                     </p>
                   </div>
                   <RevoryStatusBadge tone="neutral">
-                    {leadIntakeRead.opportunities.length} items shown
+                    Top {leadIntakeRead.opportunities.length} shown
                   </RevoryStatusBadge>
                 </div>
                 <LeadBookingOpportunityList opportunities={leadIntakeRead.opportunities} />

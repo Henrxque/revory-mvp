@@ -131,6 +131,9 @@ export function LeadBookingOpportunityList({
 }: LeadBookingOpportunityListProps) {
   const [isPending, startTransition] = useTransition();
   const [errorByOpportunity, setErrorByOpportunity] = useState<Record<string, string | null>>({});
+  const [copiedStateByOpportunity, setCopiedStateByOpportunity] = useState<
+    Record<string, string | null>
+  >({});
   const [preparedAtByOpportunity, setPreparedAtByOpportunity] = useState<Record<string, string>>(
     {},
   );
@@ -151,10 +154,10 @@ export function LeadBookingOpportunityList({
     return (
       <div className="rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] px-3 py-3">
         <p className="text-sm font-semibold text-[color:var(--foreground)]">
-          Booking assistance has not started yet.
+          No active booking read is visible yet.
         </p>
         <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-          Bring in the client lane when this workspace needs a short booking-assistance layer behind booked proof.
+          Bring in the client lane when this workspace needs a short daily booking read behind booked proof.
         </p>
       </div>
     );
@@ -169,6 +172,10 @@ export function LeadBookingOpportunityList({
           Boolean(opportunity.handoffHref && opportunity.handoffLabel);
         const isCurrentPending = isPending && activeOpportunityId === opportunity.id;
         const nextStep = getNextStepRead(opportunity, handoffAvailable);
+        const copyActionLabel = opportunity.suggestedMessageLabel?.includes("ask")
+          ? "Copy ask"
+          : "Copy message";
+        const copiedState = copiedStateByOpportunity[opportunity.id];
 
         return (
           <div
@@ -235,34 +242,116 @@ export function LeadBookingOpportunityList({
                 </p>
               ) : null}
 
+              {opportunity.suggestedMessage || handoffAvailable ? (
+                <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
+                  Use the Action Pack below to take this step without leaving today&apos;s booking read first.
+                </p>
+              ) : null}
+
               {opportunity.suggestedMessage ? (
-                <div className="mt-3 rounded-[12px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.018)] px-3 py-2.5">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="mt-3 rounded-[12px] border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.014)] px-3 py-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
+                        {opportunity.suggestedMessageLabel ?? "Suggested message"}
+                      </p>
+                      {opportunity.suggestedMessageSource === "llm" ? (
+                        <RevoryStatusBadge tone="accent">Tailored</RevoryStatusBadge>
+                      ) : null}
+                    </div>
+                    <button
+                      className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(194,9,90,0.08)]"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(opportunity.suggestedMessage!);
+                          setCopiedStateByOpportunity((current) => ({
+                            ...current,
+                            [opportunity.id]:
+                              copyActionLabel === "Copy ask" ? "Ask copied" : "Message copied",
+                          }));
+                        } catch {
+                          setErrorByOpportunity((current) => ({
+                            ...current,
+                            [opportunity.id]:
+                              "REVORY could not copy this suggested message right now.",
+                          }));
+                        }
+                      }}
+                      type="button"
+                    >
+                      {copyActionLabel}
+                    </button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
-                      {opportunity.suggestedMessageLabel ?? "Suggested message"}
+                      Action pack
                     </p>
-                    {opportunity.suggestedMessageSource === "llm" ? (
-                      <RevoryStatusBadge tone="accent">Tailored</RevoryStatusBadge>
+                    {handoffAvailable ? (
+                      <button
+                        className="inline-flex min-h-8 items-center justify-center rounded-full border border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
+                        disabled={isCurrentPending}
+                        onClick={() => {
+                          if (!opportunity.handoffHref) {
+                            return;
+                          }
+
+                          setActiveOpportunityId(opportunity.id);
+                          setErrorByOpportunity((current) => ({
+                            ...current,
+                            [opportunity.id]: null,
+                          }));
+
+                          startTransition(async () => {
+                            try {
+                              const result = await recordLeadBookingHandoff(opportunity.id);
+
+                              setPreparedAtByOpportunity((current) => ({
+                                ...current,
+                                [opportunity.id]: result.handoffOpenedAt,
+                              }));
+
+                              window.location.href = opportunity.handoffHref!;
+                            } catch (error) {
+                              setErrorByOpportunity((current) => ({
+                                ...current,
+                                [opportunity.id]:
+                                  error instanceof Error && error.message
+                                    ? error.message
+                                    : "REVORY could not open this booking handoff right now.",
+                              }));
+                            } finally {
+                              setActiveOpportunityId(null);
+                            }
+                          });
+                        }}
+                        type="button"
+                      >
+                        {isCurrentPending ? "Opening..." : opportunity.handoffLabel}
+                      </button>
+                    ) : null}
+                    {copiedState ? (
+                      <RevoryStatusBadge tone="real">{copiedState}</RevoryStatusBadge>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-[11px] leading-[1.55] text-[color:var(--text-muted)]">
+                  <p className="mt-2.5 text-[11px] leading-[1.55] text-[color:var(--text-muted)]">
                     {opportunity.suggestedMessage}
                   </p>
+
+                  {handoffAvailable ? (
+                    <p className="mt-2 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
+                      {opportunity.handoffNote}. This opens the current booking path on this device and records the assist without implying thread or follow-up.
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
-              {handoffAvailable ? (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.06)] px-3 py-2.5">
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
-                      {opportunity.handoffNote}
-                    </p>
-                    <p className="mt-1 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                      This opens the current booking path on this device and records the assist without implying thread or follow-up.
-                    </p>
-                  </div>
+              {!opportunity.suggestedMessage && handoffAvailable ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+                    Action pack
+                  </p>
                   <button
-                    className="inline-flex min-h-9 items-center justify-center rounded-full border border-[rgba(224,16,106,0.34)] bg-[rgba(194,9,90,0.16)] px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.24)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
+                    className="inline-flex min-h-8 items-center justify-center rounded-full border border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
                     disabled={isCurrentPending}
                     onClick={() => {
                       if (!opportunity.handoffHref) {

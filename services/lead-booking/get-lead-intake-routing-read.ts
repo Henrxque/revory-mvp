@@ -173,7 +173,7 @@ const getLeadIntakeRoutingReadCached = cache(async (workspaceId: string): Promis
 
       return right.updatedAt.getTime() - left.updatedAt.getTime();
     })
-    .slice(0, 4);
+    .slice(0, 3);
 
   return {
     bookingPathLabel: formatBookingPathLabel(activationSetup?.primaryChannel),
