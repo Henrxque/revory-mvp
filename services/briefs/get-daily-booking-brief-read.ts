@@ -14,6 +14,11 @@ import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 type BriefTone = "accent" | "future" | "neutral" | "real";
 
 export type DailyBookingBriefRead = {
+  freshness: {
+    label: string;
+    note: string;
+    tone: BriefTone;
+  };
   headline: string;
   nextMove: {
     href: string;
@@ -33,6 +38,9 @@ export type DailyBookingBriefRead = {
   summary: string;
   tone: BriefTone;
 };
+
+const FRESH_THRESHOLD_MS = 1000 * 60 * 60 * 48;
+const STALE_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 7;
 
 function formatRelativeDate(value: Date) {
   const diffMs = Date.now() - value.getTime();
@@ -61,12 +69,79 @@ function formatRelativeDate(value: Date) {
   }).format(value);
 }
 
-function formatSourceStateLabel(hasLiveSource: boolean, hasSource: boolean) {
-  if (hasLiveSource) {
-    return "Live";
+function formatSourceStateLabel(hasVisibleSource: boolean, hasSource: boolean) {
+  if (hasVisibleSource) {
+    return "Visible";
   }
 
   return hasSource ? "Review" : "Pending";
+}
+
+function getFreshnessTone(ageMs: number) {
+  if (ageMs <= FRESH_THRESHOLD_MS) {
+    return "real" as const;
+  }
+
+  if (ageMs < STALE_THRESHOLD_MS) {
+    return "neutral" as const;
+  }
+
+  return "future" as const;
+}
+
+function buildDailyReadFreshness(input: {
+  appointmentsImportedAt: Date | null;
+  appointmentsVisible: boolean;
+  clientsImportedAt: Date | null;
+  clientsVisible: boolean;
+  hasBookedProofVisible: boolean;
+}) {
+  const now = Date.now();
+
+  if (!input.appointmentsVisible || !input.appointmentsImportedAt) {
+    return {
+      label: "Read pending",
+      note: "Booked proof still needs a recent source before today's read can be trusted.",
+      tone: "future" as const,
+    };
+  }
+
+  const appointmentsAgeMs = now - input.appointmentsImportedAt.getTime();
+  const appointmentsTone = getFreshnessTone(appointmentsAgeMs);
+
+  if (input.hasBookedProofVisible && input.clientsVisible && input.clientsImportedAt) {
+    const clientsAgeMs = now - input.clientsImportedAt.getTime();
+
+    if (clientsAgeMs >= STALE_THRESHOLD_MS) {
+      return {
+        label: "Support may be stale",
+        note: `Lead support was refreshed ${formatRelativeDate(input.clientsImportedAt)}. Refresh it if today's booking read feels behind.`,
+        tone: "future" as const,
+      };
+    }
+  }
+
+  if (appointmentsAgeMs >= STALE_THRESHOLD_MS) {
+    return {
+      label: "Read may be stale",
+      note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}. Refresh it if today's revenue or booking read feels behind.`,
+      tone: "future" as const,
+    };
+  }
+
+  if (appointmentsTone === "neutral") {
+    return {
+      label: "Read holding",
+      note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}. Still usable, but no longer fresh.`,
+      tone: "neutral" as const,
+    };
+  }
+
+  return {
+    label: "Read fresh",
+    note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)} and is fresh enough to guide today's read.`,
+    tone: "real" as const,
+  };
 }
 
 function getMostRecentChange(input: {
@@ -83,7 +158,7 @@ function getMostRecentChange(input: {
 
   if (input.handoffOpenedAt) {
     changes.push({
-      note: `Current booking path was opened ${formatRelativeDate(input.handoffOpenedAt)}.`,
+      note: `Seller opened the current booking path ${formatRelativeDate(input.handoffOpenedAt)}.`,
       timestamp: input.handoffOpenedAt.getTime(),
       tone: "accent",
     });
@@ -107,7 +182,7 @@ function getMostRecentChange(input: {
 
   if (changes.length === 0) {
     return {
-      note: "No recent booking signal is visible yet.",
+      note: "No recent booking change is visible yet.",
       tone: "neutral" as const,
     };
   }
@@ -141,18 +216,18 @@ function buildProofFirstBrief(input: {
       {
         label: "Booked proof",
         note: hasAppointmentsSignal ? "Lane visible" : "Still missing",
-        tone: hasAppointmentsSignal ? ("future" as const) : ("future" as const),
+        tone: "future" as const,
         value: formatSourceStateLabel(hasAppointmentsSignal, hasAppointmentsSignal),
       },
       {
         label: "Lead support",
         note: input.clientsSourceVisible ? "Secondary lane visible" : "Optional until proof is clean",
-        tone: input.clientsSourceVisible ? ("neutral" as const) : ("neutral" as const),
+        tone: "neutral" as const,
         value: formatSourceStateLabel(input.clientsSourceVisible, input.clientsSourceVisible),
       },
       {
         label: "Revenue view",
-        note: input.hasBookedProofVisible ? "Can open now" : "Opens after proof",
+        note: input.hasBookedProofVisible ? "Can open next" : "Opens after proof",
         tone: input.hasBookedProofVisible ? ("real" as const) : ("future" as const),
         value: input.hasBookedProofVisible ? "Ready" : "Pending",
       },
@@ -194,7 +269,7 @@ function buildBookingLiveBrief(input: {
         : {
             href: "/app/dashboard#revenue-view",
             label: "Open revenue view",
-            note: "Booked proof is live. Keep the day short until a stronger booking move appears.",
+            note: "Booked proof is visible. Keep the day short until a stronger booking move appears.",
           };
 
   return {
@@ -265,6 +340,13 @@ export const getDailyBookingBriefRead = cache(async (
     clientsImportedAt: uploadSources.clients?.lastImportedAt ?? null,
     handoffOpenedAt: latestOpenedHandoff?.handoffOpenedAt ?? null,
   });
+  const freshness = buildDailyReadFreshness({
+    appointmentsImportedAt: uploadSources.appointments?.lastImportedAt ?? null,
+    appointmentsVisible: appointmentsSourceVisible,
+    clientsImportedAt: uploadSources.clients?.lastImportedAt ?? null,
+    clientsVisible: clientsSourceVisible,
+    hasBookedProofVisible,
+  });
 
   if (!activationSetup.isCompleted || !hasBookedProofVisible) {
     return {
@@ -273,6 +355,7 @@ export const getDailyBookingBriefRead = cache(async (
         clientsSourceVisible,
         hasBookedProofVisible,
       }),
+      freshness,
       recentChange,
     };
   }
@@ -283,6 +366,7 @@ export const getDailyBookingBriefRead = cache(async (
       handoffsOpened: leadIntakeRead.summary.handoffsOpened,
       ready: leadIntakeRead.summary.ready,
     }),
+    freshness,
     recentChange,
   };
 });

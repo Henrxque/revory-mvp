@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
+import { ExecutiveProofSummarySheet } from "@/components/proof/ExecutiveProofSummarySheet";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
@@ -14,6 +15,7 @@ import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
+import { getExecutiveProofSummaryRead } from "@/services/proof/get-executive-proof-summary-read";
 import type { RevoryDecisionSupportRead } from "@/types/decision-support";
 
 function formatCurrency(value: number | null) {
@@ -469,6 +471,11 @@ export default async function DashboardPage() {
     mainOfferLabel,
     overview,
   });
+  const executiveProofSummaryRead = getExecutiveProofSummaryRead({
+    dailyBriefRead,
+    overview,
+    workspaceName: workspace.name,
+  });
   const bookedProofSource = overview.bookedProofSource;
   const leadBaseSource = overview.leadBaseSource;
   const hasMainOfferLocked = activationSetup.selectedTemplate !== null;
@@ -646,6 +653,9 @@ export default async function DashboardPage() {
               >
                 {nextMove.cta}
               </DocumentNavigationLink>
+              <div className="mt-2">
+                <ExecutiveProofSummarySheet read={executiveProofSummaryRead} />
+              </div>
             </div>
           </div>
         </div>

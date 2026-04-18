@@ -22,7 +22,7 @@ export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
         <div className="space-y-4.5">
           <div className="flex flex-wrap items-center gap-2">
             <p className="rev-kicker">Daily booking brief</p>
-            <RevoryStatusBadge tone={read.tone}>Daily use read</RevoryStatusBadge>
+            <RevoryStatusBadge tone={read.tone}>Short daily read</RevoryStatusBadge>
           </div>
 
           <div className="max-w-[38rem] space-y-2">
@@ -71,7 +71,7 @@ export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
           <div className="rounded-[16px] border border-[rgba(194,9,90,0.16)] bg-[rgba(194,9,90,0.05)] px-3.5 py-3">
             <div className="flex items-center justify-between gap-2">
               <p className="rev-label">Today&apos;s next move</p>
-              <RevoryStatusBadge tone={read.tone}>Now</RevoryStatusBadge>
+              <RevoryStatusBadge tone={read.tone}>Current</RevoryStatusBadge>
             </div>
             <p className="mt-2.5 text-[13px] font-semibold text-[color:var(--foreground)]">
               {read.nextMove.label}
@@ -84,10 +84,20 @@ export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
           <div className="mt-3 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
             <div className="flex items-center justify-between gap-2">
               <p className="rev-label">Since last check</p>
-              <RevoryStatusBadge tone={read.recentChange.tone}>Visible</RevoryStatusBadge>
+              <RevoryStatusBadge tone={read.recentChange.tone}>Latest</RevoryStatusBadge>
             </div>
             <p className="mt-2.5 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
               {read.recentChange.note}
+            </p>
+          </div>
+
+          <div className="mt-3 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="rev-label">Read freshness</p>
+              <RevoryStatusBadge tone={read.freshness.tone}>{read.freshness.label}</RevoryStatusBadge>
+            </div>
+            <p className="mt-2.5 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+              {read.freshness.note}
             </p>
           </div>
 

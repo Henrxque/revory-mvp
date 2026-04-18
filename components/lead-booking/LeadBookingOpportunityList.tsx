@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { recordLeadBookingHandoff } from "@/src/app/(app)/app/imports/lead-booking-actions";
+
+const QUICK_ADD_FOCUS_EVENT = "revory:manual-lead-quick-add-focused";
 
 type LeadBookingOpportunityItem = {
   blockedReason: string | null;
@@ -122,6 +124,10 @@ function formatPreparedAt(value: string | null) {
   }).format(new Date(value));
 }
 
+function getOpportunityAnchorId(opportunityId: string) {
+  return `booking-opportunity-${opportunityId}`;
+}
+
 type LeadBookingOpportunityListProps = Readonly<{
   opportunities: LeadBookingOpportunityItem[];
 }>;
@@ -138,6 +144,7 @@ export function LeadBookingOpportunityList({
     {},
   );
   const [activeOpportunityId, setActiveOpportunityId] = useState<string | null>(null);
+  const [focusedOpportunityId, setFocusedOpportunityId] = useState<string | null>(null);
 
   const preparedLookup = useMemo(
     () =>
@@ -150,6 +157,43 @@ export function LeadBookingOpportunityList({
     [opportunities, preparedAtByOpportunity],
   );
 
+  useEffect(() => {
+    if (opportunities.length === 0) {
+      return;
+    }
+
+    function focusOpportunity(opportunityId: string | null) {
+      if (!opportunityId || !opportunities.some((opportunity) => opportunity.id === opportunityId)) {
+        return;
+      }
+
+      setFocusedOpportunityId(opportunityId);
+
+      window.requestAnimationFrame(() => {
+        document
+          .getElementById(getOpportunityAnchorId(opportunityId))
+          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+
+    const hashOpportunityId = window.location.hash.startsWith("#booking-opportunity-")
+      ? window.location.hash.replace("#booking-opportunity-", "")
+      : null;
+
+    focusOpportunity(hashOpportunityId);
+
+    const handleFocusEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ opportunityId?: string }>).detail;
+      focusOpportunity(detail?.opportunityId ?? null);
+    };
+
+    window.addEventListener(QUICK_ADD_FOCUS_EVENT, handleFocusEvent);
+
+    return () => {
+      window.removeEventListener(QUICK_ADD_FOCUS_EVENT, handleFocusEvent);
+    };
+  }, [opportunities]);
+
   if (opportunities.length === 0) {
     return (
       <div className="rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] px-3 py-3">
@@ -157,7 +201,7 @@ export function LeadBookingOpportunityList({
           No active booking read is visible yet.
         </p>
         <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-          Bring in the client lane when this workspace needs a short daily booking read behind booked proof.
+          Bring in the client lane, or use Quick add when today needs one short booking read without opening a bigger workflow.
         </p>
       </div>
     );
@@ -176,17 +220,26 @@ export function LeadBookingOpportunityList({
           ? "Copy ask"
           : "Copy message";
         const copiedState = copiedStateByOpportunity[opportunity.id];
+        const isFocused = focusedOpportunityId === opportunity.id;
 
         return (
           <div
-            key={opportunity.clientId}
-            className={getOpportunityCardClassName(opportunity.status)}
+            key={opportunity.id}
+            id={getOpportunityAnchorId(opportunity.id)}
+            className={`${getOpportunityCardClassName(opportunity.status)} ${
+              isFocused
+                ? "ring-1 ring-[rgba(255,110,170,0.28)] shadow-[0_0_0_1px_rgba(255,110,170,0.08)]"
+                : ""
+            }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
-                  {opportunity.clientName}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+                    {opportunity.clientName}
+                  </p>
+                  {isFocused ? <RevoryStatusBadge tone="accent">Current focus</RevoryStatusBadge> : null}
+                </div>
                 <p className="mt-1 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
                   {opportunity.intakeLabel}
                 </p>

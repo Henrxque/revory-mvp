@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
 import { LeadBookingOpportunityList } from "@/components/lead-booking/LeadBookingOpportunityList";
+import { ManualLeadQuickAdd } from "@/components/lead-booking/ManualLeadQuickAdd";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -286,7 +287,7 @@ export default async function ImportsPage() {
                   Proof first
                 </span>
                 <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] text-[color:var(--text-muted)]">
-                  {hasLeadBaseVisible ? "Lead support live" : "Lead support optional"}
+                  {hasLeadBaseVisible ? "Lead support visible" : "Lead support optional"}
                 </span>
               </div>
 
@@ -383,9 +384,9 @@ export default async function ImportsPage() {
             <h2 className="max-w-[34rem] text-[1.85rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[color:var(--foreground)]">
               Keep today&apos;s booking read premium, bounded, and tied to the current path.
             </h2>
-            <p className="max-w-[38rem] text-sm leading-[1.6] text-[color:var(--text-muted)]">
-              Seller shows what can move now, what is blocked, and which short next step fits the current booking path. Suggested message and assisted handoff stay visible only when the current read truly supports them.
-            </p>
+              <p className="max-w-[38rem] text-sm leading-[1.6] text-[color:var(--text-muted)]">
+              Seller shows what can move now, what is blocked, and which short next step fits the current booking path. Suggested message and assisted handoff appear only when the current read truly supports them.
+              </p>
             {briefTargetsBookingAssistance ? (
               <p className="max-w-[36rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
                 Today&apos;s brief is already pointing here, so this surface should stay on the shortest current move: review the priority read, use the suggested message if it helps, and open the path only when the read is truly ready.
@@ -405,7 +406,7 @@ export default async function ImportsPage() {
                 {leadIntakeRead.summary.ready}
               </p>
               <p className="mt-2 max-w-[16rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-                Opportunities already clear enough to use the current booking path with assisted guidance.
+                Opportunities already clear enough to use the current booking path with bounded guidance.
               </p>
             </div>
 
@@ -443,7 +444,7 @@ export default async function ImportsPage() {
               <div className="max-w-[34rem]">
                 <p className="rev-label">Assistance value proof</p>
                 <p className="mt-1 text-base font-semibold text-[color:var(--foreground)]">
-                  Seller now shows daily booking participation without pretending broader sales automation.
+                  Seller shows bounded booking participation without pretending broader sales automation.
                 </p>
                 <p className="mt-2 text-[11px] leading-[1.6] text-[color:var(--text-muted)]">
                   This layer stays narrow on purpose: it shows what can move now, when Seller already opened the current booking path, and which leads are already booked instead of still being treated like active booking work.
@@ -488,9 +489,14 @@ export default async function ImportsPage() {
                     Today&apos;s booking reads
                   </p>
                   <p className="mt-2 text-[11px] leading-[1.55] text-[color:var(--text-muted)]">
-                    Seller keeps the list short, prioritizes what is most actionable today, and avoids turning this area into CRM, inbox, or broad sales-automation surface.
+                    Seller keeps the list short, prioritizes what is most actionable today, and lets Quick add fall back into this same read instead of opening CRM, inbox, or a broader sales workflow.
                   </p>
                 </div>
+
+                <ManualLeadQuickAdd
+                  bookingPathLabel={leadIntakeRead.bookingPathLabel}
+                  mainOfferLabel={leadIntakeRead.mainOfferLabel}
+                />
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                   {[
