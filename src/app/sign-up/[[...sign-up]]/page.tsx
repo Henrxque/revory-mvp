@@ -6,31 +6,22 @@ import { AuthOptionsPanel } from "@/components/auth/AuthOptionsPanel";
 import { AuthStepCard } from "@/components/auth/AuthStepCard";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
-import {
-  isEmailAuthConfigured,
-  isGoogleAuthConfigured,
-  isMetaAuthConfigured,
-} from "@/services/auth/provider-config";
+import { isGoogleAuthConfigured } from "@/services/auth/provider-config";
 import {
   buildSignInRedirectPath,
   normalizeAuthRedirectTarget,
 } from "@/services/auth/redirects";
 
-const signUpHighlights = [
-  "Workspace creation",
-  "Guided activation",
-];
-
 const signUpSteps = [
   {
     label: "01",
     title: "Create the workspace",
-    text: "The account opens a real workspace context instead of a disconnected auth state.",
+    text: "Google opens a real workspace instead of a disconnected auth state.",
   },
   {
     label: "02",
     title: "Move through activation",
-    text: "The entry point stays narrow and clear instead of turning account creation into a long setup exercise.",
+    text: "REVORY drops the clinic into the same narrow setup path.",
   },
 ];
 
@@ -46,8 +37,6 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   );
   const signInPath = buildSignInRedirectPath(redirectTarget);
   const googleAuthConfigured = isGoogleAuthConfigured();
-  const metaAuthConfigured = isMetaAuthConfigured();
-  const emailAuthConfigured = isEmailAuthConfigured();
 
   if (session?.user?.id) {
     redirect(redirectTarget);
@@ -68,32 +57,21 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
               >
                 Back to REVORY
               </Link>
-              <RevoryStatusBadge tone="accent">Seller workspace</RevoryStatusBadge>
+              <RevoryStatusBadge tone="accent">Secure start</RevoryStatusBadge>
             </div>
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-2">
-            {signUpHighlights.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#cfc7db]"
-              >
-                {item}
-              </span>
-            ))}
           </div>
 
           <div className="mt-8 space-y-5">
             <p className="rev-kicker">REVORY Seller</p>
             <div className="space-y-3">
               <h1 className="rev-display-hero max-w-[32rem]">
-                Start the{" "}
+                Start your{" "}
                 <span className="italic text-[color:var(--accent-light)]">
-                  REVORY Seller path.
+                  REVORY workspace.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Create the workspace and move into setup.
+                Secure Google access creates the workspace and moves straight into setup.
               </p>
             </div>
           </div>
@@ -114,9 +92,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
         <AuthOptionsPanel
           callbackUrl={redirectTarget}
-          emailConfigured={emailAuthConfigured}
           googleConfigured={googleAuthConfigured}
-          metaConfigured={metaAuthConfigured}
           mode="sign-up"
           switchHref={signInPath}
         />

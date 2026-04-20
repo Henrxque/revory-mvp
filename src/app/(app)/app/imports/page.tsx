@@ -174,18 +174,18 @@ export default async function ImportsPage() {
     {
       label: "Booked proof",
       note: hasBookedProofVisible
-        ? "Primary proof lane is live"
+        ? "Primary proof lane is visible"
         : hasAppointmentsSourceReady
           ? "Appointments file is in, proof still needs review"
           : "Start here for revenue",
       tone: hasBookedProofVisible ? "real" : "future",
-      value: hasBookedProofVisible ? "Live" : hasAppointmentsSourceReady ? "Review" : "Pending",
+      value: hasBookedProofVisible ? "Visible" : hasAppointmentsSourceReady ? "Review" : "Pending",
     },
     {
       label: "Lead base support",
       note: hasLeadBaseVisible ? "Secondary support is visible" : "Add only when needed",
       tone: hasLeadBaseVisible ? "real" : "neutral",
-      value: hasLeadBaseVisible ? "Live" : "Ready",
+      value: hasLeadBaseVisible ? "Visible" : "Optional",
     },
   ] as const;
   const isRevenueSupported = hasBookedProofVisible;
@@ -258,7 +258,7 @@ export default async function ImportsPage() {
     },
     {
       label: "Handoffs opened",
-      note: "Seller participation already visible",
+      note: "Current path already opened and recorded",
       tone: "accent" as const,
       value: leadIntakeRead.summary.handoffsOpened,
     },
@@ -281,15 +281,7 @@ export default async function ImportsPage() {
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           <div className="space-y-4">
             <div className="max-w-[38rem] space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="rev-kicker">Booking Inputs</p>
-                <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] text-[color:var(--accent-light)]">
-                  Proof first
-                </span>
-                <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] text-[color:var(--text-muted)]">
-                  {hasLeadBaseVisible ? "Lead support visible" : "Lead support optional"}
-                </span>
-              </div>
+              <p className="rev-kicker">Booking Inputs</p>
 
               <h1 className="rev-display-hero max-w-[22rem]">{fallbackHero.heroTitle}</h1>
 
@@ -379,7 +371,6 @@ export default async function ImportsPage() {
               {briefTargetsBookingAssistance ? (
                 <RevoryStatusBadge tone="accent">Today&apos;s focus</RevoryStatusBadge>
               ) : null}
-              <RevoryStatusBadge tone="neutral">Bounded assist</RevoryStatusBadge>
             </div>
             <h2 className="max-w-[34rem] text-[1.85rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[color:var(--foreground)]">
               Keep today&apos;s booking read premium, bounded, and tied to the current path.
@@ -428,7 +419,7 @@ export default async function ImportsPage() {
             <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="rev-label">Handoffs opened</p>
-                <RevoryStatusBadge tone="neutral">Seller signal</RevoryStatusBadge>
+                <RevoryStatusBadge tone="neutral">Path opened</RevoryStatusBadge>
               </div>
               <p className="mt-3 text-[1.5rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
                 {leadIntakeRead.summary.handoffsOpened}
@@ -439,7 +430,7 @@ export default async function ImportsPage() {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.038),rgba(255,255,255,0.018))] p-5">
+            <div className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.038),rgba(255,255,255,0.018))] p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="max-w-[34rem]">
                 <p className="rev-label">Assistance value proof</p>
@@ -450,7 +441,6 @@ export default async function ImportsPage() {
                   This layer stays narrow on purpose: it shows what can move now, when Seller already opened the current booking path, and which leads are already booked instead of still being treated like active booking work.
                 </p>
               </div>
-              <RevoryStatusBadge tone="neutral">Bounded proof</RevoryStatusBadge>
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -459,12 +449,12 @@ export default async function ImportsPage() {
                   key={item.label}
                   className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="rev-label">{item.label}</p>
-                    <RevoryStatusBadge tone={item.tone}>{item.note}</RevoryStatusBadge>
-                  </div>
+                  <p className="rev-label">{item.label}</p>
                   <p className="mt-2 text-[1.4rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
                     {item.value}
+                  </p>
+                  <p className="mt-2 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
+                    {item.note}
                   </p>
                 </div>
               ))}

@@ -105,7 +105,7 @@ function formatSourceStatus(status: string) {
     normalized.includes("connected")
   ) {
     return {
-      label: "Live",
+      label: "Visible",
       tone: "real" as const,
     };
   }
@@ -567,12 +567,12 @@ export default async function DashboardPage() {
   const longitudinalSummary = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
       ? `${recentMomentum.bookedAppointments} booked appointments are visible across ${recentMomentum.windowLabel.toLowerCase()}.`
-      : "Booked proof is live, but recent monthly proof is still thin."
-    : "Recent momentum becomes defensible after booked proof is visible.";
+      : "Booked proof is visible, but recent monthly proof is still thin."
+    : "Recent momentum becomes usable after booked proof is visible.";
   const longitudinalAsideTitle = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
       ? "Value is easier to defend over time"
-      : "Live proof still needs more time depth"
+      : "Visible proof still needs more time depth"
     : "Longitudinal proof starts after booked proof";
   const longitudinalAsideNote = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
@@ -608,7 +608,7 @@ export default async function DashboardPage() {
                 {monthChip}
               </span>
               <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
-                {hasBookedProofVisible ? "Proof live" : "Proof pending"}
+                {hasBookedProofVisible ? "Proof visible" : "Proof pending"}
               </RevoryStatusBadge>
             </div>
 
@@ -921,7 +921,7 @@ export default async function DashboardPage() {
                     ? "Lead-base support is temporarily unavailable, but revenue and booked proof remain readable."
                     : attributionRead.leadBaseCoveragePercent !== null
                     ? "Visible booked proof already backed by lead-base support."
-                    : "Lead-base coverage becomes defensible after proof is visible."}
+                    : "Lead-base coverage becomes usable after proof is visible."}
                 </p>
               </div>
             </div>
@@ -1065,7 +1065,7 @@ export default async function DashboardPage() {
               Booked proof
             </p>
             <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
-              {hasBookedProofVisible ? "Live" : "Pending"}
+              {hasBookedProofVisible ? "Visible" : "Pending"}
             </RevoryStatusBadge>
           </div>
 
@@ -1127,7 +1127,7 @@ export default async function DashboardPage() {
                     <RevoryStatusBadge
                       tone={hasLiveImportSource(leadBaseSource) ? "neutral" : "future"}
                     >
-                      {hasLiveImportSource(leadBaseSource) ? "Support live" : "Support pending"}
+                      {hasLiveImportSource(leadBaseSource) ? "Support visible" : "Support pending"}
                     </RevoryStatusBadge>
                   </div>
 
@@ -1175,7 +1175,7 @@ export default async function DashboardPage() {
             <RevoryStatusBadge tone="neutral">Limited</RevoryStatusBadge>
           </div>
           <p className="mt-3 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-            Upcoming bookings are temporarily unavailable in this read. Booked proof and revenue stay live.
+            Upcoming bookings are temporarily unavailable in this read. Booked proof and revenue stay visible.
           </p>
         </section>
       ) : overview.upcomingRead.list.length > 0 ? (

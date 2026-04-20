@@ -297,7 +297,7 @@ export function LeadBookingOpportunityList({
 
               {opportunity.suggestedMessage || handoffAvailable ? (
                 <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                  Use the Action Pack below to take this step without leaving today&apos;s booking read first.
+                  Use the Action Pack below to take this step inside the current booking read.
                 </p>
               ) : null}
 
@@ -308,9 +308,6 @@ export function LeadBookingOpportunityList({
                       <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
                         {opportunity.suggestedMessageLabel ?? "Suggested message"}
                       </p>
-                      {opportunity.suggestedMessageSource === "llm" ? (
-                        <RevoryStatusBadge tone="accent">Tailored</RevoryStatusBadge>
-                      ) : null}
                     </div>
                     <button
                       className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(194,9,90,0.08)]"

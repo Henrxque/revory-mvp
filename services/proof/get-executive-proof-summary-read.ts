@@ -60,9 +60,9 @@ function buildExecutiveFrame(overview: DashboardOverview) {
 
   if (hasBookedProofVisible && hasRecentProof && hasStableSupport) {
     return {
-      headline: "Current revenue proof is visible and defensible.",
+      headline: "Current revenue proof is visible and usable.",
       summary:
-        "Booked revenue is visible in the current read, with recent proof and support context kept short enough for internal review or pricing conversations.",
+        "Booked revenue is visible in the current read, with recent proof and support context kept short enough for internal or commercial review.",
     };
   }
 

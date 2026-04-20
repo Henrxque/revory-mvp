@@ -6,31 +6,22 @@ import { AuthOptionsPanel } from "@/components/auth/AuthOptionsPanel";
 import { AuthStepCard } from "@/components/auth/AuthStepCard";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
-import {
-  isEmailAuthConfigured,
-  isGoogleAuthConfigured,
-  isMetaAuthConfigured,
-} from "@/services/auth/provider-config";
+import { isGoogleAuthConfigured } from "@/services/auth/provider-config";
 import {
   buildSignUpRedirectPath,
   normalizeAuthRedirectTarget,
 } from "@/services/auth/redirects";
 
-const signInHighlights = [
-  "Protected workspace",
-  "Fast return",
-];
-
 const signInSteps = [
   {
     label: "01",
     title: "Return to the same workspace",
-    text: "The account reconnects the user with the existing private context instead of dropping them into a generic admin shell.",
+    text: "Google brings the user back to the same private workspace.",
   },
   {
     label: "02",
-    title: "Resume the right flow",
-    text: "The workspace reopens the same narrow Seller path instead of sending the clinic through a generic admin detour.",
+    title: "Resume the Seller path",
+    text: "REVORY reopens the same narrow booking workflow.",
   },
 ];
 
@@ -46,8 +37,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   );
   const signUpPath = buildSignUpRedirectPath(redirectTarget);
   const googleAuthConfigured = isGoogleAuthConfigured();
-  const metaAuthConfigured = isMetaAuthConfigured();
-  const emailAuthConfigured = isEmailAuthConfigured();
 
   if (session?.user?.id) {
     redirect(redirectTarget);
@@ -68,32 +57,21 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               >
                 Back to REVORY
               </Link>
-              <RevoryStatusBadge tone="accent">Workspace access</RevoryStatusBadge>
+              <RevoryStatusBadge tone="accent">Secure access</RevoryStatusBadge>
             </div>
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-2">
-            {signInHighlights.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#cfc7db]"
-              >
-                {item}
-              </span>
-            ))}
           </div>
 
           <div className="mt-8 space-y-5">
             <p className="rev-kicker">REVORY Seller</p>
             <div className="space-y-3">
               <h1 className="rev-display-hero max-w-[32rem]">
-                Access the{" "}
+                Return to your{" "}
                 <span className="italic text-[color:var(--accent-light)]">
-                  same REVORY workspace.
+                  REVORY workspace.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Sign in and get back to the booking workflow.
+                Secure Google access brings the clinic back to the same booking workflow.
               </p>
             </div>
           </div>
@@ -114,9 +92,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
         <AuthOptionsPanel
           callbackUrl={redirectTarget}
-          emailConfigured={emailAuthConfigured}
           googleConfigured={googleAuthConfigured}
-          metaConfigured={metaAuthConfigured}
           mode="sign-in"
           switchHref={signUpPath}
         />

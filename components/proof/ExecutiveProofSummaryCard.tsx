@@ -18,15 +18,10 @@ export function ExecutiveProofSummaryCard({
         <div>
           <p className="rev-kicker">Executive proof</p>
           <p className="mt-1 text-[11px] font-medium text-[color:var(--text-muted)]">
-            {read.workspaceName}
+            {read.workspaceName} • {read.periodLabel}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
-            {read.periodLabel}
-          </span>
-          <RevoryStatusBadge tone={read.freshness.tone}>{read.freshness.label}</RevoryStatusBadge>
-        </div>
+        <RevoryStatusBadge tone={read.freshness.tone}>{read.freshness.label}</RevoryStatusBadge>
       </div>
 
       <div className="mt-4 max-w-[36rem] space-y-2">
@@ -41,10 +36,7 @@ export function ExecutiveProofSummaryCard({
       {primarySignal ? (
         <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.22fr)_minmax(0,0.9fr)_minmax(0,0.9fr)]">
           <div className="rounded-[22px] border border-[rgba(194,9,90,0.22)] bg-[linear-gradient(180deg,rgba(194,9,90,0.09),rgba(255,255,255,0.03))] px-4.5 py-4">
-            <div className="flex items-center justify-between gap-2">
-              <p className="rev-label">{primarySignal.label}</p>
-              <RevoryStatusBadge tone={primarySignal.tone}>Core read</RevoryStatusBadge>
-            </div>
+            <p className="rev-label">{primarySignal.label}</p>
             <p className="mt-3 text-[clamp(2rem,3vw,2.6rem)] font-semibold leading-none tracking-[-0.05em] text-[color:var(--foreground)]">
               {primarySignal.value}
             </p>
@@ -86,11 +78,9 @@ export function ExecutiveProofSummaryCard({
           </RevoryStatusBadge>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <RevoryStatusBadge tone="accent">{read.safeguard.coreReadLabel}</RevoryStatusBadge>
-          <RevoryStatusBadge tone={read.safeguard.tone}>{read.safeguard.supportLabel}</RevoryStatusBadge>
-          <RevoryStatusBadge tone={read.freshness.tone}>{read.freshness.label}</RevoryStatusBadge>
-        </div>
+        <p className="mt-4 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+          {read.safeguard.coreReadLabel} • {read.safeguard.supportLabel}
+        </p>
 
         <p className="mt-3 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
           {read.freshness.note}

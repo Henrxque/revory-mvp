@@ -404,10 +404,9 @@ export function ExecutiveProofSummarySheet({
               <div className="max-w-[34rem]">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="rev-kicker">Executive proof share</p>
-                  <RevoryStatusBadge tone="neutral">Bounded share</RevoryStatusBadge>
                 </div>
                 <h3 className="mt-2 text-[1.55rem] font-semibold leading-[1.02] tracking-[-0.04em] text-[color:var(--foreground)]">
-                  Use one short proof read for internal review or pricing conversations.
+                  Use one short proof read for internal or commercial review.
                 </h3>
                 <p className="mt-2 text-[12px] leading-[1.55] text-[color:var(--text-muted)]">
                   This summary stays narrow on purpose: booked revenue first, then only the shortest proof signals the current read already sustains.
@@ -429,7 +428,7 @@ export function ExecutiveProofSummarySheet({
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <p className="max-w-[34rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-                Copy gives the short text version. Print creates a clean exportable view. Share uses the system sheet when the device supports it.
+                Copy keeps the short text version. Print creates a clean shareable view. Share uses the system sheet when the device supports it.
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button

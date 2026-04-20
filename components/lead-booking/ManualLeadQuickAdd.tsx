@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { createManualLeadQuickAdd } from "@/src/app/(app)/app/imports/manual-lead-actions";
 
 type ManualLeadQuickAddProps = Readonly<{
@@ -73,8 +72,11 @@ export function ManualLeadQuickAdd({
         >
           Quick add
         </button>
-
-        {successMessage ? <RevoryStatusBadge tone="real">Read updated</RevoryStatusBadge> : null}
+        {successMessage ? (
+          <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--success)]">
+            Read updated
+          </span>
+        ) : null}
       </div>
 
       {isOpen ? (
@@ -105,10 +107,9 @@ export function ManualLeadQuickAdd({
               </button>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <RevoryStatusBadge tone="accent">{mainOfferLabel}</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">{bookingPathLabel}</RevoryStatusBadge>
-            </div>
+            <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
+              {mainOfferLabel} • {bookingPathLabel}
+            </p>
 
             <div className="mt-4 space-y-2.5">
               <label className="block">

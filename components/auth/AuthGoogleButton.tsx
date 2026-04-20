@@ -49,7 +49,7 @@ export function AuthGoogleButton({
 
   return (
     <button
-      className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-4 text-left shadow-[0_22px_48px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(224,16,106,0.22)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.04))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(224,16,106,0.34)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(18,16,24,1)] disabled:cursor-not-allowed disabled:opacity-80"
+      className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[22px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.028))] px-4 py-3.5 text-left shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(224,16,106,0.22)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.036))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(224,16,106,0.34)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(18,16,24,1)] disabled:cursor-not-allowed disabled:opacity-80"
       disabled={isPending}
       onClick={() => {
         startTransition(async () => {
@@ -66,18 +66,15 @@ export function AuthGoogleButton({
 
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] font-semibold text-[color:var(--foreground)]">
-          {isPending ? "Redirecting to Google" : label}
+          {isPending ? "Redirecting..." : label}
         </span>
         <span className="mt-1 block text-xs text-[#b9b2c6]">
           {isPending
-            ? "Completing the secure redirect to your workspace"
-            : "Secure Google sign-in for REVORY"}
+            ? "Opening the secure Google path"
+            : "Current secure access path"}
         </span>
       </span>
-
-      <span className="inline-flex min-h-9 min-w-[4.75rem] items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(12,11,15,0.34)] px-3 text-xs font-semibold text-[color:var(--foreground)]">
-        {isPending ? <PendingSpinner /> : "Google"}
-      </span>
+      {isPending ? <PendingSpinner /> : null}
     </button>
   );
 }
