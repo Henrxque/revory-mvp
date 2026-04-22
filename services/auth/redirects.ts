@@ -1,26 +1,39 @@
 const DEFAULT_AUTH_REDIRECT_TARGET = "/app";
 
+function isSafeInternalPath(value: string) {
+  return value.startsWith("/") && !value.startsWith("//");
+}
+
 export function normalizeAuthRedirectTarget(
   value: string | string[] | undefined,
   fallback = DEFAULT_AUTH_REDIRECT_TARGET,
 ) {
-  const candidate = Array.isArray(value) ? value[0] : value;
+  const safeFallback = isSafeInternalPath(fallback)
+    ? fallback
+    : DEFAULT_AUTH_REDIRECT_TARGET;
+  const candidate = (Array.isArray(value) ? value[0] : value)?.trim();
 
   if (!candidate) {
-    return fallback;
+    return safeFallback;
   }
 
-  if (candidate.startsWith("/")) {
-    return candidate;
+  const normalizedCandidate = candidate.replaceAll("\\", "/");
+
+  if (normalizedCandidate.startsWith("//")) {
+    return safeFallback;
+  }
+
+  if (isSafeInternalPath(normalizedCandidate)) {
+    return normalizedCandidate;
   }
 
   try {
-    const url = new URL(candidate);
+    const url = new URL(normalizedCandidate);
     const normalizedPath = `${url.pathname}${url.search}${url.hash}`;
 
-    return normalizedPath.startsWith("/") ? normalizedPath : fallback;
+    return isSafeInternalPath(normalizedPath) ? normalizedPath : safeFallback;
   } catch {
-    return fallback;
+    return safeFallback;
   }
 }
 

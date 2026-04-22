@@ -1,0 +1,208 @@
+{
+  "checkedAt": "2026-04-21T19:28:10.995Z",
+  "baseUrl": "http://localhost:3000",
+  "passes": [
+    {
+      "name": "landing loads without obvious mojibake",
+      "passed": true,
+      "details": {
+        "sample": "REVORY\nFeatures\nHow It Works\nPricing\nFAQ\nStart Your Booking Flow\nPremium booking acceleration for MedSpas\nYou are already paying for leads.\nStart turning more of them into booked appointments.\n\nREVORY Seller helps MedSpa"
+      }
+    },
+    {
+      "name": "landing has primary CTA to pricing/start",
+      "passed": true,
+      "details": {
+        "ctaCount": 6
+      }
+    },
+    {
+      "name": "unauthenticated /app redirects instead of exposing app",
+      "passed": true,
+      "details": {
+        "status": 307,
+        "location": "/sign-in?redirect_url=%2Fapp"
+      }
+    },
+    {
+      "name": "pricing loads for authenticated inactive user",
+      "passed": true,
+      "details": {
+        "url": "http://localhost:3000/start",
+        "sample": "REVORY\n\nWORKSPACE\n\nPricing QA's Workspace\n\nSELLER BILLING\nBILLING NEXT\nSTRIPE ENV MISSING\nSign out\n\nPRICING\n\nBASIC\n\n$370\n\nper month\n\n✓\n\n1 main offer\n\n✓\n\n1 booking path\n\n✓\n\nLower lead volume\n\n✓\n\nRevenue-first dashboard\n\n✓\n\nContained booking lane\n\n✓\n\nLight async"
+      }
+    },
+    {
+      "name": "pricing has no mojibake in visible plan feature markers",
+      "passed": true,
+      "details": {
+        "offendingSample": null
+      }
+    },
+    {
+      "name": "Stripe-missing checkout returns controlled unavailable state",
+      "passed": true,
+      "details": {
+        "url": "http://localhost:3000/start?billing=unavailable&plan=growth"
+      }
+    },
+    {
+      "name": "public pages produced no browser runtime errors",
+      "passed": true,
+      "details": {
+        "pageErrors": [],
+        "consoleErrors": []
+      }
+    },
+    {
+      "name": "authenticated auth redirect stays same-origin for /sign-in?redirect_url=%2F%2Fevil.example",
+      "passed": true,
+      "details": {
+        "status": 307,
+        "location": "/app"
+      }
+    },
+    {
+      "name": "authenticated auth redirect stays same-origin for /sign-up?redirect_url=%2F%2Fevil.example",
+      "passed": true,
+      "details": {
+        "status": 307,
+        "location": "/app"
+      }
+    },
+    {
+      "name": "authenticated auth redirect stays same-origin for /sign-in?redirect_url=https%3A%2F%2Fevil.example%2Ftakeover",
+      "passed": true,
+      "details": {
+        "status": 307,
+        "location": "/takeover"
+      }
+    },
+    {
+      "name": "authenticated /app reaches active app surface",
+      "passed": true,
+      "details": {
+        "url": "http://localhost:3000/app/dashboard",
+        "heading": "Open with what can move now."
+      }
+    },
+    {
+      "name": "adjust setup rejects invalid deal value without saving fake success",
+      "passed": true,
+      "details": {
+        "url": "http://localhost:3000/app/setup/deal_value?edit=1",
+        "sample": "Best fit for clearer value defense."
+      }
+    },
+    {
+      "name": "imports page shows booking assistance and quick add",
+      "passed": true,
+      "details": {
+        "url": "http://localhost:3000/app/imports",
+        "sample": "REVORY\n\nPAID LEADS INTO BOOKED APPOINTMENTS\n\nSELLER\n\nRevenue View\nBooking Inputs\n\nACTIVATION\n\nActivation Path\nLA\n\nLUMINA AESTHETICS\n\nREVENUE READY\n\nACTIVATED\nLIVE\n\nlumina.rerun.qa+1776799614805@example.com\n\nLUMINA AESTHETICS\n\nBooked proof is live and revenue i"
+      }
+    },
+    {
+      "name": "quick add submit stays disabled without contact identity",
+      "passed": true,
+      "details": {}
+    },
+    {
+      "name": "quick add phone-only lead is classified honestly against email booking path",
+      "passed": true,
+      "details": {
+        "status": "BLOCKED",
+        "blockingReason": "ineligible_for_handoff",
+        "clientPhone": "+15559707132"
+      }
+    },
+    {
+      "name": "quick add conflicting identity returns visible error",
+      "passed": true,
+      "details": {
+        "sample": "REVORY found conflicting lead identity for this quick add. Review the existing email and phone before creating a new booking read."
+      }
+    },
+    {
+      "name": "stale source read becomes visible when proof import is old",
+      "passed": true,
+      "details": {
+        "sourceId": "cmo90mp4s00rybm18feysuap7",
+        "sample": "Lead support was refreshed 1m ago."
+      }
+    },
+    {
+      "name": "executive proof copy summary shows real success",
+      "passed": true,
+      "details": {}
+    },
+    {
+      "name": "executive proof print opens non-empty print view",
+      "passed": true,
+      "details": {
+        "popupUrl": "blob:http://localhost:3000/b018dd09-cd71-4873-b476-7d245ddb6ec7",
+        "printUnavailable": false
+      }
+    },
+    {
+      "name": "authenticated core surfaces produced no browser runtime errors",
+      "passed": true,
+      "details": {
+        "pageErrors": [],
+        "consoleErrors": []
+      }
+    },
+    {
+      "name": "database has no unfinished or rolled back migrations",
+      "passed": true,
+      "details": {
+        "pendingMigrations": []
+      }
+    }
+  ],
+  "failures": [],
+  "observations": [
+    {
+      "name": "landing footer links",
+      "details": {
+        "footerLinks": [
+          {
+            "text": "Privacy",
+            "href": "/privacy"
+          },
+          {
+            "text": "Terms",
+            "href": "/terms"
+          },
+          {
+            "text": "Sign in",
+            "href": "/sign-in"
+          }
+        ]
+      }
+    },
+    {
+      "name": "migration table vs local migration folders",
+      "details": {
+        "dbOnlyMigrations": [],
+        "fileOnlyMigrations": [],
+        "dbMigrationCount": 9,
+        "localMigrationCount": 9
+      }
+    }
+  ],
+  "created": {
+    "emails": [
+      "pricing.qa+1776799692451@example.com",
+      "redirect.qa+1776799694564@example.com"
+    ],
+    "clientIds": [
+      "cmo90o4hj015gbm18zzbip6zw",
+      "cmo90o5g60001bm00oc5j3kp5",
+      "cmo90o5g90003bm00qlt1dd25"
+    ],
+    "opportunityIds": [
+      "cmo90o4hy015hbm18pq3hrc6g"
+    ]
+  }
+}

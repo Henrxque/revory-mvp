@@ -6,12 +6,13 @@ type RevoryStatusBadgeProps = Readonly<{
 
 const toneClasses: Record<NonNullable<RevoryStatusBadgeProps["tone"]>, string> = {
   accent:
-    "border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] text-[color:var(--accent-light)]",
+    "border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] text-[color:var(--accent-light)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
   future:
-    "border-[rgba(245,166,35,0.28)] bg-[rgba(245,166,35,0.12)] text-[color:var(--warning)]",
+    "border-[rgba(245,166,35,0.26)] bg-[rgba(245,166,35,0.1)] text-[color:var(--warning)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
   neutral:
-    "border-[color:var(--border)] bg-[color:var(--background-card)] text-[color:var(--text-muted)]",
-  real: "border-[rgba(46,204,134,0.25)] bg-[rgba(46,204,134,0.12)] text-[color:var(--success)]",
+    "border-[color:var(--border)] bg-[rgba(255,255,255,0.028)] text-[color:var(--text-muted)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+  real:
+    "border-[rgba(46,204,134,0.24)] bg-[rgba(46,204,134,0.1)] text-[color:var(--success)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
 };
 
 export function RevoryStatusBadge({
@@ -21,7 +22,7 @@ export function RevoryStatusBadge({
 }: RevoryStatusBadgeProps) {
   return (
     <span
-      className={`inline-flex min-h-6 items-center rounded-[11px] border px-2.5 py-[0.35rem] text-[9px] font-semibold leading-tight whitespace-nowrap ${toneClasses[tone]} ${className ?? ""}`}
+      className={`inline-flex min-h-6 items-center rounded-full border px-2.5 py-[0.34rem] text-[10px] font-semibold leading-tight tracking-[0.105em] whitespace-nowrap uppercase backdrop-blur-sm ${toneClasses[tone]} ${className ?? ""}`}
     >
       {children}
     </span>

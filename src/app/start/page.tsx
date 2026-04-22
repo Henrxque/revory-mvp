@@ -69,6 +69,23 @@ const planPresentation = {
   },
 } as const;
 
+function PlanCheckIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="mt-1 h-4 w-4 shrink-0 text-[color:var(--accent-light)]"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="m5 12 4 4L19 6" />
+    </svg>
+  );
+}
+
 type StartPageProps = Readonly<{
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;
@@ -243,11 +260,11 @@ export default async function StartPage({ searchParams }: StartPageProps) {
               return (
                 <div
                   key={planKey}
-                  className={`flex h-full flex-col rounded-[18px] border px-7 py-8 text-left ${presentation.toneClass}`}
+                  className={`flex h-full flex-col rounded-[30px] border px-7 py-8 text-left shadow-[0_24px_70px_rgba(0,0,0,0.2)] ${presentation.toneClass}`}
                 >
                   <div className="min-h-10">
                     {planKey === "GROWTH" ? (
-                      <span className="inline-flex rounded-[6px] bg-[color:var(--accent)] px-3.5 py-1.5 text-[0.74rem] font-bold uppercase tracking-[0.1em] text-white">
+                      <span className="inline-flex rounded-full border border-[rgba(255,110,170,0.36)] bg-[rgba(194,9,90,0.18)] px-3.5 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                         Best Fit
                       </span>
                     ) : (
@@ -278,9 +295,7 @@ export default async function StartPage({ searchParams }: StartPageProps) {
                   <div className="mt-6 space-y-3.5">
                     {presentation.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
-                        <span className="mt-1 text-[1.35rem] leading-none text-[color:var(--accent-light)]">
-                          ✓
-                        </span>
+                        <PlanCheckIcon />
                         <p className="text-[0.93rem] leading-8 text-[#908aa3]">{feature}</p>
                       </div>
                     ))}

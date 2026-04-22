@@ -1,0 +1,27 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "checkedAt": "2026-04-22T20:36:49.991Z",
+  "files": [
+    "00-landing.png",
+    "01-sign-in.png",
+    "02-sign-up.png",
+    "03-privacy.png",
+    "04-terms.png",
+    "05-pricing-auth.png",
+    "06-activation-path-summary.png",
+    "07-dashboard-before-import.png",
+    "08-imports-empty.png",
+    "09-quick-add-modal.png",
+    "10-imports-appointments-smoke.png",
+    "11-dashboard-smoke.png",
+    "12-imports-clients-smoke.png",
+    "13-dashboard-with-support.png",
+    "14-imports-appointments-6mo.png",
+    "15-imports-clients-6mo.png",
+    "16-dashboard-6mo.png",
+    "17-proof-share-modal.png",
+    "18-proof-print-view.png"
+  ],
+  "note": "Activation was seeded after the clean rerun activation submit returned /app/setup/activation?error=activation.",
+  "workspaceId": "cmoaiezee0002bmycmrrdpz8k"
+}

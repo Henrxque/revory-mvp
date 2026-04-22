@@ -1,0 +1,27 @@
+{
+  "authenticatedRedirect": {
+    "passed": true,
+    "url": "http://localhost:3000/app"
+  },
+  "activationAdjust": {
+    "averageDealValue": "725",
+    "isCompleted": true,
+    "passed": true
+  },
+  "quickAdd": {
+    "clientCreated": true,
+    "opportunityCreated": true,
+    "status": "READY",
+    "mainOfferKey": "INJECTABLES",
+    "bookingPath": "EMAIL",
+    "passed": true
+  },
+  "actionPackCopy": {
+    "passed": true
+  },
+  "handoff": {
+    "clickError": null,
+    "handoffOpenedAt": "2026-04-21T17:46:45.028Z",
+    "passed": true
+  }
+}

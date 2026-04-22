@@ -82,12 +82,28 @@ function normalizeClinicName(value: string) {
   return trimmedValue.slice(0, 80);
 }
 
-async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
+function getOnboardingStepErrorPath(
+  stepKey: ReturnType<typeof resolveOnboardingStepKey>,
+  errorKey: string,
+  isEditingCompletedSetup: boolean,
+) {
+  const query = isEditingCompletedSetup
+    ? `?edit=1&error=${errorKey}`
+    : `?error=${errorKey}`;
+
+  return `${getOnboardingStepPath(stepKey)}${query}`;
+}
+
+async function getSafeOnboardingContext(
+  stepValue: FormDataEntryValue | null,
+  modeValue?: FormDataEntryValue | null,
+) {
   const appContext = await getAppContext();
   const requestedStepKey =
     typeof stepValue === "string" && isOnboardingStepKey(stepValue)
       ? stepValue
       : null;
+  const isEditingCompletedSetup = modeValue === "edit";
 
   if (!appContext) {
     redirect(
@@ -98,6 +114,18 @@ async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
   }
 
   if (appContext.activationSetup.isCompleted) {
+    if (
+      isEditingCompletedSetup &&
+      requestedStepKey &&
+      requestedStepKey !== "activation"
+    ) {
+      return {
+        currentStepKey: requestedStepKey,
+        isEditingCompletedSetup: true,
+        workspaceId: appContext.workspace.id,
+      };
+    }
+
     redirect("/app");
   }
 
@@ -110,13 +138,15 @@ async function getSafeOnboardingContext(stepValue: FormDataEntryValue | null) {
 
   return {
     currentStepKey,
+    isEditingCompletedSetup: false,
     workspaceId: appContext.workspace.id,
   };
 }
 
 export async function submitOnboardingStep(formData: FormData) {
-  const { currentStepKey, workspaceId } = await getSafeOnboardingContext(
+  const { currentStepKey, isEditingCompletedSetup, workspaceId } = await getSafeOnboardingContext(
     formData.get("step"),
+    formData.get("mode"),
   );
   const nextStepKey = getNextOnboardingStepKey(currentStepKey);
 
@@ -132,7 +162,7 @@ export async function submitOnboardingStep(formData: FormData) {
         !isTemplateValue(selectedTemplate) ||
         !clinicName
       ) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=template`);
+        redirect(getOnboardingStepErrorPath(currentStepKey, "template", isEditingCompletedSetup));
       }
 
       await prisma.workspace.update({
@@ -148,8 +178,8 @@ export async function submitOnboardingStep(formData: FormData) {
         workspaceId,
       });
       await updateActivationSetup(workspaceId, {
-        currentStep: nextStepKey ?? currentStepKey,
-        isCompleted: false,
+        ...(isEditingCompletedSetup ? {} : { currentStep: nextStepKey ?? currentStepKey }),
+        isCompleted: isEditingCompletedSetup ? true : false,
         selectedTemplate,
       });
       break;
@@ -162,26 +192,28 @@ export async function submitOnboardingStep(formData: FormData) {
         !isDataSourceType(selectedDataSourceType) ||
         !isSupportedOnboardingSourceType(selectedDataSourceType)
       ) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=source`);
+        redirect(getOnboardingStepErrorPath(currentStepKey, "source", isEditingCompletedSetup));
       }
 
       await upsertOnboardingDataSource(workspaceId, selectedDataSourceType);
-      await updateActivationSetup(workspaceId, {
-        currentStep: nextStepKey ?? currentStepKey,
-        isCompleted: false,
-      });
+      if (!isEditingCompletedSetup) {
+        await updateActivationSetup(workspaceId, {
+          currentStep: nextStepKey ?? currentStepKey,
+          isCompleted: false,
+        });
+      }
       break;
     }
     case "channel": {
       const primaryChannel = formData.get("primaryChannel");
 
       if (typeof primaryChannel !== "string" || !isCommunicationChannel(primaryChannel)) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=channel`);
+        redirect(getOnboardingStepErrorPath(currentStepKey, "channel", isEditingCompletedSetup));
       }
 
       await updateActivationSetup(workspaceId, {
-        currentStep: nextStepKey ?? currentStepKey,
-        isCompleted: false,
+        ...(isEditingCompletedSetup ? {} : { currentStep: nextStepKey ?? currentStepKey }),
+        isCompleted: isEditingCompletedSetup ? true : false,
         primaryChannel,
       });
       break;
@@ -194,13 +226,13 @@ export async function submitOnboardingStep(formData: FormData) {
           : null;
 
       if (!averageDealValue) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=deal_value`);
+        redirect(getOnboardingStepErrorPath(currentStepKey, "deal_value", isEditingCompletedSetup));
       }
 
       await updateActivationSetup(workspaceId, {
-        currentStep: nextStepKey ?? currentStepKey,
         averageDealValue,
-        isCompleted: false,
+        ...(isEditingCompletedSetup ? {} : { currentStep: nextStepKey ?? currentStepKey }),
+        isCompleted: isEditingCompletedSetup ? true : false,
       });
       break;
     }
@@ -211,12 +243,12 @@ export async function submitOnboardingStep(formData: FormData) {
         typeof recommendedModeKey !== "string" ||
         !isFlowModeKey(recommendedModeKey)
       ) {
-        redirect(`${getOnboardingStepPath(currentStepKey)}?error=mode`);
+        redirect(getOnboardingStepErrorPath(currentStepKey, "mode", isEditingCompletedSetup));
       }
 
       await updateActivationSetup(workspaceId, {
-        currentStep: nextStepKey ?? currentStepKey,
-        isCompleted: false,
+        ...(isEditingCompletedSetup ? {} : { currentStep: nextStepKey ?? currentStepKey }),
+        isCompleted: isEditingCompletedSetup ? true : false,
         recommendedModeKey,
       });
       break;
@@ -230,6 +262,10 @@ export async function submitOnboardingStep(formData: FormData) {
 
       redirect("/app");
     }
+  }
+
+  if (isEditingCompletedSetup) {
+    redirect("/app/setup");
   }
 
   if (!nextStepKey) {

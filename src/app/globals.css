@@ -6,8 +6,10 @@
   --background-card: #15141c;
   --background-card-hover: #1c1b26;
   --foreground: #f5f4f8;
-  --surface: rgba(21, 20, 28, 0.88);
-  --surface-muted: rgba(17, 16, 24, 0.9);
+  --surface: rgba(21, 20, 28, 0.9);
+  --surface-muted: rgba(17, 16, 24, 0.92);
+  --surface-elevated: rgba(25, 23, 33, 0.94);
+  --surface-hairline: rgba(255, 255, 255, 0.045);
   --surface-soft: rgba(194, 9, 90, 0.08);
   --border: rgba(255, 255, 255, 0.07);
   --border-strong: rgba(255, 255, 255, 0.14);
@@ -15,13 +17,16 @@
   --accent: #c2095a;
   --accent-light: #e0106a;
   --accent-strong: #c2095a;
-  --text-muted: #7a7890;
-  --text-subtle: #4a4860;
+  --text-muted: #b0a9bd;
+  --text-subtle: #7b7488;
   --success: #2ecc86;
   --warning: #f5a623;
   --danger: #ff728d;
   --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
   --font-display: var(--font-instrument-serif), Georgia, serif;
+  --shadow-soft: 0 18px 54px rgba(0, 0, 0, 0.22);
+  --shadow-panel: 0 26px 74px rgba(0, 0, 0, 0.28);
+  --shadow-accent: 0 18px 38px rgba(194, 9, 90, 0.18);
 }
 
 * {
@@ -36,8 +41,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(194, 9, 90, 0.2), transparent 28%),
-    linear-gradient(180deg, #111018 0%, #0c0b0f 100%);
+    radial-gradient(circle at 18% 0%, rgba(194, 9, 90, 0.2), transparent 30%),
+    radial-gradient(circle at 82% 12%, rgba(113, 53, 86, 0.14), transparent 30%),
+    linear-gradient(180deg, #111018 0%, #0c0b0f 62%, #09080c 100%);
   color: var(--foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -53,27 +59,43 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: 58px 58px;
   mask-image: radial-gradient(circle at top, black 16%, transparent 78%);
-  opacity: 0.65;
+  opacity: 0.42;
   z-index: -1;
 }
 
 .rev-shell-panel {
   border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+    var(--surface);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 var(--surface-hairline);
 }
 
 .rev-shell-hero {
   border: 1px solid var(--border);
   background:
-    radial-gradient(circle at top left, rgba(194, 9, 90, 0.18), transparent 32%),
-    linear-gradient(180deg, rgba(21, 20, 28, 0.98), rgba(11, 10, 15, 0.98));
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.24);
+    radial-gradient(circle at 12% 0%, rgba(194, 9, 90, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(26, 24, 34, 0.98), rgba(11, 10, 15, 0.98));
+  box-shadow: var(--shadow-panel), inset 0 1px 0 var(--surface-hairline);
 }
 
 .rev-card {
   border: 1px solid var(--border);
-  background: var(--background-card);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.012)),
+    var(--background-card);
+  box-shadow: inset 0 1px 0 var(--surface-hairline);
+}
+
+.rev-card-premium {
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(194, 9, 90, 0.085), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.034), rgba(255, 255, 255, 0.014)),
+    rgba(18, 17, 25, 0.94);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 var(--surface-hairline);
 }
 
 .rev-card-soft {
@@ -154,10 +176,10 @@ body::before {
 
 .rev-kicker {
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-light);
 }
 
 .rev-label {
@@ -198,38 +220,50 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   border-radius: 999px;
-  padding: 0.72rem 1.2rem;
+  min-height: 2.75rem;
+  padding: 0.72rem 1.22rem;
   font-size: 0.86rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
     color 0.18s ease,
+    box-shadow 0.18s ease,
     transform 0.18s ease;
 }
 
 .rev-button-primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
+  border: 1px solid rgba(255, 94, 155, 0.44);
+  background: linear-gradient(180deg, #e0146d 0%, #b90a55 100%);
   color: #fff;
+  box-shadow: var(--shadow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .rev-button-primary:hover {
-  background: var(--accent-light);
-  border-color: var(--accent-light);
+  background: linear-gradient(180deg, #ef1b78 0%, #c40c5c 100%);
+  border-color: rgba(255, 125, 177, 0.56);
+  box-shadow: 0 22px 46px rgba(194, 9, 90, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
 }
 
 .rev-button-secondary {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.012);
   color: var(--foreground);
+  box-shadow: inset 0 1px 0 var(--surface-hairline);
 }
 
 .rev-button-secondary:hover {
-  border-color: var(--border-accent);
-  background: var(--background-card-hover);
+  border-color: rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+    var(--background-card-hover);
   transform: translateY(-1px);
 }
 
@@ -245,11 +279,84 @@ body::before {
   transform: translateY(-1px);
 }
 
+.rev-action-button,
+.rev-action-button-primary {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  border-radius: 999px;
+  padding: 0.48rem 0.82rem;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.rev-action-button {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.024);
+  color: var(--foreground);
+}
+
+.rev-action-button:hover {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-1px);
+}
+
+.rev-action-button-primary {
+  border: 1px solid rgba(224, 16, 106, 0.38);
+  background: rgba(194, 9, 90, 0.16);
+  color: var(--foreground);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.rev-action-button-primary:hover {
+  border-color: rgba(255, 110, 170, 0.5);
+  background: rgba(194, 9, 90, 0.23);
+  transform: translateY(-1px);
+}
+
+.rev-button-primary:focus-visible,
+.rev-button-secondary:focus-visible,
+.rev-button-ghost:focus-visible,
+.rev-action-button:focus-visible,
+.rev-action-button-primary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(194, 9, 90, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.16),
+    var(--shadow-accent);
+}
+
+.rev-action-button:disabled,
+.rev-action-button-primary:disabled,
+.rev-button-primary:disabled,
+.rev-button-secondary:disabled,
+.rev-button-ghost:disabled {
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-subtle);
+  box-shadow: none;
+  transform: none;
+}
+
 .rev-input-field {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  background: var(--background-card);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.012)),
+    var(--background-card);
   padding: 0.9rem 1rem;
   color: var(--foreground);
   outline: none;

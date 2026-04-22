@@ -23,12 +23,7 @@ export function ExecutiveProofSummarySheet({
   read,
 }: ExecutiveProofSummarySheetProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [copyState, setCopyState] = useState<"copied" | "error" | null>(null);
-  const [canShare, setCanShare] = useState(false);
-
-  useEffect(() => {
-    setCanShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
-  }, []);
+  const [copyState, setCopyState] = useState<"copied" | "copy-error" | "print-error" | null>(null);
 
   useEffect(() => {
     if (!copyState) {
@@ -49,12 +44,12 @@ export function ExecutiveProofSummarySheet({
       await navigator.clipboard.writeText(read.copyText);
       setCopyState("copied");
     } catch {
-      setCopyState("error");
+      setCopyState("copy-error");
     }
   }
 
   async function shareSummary() {
-    if (!canShare) {
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function") {
       await copySummary();
       return;
     }
@@ -70,13 +65,6 @@ export function ExecutiveProofSummarySheet({
   }
 
   function openPrintView() {
-    const popup = window.open("", "_blank", "noopener,noreferrer,width=1180,height=860");
-
-    if (!popup) {
-      setCopyState("error");
-      return;
-    }
-
     const [primarySignal, ...secondarySignals] = read.signals;
     const secondarySignalsHtml = secondarySignals
       .map(
@@ -90,7 +78,7 @@ export function ExecutiveProofSummarySheet({
       )
       .join("");
 
-    popup.document.write(`<!DOCTYPE html>
+    const printViewHtml = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -375,15 +363,32 @@ export function ExecutiveProofSummarySheet({
       </section>
     </main>
   </body>
-</html>`);
-    popup.document.close();
+</html>`;
+    const blob = new Blob([printViewHtml], {
+      type: "text/html;charset=utf-8",
+    });
+    const printUrl = URL.createObjectURL(blob);
+    const popup = window.open(
+      printUrl,
+      "_blank",
+      "width=1180,height=860",
+    );
+
+    if (!popup) {
+      URL.revokeObjectURL(printUrl);
+      setCopyState("print-error");
+      return;
+    }
+
+    setCopyState(null);
+    window.setTimeout(() => URL.revokeObjectURL(printUrl), 60_000);
   }
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
         <button
-          className="inline-flex min-h-9 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(255,255,255,0.06)]"
+          className="rev-action-button min-h-9 px-3.5 py-1.5 text-[11px]"
           onClick={() => {
             setIsOpen(true);
             setCopyState(null);
@@ -394,12 +399,13 @@ export function ExecutiveProofSummarySheet({
         </button>
 
         {copyState === "copied" ? <RevoryStatusBadge tone="real">Summary copied</RevoryStatusBadge> : null}
-        {copyState === "error" ? <RevoryStatusBadge tone="future">Copy failed</RevoryStatusBadge> : null}
+        {copyState === "copy-error" ? <RevoryStatusBadge tone="future">Copy failed</RevoryStatusBadge> : null}
+        {copyState === "print-error" ? <RevoryStatusBadge tone="future">Print unavailable</RevoryStatusBadge> : null}
       </div>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,7,14,0.76)] px-4 py-6 backdrop-blur-[3px]">
-          <div className="w-full max-w-[64rem] rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(16,14,22,0.985),rgba(10,9,17,0.99))] p-5 shadow-[0_34px_90px_rgba(0,0,0,0.46)] md:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,7,14,0.78)] px-4 py-6 backdrop-blur-[4px]">
+          <div className="rev-card-premium w-full max-w-[64rem] rounded-[30px] p-5 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-[34rem]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -414,7 +420,7 @@ export function ExecutiveProofSummarySheet({
               </div>
 
               <button
-                className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1 text-[10px] font-semibold text-[color:var(--text-muted)] transition hover:text-[color:var(--foreground)]"
+                className="rev-action-button min-h-8 px-3 py-1 text-[10px] text-[color:var(--text-muted)]"
                 onClick={() => setIsOpen(false)}
                 type="button"
               >
@@ -432,25 +438,25 @@ export function ExecutiveProofSummarySheet({
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
-                  className="inline-flex min-h-9 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(255,255,255,0.05)]"
+                  className="rev-action-button min-h-9 px-3.5 py-1.5 text-[11px]"
                   onClick={copySummary}
                   type="button"
                 >
                   Copy summary
                 </button>
                 <button
-                  className="inline-flex min-h-9 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(255,255,255,0.05)]"
+                  className="rev-action-button min-h-9 px-3.5 py-1.5 text-[11px]"
                   onClick={openPrintView}
                   type="button"
                 >
                   Print or save PDF
                 </button>
                 <button
-                  className="inline-flex min-h-9 items-center justify-center rounded-full border border-[rgba(194,9,90,0.26)] bg-[rgba(194,9,90,0.14)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)]"
+                  className="rev-action-button-primary min-h-9 px-3.5 py-1.5 text-[11px]"
                   onClick={shareSummary}
                   type="button"
                 >
-                  {canShare ? "Share summary" : "Copy for share"}
+                  Share summary
                 </button>
               </div>
             </div>

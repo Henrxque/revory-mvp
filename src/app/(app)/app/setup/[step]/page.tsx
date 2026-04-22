@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { OnboardingStepLayout } from "@/components/onboarding/OnboardingStepLayout";
 import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -27,6 +28,7 @@ type OnboardingStepPageProps = Readonly<{
     step: string;
   }>;
   searchParams: Promise<{
+    edit?: string;
     error?: string;
   }>;
 }>;
@@ -217,24 +219,29 @@ export default async function OnboardingStepPage({
   searchParams,
 }: OnboardingStepPageProps) {
   const { step: stepParam } = await params;
-  const { error } = await searchParams;
+  const { edit, error } = await searchParams;
   const appContext = await getAppContext();
 
   if (!appContext) {
     redirect(buildSignInRedirectPath(`/app/setup/${stepParam}`));
   }
 
-  if (appContext.activationSetup.isCompleted) {
-    redirect("/app");
-  }
-
-  const currentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
+  const persistedCurrentStepKey = resolveOnboardingStepKey(appContext.activationSetup.currentStep);
 
   if (!isOnboardingStepKey(stepParam)) {
-    redirect(getOnboardingStepPath(currentStepKey));
+    redirect(getOnboardingStepPath(persistedCurrentStepKey));
   }
 
-  if (stepParam !== currentStepKey) {
+  const isEditingCompletedSetup =
+    appContext.activationSetup.isCompleted && edit === "1" && stepParam !== "activation";
+
+  if (appContext.activationSetup.isCompleted && !isEditingCompletedSetup) {
+    redirect("/app/setup");
+  }
+
+  const currentStepKey = isEditingCompletedSetup ? stepParam : persistedCurrentStepKey;
+
+  if (!isEditingCompletedSetup && stepParam !== currentStepKey) {
     redirect(getOnboardingStepPath(currentStepKey));
   }
 
@@ -280,7 +287,13 @@ export default async function OnboardingStepPage({
     <OnboardingStepLayout
       currentStepKey={currentStepKey}
       formAction={submitOnboardingStep}
-      formFields={<input name="step" type="hidden" value={currentStepKey} />}
+      formFields={
+        <>
+          <input name="step" type="hidden" value={currentStepKey} />
+          {isEditingCompletedSetup ? <input name="mode" type="hidden" value="edit" /> : null}
+        </>
+      }
+      isAdjustmentMode={isEditingCompletedSetup}
       step={step}
       stepKeys={onboardingSteps.map((wizardStep) => wizardStep.key)}
       contextPanel={
@@ -291,7 +304,9 @@ export default async function OnboardingStepPage({
               {clinicName || "Clinic name pending"}
             </p>
             <p className="mt-1.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
-              {businessTypeLabel}. REVORY Seller is being configured for one clear booking system, not a generic workspace.
+              {isEditingCompletedSetup
+                ? `${businessTypeLabel}. Seller stays live while this one setup choice is adjusted.`
+                : `${businessTypeLabel}. REVORY Seller is being configured for one clear booking system, not a generic workspace.`}
             </p>
           </div>
 
@@ -317,7 +332,11 @@ export default async function OnboardingStepPage({
         </div>
       }
       previousAction={
-        previousStepKey ? (
+        isEditingCompletedSetup ? (
+          <DocumentNavigationLink className="rev-button-secondary" href="/app/setup">
+            Back to setup
+          </DocumentNavigationLink>
+        ) : previousStepKey ? (
           <button
             className="rev-button-secondary"
             formAction={goToPreviousOnboardingStep}
@@ -336,7 +355,7 @@ export default async function OnboardingStepPage({
           className="rev-button-primary"
           type="submit"
         >
-          {step.ctaLabel}
+          {isEditingCompletedSetup ? "Save adjustment" : step.ctaLabel}
         </button>
       }
     >

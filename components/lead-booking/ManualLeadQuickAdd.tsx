@@ -63,7 +63,7 @@ export function ManualLeadQuickAdd({
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
         <button
-          className="inline-flex min-h-9 items-center justify-center rounded-full border border-[rgba(194,9,90,0.22)] bg-[rgba(194,9,90,0.08)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.42)] hover:bg-[rgba(194,9,90,0.16)]"
+          className="rev-action-button-primary min-h-9 px-3.5 py-1.5 text-[11px]"
           onClick={() => {
             setIsOpen(true);
             setErrorMessage(null);
@@ -80,8 +80,8 @@ export function ManualLeadQuickAdd({
       </div>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,7,14,0.72)] px-4 py-6 backdrop-blur-[2px]">
-          <div className="w-full max-w-[28rem] rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(16,14,22,0.985),rgba(11,10,18,0.985))] p-5 shadow-[0_30px_80px_rgba(0,0,0,0.44)] md:p-5.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,7,14,0.78)] px-4 py-6 backdrop-blur-[4px]">
+          <div className="rev-card-premium w-full max-w-[27rem] rounded-[30px] p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="max-w-[22rem]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -96,7 +96,7 @@ export function ManualLeadQuickAdd({
               </div>
 
               <button
-                className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1 text-[10px] font-semibold text-[color:var(--text-muted)] transition hover:text-[color:var(--foreground)]"
+                className="rev-action-button min-h-8 px-3 py-1 text-[10px] text-[color:var(--text-muted)]"
                 onClick={() => {
                   setIsOpen(false);
                   setErrorMessage(null);
@@ -108,7 +108,7 @@ export function ManualLeadQuickAdd({
             </div>
 
             <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
-              {mainOfferLabel} • {bookingPathLabel}
+              {mainOfferLabel} / {bookingPathLabel}
             </p>
 
             <div className="mt-4 space-y-2.5">
@@ -116,7 +116,7 @@ export function ManualLeadQuickAdd({
                 <span className="rev-label">Lead name</span>
                 <input
                   autoFocus
-                  className="mt-1.5 w-full rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 text-sm text-[color:var(--foreground)] outline-none transition placeholder:text-[color:var(--text-subtle)] focus:border-[rgba(194,9,90,0.34)]"
+                  className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
                   onChange={(event) => setFullName(event.target.value)}
                   placeholder="Full name"
                   value={fullName}
@@ -127,7 +127,7 @@ export function ManualLeadQuickAdd({
                 <label className="block">
                   <span className="rev-label">Email</span>
                   <input
-                    className="mt-1.5 w-full rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 text-sm text-[color:var(--foreground)] outline-none transition placeholder:text-[color:var(--text-subtle)] focus:border-[rgba(194,9,90,0.34)]"
+                    className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="name@clinic.com"
                     type="email"
@@ -138,7 +138,7 @@ export function ManualLeadQuickAdd({
                 <label className="block">
                   <span className="rev-label">Phone</span>
                   <input
-                    className="mt-1.5 w-full rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 text-sm text-[color:var(--foreground)] outline-none transition placeholder:text-[color:var(--text-subtle)] focus:border-[rgba(194,9,90,0.34)]"
+                    className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
                     onChange={(event) => setPhone(event.target.value)}
                     placeholder="Mobile number"
                     value={phone}
@@ -149,7 +149,7 @@ export function ManualLeadQuickAdd({
               <label className="block">
                 <span className="rev-label">Source</span>
                 <input
-                  className="mt-1.5 w-full rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3 text-sm text-[color:var(--foreground)] outline-none transition placeholder:text-[color:var(--text-subtle)] focus:border-[rgba(194,9,90,0.34)]"
+                  className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
                   maxLength={48}
                   onChange={(event) => setSourceLabel(event.target.value)}
                   placeholder="Optional"
@@ -168,9 +168,9 @@ export function ManualLeadQuickAdd({
               <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
                 Name + email or phone
               </p>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
                 <button
-                  className="inline-flex min-h-9 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--text-muted)] transition hover:text-[color:var(--foreground)]"
+                  className="rev-action-button min-h-9 flex-1 px-3.5 py-1.5 text-[11px] text-[color:var(--text-muted)] sm:flex-none"
                   onClick={() => {
                     setIsOpen(false);
                     setErrorMessage(null);
@@ -180,7 +180,7 @@ export function ManualLeadQuickAdd({
                   Cancel
                 </button>
                 <button
-                  className="inline-flex min-h-9 items-center justify-center rounded-full border border-[rgba(194,9,90,0.28)] bg-[rgba(194,9,90,0.14)] px-3.5 py-1.5 text-[11px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
+                  className="rev-action-button-primary min-h-9 flex-1 px-3.5 py-1.5 text-[11px] sm:flex-none"
                   disabled={!canSubmit || isPending}
                   onClick={() => {
                     setErrorMessage(null);

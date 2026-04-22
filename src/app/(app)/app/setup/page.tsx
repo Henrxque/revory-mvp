@@ -17,6 +17,7 @@ import {
   getOnboardingStepPath,
   onboardingSteps,
   resolveOnboardingStepKey,
+  type OnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
 import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 
@@ -97,6 +98,7 @@ type SetupItem = {
   label: string;
   note: string;
   ready: boolean;
+  stepKey?: OnboardingStepKey;
   type: "pillar" | "support";
 };
 
@@ -177,6 +179,7 @@ export default async function SetupPage() {
       label: "Main offer",
       note: "Offer pushed first.",
       ready: Boolean(mainOfferLabel),
+      stepKey: "template",
       type: "pillar",
     },
     {
@@ -184,6 +187,7 @@ export default async function SetupPage() {
       label: "Booking path",
       note: "Route leads into booking.",
       ready: Boolean(bookingPathLabel),
+      stepKey: "channel",
       type: "pillar",
     },
     {
@@ -195,6 +199,7 @@ export default async function SetupPage() {
         ? "Unsupported input type."
         : "Where paid leads first appear.",
       ready: Boolean(sourceLabel) && !sourceNeedsReview,
+      stepKey: "source",
       type: "pillar",
     },
     {
@@ -202,6 +207,7 @@ export default async function SetupPage() {
       label: "Value per booking",
       note: "Revenue anchor per booking.",
       ready: Boolean(appContext.activationSetup.averageDealValue),
+      stepKey: "deal_value",
       type: "pillar",
     },
     {
@@ -209,6 +215,7 @@ export default async function SetupPage() {
       label: "Seller voice",
       note: "Tone for the first booking step.",
       ready: Boolean(brandVoiceLabel),
+      stepKey: "mode",
       type: "support",
     },
   ];
@@ -377,6 +384,14 @@ export default async function SetupPage() {
               <DocumentNavigationLink className="rev-button-primary" href={nextMove.href}>
                 {nextMove.label}
               </DocumentNavigationLink>
+              {appContext.activationSetup.isCompleted ? (
+                <DocumentNavigationLink
+                  className="rev-button-secondary"
+                  href={`${getOnboardingStepPath("template")}?edit=1`}
+                >
+                  Adjust setup
+                </DocumentNavigationLink>
+              ) : null}
               {nextMove.secondaryHref && nextMove.secondaryLabel ? (
                 <DocumentNavigationLink className="rev-button-secondary" href={nextMove.secondaryHref}>
                   {nextMove.secondaryLabel}
@@ -409,6 +424,16 @@ export default async function SetupPage() {
               {item.detail}
             </p>
             <p className="mt-1.5 text-[12px] leading-[1.45] text-[color:var(--text-muted)]">{item.note}</p>
+            {appContext.activationSetup.isCompleted && item.stepKey ? (
+              <div className="mt-3">
+                <DocumentNavigationLink
+                  className="rev-action-button min-h-8 px-3 py-1 text-[10px]"
+                  href={`${getOnboardingStepPath(item.stepKey)}?edit=1`}
+                >
+                  Adjust
+                </DocumentNavigationLink>
+              </div>
+            ) : null}
           </div>
         ))}
       </section>
@@ -564,12 +589,17 @@ export default async function SetupPage() {
             const stepIndex = onboardingSteps.findIndex((candidate) => candidate.key === step.key);
             const isCompleted = appContext.activationSetup.isCompleted || stepIndex < currentStepIndex;
             const isCurrent = !appContext.activationSetup.isCompleted && step.key === currentStepKey;
-
-            return (
-              <div
-                key={step.key}
-                className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-3.5"
-              >
+            const editHref =
+              appContext.activationSetup.isCompleted && step.key !== "activation"
+                ? `${getOnboardingStepPath(step.key)}?edit=1`
+                : null;
+            const cardClassName = `rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.025)] p-3.5 ${
+              editHref
+                ? "block transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.04)]"
+                : ""
+            }`;
+            const cardContent = (
+              <>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="rev-label">{step.eyebrow}</p>
                   <RevoryStatusBadge
@@ -581,6 +611,21 @@ export default async function SetupPage() {
                 <p className="mt-2.5 text-sm font-semibold text-[color:var(--foreground)]">
                   {step.title}
                 </p>
+                {editHref ? (
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--accent-light)]">
+                    Adjust
+                  </p>
+                ) : null}
+              </>
+            );
+
+            return editHref ? (
+              <DocumentNavigationLink className={cardClassName} href={editHref} key={step.key}>
+                {cardContent}
+              </DocumentNavigationLink>
+            ) : (
+              <div className={cardClassName} key={step.key}>
+                {cardContent}
               </div>
             );
           })}

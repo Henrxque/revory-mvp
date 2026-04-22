@@ -93,11 +93,11 @@ function getNextStepRead(
 function getOpportunityCardClassName(status: LeadBookingOpportunityItem["status"]) {
   switch (status) {
     case "READY":
-      return "rounded-[18px] border border-[rgba(194,9,90,0.26)] bg-[linear-gradient(180deg,rgba(194,9,90,0.09),rgba(255,255,255,0.02))] px-3.5 py-3.5";
+      return "rounded-[22px] border border-[rgba(194,9,90,0.28)] bg-[linear-gradient(180deg,rgba(194,9,90,0.1),rgba(255,255,255,0.022))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]";
     case "BLOCKED":
-      return "rounded-[18px] border border-[rgba(255,184,77,0.18)] bg-[linear-gradient(180deg,rgba(255,184,77,0.05),rgba(255,255,255,0.018))] px-3.5 py-3.5";
+      return "rounded-[22px] border border-[rgba(255,184,77,0.2)] bg-[linear-gradient(180deg,rgba(255,184,77,0.055),rgba(255,255,255,0.018))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]";
     default:
-      return "rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] px-3.5 py-3.5";
+      return "rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]";
   }
 }
 
@@ -208,7 +208,7 @@ export function LeadBookingOpportunityList({
   }
 
   return (
-    <div className="mt-3 space-y-2">
+    <div className="mt-3 space-y-3">
       {opportunities.map((opportunity) => {
         const preparedAt = preparedLookup.get(opportunity.id) ?? null;
         const handoffAvailable =
@@ -268,7 +268,7 @@ export function LeadBookingOpportunityList({
               </p>
             ) : null}
 
-            <div className="mt-3 rounded-[14px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.024)] px-3 py-2.5">
+            <div className="mt-3 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.024)] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
                   Next step
@@ -302,7 +302,7 @@ export function LeadBookingOpportunityList({
               ) : null}
 
               {opportunity.suggestedMessage ? (
-                <div className="mt-3 rounded-[12px] border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.014)] px-3 py-2.5">
+                <div className="mt-3 rounded-[14px] border border-[rgba(255,255,255,0.055)] bg-[rgba(255,255,255,0.016)] px-3 py-2.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
@@ -310,7 +310,7 @@ export function LeadBookingOpportunityList({
                       </p>
                     </div>
                     <button
-                      className="inline-flex min-h-8 items-center justify-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(194,9,90,0.24)] hover:bg-[rgba(194,9,90,0.08)]"
+                      className="rev-action-button min-h-8 px-3 py-1 text-[10px]"
                       onClick={async () => {
                         try {
                           await navigator.clipboard.writeText(opportunity.suggestedMessage!);
@@ -338,7 +338,7 @@ export function LeadBookingOpportunityList({
                     </p>
                     {handoffAvailable ? (
                       <button
-                        className="inline-flex min-h-8 items-center justify-center rounded-full border border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
+                        className="rev-action-button-primary min-h-8 px-3 py-1 text-[10px]"
                         disabled={isCurrentPending}
                         onClick={() => {
                           if (!opportunity.handoffHref) {
@@ -401,7 +401,7 @@ export function LeadBookingOpportunityList({
                     Action pack
                   </p>
                   <button
-                    className="inline-flex min-h-8 items-center justify-center rounded-full border border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[10px] font-semibold text-[color:var(--foreground)] transition hover:border-[rgba(255,110,170,0.5)] hover:bg-[rgba(194,9,90,0.22)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)]"
+                    className="rev-action-button-primary min-h-8 px-3 py-1 text-[10px]"
                     disabled={isCurrentPending}
                     onClick={() => {
                       if (!opportunity.handoffHref) {

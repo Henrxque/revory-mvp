@@ -6,6 +6,7 @@ type OnboardingStepLayoutProps = Readonly<{
   currentStepKey: OnboardingStepKey;
   formAction?: (formData: FormData) => void | Promise<void>;
   formFields?: React.ReactNode;
+  isAdjustmentMode?: boolean;
   nextAction?: React.ReactNode;
   previousAction?: React.ReactNode;
   step: OnboardingStep;
@@ -37,6 +38,7 @@ export function OnboardingStepLayout({
   currentStepKey,
   formAction,
   formFields,
+  isAdjustmentMode = false,
   nextAction,
   previousAction,
   step,
@@ -50,22 +52,23 @@ export function OnboardingStepLayout({
       <aside className="rev-shell-hero rounded-[28px] p-5">
         <div className="space-y-6">
           <div className="space-y-3">
-            <p className="rev-kicker">Activation</p>
+            <p className="rev-kicker">{isAdjustmentMode ? "Setup adjustment" : "Activation"}</p>
             <h2 className="rev-display-panel max-w-[14rem]">
-              Set six choices. Launch one booking system.
+              {isAdjustmentMode
+                ? "Adjust one choice. Keep Seller live."
+                : "Set six choices. Launch one booking system."}
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
-              REVORY Seller stays narrow on purpose: one main offer, one lead
-              entry, one booking path, and one value per booking. That gives
-              paid leads a faster path to booked appointments and gives revenue
-              a clearer read.
+              {isAdjustmentMode
+                ? "This is a narrow setup adjustment, not a new onboarding path. Seller stays live while the selected booking choice is updated."
+                : "REVORY Seller stays narrow on purpose: one main offer, one lead entry, one booking path, and one value per booking. That gives paid leads a faster path to booked appointments and gives revenue a clearer read."}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="rev-label">Activation progress</p>
+                <p className="rev-label">{isAdjustmentMode ? "Setup choice" : "Activation progress"}</p>
                 <p className="text-sm font-semibold text-[color:var(--foreground)]">
                   {currentStepIndex + 1} / {stepKeys.length}
                 </p>
@@ -81,9 +84,9 @@ export function OnboardingStepLayout({
             <div className="rounded-[24px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <p className="rev-label">Why it stays short</p>
               <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
-                One clear decision per step. One booking motion. No CRM sprawl,
-                no heavy setup project, and no extra detour before Seller can
-                show booked appointments and revenue clearly.
+                {isAdjustmentMode
+                  ? "One adjustment at a time. No setup reset, no CRM sprawl, and no new operational surface."
+                  : "One clear decision per step. One booking motion. No CRM sprawl, no heavy setup project, and no extra detour before Seller can show booked appointments and revenue clearly."}
               </p>
             </div>
           </div>
@@ -129,7 +132,15 @@ export function OnboardingStepLayout({
                           : "text-[color:var(--text-muted)]"
                     }`}
                   >
-                    {isCurrent ? "Current move" : isDone ? "Locked" : "Up next"}
+                    {isAdjustmentMode
+                      ? isCurrent
+                        ? "Editing"
+                        : "Configured"
+                      : isCurrent
+                        ? "Current move"
+                        : isDone
+                          ? "Locked"
+                          : "Up next"}
                   </p>
                 </div>
               );

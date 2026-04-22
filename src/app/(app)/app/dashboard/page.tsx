@@ -179,24 +179,6 @@ function getInitials(name: string) {
   );
 }
 
-type SignalCardProps = Readonly<{
-  hint: string;
-  label: string;
-  value: string | number;
-}>;
-
-function SignalCard({ hint, label, value }: SignalCardProps) {
-  return (
-    <div className="rev-card-soft min-w-0 rounded-[20px] px-4 py-4">
-      <p className="rev-label">{label}</p>
-      <p className="mt-2 text-[1.45rem] font-semibold leading-none text-[color:var(--foreground)]">
-        {value}
-      </p>
-      <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">{hint}</p>
-    </div>
-  );
-}
-
 type AttributionSignalCardProps = Readonly<{
   hint: string;
   isPrimary?: boolean;

@@ -13,7 +13,7 @@ export function ExecutiveProofSummaryCard({
   const [primarySignal, ...secondarySignals] = read.signals;
 
   return (
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.018))] p-5 shadow-[0_22px_56px_rgba(0,0,0,0.18)]">
+    <div className="rev-card-premium overflow-hidden rounded-[30px] p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="rev-kicker">Executive proof</p>
@@ -25,7 +25,7 @@ export function ExecutiveProofSummaryCard({
       </div>
 
       <div className="mt-4 max-w-[36rem] space-y-2">
-        <h3 className="text-[1.45rem] font-semibold leading-[1.03] tracking-[-0.04em] text-[color:var(--foreground)]">
+        <h3 className="rev-display-panel max-w-[34rem]">
           {read.headline}
         </h3>
         <p className="text-sm leading-[1.55] text-[color:var(--text-muted)]">
@@ -35,7 +35,7 @@ export function ExecutiveProofSummaryCard({
 
       {primarySignal ? (
         <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.22fr)_minmax(0,0.9fr)_minmax(0,0.9fr)]">
-          <div className="rounded-[22px] border border-[rgba(194,9,90,0.22)] bg-[linear-gradient(180deg,rgba(194,9,90,0.09),rgba(255,255,255,0.03))] px-4.5 py-4">
+          <div className="rounded-[24px] border border-[rgba(194,9,90,0.24)] bg-[linear-gradient(180deg,rgba(194,9,90,0.1),rgba(255,255,255,0.03))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]">
             <p className="rev-label">{primarySignal.label}</p>
             <p className="mt-3 text-[clamp(2rem,3vw,2.6rem)] font-semibold leading-none tracking-[-0.05em] text-[color:var(--foreground)]">
               {primarySignal.value}
@@ -48,7 +48,7 @@ export function ExecutiveProofSummaryCard({
           {secondarySignals.map((signal) => (
             <div
               key={signal.label}
-              className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5"
+              className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
             >
               <p className="rev-label">{signal.label}</p>
               <p className="mt-2.5 text-[1.25rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
@@ -62,7 +62,7 @@ export function ExecutiveProofSummaryCard({
         </div>
       ) : null}
 
-        <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.015))] px-4 py-4">
+        <div className="mt-4 rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.014))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-[30rem]">
             <p className="rev-label">Proof position</p>

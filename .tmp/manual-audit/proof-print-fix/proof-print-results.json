@@ -1,0 +1,13 @@
+{
+  "copySummary": {
+    "passed": true
+  },
+  "printView": {
+    "bodyHasExecutiveProof": true,
+    "bodyHasPrintButton": true,
+    "passed": true,
+    "urlStartsWith": "blob:http://localhost:30"
+  },
+  "falseCopyFailedVisible": false,
+  "printUnavailableVisible": false
+}

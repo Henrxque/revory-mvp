@@ -141,7 +141,7 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Proof live" || status === "Activated") {
+  if (status === "Proof visible" || status === "Activated") {
     return "success";
   }
 
@@ -168,10 +168,10 @@ export function AppSidebar({
   const workspaceInitials = getWorkspaceInitials(workspaceName);
 
   return (
-    <aside className="relative z-50 flex h-full pointer-events-auto flex-col rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,#111018,#0d0c11)] shadow-[0_30px_90px_rgba(0,0,0,0.34)]">
-      <div className="border-b border-[color:var(--border)] px-5 py-[1.125rem]">
+    <aside className="pointer-events-auto relative z-50 flex h-full flex-col rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(18,17,25,0.98),rgba(10,9,14,0.98))] shadow-[var(--shadow-panel)]">
+      <div className="border-b border-[color:var(--border)] px-5 py-5">
         <RevoryLogo compact />
-        <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-subtle)]">
+        <p className="mt-3 text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)]">
           Paid leads into booked appointments
         </p>
       </div>
@@ -189,10 +189,10 @@ export function AppSidebar({
                 ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : false;
 
-              const itemClassName = `flex items-center gap-3 rounded-[16px] px-3.5 py-2.5 text-[13.5px] transition ${
+              const itemClassName = `flex items-center gap-3 rounded-[18px] px-3.5 py-2.5 text-[13.5px] transition ${
                 isActive
-                  ? "bg-[rgba(194,9,90,0.16)] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(194,9,90,0.18)]"
-                  : "text-[color:var(--text-muted)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[color:var(--foreground)]"
+                  ? "bg-[linear-gradient(180deg,rgba(194,9,90,0.18),rgba(194,9,90,0.1))] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(194,9,90,0.22)]"
+                  : "text-[color:var(--text-muted)] hover:bg-[rgba(255,255,255,0.035)] hover:text-[color:var(--foreground)]"
               }`;
 
               const statusTone = getStatusTone(item.status);
@@ -239,8 +239,8 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <div className="border-t border-[color:var(--border)] px-4 py-3.5">
-        <div className="rounded-[18px] border border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3 py-3">
+      <div className="border-t border-[color:var(--border)] px-4 py-4">
+        <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <div className="flex items-center gap-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-[13px] font-semibold text-[color:var(--accent-light)]">
               {workspaceInitials}
@@ -257,10 +257,10 @@ export function AppSidebar({
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+            <span className="inline-flex min-h-6 items-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
               {activationStatus}
             </span>
-            <span className="inline-flex min-h-6 items-center rounded-full border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
+            <span className="inline-flex min-h-6 items-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-muted)]">
               {formatWorkspaceStatus(workspaceStatus)}
             </span>
           </div>

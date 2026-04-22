@@ -135,10 +135,10 @@ export default async function HomePage() {
           </span>
           <ul className="footer-links">
             <li>
-              <Link href="/">Privacy</Link>
+              <Link href="/privacy">Privacy</Link>
             </li>
             <li>
-              <Link href="/">Terms</Link>
+              <Link href="/terms">Terms</Link>
             </li>
             <li>
               <Link href="/sign-in">Sign in</Link>
