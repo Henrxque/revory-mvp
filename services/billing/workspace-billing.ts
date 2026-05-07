@@ -6,55 +6,61 @@ import type {
   WorkspaceBillingLike,
 } from "@/types/billing";
 
+type RevoryBillingFeature =
+  | "EXECUTIVE_PROOF_SHARE"
+  | "MANUAL_LEAD_QUICK_ADD";
+
 const billingPlanCatalog: Record<RevoryBillingPlan, RevoryBillingPlanDefinition> = {
   BASIC: {
     badgeLabel: "Basic",
     ctaLabel: "Start with Basic",
-    fitLabel: "Premium entry",
-    framing: "The narrow Seller core for contained paid lead volume and one clean booking lane.",
-    inAppSignal: "Lean core for one tight booking lane.",
+    fitLabel: "Entry plan",
+    framing:
+      "A lower-friction entry plan for the narrow Seller core without Growth's premium action and proof tools.",
+    inAppSignal: "Entry plan with limited premium actions.",
     key: "BASIC",
     label: "Basic",
     supportPoints: [
-      "Same booked-proof and revenue-first core",
-      "Best when one offer and one lane already stay tight",
-      "Keeps the product premium without extra software weight",
+      "Revenue-first dashboard and booked proof",
+      "Import-first booking assistance read",
+      "No Manual Quick Add or shareable proof export",
     ],
     rank: 1,
-    valueSignal: "Best when the clinic needs a clean premium entry, not extra room.",
+    valueSignal: "Entry plan for trying the core read; Growth is the complete MVP.",
   },
   GROWTH: {
     badgeLabel: "Growth",
-    ctaLabel: "Choose Growth",
-    fitLabel: "Best fit",
-    framing: "The strongest default path for MedSpas that want the clearest value defense and headroom.",
-    inAppSignal: "Best fit for clearer value defense.",
+    ctaLabel: "Start with Growth",
+    fitLabel: "Main plan",
+    framing:
+      "The complete self-service plan for the REVORY Seller MVP as it exists today.",
+    inAppSignal: "Complete MVP plan.",
     key: "GROWTH",
     label: "Growth",
     supportPoints: [
-      "Best overall balance of proof, clarity, and headroom",
-      "Easiest plan to defend in both sale and renewal",
-      "Default plan when Seller is the real booking system",
+      "Full booking assistance and bounded suggested message",
+      "Manual Quick Add for one-off lead entry",
+      "Executive Proof Summary with copy, share, and print",
     ],
     rank: 2,
-    valueSignal: "Best overall fit once Seller is the real booking system.",
+    valueSignal: "The main plan and the full product package for the current MVP.",
   },
   PREMIUM: {
     badgeLabel: "Premium",
-    ctaLabel: "Review Premium fit",
-    fitLabel: "Selective fit",
+    ctaLabel: "Coming later",
+    fitLabel: "Future tier",
     framing:
-      "For MedSpas already proving Seller value and needing more room inside the same narrow booking system.",
-    inAppSignal: "More room once Seller value is already proving out.",
+      "A future tier placeholder. Premium is not available, not checkout-enabled, and not a manual sales motion today.",
+    inAppSignal: "Future tier; not available today.",
     key: "PREMIUM",
     label: "Premium",
     supportPoints: [
-      "Best once booked proof and revenue read already feel repeatable",
-      "Adds room inside the same premium Seller core",
-      "Not a broader platform or enterprise operating layer",
+      "Not available for checkout yet",
+      "No manual fit review in the current motion",
+      "Future tier must stay inside the narrow Seller model",
     ],
     rank: 3,
-    valueSignal: "Top tier for proven volume, not a broader operating stack.",
+    valueSignal: "Future tier only; not part of the current sales motion.",
   },
 };
 
@@ -79,6 +85,17 @@ export function getBillingPlanDefinition(planKey: RevoryBillingPlan | null | und
 
 export function getBillingPlanLabel(planKey: RevoryBillingPlan | null | undefined) {
   return getBillingPlanDefinition(planKey)?.label ?? "No plan";
+}
+
+export function canUseBillingPlanFeature(
+  planKey: RevoryBillingPlan | null | undefined,
+  feature: RevoryBillingFeature,
+) {
+  switch (feature) {
+    case "EXECUTIVE_PROOF_SHARE":
+    case "MANUAL_LEAD_QUICK_ADD":
+      return planKey === "GROWTH";
+  }
 }
 
 export function normalizeBillingPlanKey(

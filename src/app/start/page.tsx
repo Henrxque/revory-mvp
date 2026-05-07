@@ -7,67 +7,84 @@ import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { buildSignUpRedirectPath } from "@/services/auth/redirects";
 import { syncAuthenticatedUser } from "@/services/auth/sync-user";
-import { getStripeAppUrl, isStripeBillingConfigured } from "@/services/billing/stripe-runtime";
+import {
+  getStripeAppUrl,
+  isStripeBillingConfigured,
+  isStripeCheckoutConfiguredForPlan,
+} from "@/services/billing/stripe-runtime";
 import { syncWorkspaceBillingFromCheckoutSession } from "@/services/billing/stripe-sync";
 import {
+  getBillingPlanDefinition,
   getWorkspaceBillingSummary,
   normalizeBillingPlanKey,
 } from "@/services/billing/workspace-billing";
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 
-const billingPlans = ["BASIC", "GROWTH", "PREMIUM"] as const;
+const primaryBillingPlan = "GROWTH" as const;
+const secondaryBillingPlans = ["BASIC", "PREMIUM"] as const;
 
 const planPresentation = {
   BASIC: {
-    ctaLabel: "Get Started",
+    ctaHref: "/api/billing/checkout?plan=basic",
     features: [
-      "1 main offer",
-      "1 booking path",
-      "Lower lead volume",
-      "Revenue-first dashboard",
-      "Contained booking lane",
-      "Light async support",
+      "Revenue-first dashboard and booked proof",
+      "Import-first booking inputs",
+      "Daily Booking Brief",
+      "Bounded booking assistance read",
+      "No Manual Quick Add",
+      "No shareable proof export",
     ],
     headerTone: "text-[#f3eef9]",
-    name: "Basic",
     price: "$370",
     toneClass:
       "border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))]",
   },
   GROWTH: {
-    ctaLabel: "Start Your Booking Flow ->",
+    ctaHref: "/api/billing/checkout?plan=growth",
     features: [
-      "Higher lead volume",
-      "Better result visibility",
-      "Stronger booking playbook",
-      "Stronger booking lane",
-      "Revenue-first dashboard",
-      "Best-fit core plan",
-      "Priority async support",
+      "Full Seller core as it exists today",
+      "Revenue-first dashboard and booked proof",
+      "Daily Booking Brief and Action Pack",
+      "Booking Assistance with bounded suggested message",
+      "Manual Quick Add",
+      "Executive Proof Summary with copy, share, and print",
     ],
     headerTone: "text-white",
-    name: "Growth",
     price: "$570",
     toneClass:
       "border-[rgba(194,9,90,0.36)] bg-[linear-gradient(145deg,rgba(25,22,32,0.98),rgba(194,9,90,0.05))] shadow-[0_0_40px_rgba(194,9,90,0.12)]",
   },
   PREMIUM: {
-    ctaLabel: "Review Premium Fit",
+    ctaHref: null,
     features: [
-      "For higher lead volume already proving fit",
-      "Priority async support",
-      "More room inside the same narrow model",
-      "Stronger attribution support",
-      "Stronger renewal read",
-      "Best once Seller value is already clear",
+      "Future tier placeholder",
+      "Not available for checkout yet",
+      "No manual fit review today",
+      "No CRM, inbox, automation, or BI expansion",
+      "Must stay inside the narrow Seller model",
     ],
     headerTone: "text-[#f3eef9]",
-    name: "Premium",
-    price: "$999+",
+    price: "Later",
     toneClass:
       "border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))]",
   },
 } as const;
+
+const planCopy = {
+  BASIC: getBillingPlanDefinition("BASIC"),
+  GROWTH: getBillingPlanDefinition("GROWTH"),
+  PREMIUM: getBillingPlanDefinition("PREMIUM"),
+} as const;
+
+function getPlanCopy(planKey: keyof typeof planPresentation) {
+  const copy = planCopy[planKey];
+
+  if (!copy) {
+    throw new Error(`Missing billing plan copy for ${planKey}.`);
+  }
+
+  return copy;
+}
 
 function PlanCheckIcon() {
   return (
@@ -121,6 +138,19 @@ function getBillingMessage(
   }
 
   switch (state) {
+    case "basic-fit":
+      return {
+        label: "Basic is limited",
+        text: "Basic is an entry plan with checkout, but it does not include Growth's premium action and proof tools.",
+        tone: "neutral" as const,
+      };
+    case "premium-future":
+    case "premium-fit":
+      return {
+        label: "Premium is coming later",
+        text: "Premium is not available for checkout and does not open a manual fit motion today.",
+        tone: "future" as const,
+      };
     case "unavailable":
       return {
         label: "Stripe unavailable",
@@ -188,15 +218,25 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     redirect("/app");
   }
 
-  if (requestedPlan && !checkoutState && !billingState && isStripeBillingConfigured()) {
+  if (
+    (requestedPlan === "BASIC" || requestedPlan === primaryBillingPlan) &&
+    !checkoutState &&
+    !billingState &&
+    isStripeCheckoutConfiguredForPlan(requestedPlan)
+  ) {
     redirect(`/api/billing/checkout?plan=${requestedPlan.toLowerCase()}`);
   }
+
+  const fitBillingState =
+    !checkoutState && !billingState && requestedPlan === "PREMIUM"
+      ? "premium-future"
+      : billingState;
 
   const billingMessage =
     getBillingMessage(
       checkoutState === "success" && !billingSummary.hasActiveAccess
         ? "processing"
-        : billingState,
+        : fitBillingState,
       checkoutState,
     );
 
@@ -252,69 +292,144 @@ export default async function StartPage({ searchParams }: StartPageProps) {
         ) : null}
 
         <section className="mx-auto max-w-[1260px]">
-          <div className="grid gap-5 xl:grid-cols-3">
-            {billingPlans.map((planKey) => {
-              const presentation = planPresentation[planKey];
-              const isCurrentPlan = billingSummary.planKey === planKey;
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.14fr)_minmax(320px,0.86fr)]">
+            {(() => {
+              const presentation = planPresentation[primaryBillingPlan];
+              const copy = getPlanCopy(primaryBillingPlan);
+              const isCurrentPlan = billingSummary.planKey === primaryBillingPlan;
 
               return (
                 <div
-                  key={planKey}
-                  className={`flex h-full flex-col rounded-[30px] border px-7 py-8 text-left shadow-[0_24px_70px_rgba(0,0,0,0.2)] ${presentation.toneClass}`}
+                  className={`flex h-full flex-col rounded-[34px] border px-7 py-8 text-left shadow-[0_30px_90px_rgba(0,0,0,0.24)] md:px-9 md:py-9 ${presentation.toneClass}`}
                 >
-                  <div className="min-h-10">
-                    {planKey === "GROWTH" ? (
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
                       <span className="inline-flex rounded-full border border-[rgba(255,110,170,0.36)] bg-[rgba(194,9,90,0.18)] px-3.5 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                        Best Fit
+                        {copy.fitLabel}
                       </span>
-                    ) : (
-                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
-                        {presentation.name}
+                      <p className="mt-5 text-[0.76rem] font-semibold uppercase tracking-[0.14em] text-[#8d88a1]">
+                        {copy.label}
                       </p>
-                    )}
+                    </div>
+                    <RevoryStatusBadge tone="accent">Best fit</RevoryStatusBadge>
                   </div>
 
-                  <div className="mt-1">
-                    {planKey === "GROWTH" ? (
-                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
-                        {presentation.name}
-                      </p>
-                    ) : null}
+                  <div className="mt-4">
                     <p
-                      className={`mt-3 font-[family:var(--font-display)] text-[clamp(2.8rem,3.2vw,3.65rem)] leading-none tracking-[-0.04em] ${presentation.headerTone}`}
+                      className={`font-[family:var(--font-display)] text-[clamp(3.4rem,6vw,5.6rem)] leading-none tracking-[-0.06em] ${presentation.headerTone}`}
                     >
                       {presentation.price}
                     </p>
-                    <p className="mt-2.5 text-[0.92rem] leading-7 text-[#8f8aa4]">
+                    <p className="mt-2.5 text-[0.95rem] leading-7 text-[#9b94aa]">
                       per month
+                    </p>
+                    <p className="mt-5 max-w-[42rem] text-[1rem] leading-8 text-[#c7bfce]">
+                      {copy.framing}
                     </p>
                   </div>
 
-                  <div className="mt-6 h-px bg-[rgba(255,255,255,0.08)]" />
+                  <div className="mt-7 h-px bg-[rgba(255,255,255,0.08)]" />
 
-                  <div className="mt-6 space-y-3.5">
+                  <div className="mt-7 grid gap-x-6 gap-y-3.5 md:grid-cols-2">
                     {presentation.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
                         <PlanCheckIcon />
-                        <p className="text-[0.93rem] leading-8 text-[#908aa3]">{feature}</p>
+                        <p className="text-[0.95rem] leading-8 text-[#aaa2b6]">{feature}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-auto pt-7">
-                    <a
-                      className={`w-full ${planKey === "GROWTH" ? "rev-button-primary" : "rev-button-secondary"}`}
-                      href={`/api/billing/checkout?plan=${planKey.toLowerCase()}`}
-                    >
-                      {isCurrentPlan ? "Continue with this plan" : presentation.ctaLabel}
+                  <div className="mt-auto pt-8">
+                    <a className="rev-button-primary w-full md:w-auto" href={presentation.ctaHref}>
+                      {isCurrentPlan ? `Continue with ${copy.label}` : copy.ctaLabel}
                     </a>
                   </div>
                 </div>
               );
-            })}
+            })()}
+
+            <div className="space-y-5">
+              {secondaryBillingPlans.map((planKey) => {
+                const presentation = planPresentation[planKey];
+                const copy = getPlanCopy(planKey);
+                const isCurrentPlan = billingSummary.planKey === planKey;
+
+                return (
+                  <div
+                    key={planKey}
+                    className={`flex flex-col rounded-[28px] border px-6 py-6 text-left shadow-[0_22px_60px_rgba(0,0,0,0.18)] ${presentation.toneClass}`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
+                        {copy.fitLabel}
+                      </p>
+                      <RevoryStatusBadge tone={planKey === "PREMIUM" ? "future" : "neutral"}>
+                        {copy.label}
+                      </RevoryStatusBadge>
+                    </div>
+
+                    <div className="mt-4">
+                      <p
+                        className={`font-[family:var(--font-display)] text-[clamp(2.45rem,3vw,3.2rem)] leading-none tracking-[-0.04em] ${presentation.headerTone}`}
+                      >
+                        {presentation.price}
+                      </p>
+                      <p className="mt-2 text-[0.86rem] leading-6 text-[#8f8aa4]">
+                        per month
+                      </p>
+                      <p className="mt-4 text-[0.9rem] leading-7 text-[#aaa2b6]">
+                        {copy.framing}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 h-px bg-[rgba(255,255,255,0.08)]" />
+
+                    <div className="mt-5 space-y-2.5">
+                      {presentation.features.map((feature) => (
+                        <div key={feature} className="flex items-start gap-3">
+                          <PlanCheckIcon />
+                          <p className="text-[0.88rem] leading-7 text-[#908aa3]">
+                            {feature}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-auto pt-6">
+                      {presentation.ctaHref ? (
+                        <a className="rev-button-secondary w-full" href={presentation.ctaHref}>
+                          {isCurrentPlan ? `Continue with ${copy.label}` : copy.ctaLabel}
+                        </a>
+                      ) : (
+                        <button
+                          className="rev-action-button w-full cursor-not-allowed justify-center opacity-60"
+                          disabled
+                          type="button"
+                        >
+                          {isCurrentPlan ? `Current ${copy.label}` : copy.ctaLabel}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="rounded-[24px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.018)] px-5 py-4 text-left">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#827b91]">
+                  Growth stays the full product
+                </p>
+                <p className="mt-2 text-[0.86rem] leading-7 text-[#8f879d]">
+                  Basic is public and useful for entry, but Growth keeps the premium action
+                  tools and proof sharing that make the MVP complete.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mx-auto mt-6 max-w-[760px] text-center">
+            <p className="text-sm leading-7 text-[#8f879d]">
+              {getPlanCopy("GROWTH").valueSignal} Basic is the limited entry plan.
+              Premium is a future tier and is not available today.
+            </p>
             <p className="text-sm leading-7 text-[#7f798f]">
               Stripe handles checkout, card updates, and cancellation. The paid account
               returns directly into the protected app flow for {workspace.name}.

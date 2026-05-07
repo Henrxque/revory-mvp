@@ -17,13 +17,17 @@ const priceIdsByPlan: Record<RevoryBillingPlan, string> = {
 
 let stripeClientSingleton: Stripe | null = null;
 
+export function isStripeCheckoutConfiguredForPlan(planKey: RevoryBillingPlan) {
+  if (planKey === "PREMIUM") {
+    return false;
+  }
+
+  return Boolean(stripeSecretKey && priceIdsByPlan[planKey]);
+}
+
 export function isStripeBillingConfigured() {
-  return Boolean(
-    stripeSecretKey &&
-      priceIdsByPlan.BASIC &&
-      priceIdsByPlan.GROWTH &&
-      priceIdsByPlan.PREMIUM,
-  );
+  // Growth remains the primary complete self-service checkout path.
+  return isStripeCheckoutConfiguredForPlan("GROWTH");
 }
 
 export function isStripeWebhookConfigured() {

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuthSession } from "@/auth";
-import { getStripeAppUrl, getStripePriceId, getStripeServerClient, isStripeBillingConfigured } from "@/services/billing/stripe-runtime";
+import {
+  getStripeAppUrl,
+  getStripePriceId,
+  getStripeServerClient,
+  isStripeCheckoutConfiguredForPlan,
+} from "@/services/billing/stripe-runtime";
 import { ensureStripeCustomerForWorkspace } from "@/services/billing/stripe-sync";
 import {
   getWorkspaceBillingSummary,
@@ -17,6 +22,16 @@ export async function GET(request: NextRequest) {
   const requestedPlan = normalizeBillingPlanKey(
     request.nextUrl.searchParams.get("plan"),
   ) ?? "GROWTH";
+  const selectiveBillingState = requestedPlan === "PREMIUM" ? "premium-future" : null;
+
+  if (selectiveBillingState) {
+    return NextResponse.redirect(
+      new URL(
+        `/start?billing=${selectiveBillingState}&plan=${requestedPlan.toLowerCase()}`,
+        request.url,
+      ),
+    );
+  }
 
   if (!session?.user?.id) {
     const redirectTarget = `/api/billing/checkout?plan=${requestedPlan.toLowerCase()}`;
@@ -26,7 +41,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!isStripeBillingConfigured()) {
+  if (!isStripeCheckoutConfiguredForPlan(requestedPlan)) {
     return NextResponse.redirect(
       new URL(`/start?billing=unavailable&plan=${requestedPlan.toLowerCase()}`, request.url),
     );

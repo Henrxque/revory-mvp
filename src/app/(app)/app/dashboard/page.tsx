@@ -7,6 +7,7 @@ import { ExecutiveProofSummarySheet } from "@/components/proof/ExecutiveProofSum
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { canUseBillingPlanFeature } from "@/services/billing/workspace-billing";
 import { getDailyBookingBriefRead } from "@/services/briefs/get-daily-booking-brief-read";
 import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardDecisionSupport } from "@/services/decision-support/get-dashboard-decision-support";
@@ -389,6 +390,20 @@ function DashboardNextMoveAside({
   );
 }
 
+function GrowthProofShareLimitCard() {
+  return (
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="rev-label">Proof sharing</p>
+        <RevoryStatusBadge tone="future">Growth</RevoryStatusBadge>
+      </div>
+      <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+        Basic keeps the revenue read in-app. Growth adds copy, share, and print for the Executive Proof Summary.
+      </p>
+    </div>
+  );
+}
+
 async function DashboardNextMoveAsideAsync({
   bookingPathLabel,
   dealValueLabel,
@@ -458,6 +473,10 @@ export default async function DashboardPage() {
     overview,
     workspaceName: workspace.name,
   });
+  const canShareExecutiveProof = canUseBillingPlanFeature(
+    workspace.planKey,
+    "EXECUTIVE_PROOF_SHARE",
+  );
   const bookedProofSource = overview.bookedProofSource;
   const leadBaseSource = overview.leadBaseSource;
   const hasMainOfferLocked = activationSetup.selectedTemplate !== null;
@@ -636,7 +655,11 @@ export default async function DashboardPage() {
                 {nextMove.cta}
               </DocumentNavigationLink>
               <div className="mt-2">
-                <ExecutiveProofSummarySheet read={executiveProofSummaryRead} />
+                {canShareExecutiveProof ? (
+                  <ExecutiveProofSummarySheet read={executiveProofSummaryRead} />
+                ) : (
+                  <GrowthProofShareLimitCard />
+                )}
               </div>
             </div>
           </div>

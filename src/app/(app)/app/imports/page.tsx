@@ -9,6 +9,7 @@ import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigati
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { canUseBillingPlanFeature } from "@/services/billing/workspace-billing";
 import { getDailyBookingBriefRead } from "@/services/briefs/get-daily-booking-brief-read";
 import { applyImportsIntentClassification } from "@/services/decision-support/apply-intent-classification";
 import {
@@ -82,6 +83,25 @@ function ImportsNextMoveSection({
       <p className="mt-1 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
         {note}
       </p>
+    </div>
+  );
+}
+
+function GrowthPlanLimitCard({
+  note,
+  title,
+}: Readonly<{
+  note: string;
+  title: string;
+}>) {
+  return (
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="rev-label">Growth tool</p>
+        <RevoryStatusBadge tone="future">Limited on Basic</RevoryStatusBadge>
+      </div>
+      <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">{title}</p>
+      <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">{note}</p>
     </div>
   );
 }
@@ -271,6 +291,10 @@ export default async function ImportsPage() {
   ] as const;
   const briefTargetsBookingAssistance = dailyBriefRead.nextMove.href.includes(
     "#booking-assistance-flow",
+  );
+  const canUseManualQuickAdd = canUseBillingPlanFeature(
+    appContext.workspace.planKey,
+    "MANUAL_LEAD_QUICK_ADD",
   );
 
   return (
@@ -483,10 +507,17 @@ export default async function ImportsPage() {
                   </p>
                 </div>
 
-                <ManualLeadQuickAdd
-                  bookingPathLabel={leadIntakeRead.bookingPathLabel}
-                  mainOfferLabel={leadIntakeRead.mainOfferLabel}
-                />
+                {canUseManualQuickAdd ? (
+                  <ManualLeadQuickAdd
+                    bookingPathLabel={leadIntakeRead.bookingPathLabel}
+                    mainOfferLabel={leadIntakeRead.mainOfferLabel}
+                  />
+                ) : (
+                  <GrowthPlanLimitCard
+                    note="Basic can still use imported lead reads. Growth adds the manual one-off lead entry when a lead needs to be added outside the import lane."
+                    title="Manual Quick Add is not included in Basic."
+                  />
+                )}
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                   {[

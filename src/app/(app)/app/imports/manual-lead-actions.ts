@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getAppContext } from "@/services/app/get-app-context";
+import { canUseBillingPlanFeature } from "@/services/billing/workspace-billing";
 import { createManualLeadBookingOpportunity } from "@/services/lead-booking/create-manual-lead-booking-opportunity";
 
 type CreateManualLeadQuickAddInput = {
@@ -33,6 +34,18 @@ export async function createManualLeadQuickAdd(
   if (!appContext) {
     return {
       message: "Your REVORY session expired before this quick add could create a booking read.",
+      ok: false,
+    };
+  }
+
+  if (
+    !canUseBillingPlanFeature(
+      appContext.workspace.planKey,
+      "MANUAL_LEAD_QUICK_ADD",
+    )
+  ) {
+    return {
+      message: "Manual Quick Add is included with Growth. Basic stays import-first.",
       ok: false,
     };
   }
