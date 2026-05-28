@@ -689,24 +689,24 @@ async function getDashboardOverviewUncached(
   const renewalHeadline = hasBookedProofVisible
     ? hasMomentumVisible
       ? hasMomentumLayerAvailable && hasAttributionLayerAvailable
-        ? "Seller is still earning its place"
-        : "Seller is still readable even with thinner support"
-      : "Seller is live, but continuity is still thin"
-    : "Renewal starts after proof is visible";
+        ? "REVORY is still earning its place"
+        : "REVORY is still readable even with thinner support"
+      : "REVORY is active, but continuity is still thin"
+    : "Renewal starts after appointment evidence is visible";
   const renewalSummary = hasBookedProofVisible
     ? hasMomentumVisible
       ? !hasMomentumLayerAvailable
-        ? "Booked proof is still visible, but recent momentum is temporarily unavailable in this read."
+        ? "Appointment evidence is still visible, but recent momentum is temporarily unavailable in this read."
         : !hasAttributionLayerAvailable
-          ? "Booked proof and recent momentum are visible. Attribution support is temporarily unavailable, but the revenue story stays live."
+          ? "Appointment evidence and recent momentum are visible. Attribution support is temporarily unavailable, but the revenue story stays live."
         : hasLeadSupportVisible
-          ? "Booked proof, recent momentum, and lead-backed attribution are all supporting the revenue story."
-          : "Booked proof and recent momentum are visible, but attribution support is still thinner than the revenue read."
-      : "The revenue snapshot is live, but the longitudinal layer still needs more visible booked proof."
-    : "Revenue defense becomes renewable after booked appointments are visible and supported over time.";
+          ? "Appointment evidence, recent momentum, and client-backed attribution are all supporting the revenue story."
+          : "Appointment evidence and recent momentum are visible, but attribution support is still thinner than the revenue read."
+      : "The revenue snapshot is live, but the longitudinal layer still needs more visible appointment evidence."
+    : "Revenue defense becomes renewable after appointment evidence is visible and supported over time.";
   const renewalSupportPoints = [
     {
-      label: "Booked proof",
+      label: "Appointment evidence",
       statusLabel: hasBookedProofVisible ? "Visible" : "Pending",
       tone: hasBookedProofVisible ? ("real" as const) : ("future" as const),
       value: hasBookedProofVisible ? `${bookedAppointments} visible` : "Pending",
@@ -764,22 +764,22 @@ async function getDashboardOverviewUncached(
         ? "Economic value is readable quickly"
         : "Economic value stays readable"
       : "Economic value is visible, but still thin"
-    : "Economic read opens after booked proof";
+    : "Economic read opens after appointment evidence";
   const executiveSummary = hasBookedProofVisible
     ? hasMomentumVisible
       ? !hasMomentumLayerAvailable
-        ? "Booked revenue is still visible. Recent momentum is temporarily unavailable, but the core revenue read remains intact."
+        ? "Observed revenue is still visible. Recent momentum is temporarily unavailable, but the core revenue read remains intact."
         : !hasAttributionLayerAvailable
-          ? "Booked revenue and recent momentum are visible. Attribution support is temporarily limited, but the core revenue read remains intact."
+          ? "Observed revenue and recent momentum are visible. Attribution support is temporarily limited, but the core revenue read remains intact."
         : supportedRevenueSharePercent !== null
-          ? `${supportedRevenueSharePercent}% of visible booked revenue already carries lead-supported context.`
-          : "Booked revenue is visible and recent momentum is now readable in one short executive pass."
-      : "Booked revenue is visible, but recent value still needs more proof depth."
-    : "Booked proof is the first requirement before Seller can defend economic value clearly.";
+          ? `${supportedRevenueSharePercent}% of visible observed revenue already carries client-supported context.`
+          : "Observed revenue is visible and recent momentum is now readable in one short executive pass."
+      : "Observed revenue is visible, but recent value still needs more evidence depth."
+    : "Appointment evidence is the first requirement before REVORY can defend economic value clearly.";
   const executiveTiles = [
     {
-      hint: "Visible booked revenue now",
-      label: "Revenue now",
+      hint: "Visible observed revenue now",
+      label: "Observed revenue",
       value: formatExecutiveCurrency(estimatedImportedRevenue),
     },
     {
@@ -788,7 +788,7 @@ async function getDashboardOverviewUncached(
       value: formatExecutiveCurrency(totalMomentumRevenue),
     },
     {
-      hint: "Revenue already backed by lead support",
+      hint: "Revenue already backed by client support",
       label: "Supported revenue",
       value: !hasAttributionLayerAvailable
         ? "Unavailable"
@@ -807,16 +807,16 @@ async function getDashboardOverviewUncached(
       : activeMonthsCount === 1
         ? "Value is visible, but still concentrated"
         : "Retention signal is still thin"
-    : "Retention signal opens after proof";
+    : "Retention signal opens after evidence";
   const retentionSummary = hasBookedProofVisible
     ? !hasMomentumLayerAvailable
-      ? "Booked proof is still visible, but the recent continuity window is temporarily unavailable."
+      ? "Appointment evidence is still visible, but the recent continuity window is temporarily unavailable."
       : activeMonthsCount >= 2
-        ? `${activeMonthsCount} of the last ${recentMonthBuckets.length} months already show booked proof in the dashboard.`
+        ? `${activeMonthsCount} of the last ${recentMonthBuckets.length} months already show appointment evidence in the dashboard.`
         : activeMonthsCount === 1
-          ? "Only one recent month is currently carrying visible booked proof, so continuity is still thin."
-          : "Booked proof is live, but the short continuity window is still empty."
-    : "Seller needs visible booked proof before it can defend continuity over time.";
+          ? "Only one recent month is currently carrying visible appointment evidence, so continuity is still thin."
+          : "Appointment evidence is live, but the short continuity window is still empty."
+    : "REVORY needs visible appointment evidence before it can defend continuity over time.";
   const retentionCheckpoints = [
     {
       label: "Active months",
@@ -870,35 +870,35 @@ async function getDashboardOverviewUncached(
         : "All value reads are fully available",
     summary:
       degradedSections.length > 0
-        ? `Booked proof and revenue remain readable. ${degradedSections.length} support read${degradedSections.length === 1 ? " is" : "s are"} temporarily limited.`
+        ? `Appointment evidence and revenue remain readable. ${degradedSections.length} support read${degradedSections.length === 1 ? " is" : "s are"} temporarily limited.`
         : "Revenue, momentum, attribution, and upcoming reads are all available in this workspace.",
   };
   const commercialSafeguard = degradedSections.length > 0
     ? {
         actionHref: "/app/imports",
-        actionLabel: "Refresh booked proof",
-        coreReadLabel: hasBookedProofVisible ? "Revenue and proof live" : "Proof still pending",
+        actionLabel: "Refresh clinic data",
+        coreReadLabel: hasBookedProofVisible ? "Revenue and evidence live" : "Evidence still pending",
         headline: hasBookedProofVisible
           ? "The commercial read is still safe to show"
           : "The commercial read is not fully ready yet",
         status: "watch" as const,
         supportLabel: `${degradedSections.length} support layer${degradedSections.length === 1 ? "" : "s"} limited`,
         summary: hasBookedProofVisible
-          ? "Seller keeps the revenue and booked-proof read visible while support layers recover in the background."
-          : "Seller keeps the read honest: proof is still pending and support layers are currently thinner than the core setup.",
+          ? "REVORY keeps the revenue and appointment evidence read visible while support layers recover in the background."
+          : "REVORY keeps the read honest: evidence is still pending and support layers are currently thinner than the core setup.",
       }
     : {
         actionHref: "/app/imports",
-        actionLabel: hasBookedProofVisible ? "Keep proof fresh" : "Open booked proof",
-        coreReadLabel: hasBookedProofVisible ? "Revenue and proof aligned" : "Setup still advancing",
+        actionLabel: hasBookedProofVisible ? "Keep data fresh" : "Open appointment evidence",
+        coreReadLabel: hasBookedProofVisible ? "Revenue and evidence aligned" : "Setup still advancing",
         headline: hasBookedProofVisible
           ? "The commercial read is fully supported"
           : "The commercial read is still building",
         status: "stable" as const,
         supportLabel: "All support layers available",
         summary: hasBookedProofVisible
-          ? "Revenue, proof, momentum, and attribution are all available in one short read."
-          : "Seller is still moving toward a fully visible commercial read.",
+          ? "Revenue, evidence, momentum, and attribution are all available in one short read."
+          : "REVORY is still moving toward a fully visible commercial read.",
       };
 
   return {

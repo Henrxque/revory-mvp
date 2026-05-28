@@ -33,7 +33,7 @@ export async function createManualLeadQuickAdd(
 
   if (!appContext) {
     return {
-      message: "Your REVORY session expired before this quick add could create a booking read.",
+      message: "Your REVORY session expired before this evidence input could create a booking-risk read.",
       ok: false,
     };
   }
@@ -45,7 +45,7 @@ export async function createManualLeadQuickAdd(
     )
   ) {
     return {
-      message: "Manual Quick Add is included with Growth. Basic stays import-first.",
+      message: "Manual evidence add is included with Growth. Basic stays import-first.",
       ok: false,
     };
   }
@@ -65,7 +65,7 @@ export async function createManualLeadQuickAdd(
 
     return {
       clientName: result.clientName,
-      message: `${result.clientName} was added to today's booking read.`,
+      message: `${result.clientName} was added to today's booking-risk read.`,
       ok: true,
       opportunityId: result.opportunityId,
       status: result.status,
@@ -75,7 +75,7 @@ export async function createManualLeadQuickAdd(
       message:
         error instanceof Error && error.message
           ? error.message
-          : "REVORY could not create this manual booking read right now.",
+          : "REVORY could not create this manual booking-risk read right now.",
       ok: false,
     };
   }

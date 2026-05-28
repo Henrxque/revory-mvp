@@ -9,18 +9,18 @@ type DailyBookingBriefProps = Readonly<{
 export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
   const [primarySignal, ...secondarySignals] = read.signals;
   const focusSurfaceLabel = read.nextMove.href.includes("#booking-assistance-flow")
-    ? "Booking assistance"
+    ? "Operational risks"
     : read.nextMove.href.includes("#booking-inputs-flow")
-      ? "Booking inputs"
+      ? "Clinic data"
       : read.nextMove.href.includes("#revenue-view")
-        ? "Revenue view"
+        ? "Revenue read"
         : "Current view";
 
   return (
     <section className="rev-card-premium overflow-hidden rounded-[30px] p-5 md:p-6">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)] xl:items-start">
         <div className="space-y-5">
-          <p className="rev-kicker">Daily booking brief</p>
+          <p className="rev-kicker">Daily revenue brief</p>
 
           <div className="max-w-[38rem] space-y-2">
             <h2 className="rev-display-panel max-w-[34rem]">

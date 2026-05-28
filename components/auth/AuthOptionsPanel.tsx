@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AuthEmailPasswordForm } from "@/components/auth/AuthEmailPasswordForm";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 
 type AuthOptionsPanelProps = Readonly<{
@@ -24,17 +25,27 @@ export function AuthOptionsPanel({
         <div className="space-y-2.5">
           <p className="rev-kicker">{isSignIn ? "Workspace access" : "Workspace creation"}</p>
           <h2 className="rev-display-panel max-w-[22rem]">
-            {isSignIn ? "Use Google to access REVORY." : "Use Google to start REVORY."}
+            {isSignIn ? "Access REVORY securely." : "Create REVORY securely."}
           </h2>
           <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
             {isSignIn
-              ? "One secure path back to the same workspace."
-              : "One secure path into the same Seller setup flow."}
+              ? "Use Google or email/password to return to the same workspace."
+              : "Use Google or email/password to start the same REVORY workspace setup."}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-5 md:p-6">
-          <div className="space-y-3.5">
+          <div className="space-y-4">
+            <AuthEmailPasswordForm callbackUrl={callbackUrl} mode={mode} />
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-[rgba(255,255,255,0.08)]" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8f8aa4]">
+                Or
+              </span>
+              <div className="h-px flex-1 bg-[rgba(255,255,255,0.08)]" />
+            </div>
+
             {googleConfigured ? (
               <AuthGoogleButton
                 callbackUrl={callbackUrl}
@@ -59,14 +70,14 @@ export function AuthOptionsPanel({
               </Link>
               {!googleConfigured ? (
                 <span className="text-[11px] text-[#8f8aa4]">
-                  Google auth is unavailable in this build.
+                  Email/password remains available.
                 </span>
               ) : null}
             </div>
 
             {googleConfigured ? null : (
               <p className="text-[11px] leading-[1.55] text-[#8f8aa4]">
-                REVORY keeps auth narrow on purpose. This build only supports the real Google path.
+                Google needs OAuth credentials before launch. No other social providers are exposed.
               </p>
             )}
           </div>

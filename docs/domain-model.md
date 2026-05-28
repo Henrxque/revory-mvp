@@ -1,5 +1,9 @@
 # Domain Model - REVORY MVP
 
+> Historical implementation reference. Not current public positioning. Current source of truth is REVORY Revenue Leak Detector in `docs/source-of-truth.md`.
+>
+> Some model names and examples in this document come from the earlier REVORY Seller / MVP substrate. They may still describe useful implementation history, but they should not be used to define current buyer-facing category, copy, or scope.
+
 Este documento descreve o modelo de dominio inicial do MVP da REVORY. O objetivo e alinhar implementacao, schema e integracoes com uma base simples e suficiente para a primeira fase do produto.
 
 ## User

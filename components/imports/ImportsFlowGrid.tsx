@@ -59,18 +59,18 @@ export function ImportsFlowGrid({
           <div>
             <p className="rev-label">Primary lane</p>
             <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-              Booked proof comes first.
+              Appointment evidence comes first.
             </p>
           </div>
           <p className="max-w-[22rem] text-right text-xs leading-[1.45] text-[color:var(--text-muted)]">
-            Use appointments first when you want the shortest path from paid leads to visible booked revenue.
+            Appointments help REVORY identify no-shows, cancellations, service patterns and data freshness.
           </p>
         </div>
 
         <CsvUploadCard
-          helperText="Bring booked appointments into Seller first so revenue can read real proof."
+          helperText="Upload appointment data first so REVORY can read status, schedule, estimated value and freshness signals."
           lastUpload={appointmentsLastUpload}
-          laneSummary="Primary proof lane"
+          laneSummary="Primary evidence lane"
           onActivityChange={handleAppointmentsActivityChange}
           templateHref={`/templates/${revoryCsvTemplateDefinitions.appointments.fileName}`}
           templateKey="appointments"
@@ -84,18 +84,18 @@ export function ImportsFlowGrid({
           <div>
             <p className="rev-label">Secondary lane</p>
             <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
-              Lead base supports proof.
+              Client context supports the leak read.
             </p>
           </div>
           <p className="max-w-[22rem] text-right text-xs leading-[1.45] text-[color:var(--text-muted)]">
-            Add lead context after proof when the clinic needs more support behind the booked view.
+            Add client context when the clinic needs cleaner contact evidence behind blocked booking risks.
           </p>
         </div>
 
         <CsvUploadCard
-          helperText="Add lead context only when the booked proof lane is already clear or needs support."
+          helperText="Add client context only when appointment evidence is already clear or blocked booking risks need support."
           lastUpload={clientsLastUpload}
-          laneSummary="Secondary support lane"
+          laneSummary="Context support lane"
           onActivityChange={handleClientsActivityChange}
           templateHref={`/templates/${revoryCsvTemplateDefinitions.clients.fileName}`}
           templateKey="clients"

@@ -79,6 +79,7 @@ function adaptReferenceCss(css: string) {
 
 function adaptReferenceMarkup(markup: string) {
   return markup
+    .replace(/href="\/cdn-cgi\/l\/email-protection#[^"]*"/g, 'href="mailto:hello@revory.com"')
     .replaceAll('href="#pricing" class="btn-primary"', 'href="/start" class="btn-primary"')
     .replaceAll('href="#pricing" class="nav-cta"', 'href="/start" class="nav-cta"')
     .replaceAll('href="#" class="btn-primary"', 'href="/start" class="btn-primary"')
@@ -131,7 +132,7 @@ export default async function HomePage() {
             <span className="logo-wordmark">REVORY</span>
           </div>
           <span className="footer-copy">
-            © 2025 REVORY. Premium booking acceleration software for MedSpas.
+            © 2025 REVORY. Revenue Leak Detector for premium MedSpas.
           </span>
           <ul className="footer-links">
             <li>

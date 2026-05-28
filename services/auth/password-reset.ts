@@ -1,0 +1,103 @@
+import "server-only";
+
+import { createHash, randomBytes } from "node:crypto";
+
+import { prisma } from "@/db/prisma";
+import { hashPassword, isPasswordStrongEnough } from "@/services/auth/password-crypto";
+import { getTransactionalEmailConfig, sendPasswordResetEmail } from "@/services/email/transactional-email";
+
+const RESET_TOKEN_TTL_MS = 1000 * 60 * 45;
+
+function hashResetToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function createResetToken() {
+  return randomBytes(32).toString("base64url");
+}
+
+export function isPasswordResetDeliveryConfigured() {
+  return getTransactionalEmailConfig().configured;
+}
+
+export async function requestPasswordReset(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = normalizedEmail
+    ? await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    : null;
+
+  if (!user?.passwordHash) {
+    return { deliveryConfigured: isPasswordResetDeliveryConfigured(), sent: false };
+  }
+
+  const token = createResetToken();
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") ?? "http://localhost:3000"}/reset-password?token=${encodeURIComponent(token)}`;
+
+  await prisma.user.update({
+    data: {
+      passwordResetExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      passwordResetTokenHash: hashResetToken(token),
+    },
+    where: {
+      id: user.id,
+    },
+  });
+
+  const sent = await sendPasswordResetEmail({
+    email: user.email,
+    resetUrl,
+  });
+
+  if (!sent && process.env.NODE_ENV !== "production") {
+    console.info("[revory-auth] local password reset link", {
+      email: user.email,
+      resetUrl,
+    });
+  }
+
+  return { deliveryConfigured: isPasswordResetDeliveryConfigured(), sent };
+}
+
+export async function resetPasswordWithToken(input: {
+  password: string;
+  token: string;
+}) {
+  const tokenHash = hashResetToken(input.token.trim());
+  const user = await prisma.user.findUnique({
+    where: {
+      passwordResetTokenHash: tokenHash,
+    },
+  });
+
+  if (!user?.passwordResetExpiresAt || user.passwordResetExpiresAt.getTime() < Date.now()) {
+    return {
+      message: "This reset link is expired or invalid.",
+      ok: false as const,
+    };
+  }
+
+  if (!isPasswordStrongEnough(input.password)) {
+    return {
+      message: "Use at least 10 characters for the new password.",
+      ok: false as const,
+    };
+  }
+
+  await prisma.user.update({
+    data: {
+      authProvider: user.authProvider === "google" ? "google+credentials" : "credentials",
+      passwordHash: await hashPassword(input.password),
+      passwordResetExpiresAt: null,
+      passwordResetTokenHash: null,
+      passwordUpdatedAt: new Date(),
+    },
+    where: {
+      id: user.id,
+    },
+  });
+
+  return {
+    message: "Password updated. You can sign in now.",
+    ok: true as const,
+  };
+}

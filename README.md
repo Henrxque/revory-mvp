@@ -1,22 +1,36 @@
-# REVORY Seller 2.0
+# REVORY
 
-Setup inicial do projeto `revory-mvp`, construido com Next.js, TypeScript e Tailwind.
+REVORY is now a Revenue Leak Detector for premium MedSpas.
+
+The current product foundation includes onboarding, imports, billing, dashboard reads, booking evidence, bounded action guidance, and executive summaries. The public positioning now follows the V3 source of truth: show where revenue is at risk from structured appointment and booking data without turning into CRM, inbox, BI, scheduling software, consulting, or an AI sales agent.
 
 ## Source Of Truth
 
-O contexto principal deste projeto esta em [docs/source-of-truth.md](docs/source-of-truth.md).
+Use [docs/source-of-truth.md](docs/source-of-truth.md) as the primary product reference.
 
-Quando houver conflito entre docs antigas, wireframes, README legado ou implementacao parcial, siga primeiro esse documento de referencia.
+When old docs, wireframes, README text, or partial implementation conflict with the source of truth, follow the narrower V3 Revenue Leak Detector interpretation.
 
-## Foco do projeto
+## Product Focus
 
-- premium
-- self-service
+- Premium
+- Self-service
 - MedSpa-first
-- booking-first
-- 1 main offer por cliente no inicio
-- IA minima, barata e invisivel
-- dashboard centrado em receita
+- Revenue leak-first
+- Estimated revenue at risk
+- CSV-first intake
+- Evidence and confidence before claims
+- Bounded AI only for intake, triage, explanation, and guidance
+
+## Avoid
+
+- CRM
+- Inbox
+- BI bloat
+- Scheduling system
+- Revenue cycle management
+- Consulting service
+- AI sales assistant
+- Claims of confirmed lost revenue without evidence
 
 ## Stack
 
@@ -24,14 +38,14 @@ Quando houver conflito entre docs antigas, wireframes, README legado ou implemen
 - TypeScript
 - Tailwind CSS
 
-## Como iniciar
+## How To Start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
@@ -43,24 +57,6 @@ npm run lint
 npm run typecheck
 ```
 
-## Variaveis de ambiente
+## Environment Variables
 
-Copie `.env.example` para `.env.local` e ajuste os valores conforme o ambiente.
-
-## Estrutura inicial
-
-```text
-.
-|-- src/
-|   `-- app/
-|       |-- globals.css
-|       |-- layout.tsx
-|       `-- page.tsx
-|-- .env.example
-|-- .gitignore
-|-- eslint.config.mjs
-|-- next.config.ts
-|-- package.json
-|-- postcss.config.mjs
-`-- tsconfig.json
-```
+Copy `.env.example` to `.env.local` and adjust values for the environment.

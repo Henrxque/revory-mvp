@@ -323,7 +323,7 @@ export function CsvUploadCard({
     currentPreview && confirmationDraft && confirmationDraft.canProceed,
   );
   const cardTitle =
-    templateKey === "appointments" ? "Booked proof" : "Lead base";
+    templateKey === "appointments" ? "Appointment evidence" : "Client context";
   const isPrimaryLane = tone === "primary";
   const processSteps = [
     { detail: "Read headers", step: "01" },
@@ -383,33 +383,33 @@ export function CsvUploadCard({
       ? "Confirm and make visible"
       : "Confirm mapping and make visible";
   const latestPassLabel =
-    templateKey === "appointments" ? "Latest proof pass" : "Latest support pass";
+    templateKey === "appointments" ? "Latest evidence pass" : "Latest context pass";
   const coverageLabel =
-    templateKey === "appointments" ? "Proof coverage" : "Lead-base coverage";
+    templateKey === "appointments" ? "Evidence coverage" : "Client context coverage";
   const visibleNowLabel =
-    templateKey === "appointments" ? "Proof rows live" : "Rows live";
+    templateKey === "appointments" ? "Evidence rows live" : "Rows live";
   const uploadLabel =
     templateKey === "appointments"
-      ? "Upload booked appointments file"
-      : "Upload lead-base support file";
+      ? "Upload appointment evidence file"
+      : "Upload client context file";
   const currentUpdateLabel =
-    templateKey === "appointments" ? "Current proof pass" : "Current support pass";
+    templateKey === "appointments" ? "Current evidence pass" : "Current context pass";
   const inProgressLabel =
     templateKey === "appointments"
-      ? "Proof update in progress"
-      : "Support update in progress";
+      ? "Evidence update in progress"
+      : "Context update in progress";
   const inProgressTitle =
     templateKey === "appointments"
-      ? "Validating file and updating booked proof."
-      : "Validating file and updating lead-base support.";
+      ? "Validating file and updating appointment evidence."
+      : "Validating file and updating client context.";
   const currentResultTitle =
     templateKey === "appointments"
-      ? "Result from the latest proof file."
-      : "Result from the latest support file.";
+      ? "Result from the latest appointment evidence file."
+      : "Result from the latest client context file.";
   const templateCtaLabel =
-    templateKey === "appointments" ? "Get proof template" : "Get support template";
+    templateKey === "appointments" ? "Get appointment template" : "Get client template";
   const fileReadLabel =
-    templateKey === "appointments" ? "Selected proof file" : "Selected support file";
+    templateKey === "appointments" ? "Selected appointment file" : "Selected client file";
   const currentResultBody =
     templateKey === "appointments"
       ? "This result applies only to the current file."
@@ -731,7 +731,7 @@ export function CsvUploadCard({
                 <p className="rev-label">{uploadLabel}</p>
                 <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
                   Upload one file, check the fit, then confirm what becomes
-                  visible in Seller.
+                  visible in the revenue risk read.
                </p>
             </div>
             <span className="rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]">
@@ -803,7 +803,7 @@ export function CsvUploadCard({
               <div className="max-w-3xl">
                 <p className="rev-label">Confirm this file</p>
                 <h3 className="mt-2 text-[1.35rem] font-semibold leading-[1.15] text-[color:var(--foreground)]">
-                  Confirm the mapping and update Seller.
+                  Confirm the mapping and update the REVORY read.
                 </h3>
                 <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                   This confirmation applies only to the current file.
@@ -1089,14 +1089,14 @@ export function CsvUploadCard({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
             {isConfirmationStepVisible
-              ? "Final check before Seller updates from this file."
+              ? "Final check before REVORY updates from this file."
               : currentPreview
               ? canSubmit
                 ? "Mapping ready. Confirm this file to continue."
                 : "Resolve blockers in the mapping preview to continue."
               : isPrimaryLane
-                ? "Use the proof template when possible. Seller should read booked proof before revenue."
-                : "Use the support template when needed. Lead base stays secondary to booked proof."}
+                ? "Use the REVORY template when possible. Appointment status improves leak detection, and estimated revenue improves confidence."
+                : "Use the client template when needed. Missing estimated revenue can fall back to average deal value later."}
           </p>
           {!isConfirmationStepVisible && currentPreview ? (
             <button

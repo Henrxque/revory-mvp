@@ -203,7 +203,7 @@ async function runBoundedRequest({
           input: [
             {
               content:
-                "Classify the current REVORY Seller state using only the provided enums. Return exactly one intent, one objection, one simple confidence band, and one short rationale. Keep the classification narrow, booking-first, and commercially honest. Never invent a new enum, never output prose outside the schema, and never imply chat, CRM, inbox, or autonomous behavior.",
+                "Classify the current REVORY Revenue Leak Detector state using only the provided enums. Return exactly one intent, one objection, one simple confidence band, and one short rationale. Keep the classification narrow, evidence-first, revenue-risk-first, and commercially honest. Never invent a new enum, revenue number, confirmed loss, or causal recovery claim. Never output prose outside the schema. Never imply REVORY is a CRM, inbox, BI tool, scheduling system, sales agent, clinical advisor, or autonomous workflow.",
               role: "developer",
             },
             {

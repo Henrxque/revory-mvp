@@ -100,8 +100,8 @@ function buildDailyReadFreshness(input: {
 
   if (!input.appointmentsVisible || !input.appointmentsImportedAt) {
     return {
-      label: "Read pending",
-      note: "Booked proof still needs a recent source before today's read can be trusted.",
+      label: "Data pending",
+      note: "Upload appointment data to start detecting revenue at risk.",
       tone: "future" as const,
     };
   }
@@ -115,7 +115,7 @@ function buildDailyReadFreshness(input: {
     if (clientsAgeMs >= STALE_THRESHOLD_MS) {
       return {
         label: "Support may be stale",
-        note: `Lead support was refreshed ${formatRelativeDate(input.clientsImportedAt)}. Refresh it if today's booking read feels behind.`,
+        note: `Client support was refreshed ${formatRelativeDate(input.clientsImportedAt)}. Refresh it if today's revenue risk read feels behind.`,
         tone: "future" as const,
       };
     }
@@ -123,8 +123,8 @@ function buildDailyReadFreshness(input: {
 
   if (appointmentsAgeMs >= STALE_THRESHOLD_MS) {
     return {
-      label: "Read may be stale",
-      note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}. Refresh it if today's revenue or booking read feels behind.`,
+      label: "Data may be stale",
+      note: "Your appointment data may be outdated. Upload a fresh file to keep your revenue risk read current.",
       tone: "future" as const,
     };
   }
@@ -132,14 +132,14 @@ function buildDailyReadFreshness(input: {
   if (appointmentsTone === "neutral") {
     return {
       label: "Read holding",
-      note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}. Still usable, but no longer fresh.`,
+      note: `Appointment data was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}. Still usable, but no longer fresh.`,
       tone: "neutral" as const,
     };
   }
 
   return {
     label: "Read fresh",
-    note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)} and is fresh enough to guide today's read.`,
+    note: `Appointment data was refreshed ${formatRelativeDate(input.appointmentsImportedAt)} and is fresh enough to guide today's read.`,
     tone: "real" as const,
   };
 }
@@ -158,7 +158,7 @@ function getMostRecentChange(input: {
 
   if (input.handoffOpenedAt) {
     changes.push({
-      note: `Seller opened the current booking path ${formatRelativeDate(input.handoffOpenedAt)}.`,
+      note: `The current booking path was opened ${formatRelativeDate(input.handoffOpenedAt)}.`,
       timestamp: input.handoffOpenedAt.getTime(),
       tone: "accent",
     });
@@ -166,7 +166,7 @@ function getMostRecentChange(input: {
 
   if (input.appointmentsImportedAt) {
     changes.push({
-      note: `Booked proof was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}.`,
+      note: `Appointment data was refreshed ${formatRelativeDate(input.appointmentsImportedAt)}.`,
       timestamp: input.appointmentsImportedAt.getTime(),
       tone: "real",
     });
@@ -174,7 +174,7 @@ function getMostRecentChange(input: {
 
   if (input.clientsImportedAt) {
     changes.push({
-      note: `Lead support was refreshed ${formatRelativeDate(input.clientsImportedAt)}.`,
+      note: `Client support was refreshed ${formatRelativeDate(input.clientsImportedAt)}.`,
       timestamp: input.clientsImportedAt.getTime(),
       tone: "neutral",
     });
@@ -182,7 +182,7 @@ function getMostRecentChange(input: {
 
   if (changes.length === 0) {
     return {
-      note: "No recent booking change is visible yet.",
+      note: "No recent clinic data change is visible yet.",
       tone: "neutral" as const,
     };
   }
@@ -199,42 +199,42 @@ function buildProofFirstBrief(input: {
 
   return {
     headline: hasAppointmentsSignal
-      ? "Open with booked proof review."
-      : "Open with booked proof first.",
+      ? "Open with appointment evidence review."
+      : "Upload appointment data to start detecting revenue at risk.",
     nextMove: hasAppointmentsSignal
       ? {
           href: "/app/imports#booking-inputs-flow",
-          label: "Review booked proof",
-          note: "The appointments lane is already in. Keep today on booked proof before anything wider.",
+          label: "Review appointment evidence",
+          note: "The appointments lane is already in. Keep today's read evidence-first before anything wider.",
         }
       : {
           href: "/app/imports#booking-inputs-flow",
-          label: "Start booked proof",
-          note: "Booked proof still sets the first useful read of the day in Seller.",
+          label: "Upload appointment data",
+          note: "REVORY needs appointment status and scheduled date to detect stronger revenue risks.",
         },
     signals: [
       {
-        label: "Booked proof",
+        label: "Appointment evidence",
         note: hasAppointmentsSignal ? "Lane visible" : "Still missing",
         tone: "future" as const,
         value: formatSourceStateLabel(hasAppointmentsSignal, hasAppointmentsSignal),
       },
       {
-        label: "Lead support",
-        note: input.clientsSourceVisible ? "Secondary lane visible" : "Optional until proof is clean",
+        label: "Client support",
+        note: input.clientsSourceVisible ? "Secondary lane visible" : "Optional until evidence is clean",
         tone: "neutral" as const,
         value: formatSourceStateLabel(input.clientsSourceVisible, input.clientsSourceVisible),
       },
       {
-        label: "Revenue view",
-        note: input.hasBookedProofVisible ? "Can open next" : "Opens after proof",
+        label: "Revenue read",
+        note: input.hasBookedProofVisible ? "Can open next" : "Opens after evidence",
         tone: input.hasBookedProofVisible ? ("real" as const) : ("future" as const),
         value: input.hasBookedProofVisible ? "Ready" : "Pending",
       },
     ],
     summary: hasAppointmentsSignal
-      ? "Seller keeps the day anchored on booked proof so revenue can stay honest before booking assistance becomes the daily booking read."
-      : "Seller still starts with booked proof. Until that lane is visible, the daily brief should stay narrow and proof-first.",
+      ? "REVORY keeps the day anchored on appointment evidence so the revenue risk read stays honest before operational booking risks become the next layer."
+      : "REVORY uses structured appointment and booking data to identify no-show risk, unrecovered cancellations, blocked booking opportunities and stale data signals.",
     tone: "future" as const,
   };
 }
@@ -251,25 +251,25 @@ function buildBookingLiveBrief(input: {
   const nextMove = hasReady
     ? {
         href: "/app/imports#booking-assistance-flow",
-        label: "Open booking assistance",
-        note: "Use the short booking read where Seller already has a clear path to move today.",
+        label: "Review operational risks",
+        note: "Use the short read where REVORY already has a clear path to inspect today.",
       }
     : hasBlocked
       ? {
           href: "/app/imports#booking-assistance-flow",
-          label: "Review blocked reads",
-          note: "Keep today on the blockers that are still preventing the current path from opening.",
+          label: "Review blocked risks",
+          note: "Keep today on the blockers still preventing the current path from opening.",
         }
       : hasHandoffs
         ? {
             href: "/app/imports#booking-assistance-flow",
-            label: "Refresh booking reads",
-            note: "Seller already opened the current path recently. Recheck the active booking read before widening the day.",
+            label: "Refresh risk read",
+            note: "The current path was opened recently. Recheck the active read before widening the day.",
           }
         : {
             href: "/app/dashboard#revenue-view",
-            label: "Open revenue view",
-            note: "Booked proof is visible. Keep the day short until a stronger booking move appears.",
+            label: "Open revenue read",
+            note: "Appointment evidence is visible. Keep the day short until a stronger operational risk appears.",
           };
 
   return {
@@ -281,29 +281,29 @@ function buildBookingLiveBrief(input: {
     nextMove,
     signals: [
       {
-        label: "Ready now",
-        note: "Can open path",
+        label: "Ready risks",
+        note: "Can inspect now",
         tone: hasReady ? ("real" as const) : ("neutral" as const),
         value: String(input.ready),
       },
       {
-        label: "Blocked now",
+        label: "Blocked risks",
         note: "Needs a fix",
         tone: hasBlocked ? ("future" as const) : ("neutral" as const),
         value: String(input.blocked),
       },
       {
-        label: "Handoffs opened",
-        note: "Seller signal",
+        label: "Paths opened",
+        note: "Action signal",
         tone: hasHandoffs ? ("accent" as const) : ("neutral" as const),
         value: String(input.handoffsOpened),
       },
     ],
     summary: hasReady
-      ? "Seller starts the day with the booking reads that are already actionable, keeps blockers visible, and avoids widening into a heavier operating surface."
+      ? "REVORY starts the day with the operational booking risks that are already actionable, keeps blockers visible, and avoids widening into a heavier operating surface."
       : hasBlocked
-        ? "Seller keeps the first minute on explicit blockers and the next bounded move instead of drifting into pipeline management."
-        : "Seller keeps the first minute short: check the current booking read, then move back to revenue once nothing active needs a push.",
+        ? "REVORY keeps the first minute on explicit blockers and the next bounded move instead of drifting into pipeline management."
+        : "REVORY keeps the first minute short: check the current revenue read, then move only if an operational risk needs attention.",
     tone: hasReady ? ("real" as const) : hasBlocked ? ("future" as const) : ("neutral" as const),
   };
 }

@@ -57,7 +57,7 @@ export function ExecutiveProofSummarySheet({
     try {
       await navigator.share({
         text: read.copyText,
-        title: `${read.workspaceName} executive proof summary`,
+        title: `${read.workspaceName} executive revenue read`,
       });
     } catch {
       // User cancel should stay silent.
@@ -83,7 +83,7 @@ export function ExecutiveProofSummarySheet({
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(read.workspaceName)} executive proof</title>
+    <title>${escapeHtml(read.workspaceName)} executive revenue read</title>
     <style>
       :root {
         color-scheme: dark;
@@ -317,7 +317,7 @@ export function ExecutiveProofSummarySheet({
       <section class="card">
         <div class="topbar">
           <div>
-            <p class="kicker">Executive proof</p>
+            <p class="kicker">Executive revenue read</p>
             <p class="workspace">${escapeHtml(read.workspaceName)}</p>
           </div>
           <div class="pills">
@@ -345,7 +345,7 @@ export function ExecutiveProofSummarySheet({
         <div class="safeguard">
           <div class="safeguard-grid">
             <div>
-              <p class="signal-label">Proof position</p>
+              <p class="signal-label">Evidence position</p>
               <p class="safeguard-headline">${escapeHtml(read.safeguard.headline)}</p>
               <p class="safeguard-note">${escapeHtml(read.safeguard.note)}</p>
             </div>
@@ -395,7 +395,7 @@ export function ExecutiveProofSummarySheet({
           }}
           type="button"
         >
-          Share proof
+          Share revenue read
         </button>
 
         {copyState === "copied" ? <RevoryStatusBadge tone="real">Summary copied</RevoryStatusBadge> : null}
@@ -409,13 +409,13 @@ export function ExecutiveProofSummarySheet({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-[34rem]">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="rev-kicker">Executive proof share</p>
+                  <p className="rev-kicker">Executive revenue read</p>
                 </div>
                 <h3 className="mt-2 text-[1.55rem] font-semibold leading-[1.02] tracking-[-0.04em] text-[color:var(--foreground)]">
-                  Use one short proof read for internal or commercial review.
+                  Use one short revenue read for internal or commercial review.
                 </h3>
                 <p className="mt-2 text-[12px] leading-[1.55] text-[color:var(--text-muted)]">
-                  This summary stays narrow on purpose: booked revenue first, then only the shortest proof signals the current read already sustains.
+                  This read stays narrow on purpose: observed revenue, appointment evidence, freshness and support context only.
                 </p>
               </div>
 

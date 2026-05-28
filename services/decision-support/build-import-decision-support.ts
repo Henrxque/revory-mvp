@@ -23,7 +23,7 @@ type BuildImportDecisionSupportInput = {
 };
 
 function getSupportLabel(templateKey: RevoryCsvTemplateKey) {
-  return templateKey === "appointments" ? "booked proof" : "lead-base support";
+  return templateKey === "appointments" ? "appointment evidence" : "client context";
 }
 
 export function buildImportDecisionSupport({
@@ -46,31 +46,31 @@ export function buildImportDecisionSupport({
         uploadState.importSummary.errorRows > 0
           ? "Held rows still need review."
           : "Pass clean and visible.",
-      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      eyebrow: isAppointments ? "Appointment evidence read" : "Client context read",
       fallbackLabel: "If confidence softens",
       fallbackNote:
         isAppointments
-          ? "If proof weakens, keep revenue unchanged until the next clean pass."
-          : "If support weakens, keep lead base secondary.",
-      guardrailLabel: "Seller stays narrow",
-      guardrailNote: "Proof first. Lead support second.",
+          ? "If evidence weakens, keep the revenue risk read conservative until the next clean pass."
+          : "If context weakens, keep client data secondary to appointment evidence.",
+      guardrailLabel: "REVORY stays narrow",
+      guardrailNote: "Appointment evidence first. Client context second.",
       nextBestAction:
         isAppointments
           ? uploadState.importSummary.errorRows > 0
             ? "Keep this pass and clear held rows on the next upload."
-            : "Proof is clean. Open Revenue View."
+            : "Evidence is clean. Open Revenue Read."
           : uploadState.importSummary.errorRows > 0
             ? "Keep this pass and clean held rows only when needed."
-            : "Support is clean. Keep it secondary to proof.",
+            : "Context is clean. Keep it secondary to appointment evidence.",
       recommendedPath: isAppointments
-        ? "Booked proof -> revenue view"
-        : "Lead base -> support revenue context",
+        ? "Appointment evidence -> revenue risk read"
+        : "Client context -> support revenue risk read",
       signals: [
         {
-          label: isAppointments ? "Proof strength" : "Current support",
+          label: isAppointments ? "Evidence strength" : "Current context",
           note: isAppointments
-            ? "Rows now visible in proof."
-            : "Rows now visible in support.",
+            ? "Rows now visible for leak-risk review."
+            : "Rows now visible as client context.",
           value: `${uploadState.importSummary.successRows}`,
         },
         {
@@ -79,20 +79,20 @@ export function buildImportDecisionSupport({
           value: `${uploadState.importSummary.errorRows}`,
         },
         {
-          label: "Role in Seller",
+          label: "Role in REVORY",
           note: isAppointments
-            ? "Appointments anchor revenue proof."
-            : "Lead base stays secondary.",
-          value: isAppointments ? "Revenue support" : "Context support",
+            ? "Appointments anchor the revenue risk read."
+            : "Client context stays secondary.",
+          value: isAppointments ? "Risk evidence" : "Context support",
         },
       ],
       summary:
         isAppointments
-          ? "Revenue proof updated."
-          : "Lead-base support updated.",
+          ? "Appointment evidence updated."
+          : "Client context updated.",
       title: isAppointments
-        ? "Booked proof updated."
-        : "Lead-base support updated.",
+        ? "Appointment evidence updated."
+        : "Client context updated.",
       tone: uploadState.importSummary.errorRows > 0 ? "future" : "real",
     };
   }
@@ -116,10 +116,10 @@ export function buildImportDecisionSupport({
               : confirmationDraft.suggestedPendingConfirmationCount > 0
                 ? "Review suggested matches."
                 : "No blocker left.",
-      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      eyebrow: isAppointments ? "Appointment evidence read" : "Client context read",
       fallbackLabel: "If confidence softens",
       fallbackNote: "Nothing goes live before final confirmation.",
-      guardrailLabel: "Seller stays narrow",
+      guardrailLabel: "REVORY stays narrow",
       guardrailNote: "Read headers, confirm mapping, then make visible.",
       nextBestAction:
         currentPreview.exactTemplateMatch
@@ -132,7 +132,7 @@ export function buildImportDecisionSupport({
         : "Guided mapping -> final review -> make visible",
       signals: [
         {
-          label: "Proof strength",
+          label: "Mapping confidence",
           note: "High-confidence matches.",
           value: `${confirmationDraft.keptConfidentMatchCount}`,
         },
@@ -142,11 +142,11 @@ export function buildImportDecisionSupport({
           value: `${confirmationDraft.suggestedPendingConfirmationCount}`,
         },
         {
-          label: "Role in Seller",
+          label: "Role in REVORY",
           note: isAppointments
-            ? "Proof should go live before revenue read."
-            : "Lead base should stay support-only.",
-          value: isAppointments ? "Booked proof" : "Lead base",
+            ? "Appointment status should go live before stronger leak reads."
+            : "Client context should stay support-only.",
+          value: isAppointments ? "Appointment evidence" : "Client context",
         },
       ],
       summary: blockingTitle
@@ -165,10 +165,10 @@ export function buildImportDecisionSupport({
     return {
       badgeLabel: "Controlled read",
       detectedObjection: "File selected. Not live yet.",
-      eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+      eyebrow: isAppointments ? "Appointment evidence read" : "Client context read",
       fallbackLabel: "If confidence softens",
       fallbackNote: "Live state stays unchanged until final confirmation.",
-      guardrailLabel: "Seller stays narrow",
+      guardrailLabel: "REVORY stays narrow",
       guardrailNote: "Read stays contained to this file.",
       nextBestAction: "Wait for header read, then confirm mapping.",
       recommendedPath: "Read file -> review mapping -> make visible",
@@ -179,9 +179,9 @@ export function buildImportDecisionSupport({
           value: selectedFileName,
         },
         {
-          label: "Role in Seller",
+          label: "Role in REVORY",
           note: "This read stays narrow.",
-          value: isAppointments ? "Booked proof" : "Lead base",
+          value: isAppointments ? "Appointment evidence" : "Client context",
         },
         {
           label: "Current effect",
@@ -199,23 +199,23 @@ export function buildImportDecisionSupport({
     badgeLabel: "Controlled read",
     detectedObjection:
       isAppointments
-        ? "Revenue read needs booked proof."
-        : "Lead base should not be first move.",
-    eyebrow: isAppointments ? "Booked proof read" : "Lead-base read",
+        ? "Revenue risk read needs appointment evidence."
+        : "Client context should not be first move.",
+    eyebrow: isAppointments ? "Appointment evidence read" : "Client context read",
     fallbackLabel: "If confidence softens",
     fallbackNote:
       isAppointments
-        ? "Without proof, revenue stays pending."
-        : "Without support, keep proof as the main read.",
-    guardrailLabel: "Seller stays narrow",
-    guardrailNote: "Booked proof stays primary. Lead base stays secondary.",
+        ? "Without appointment evidence, the revenue risk read stays pending."
+        : "Without client context, keep appointment evidence as the main read.",
+    guardrailLabel: "REVORY stays narrow",
+    guardrailNote: "Appointment evidence stays primary. Client context stays secondary.",
     nextBestAction:
       isAppointments
         ? "Upload appointments first."
-        : "Add clients after proof when needed.",
+        : "Add clients after appointment evidence when needed.",
     recommendedPath: isAppointments
-      ? "Upload appointments -> booked proof -> revenue view"
-      : "Lead base after booked proof",
+      ? "Upload appointments -> evidence read -> revenue risk read"
+      : "Client context after appointment evidence",
     signals: [
       {
         label: "Visible now",
@@ -228,17 +228,17 @@ export function buildImportDecisionSupport({
         value: `${latestHeldRows}`,
       },
       {
-        label: "Role in Seller",
+        label: "Role in REVORY",
         note: isAppointments
-          ? "Main proof read."
-          : "Secondary support read.",
-        value: isAppointments ? "Primary proof" : "Secondary support",
+          ? "Main evidence read."
+          : "Secondary context read.",
+        value: isAppointments ? "Primary evidence" : "Secondary context",
       },
     ],
     summary: "State, next move, and support.",
     title: isAppointments
-      ? "Booked proof is the next move."
-      : "Lead base comes after proof.",
+      ? "Appointment evidence is the next move."
+      : "Client context comes after appointment evidence.",
     tone: isAppointments ? "accent" : "neutral",
   };
 }

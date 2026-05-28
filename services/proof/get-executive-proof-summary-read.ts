@@ -60,32 +60,32 @@ function buildExecutiveFrame(overview: DashboardOverview) {
 
   if (hasBookedProofVisible && hasRecentProof && hasStableSupport) {
     return {
-      headline: "Current revenue proof is visible and usable.",
+      headline: "Current revenue read is visible and usable.",
       summary:
-        "Booked revenue is visible in the current read, with recent proof and support context kept short enough for internal or commercial review.",
+        "Observed appointment revenue is visible in the current read, with recent appointment evidence and support context kept short enough for internal or commercial review.",
     };
   }
 
   if (hasBookedProofVisible) {
     return {
-      headline: "Current revenue proof is visible, but still thin.",
+      headline: "Current revenue read is visible, but still thin.",
       summary:
-        "Booked revenue is already visible, but recent proof or support is still building. Use this summary as a narrow snapshot, not as broad performance reporting.",
+        "Observed appointment revenue is already visible, but recent evidence or support is still building. Use this summary as a narrow snapshot, not as broad performance reporting.",
     };
   }
 
   return {
-    headline: "Current revenue proof is not ready yet.",
+    headline: "Current revenue read is not ready yet.",
     summary:
-      "Booked proof still needs to be visible before this summary should be used for stronger internal or commercial justification.",
+      "Appointment evidence still needs to be visible before this summary should be used for stronger internal or commercial justification.",
   };
 }
 
 function buildRecentProofSignal(overview: DashboardOverview) {
   if (overview.recentMomentum.status === "degraded") {
     return {
-      label: "Recent proof",
-      note: "Recent continuity is temporarily limited in this read.",
+      label: "Recent evidence",
+      note: "Recent evidence continuity is temporarily limited in this read.",
       tone: "neutral" as const,
       value: "Limited",
     };
@@ -93,7 +93,7 @@ function buildRecentProofSignal(overview: DashboardOverview) {
 
   if (overview.recentMomentum.estimatedRevenue !== null) {
     return {
-      label: "Recent proof",
+      label: "Recent evidence",
       note: overview.recentMomentum.windowLabel,
       tone:
         overview.recentMomentum.bookedAppointments > 0 ? ("real" as const) : ("neutral" as const),
@@ -102,13 +102,13 @@ function buildRecentProofSignal(overview: DashboardOverview) {
   }
 
   return {
-    label: "Recent proof",
+    label: "Recent evidence",
     note: overview.recentMomentum.windowLabel,
     tone:
       overview.recentMomentum.bookedAppointments > 0 ? ("neutral" as const) : ("future" as const),
     value:
       overview.recentMomentum.bookedAppointments > 0
-        ? `${overview.recentMomentum.bookedAppointments} booked`
+        ? `${overview.recentMomentum.bookedAppointments} visible`
         : "Pending",
   };
 }
@@ -124,10 +124,10 @@ export function getExecutiveProofSummaryRead(input: {
     overview.executiveRead.tiles.find((tile) => tile.label === "Revenue now")?.value ?? "Pending";
   const bookedProofVisible = overview.bookedAppointments > 0;
   const bookedProofSignal = {
-    label: "Booked proof",
+    label: "Appointment evidence",
     note: bookedProofVisible
-      ? "Booked appointments already visible in this workspace."
-      : "Booked proof still needs support before this read is stronger.",
+      ? "Booked appointments are already visible in this workspace."
+      : "Appointment evidence still needs support before this read is stronger.",
     tone: bookedProofVisible ? ("real" as const) : ("future" as const),
     value: bookedProofVisible ? `${overview.bookedAppointments} booked` : "Pending",
   };
@@ -137,12 +137,13 @@ export function getExecutiveProofSummaryRead(input: {
       ? ("real" as const)
       : ("neutral" as const);
   const copyLines = [
-    `${workspaceName} - Executive proof summary (${formatPeriodLabel()})`,
-    `Revenue in current read: ${revenueNow}`,
-    `Booked proof visible: ${bookedProofSignal.value}`,
+    `${workspaceName} - Executive revenue read (${formatPeriodLabel()})`,
+    `Observed revenue in current read: ${revenueNow}`,
+    `Appointment evidence visible: ${bookedProofSignal.value}`,
     `${recentProofSignal.label}: ${recentProofSignal.value}`,
     `Support status: ${overview.commercialSafeguard.supportLabel}`,
     `Freshness: ${dailyBriefRead.freshness.label}`,
+    "Revenue at risk is an estimate based on imported data, not a confirmed accounting loss.",
   ];
 
   return {
@@ -160,8 +161,8 @@ export function getExecutiveProofSummaryRead(input: {
     signals: [
       {
         isPrimary: true,
-        label: "Revenue now",
-        note: "Visible booked revenue in the current workspace read.",
+        label: "Observed revenue read",
+        note: "Based on imported appointment evidence; not confirmed recovery or accounting loss.",
         tone: bookedProofVisible ? ("real" as const) : ("future" as const),
         value: revenueNow,
       },

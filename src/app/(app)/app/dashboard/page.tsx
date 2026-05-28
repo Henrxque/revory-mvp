@@ -142,7 +142,7 @@ function hasLiveImportSource(source: {
 }
 
 function formatSourceLabel(type: string) {
-  return type === "APPOINTMENTS_CSV" ? "Booked proof" : "Lead base";
+  return type === "APPOINTMENTS_CSV" ? "Appointment evidence" : "Client support";
 }
 
 function getProgressPercent(successRows: number, totalRows: number) {
@@ -346,7 +346,7 @@ function MomentumMonthCard({
         {bookedAppointments}
       </p>
       <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-        {bookedAppointments === 1 ? "booked appointment" : "booked appointments"}
+        {bookedAppointments === 1 ? "appointment" : "appointments"}
       </p>
 
       <div className="mt-4 border-t border-[color:var(--border)] pt-3">
@@ -394,11 +394,11 @@ function GrowthProofShareLimitCard() {
   return (
     <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="rev-label">Proof sharing</p>
+        <p className="rev-label">Revenue read sharing</p>
         <RevoryStatusBadge tone="future">Growth</RevoryStatusBadge>
       </div>
       <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-        Basic keeps the revenue read in-app. Growth adds copy, share, and print for the Executive Proof Summary.
+        Basic keeps the revenue read in-app. Growth adds copy, share, and print for the Executive Revenue Read.
       </p>
     </div>
   );
@@ -489,7 +489,7 @@ export default async function DashboardPage() {
         cta: "Finish Activation",
         headline: "Set main offer",
         href: "/app/setup",
-        note: "Lock one offer to keep Seller narrow.",
+        note: "Lock one offer to keep the revenue risk read narrow.",
       };
     }
 
@@ -498,63 +498,63 @@ export default async function DashboardPage() {
         cta: "Finish Activation",
         headline: "Set booking path",
         href: "/app/setup",
-        note: "Lock one path before revenue read.",
+        note: "Lock one path before operational booking risks can be read.",
       };
     }
 
     if (!hasBookingValueLocked) {
       return {
         cta: "Finish Activation",
-        headline: "Set booking value",
+        headline: "Set estimated value",
         href: "/app/setup",
-        note: "Complete the revenue anchor.",
+        note: "Complete the estimated value anchor.",
       };
     }
 
     if (!hasBookedProofVisible) {
       if (hasBookedProofSourceVisible) {
         return {
-          cta: "Review booked proof",
-          headline: "Booked proof needs a clean pass",
+          cta: "Review appointment evidence",
+          headline: "Appointment evidence needs a clean pass",
           href: "/app/imports",
-          note: "The appointments source is present, but booked outcomes still are not supporting revenue.",
+          note: "The appointments source is present, but appointment outcomes still are not supporting the revenue read.",
         };
       }
 
       return {
-        cta: "Add booked proof",
-        headline: "Add booked proof",
+        cta: "Upload appointment data",
+        headline: "Upload appointment data",
         href: "/app/imports",
-        note: "Revenue becomes credible after proof.",
+        note: "REVORY needs appointment status and scheduled date to detect stronger revenue risks.",
       };
     }
 
     return {
-      cta: "Refresh booked proof",
-      headline: "Refresh booked proof",
+      cta: "Refresh clinic data",
+      headline: "Refresh appointment data",
       href: "/app/imports",
-      note: "Keep revenue and proof aligned.",
+      note: "Keep the revenue risk read current.",
     };
   })();
 
   const supportingSignals = [
     {
-      hint: "Booked appointments visible",
-      label: "Booked proof",
+      hint: "Appointment outcomes visible",
+      label: "Appointment evidence",
       value: overview.bookedAppointments > 0 ? overview.bookedAppointments : "Pending",
     },
     {
-      hint: "Revenue baseline applied",
-      label: "Value per booking",
+      hint: "Used when direct appointment value is missing",
+      label: "Estimated value",
       value: dealValueLabel,
     },
     {
-      hint: "Offer pushed first",
+      hint: "Primary risk context",
       label: "Main offer",
       value: mainOfferLabel,
     },
     {
-      hint: "Primary route into booking",
+      hint: "Primary route for blocked booking risk",
       label: "Booking path",
       value: bookingPathLabel,
     },
@@ -567,31 +567,31 @@ export default async function DashboardPage() {
   const strongestMonthLabel = recentMomentum.strongestMonthLabel;
   const longitudinalSummary = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
-      ? `${recentMomentum.bookedAppointments} booked appointments are visible across ${recentMomentum.windowLabel.toLowerCase()}.`
-      : "Booked proof is visible, but recent monthly proof is still thin."
-    : "Recent momentum becomes usable after booked proof is visible.";
+      ? `${recentMomentum.bookedAppointments} appointments are visible across ${recentMomentum.windowLabel.toLowerCase()}.`
+      : "Appointment evidence is visible, but recent monthly evidence is still thin."
+    : "Recent momentum becomes usable after appointment evidence is visible.";
   const longitudinalAsideTitle = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
       ? "Value is easier to defend over time"
-      : "Visible proof still needs more time depth"
-    : "Longitudinal proof starts after booked proof";
+      : "Visible evidence still needs more time depth"
+    : "Longitudinal evidence starts after appointment data";
   const longitudinalAsideNote = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
       ? strongestMonthLabel
         ? `${strongestMonthLabel} is currently the strongest visible month in this short read.`
-        : "Seller keeps this read short until more booked proof accumulates."
+        : "REVORY keeps this read short until more appointment evidence accumulates."
       : "The revenue snapshot is working, but the longitudinal layer still needs more visible bookings."
-    : "Once booked appointments are visible, Seller starts defending value over time instead of only in one snapshot.";
+    : "Once appointments are visible, REVORY starts defending value over time instead of only in one snapshot.";
   const attributionSummary = hasBookedProofVisible
     ? attributionRead.status === "degraded"
       ? "Revenue is still visible, but attribution support is temporarily unavailable in this read."
       : attributionRead.bookedAppointmentsWithLeadBaseSupport !== null &&
           attributionRead.bookedAppointmentsWithLeadBaseSupport > 0
-        ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport} booked appointments already carry lead-base support behind the revenue read.`
+        ? `${attributionRead.bookedAppointmentsWithLeadBaseSupport} appointments already carry client support behind the revenue read.`
       : attributionRead.bookedAppointmentsWithIdentity > 0
-        ? "Booked proof is visible, but lead-base support is still thin behind the revenue read."
-        : "Booked proof is visible, but attribution clarity is still thin."
-    : "Attribution clarity becomes useful after booked proof is visible.";
+        ? "Appointment evidence is visible, but client support is still thin behind the revenue read."
+        : "Appointment evidence is visible, but attribution clarity is still thin."
+    : "Attribution clarity becomes useful after appointment evidence is visible.";
 
   return (
     <div className="space-y-5">
@@ -604,19 +604,19 @@ export default async function DashboardPage() {
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           <div className="max-w-[39rem] space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="rev-kicker">Revenue view</p>
+              <p className="rev-kicker">Revenue leak read</p>
               <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
                 {monthChip}
               </span>
               <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
-                {hasBookedProofVisible ? "Proof visible" : "Proof pending"}
+                {hasBookedProofVisible ? "Evidence visible" : "Evidence pending"}
               </RevoryStatusBadge>
             </div>
 
             <h1 className="rev-display-hero max-w-[31rem]">
               {hasBookedProofVisible
-                ? "See booked appointments in revenue."
-                : "Revenue starts with booked proof."}
+                ? "See observed revenue from appointment evidence."
+                : "Upload appointment data to start detecting revenue at risk."}
             </h1>
 
             <p className="max-w-[33rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
@@ -625,14 +625,14 @@ export default async function DashboardPage() {
           </div>
 
           <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
-            <p className="rev-label">Booked revenue now</p>
+            <p className="rev-label">Observed revenue read</p>
             <p className="mt-3 text-[clamp(2.2rem,3.2vw,3rem)] font-semibold leading-none text-[color:var(--accent-light)]">
               {revenueLabel}
             </p>
 
             <div className="mt-4 space-y-2.5 border-t border-[rgba(255,255,255,0.08)] pt-3.5 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[color:var(--text-muted)]">Booked appointments</span>
+                <span className="text-[color:var(--text-muted)]">Appointment evidence</span>
                 <span className="font-semibold text-[color:var(--foreground)]">
                   {overview.bookedAppointments > 0
                     ? `${overview.bookedAppointments} booked`
@@ -640,7 +640,7 @@ export default async function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[color:var(--text-muted)]">Value per booking</span>
+                <span className="text-[color:var(--text-muted)]">Estimated value</span>
                 <span className="font-semibold text-[color:var(--foreground)]">
                   {dealValueLabel}
                 </span>
@@ -705,7 +705,7 @@ export default async function DashboardPage() {
               {executiveRead.headline}
             </p>
             <p className="mt-3 max-w-[24rem] text-sm leading-[1.55] text-[color:var(--text-muted)]">
-              Seller keeps this read short: booked revenue first, then the strongest support still available.
+              REVORY keeps this read short: observed revenue, appointment evidence, freshness and support context only.
             </p>
           </div>
 
@@ -824,9 +824,9 @@ export default async function DashboardPage() {
 
             <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
               <AttributionSignalCard
-                hint="Clients carrying usable lead context"
+                hint="Clients carrying usable context"
                 isPrimary
-                label="Lead-base clients"
+                label="Client support"
                 value={
                   attributionRead.status === "degraded"
                     ? "Unavailable"
@@ -836,8 +836,8 @@ export default async function DashboardPage() {
                 }
               />
               <AttributionSignalCard
-                hint="Booked proof already backed by lead-base support"
-                label="Booked with lead support"
+                hint="Appointment evidence already backed by client support"
+                label="Appointments with support"
                 value={
                   attributionRead.status === "degraded"
                     ? "Unavailable"
@@ -848,8 +848,8 @@ export default async function DashboardPage() {
                 }
               />
               <AttributionSignalCard
-                hint="Booked revenue already tied to supported lead context"
-                label="Revenue with lead support"
+                hint="Observed revenue already tied to supported client context"
+                label="Revenue with support"
                 value={formatLimitedCurrency(attributionRead.revenueWithLeadBaseSupport)}
               />
             </div>
@@ -858,7 +858,7 @@ export default async function DashboardPage() {
               <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))] px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-subtle)]">
-                    Booked with identity
+                    Appointments with identity
                   </p>
                   <RevoryStatusBadge
                     className="self-start rounded-full px-3 py-[0.38rem] text-[10px]"
@@ -880,8 +880,8 @@ export default async function DashboardPage() {
                 </p>
                 <p className="mt-2.5 min-h-[3.25rem] text-sm leading-[1.52] text-[color:var(--text-muted)]">
                   {attributionRead.identityCoveragePercent !== null
-                    ? `${attributionRead.identityCoveragePercent}% of visible booked appointments already have client identity attached.`
-                    : "Identity coverage appears after booked proof is visible."}
+                    ? `${attributionRead.identityCoveragePercent}% of visible appointments already have client identity attached.`
+                    : "Identity coverage appears after appointment evidence is visible."}
                 </p>
               </div>
 
@@ -923,10 +923,10 @@ export default async function DashboardPage() {
                 </p>
                 <p className="mt-2.5 min-h-[3.25rem] text-sm leading-[1.52] text-[color:var(--text-muted)]">
                   {attributionRead.status === "degraded"
-                    ? "Lead-base support is temporarily unavailable, but revenue and booked proof remain readable."
+                    ? "Client support is temporarily unavailable, but revenue and appointment evidence remain readable."
                     : attributionRead.leadBaseCoveragePercent !== null
-                    ? "Visible booked proof already backed by lead-base support."
-                    : "Lead-base coverage becomes usable after proof is visible."}
+                    ? "Visible appointment evidence already backed by client support."
+                    : "Client coverage becomes usable after evidence is visible."}
                 </p>
               </div>
             </div>
@@ -939,7 +939,7 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-                Recent booked momentum
+                Recent appointment momentum
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-muted)]">
                 {longitudinalSummary}
@@ -1039,10 +1039,10 @@ export default async function DashboardPage() {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[color:var(--text-muted)]">
               <span>
-                Booked in view:{" "}
+                Appointments in view:{" "}
                 <span className="font-semibold text-[color:var(--foreground)]">
                   {recentMomentum.bookedAppointments > 0
-                    ? `${recentMomentum.bookedAppointments} booked`
+                    ? `${recentMomentum.bookedAppointments} visible`
                     : "Pending"}
                 </span>
               </span>
@@ -1067,7 +1067,7 @@ export default async function DashboardPage() {
         <div className="rounded-[24px] border border-[color:var(--border)] bg-[color:var(--background-card)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[1rem] font-semibold text-[color:var(--foreground)]">
-              Booked proof
+              Appointment evidence
             </p>
             <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
               {hasBookedProofVisible ? "Visible" : "Pending"}
@@ -1105,13 +1105,13 @@ export default async function DashboardPage() {
                     </div>
 
                     <div className="mt-3 grid gap-2 text-xs text-[color:var(--text-muted)] sm:grid-cols-3">
-                      <span>Proof kept {progressPercent}%</span>
-                      <span>Booked visible {bookedProofSource.successRows}</span>
+                      <span>Evidence kept {progressPercent}%</span>
+                      <span>Appointments visible {bookedProofSource.successRows}</span>
                       <span>Needs review {bookedProofSource.errorRows}</span>
                     </div>
                     {!hasBookedProofVisible ? (
                       <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-muted)]">
-                        The appointments file is in, but booked outcomes still are not visible enough to support revenue.
+                        The appointments file is in, but appointment outcomes still are not visible enough to support the revenue read.
                       </p>
                     ) : null}
                   </div>
@@ -1123,7 +1123,7 @@ export default async function DashboardPage() {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                        Lead-base support
+                        Client support
                       </p>
                       <p className="mt-1 truncate text-xs text-[color:var(--text-muted)]">
                         {leadBaseSource.fileName ?? "File unavailable"}
@@ -1137,13 +1137,13 @@ export default async function DashboardPage() {
                   </div>
 
                   <div className="mt-3 grid gap-2 text-xs text-[color:var(--text-muted)] sm:grid-cols-3">
-                    <span>Lead rows {leadBaseSource.totalRows}</span>
+                    <span>Client rows {leadBaseSource.totalRows}</span>
                     <span>Support visible {leadBaseSource.successRows}</span>
                     <span>Needs review {leadBaseSource.errorRows}</span>
                   </div>
 
                   <p className="mt-3 text-xs leading-[1.45] text-[color:var(--text-muted)]">
-                    Lead base stays secondary. It adds context without acting as booked proof.
+                    Client support stays secondary. It adds context without acting as appointment evidence.
                   </p>
                 </div>
               ) : null}
@@ -1151,10 +1151,10 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-4 rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
               <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                Booked proof pending
+                Appointment evidence pending
               </p>
               <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-                Upload booked appointments so revenue can read real bookings, not activity alone.
+                Upload appointment data to start detecting revenue at risk.
               </p>
             </div>
           )}
@@ -1180,7 +1180,7 @@ export default async function DashboardPage() {
             <RevoryStatusBadge tone="neutral">Limited</RevoryStatusBadge>
           </div>
           <p className="mt-3 text-sm leading-[1.45] text-[color:var(--text-muted)]">
-            Upcoming bookings are temporarily unavailable in this read. Booked proof and revenue stay visible.
+            Upcoming bookings are temporarily unavailable in this read. Appointment evidence and revenue remain visible.
           </p>
         </section>
       ) : overview.upcomingRead.list.length > 0 ? (

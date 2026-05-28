@@ -64,7 +64,7 @@ function formatVoiceInstruction(label: string) {
     case "High-Touch Premium":
       return "Keep the wording warm, premium, and concierge-like without becoming chatty.";
     default:
-      return "Keep the wording premium, concise, and booking-first.";
+      return "Keep the wording premium, concise, and tied to the current booking-risk context.";
   }
 }
 
@@ -183,10 +183,10 @@ function resolveEligibilityReason(
 function formatSurfaceLabel(reason: RevoryLeadSuggestedMessageEligibilityReason) {
   switch (reason) {
     case "ready":
-      return "Suggested booking message";
+      return "Bounded next action";
     case "blocked_by_contact":
     case "blocked_by_handoff_fit":
-      return "Suggested unblock ask";
+      return "Bounded unblock ask";
     default:
       return null;
   }
@@ -289,24 +289,25 @@ function buildPrompt(input: RevoryLeadSuggestedMessageInput) {
   const blockedInstruction =
     input.status === "BLOCKED" && input.blockedReason === "missing_contact"
       ? input.bookingPath === "SMS"
-        ? "Write a short ask that gets the lead's best mobile number so the current booking path can open."
-        : "Write a short ask that gets the lead's best email so the current booking path can open."
+        ? "Write a short ask that gets the record's best mobile number so the current booking-path risk can be reviewed."
+        : "Write a short ask that gets the record's best email so the current booking-path risk can be reviewed."
       : input.status === "BLOCKED" && input.blockedReason === "ineligible_for_handoff"
         ? input.bookingPath === "SMS"
-          ? "Write a short ask that gets the mobile number needed for the SMS booking path."
-          : "Write a short ask that gets the email needed for the email booking path."
-        : "Write the next short message that opens the current booking path.";
+          ? "Write a short ask that gets the mobile number needed to review the SMS booking-path risk."
+          : "Write a short ask that gets the email needed to review the email booking-path risk."
+        : "Write the next short message that opens the current booking path as bounded action guidance.";
 
   return [
-    "You generate one short REVORY Seller suggested message for a single lead booking opportunity.",
-    "This is not chat. This is not a thread. This is not follow-up logic. Write only the next bounded message.",
-    "The message must stay commercially useful, premium, and narrow.",
+    "You generate one short REVORY bounded next-action message for a single booking-path risk.",
+    "This is not chat. This is not a thread. This is not follow-up logic. Write only the next bounded message for this specific risk.",
+    "The message must stay commercially useful, premium, evidence-first, and narrow without sounding like CRM, inbox or automated selling software.",
     `Allowed job: ${blockedInstruction}`,
-    "Forbidden: ongoing conversation, multiple options, discounts, claims about availability, promises of follow-up, links, emojis, or anything that sounds like a sales automation engine.",
+    "Forbidden: ongoing conversation, multiple options, discounts, claims about availability, promises of follow-up, links, emojis, revenue numbers, confirmed loss claims, recovered revenue claims, or anything that sounds like a sales automation engine.",
     "Keep the message to at most 2 sentences.",
     `Keep the message under ${SUGGESTED_MESSAGE_MAX_LENGTH} characters.`,
-    "Do not mention AI, assistant, CRM, inbox, workflow, automation, or internal states.",
-    "Use the workspace context, main offer, seller voice, and booking path to make the message feel specific but still tight.",
+    "Do not mention AI, assistant, CRM, inbox, BI, scheduling system, workflow, automation, clinical advice, revenue generated, revenue recovered, or internal states.",
+    "Use the workspace context, main offer, clinic voice, and booking path to make the message feel specific but still tight.",
+    "If revenue risk is relevant, only imply operational risk; do not invent estimated revenue at risk unless it is supplied by deterministic services.",
     formatVoiceInstruction(input.sellerVoiceLabel),
   ].join(" ");
 }

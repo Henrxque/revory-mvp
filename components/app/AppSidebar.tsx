@@ -42,17 +42,17 @@ const navGroups = (
   bookingInputsStatus: string,
 ): SidebarGroup[] => [
     {
-      label: "Seller",
+      label: "REVORY",
       items: [
         {
           href: "/app/dashboard",
           icon: "dashboard",
-          label: "Revenue View",
+          label: "Leak Read",
         },
         {
           href: "/app/imports",
           icon: "appointments",
-          label: "Booking Inputs",
+          label: "Clinic Data",
           status: bookingInputsStatus,
         },
       ],
@@ -141,15 +141,15 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Proof visible" || status === "Activated") {
+  if (status === "Data visible" || status === "Activated") {
     return "success";
   }
 
-  if (status === "Proof next" || status === "Activating") {
+  if (status === "Data next" || status === "Activating") {
     return "warning";
   }
 
-  if (status === "Proof pending") {
+  if (status === "Data pending") {
     return "warning";
   }
 
@@ -172,7 +172,7 @@ export function AppSidebar({
       <div className="border-b border-[color:var(--border)] px-5 py-5">
         <RevoryLogo compact />
         <p className="mt-3 text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)]">
-          Paid leads into booked appointments
+          Estimated revenue at risk, leak evidence and next fix
         </p>
       </div>
 

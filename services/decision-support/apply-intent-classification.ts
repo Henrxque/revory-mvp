@@ -22,15 +22,15 @@ export function applyActivationIntentClassification(
       case "LOCK_MAIN_OFFER":
         return "Keep one main offer locked before expanding anything else.";
       case "CHOOSE_LEAD_ENTRY":
-        return "Choose one lead entry now so booked proof can stay short and clear.";
+        return "Choose one data entry path now so appointment evidence can stay short and clear.";
       case "LOCK_BOOKING_PATH":
-        return "Lock one booking path so Seller can hand off with less ambiguity.";
+        return "Lock one booking path so REVORY can identify blocked booking risk with less ambiguity.";
       case "SET_VALUE_PER_BOOKING":
-        return "Set one value per booking so revenue can read cleanly once proof is visible.";
+        return "Set one estimated value so revenue at risk can read cleanly once evidence is visible.";
       case "COMPLETE_ACTIVATION":
-        return "Finish activation, then move straight into booked proof.";
+        return "Finish activation, then move straight into appointment evidence.";
       case "START_BOOKED_PROOF":
-        return "Go live, then add booked proof before leaning on revenue.";
+        return "Activate REVORY, then add appointment evidence before leaning on the leak read.";
       default:
         return read.nextBestAction;
     }
@@ -39,15 +39,15 @@ export function applyActivationIntentClassification(
   const detectedObjection = (() => {
     switch (classification.objection) {
       case "MULTI_OFFER_RISK":
-        return "More than one offer story would blur the first booking motion.";
+        return "More than one offer story would blur which risks matter first.";
       case "LEAD_ENTRY_MISSING":
-        return "Seller still needs one clear lead entry before proof can read cleanly.";
+        return "REVORY still needs one clear data entry path before evidence can read cleanly.";
       case "BOOKING_PATH_MISSING":
-        return "The booking handoff is still too open to feel fully launch-ready.";
+        return "The booking path is still too open to read blocked risk cleanly.";
       case "VALUE_PER_BOOKING_MISSING":
-        return "Revenue still lacks one clear value anchor.";
+        return "Revenue at risk still lacks one clear estimated value anchor.";
       case "PROOF_NOT_VISIBLE":
-        return "Activation is ready, but proof still needs to become visible next.";
+        return "Activation is ready, but appointment evidence still needs to become visible next.";
       default:
         return read.detectedObjection;
     }
@@ -56,16 +56,16 @@ export function applyActivationIntentClassification(
   const recommendedPath = (() => {
     switch (stepKey) {
       case "template":
-        return "One main offer -> lead entry -> one booking path";
+        return "One main offer -> data entry -> one booking path";
       case "source":
-        return "Choose lead entry -> booked proof -> revenue view";
+        return "Choose data entry -> appointment evidence -> leak read";
       case "channel":
-        return "Lead enters -> one booking path -> booked appointment";
+        return "Clinic data -> one booking path -> blocked risk read";
       case "deal_value":
-        return "Configured value -> visible bookings -> revenue read";
+        return "Configured estimated value -> appointment evidence -> leak read";
       case "activation":
         return classification.intent === "START_BOOKED_PROOF"
-          ? "Activation complete -> booked proof -> revenue view"
+          ? "Activation complete -> appointment evidence -> leak read"
           : read.recommendedPath;
       default:
         return read.recommendedPath;
@@ -91,15 +91,15 @@ export function applyDashboardIntentClassification(
   const nextBestAction = (() => {
     switch (classification.intent) {
       case "START_BOOKED_PROOF":
-        return "Open Booking Inputs and add appointments before asking revenue to carry the story.";
+        return "Open Source Inputs and add appointments before asking the revenue risk read to carry the story.";
       case "REVIEW_BOOKED_PROOF":
-        return "Review booked proof first so revenue and visible outcomes stay aligned.";
+        return "Review appointment evidence first so revenue risk and visible outcomes stay aligned.";
       case "REFRESH_BOOKED_PROOF":
-        return "Refresh booked proof so the revenue read stays current and credible.";
+        return "Refresh appointment evidence so the revenue risk read stays current and credible.";
       case "ADD_LEAD_BASE_SUPPORT":
-        return "Add lead base only as support after booked proof is already visible.";
+        return "Add client context only as support after appointment evidence is already visible.";
       case "OPEN_REVENUE_VIEW":
-        return "Keep the revenue read short and supported by the booked proof already in view.";
+        return "Keep the revenue risk read short and supported by the appointment evidence already in view.";
       default:
         return read.nextBestAction;
     }
@@ -108,15 +108,15 @@ export function applyDashboardIntentClassification(
   const detectedObjection = (() => {
     switch (classification.objection) {
       case "PROOF_NOT_VISIBLE":
-        return "Revenue still feels premature because booked proof is not visible yet.";
+        return "Revenue risk still feels premature because appointment evidence is not visible yet.";
       case "PROOF_SOURCE_NEEDS_REVIEW":
-        return "The proof source is present, but the booked outcome layer still needs review.";
+        return "The appointment source is present, but the outcome layer still needs review.";
       case "LEAD_BASE_ONLY":
-        return "Lead base alone cannot carry the booked revenue read.";
+        return "Client context alone cannot carry the revenue risk read.";
       case "THIN_BOOKING_CALENDAR":
         return "The revenue read is visible, but the upcoming booking layer is still thin.";
       case "SUPPORT_SHOULD_STAY_SECONDARY":
-        return "Lead-base support should stay behind booked proof, not in front of it.";
+        return "Client context should stay behind appointment evidence, not in front of it.";
       default:
         return read.detectedObjection;
     }
@@ -125,13 +125,13 @@ export function applyDashboardIntentClassification(
   const recommendedPath = (() => {
     switch (classification.intent) {
       case "START_BOOKED_PROOF":
-        return "Booking Inputs -> booked proof -> revenue view";
+        return "Source Inputs -> appointment evidence -> revenue risk read";
       case "REVIEW_BOOKED_PROOF":
-        return "Review booked proof -> clean proof -> revenue view";
+        return "Review appointment evidence -> clean evidence -> revenue risk read";
       case "REFRESH_BOOKED_PROOF":
-        return "Refresh booked proof -> keep revenue aligned";
+        return "Refresh appointment evidence -> keep revenue risk aligned";
       case "ADD_LEAD_BASE_SUPPORT":
-        return "Booked proof -> lead-base support -> revenue context";
+        return "Appointment evidence -> client context -> revenue risk context";
       default:
         return read.recommendedPath;
     }
@@ -164,43 +164,43 @@ export function applyImportsIntentClassification(
   switch (classification.intent) {
     case "START_BOOKED_PROOF":
       return {
-        heroCtaLabel: "Start booked proof",
-        heroSummary: "Booked proof comes first. Lead support follows later.",
-        heroTitle: "Start booked proof.",
-        nextMoveHeadline: "Start booked proof",
-        nextMoveNote: "Upload appointments first so revenue can open on visible outcomes.",
+        heroCtaLabel: "Start source inputs",
+        heroSummary: "Appointment evidence comes first. Client context follows later.",
+        heroTitle: "Upload clinic data for revenue leak detection.",
+        nextMoveHeadline: "Start source inputs",
+        nextMoveNote: "Upload appointments first so the revenue risk read can open on visible outcomes.",
       };
     case "REVIEW_BOOKED_PROOF":
       return {
-        heroCtaLabel: "Review booked proof",
-        heroSummary: "The proof source is in, but booked outcomes still need a clean pass.",
-        heroTitle: "Review booked proof.",
-        nextMoveHeadline: "Review booked proof",
-        nextMoveNote: "Clean the appointments pass before asking revenue to carry the read.",
+        heroCtaLabel: "Review appointment evidence",
+        heroSummary: "The appointment source is in, but outcomes still need a clean pass.",
+        heroTitle: "Review appointment evidence.",
+        nextMoveHeadline: "Review appointment evidence",
+        nextMoveNote: "Clean the appointments pass before asking the revenue risk read to carry the story.",
       };
     case "OPEN_REVENUE_VIEW":
       return {
-        heroCtaLabel: "Open Revenue View",
-        heroSummary: "Booked proof is live. Lead support stays secondary.",
-        heroTitle: "Booked proof is live.",
-        nextMoveHeadline: "Open Revenue View",
-        nextMoveNote: "Revenue is ready because booked proof is already visible.",
+        heroCtaLabel: "Open Revenue Read",
+        heroSummary: "Appointment evidence is live. Client context stays secondary.",
+        heroTitle: "Appointment evidence is live.",
+        nextMoveHeadline: "Open Revenue Read",
+        nextMoveNote: "Revenue risk is ready because appointment evidence is already visible.",
       };
     case "REFRESH_BOOKED_PROOF":
       return {
-        heroCtaLabel: "Open Revenue View",
-        heroSummary: "Proof is live, but it should stay fresh behind the revenue read.",
-        heroTitle: "Keep booked proof fresh.",
-        nextMoveHeadline: "Refresh booked proof",
-        nextMoveNote: "Update proof when booked data changes so the commercial read stays credible.",
+        heroCtaLabel: "Open Revenue Read",
+        heroSummary: "Appointment evidence is live, but it should stay fresh behind the revenue risk read.",
+        heroTitle: "Keep appointment evidence fresh.",
+        nextMoveHeadline: "Refresh appointment evidence",
+        nextMoveNote: "Update appointment data when statuses, dates or estimated value change so the read stays credible.",
       };
     case "ADD_LEAD_BASE_SUPPORT":
       return {
-        heroCtaLabel: "Open Revenue View",
-        heroSummary: "Booked proof is already carrying the read. Lead base can join as support.",
-        heroTitle: "Lead base can stay secondary.",
-        nextMoveHeadline: "Add lead base",
-        nextMoveNote: "Bring lead base in only as support once booked proof is already visible.",
+        heroCtaLabel: "Open Revenue Read",
+        heroSummary: "Appointment evidence is already carrying the read. Client context can join as support.",
+        heroTitle: "Client context stays secondary.",
+        nextMoveHeadline: "Add client context",
+        nextMoveNote: "Bring client context in only as support once appointment evidence is already visible.",
       };
     default:
       return fallback;

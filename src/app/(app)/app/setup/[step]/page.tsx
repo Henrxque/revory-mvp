@@ -81,81 +81,81 @@ const stepBody: Record<
 > = {
   activation: {
     checklist: [
-      "Review the few choices that shape booked proof and revenue.",
-      "Confirm Seller has enough context to read booked appointments clearly.",
+      "Review the few choices that shape appointment evidence and revenue risk.",
+      "Confirm REVORY has enough context to read appointment evidence clearly.",
       "Keep go-live short, explicit, and self-service.",
     ],
     summary:
-      "This final step turns the workspace into a live REVORY Seller environment.",
+      "This final step turns the workspace into an active REVORY revenue leak read.",
     whyItMatters:
-      "Activation is where setup stops feeling theoretical and starts feeling commercial. The customer should feel ready to see paid leads, booked appointments, and revenue in one narrow system.",
+      "Activation is where setup stops feeling theoretical and starts showing structured clinic data, appointment evidence and estimated revenue at risk in one narrow system.",
     next:
-      "After activation, Seller moves into Booking Inputs first or straight into Revenue View when booked proof is already visible.",
+      "After activation, REVORY moves into Clinic Data first or straight into the Leak Read when appointment evidence is already visible.",
   },
   channel: {
     checklist: [
       "Keep one primary booking lane so the motion feels predictable from day one.",
-      "Anchor Seller in one booking path instead of multiple competing routes.",
-      "Make the handoff to booking obvious.",
+      "Anchor REVORY in one booking path instead of multiple competing routes.",
+      "Make blocked booking risk easier to detect.",
     ],
     summary:
-      "This choice sets the main route REVORY Seller should reinforce when a lead is ready to book.",
+      "This choice sets the main route REVORY uses to identify blocked booking opportunities and operational leak risks.",
     whyItMatters:
-      "A premium self-service system removes ambiguity early. One default path keeps booking faster, clearer, and easier to trust.",
+      "A premium self-service system removes ambiguity early. One default path keeps operational leak risk easier to understand.",
     next:
-      "Next, REVORY Seller sets the value tied to each booked appointment.",
+      "Next, REVORY sets the estimated value used when direct appointment value is missing.",
   },
   mode: {
     checklist: [
       "Keep the voice choice understandable in plain language.",
       "Treat the choice as delivery posture, not as a custom copy system.",
-      "Keep the booking path premium and easy to launch.",
+      "Keep guidance premium and easy to understand.",
     ],
     summary:
-      "This choice defines the voice REVORY Seller should carry across the booking motion.",
+      "This choice defines the message tone REVORY should use for bounded guidance.",
     whyItMatters:
-      "Voice should support speed and consistency, not create another setup project. The goal is a premium first booking step without turning Seller into a copy builder.",
+      "Tone should support clarity and consistency, not create another setup project. The goal is bounded guidance without turning REVORY into a copy builder.",
     next:
       "After this, activation becomes a clean final review instead of another strategy pass.",
   },
   deal_value: {
     checklist: [
       "Keep this value easy to set without turning setup into a finance workflow.",
-      "Use one clear number to anchor revenue visibility from day one.",
+      "Use one clear number to anchor estimated revenue at risk from day one.",
       "Avoid bloating the step with pricing logic or plan complexity.",
     ],
     summary:
-      "This step stores the revenue baseline tied to one booked appointment.",
+      "This step stores the directional value used when direct appointment value is missing.",
     whyItMatters:
-      "Seller should feel connected to money from the first session. A clear value per booking keeps the dashboard centered on booked revenue instead of generic activity.",
+      "REVORY should feel connected to money from the first session. A clear estimated value keeps the read centered on revenue risk instead of generic activity.",
     next:
-      "Once value per booking is set, REVORY Seller can lock the booking voice and move to final activation.",
+      "Once estimated value is set, REVORY can lock message tone and move to final activation.",
   },
   source: {
     checklist: [
-      "Make the lead entry path obvious before the customer reaches Booking Inputs.",
+      "Make the data entry path obvious before the customer reaches Clinic Data.",
       "Keep supported input types explicit and narrow.",
       "Position uploads as guided, not technical.",
     ],
     summary:
-      "This choice tells REVORY Seller where paid lead context will come from first.",
+      "This choice tells REVORY where structured clinic evidence will come from first.",
     whyItMatters:
-      "The product only feels premium when setup starts from real demand. A clear lead entry connects Seller to the actual booking flow instead of a vague setup state.",
+      "The product only feels premium when setup starts from real clinic data. A clear data entry path connects REVORY to evidence instead of a vague setup state.",
     next:
-      "After the lead entry is chosen, REVORY Seller locks the primary booking path.",
+      "After the data entry path is chosen, REVORY locks the primary booking path.",
   },
   template: {
     checklist: [
-      "Start by naming the clinic so Seller feels anchored to a real MedSpa.",
+      "Start by naming the clinic so REVORY feels anchored to a real MedSpa.",
       "Choose one main offer instead of spreading attention across multiple services.",
       "Keep the first setup move concrete, narrow, and low-friction.",
     ],
     summary:
-      "This step anchors the workspace to a real clinic and the one offer REVORY Seller is designed to accelerate.",
+      "This step anchors the workspace to a real clinic and the one offer REVORY uses to understand appointment and booking risks.",
     whyItMatters:
-      "A narrow product feels easier to trust when it clearly belongs to a real clinic and one booking goal. This keeps the setup commercial instead of abstract.",
+      "A narrow product feels easier to trust when it clearly belongs to a real clinic and one primary offer. This keeps the setup evidence-first instead of abstract.",
     next:
-      "After locking the main offer, REVORY Seller connects the lead entry feeding that booking motion.",
+      "After locking the main offer, REVORY connects the data entry path feeding the leak read.",
   },
 };
 
@@ -266,14 +266,14 @@ export default async function OnboardingStepPage({
   const selectedMainOfferLabel =
     (persistedTemplate && mainOfferLabels[persistedTemplate]) || "Main offer pending";
   const selectedLeadEntryLabel =
-    (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Lead entry pending";
+    (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Data entry pending";
   const selectedBookingPathLabel = selectedPrimaryChannel
     ? currentStepKey === "channel" || currentStepKey === "template" || currentStepKey === "source"
       ? `${channelLabels[selectedPrimaryChannel]} · recommended`
       : channelLabels[selectedPrimaryChannel]
     : "Booking path pending";
-  const selectedSellerVoiceLabel =
-    (persistedRecommendedModeKey && modeLabels[persistedRecommendedModeKey]) || "Seller voice pending";
+  const selectedMessageToneLabel =
+    (persistedRecommendedModeKey && modeLabels[persistedRecommendedModeKey]) || "Message tone pending";
   const activationStepFallbackRead = buildActivationStepRead({
     averageDealValue: selectedAverageDealValue,
     primaryChannel: selectedPrimaryChannel,
@@ -305,8 +305,8 @@ export default async function OnboardingStepPage({
             </p>
             <p className="mt-1.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
               {isEditingCompletedSetup
-                ? `${businessTypeLabel}. Seller stays live while this one setup choice is adjusted.`
-                : `${businessTypeLabel}. REVORY Seller is being configured for one clear booking system, not a generic workspace.`}
+                ? `${businessTypeLabel}. REVORY stays active while this one setup choice is adjusted.`
+                : `${businessTypeLabel}. REVORY is being configured for one clear revenue leak read, not a generic workspace.`}
             </p>
           </div>
 
@@ -318,7 +318,7 @@ export default async function OnboardingStepPage({
                 selectedLeadEntryLabel,
                 selectedBookingPathLabel,
                 formattedDealValue ?? "Value pending",
-                selectedSellerVoiceLabel,
+                selectedMessageToneLabel,
               ].map((item) => (
                 <span
                   className="inline-flex min-h-8 items-center rounded-full border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-[11px] font-medium text-[color:var(--foreground)]"
@@ -420,7 +420,7 @@ export default async function OnboardingStepPage({
                   {businessTypeLabel}
                 </p>
                 <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                  Seller stays anchored to a MedSpa-first booking motion from the first step.
+                  REVORY stays anchored to a MedSpa-first leak read from the first step.
                 </p>
               </div>
 
@@ -428,7 +428,7 @@ export default async function OnboardingStepPage({
                 {
                   value: "INJECTABLES",
                   label: "Injectables",
-                  note: "Best when the clinic wants REVORY Seller focused on a high-intent consult path with fast booking potential.",
+                  note: "Best when the clinic wants REVORY focused on a high-intent consult path with clear revenue risk.",
                 },
                 {
                   value: "LASER_SKIN",
@@ -472,12 +472,12 @@ export default async function OnboardingStepPage({
                 {
                   value: "CLIENTS_CSV",
                   label: "Client export",
-                  note: "Best when this clinic wants lead context visible before booked proof is complete.",
+                  note: "Best when this clinic wants client context visible before appointment evidence is complete.",
                 },
                 {
                   value: "MANUAL_IMPORT",
                   label: "Guided CSV upload",
-                  note: "Fallback when the clinic export needs one guided pass before Seller can read it cleanly.",
+                  note: "Fallback when the clinic export needs one guided pass before REVORY can read it cleanly.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -511,7 +511,7 @@ export default async function OnboardingStepPage({
                 {
                   value: "SMS",
                   label: "Assisted booking path (SMS)",
-                  note: "Useful when available in-plan, but Seller still keeps one main booking destination instead of multiple parallel lanes.",
+                  note: "Useful when available in-plan, but REVORY still keeps one main booking destination instead of multiple parallel lanes.",
                 },
               ].map((option) => (
                 <label key={option.value} className={optionCardClassName}>
@@ -538,7 +538,7 @@ export default async function OnboardingStepPage({
             <div className="space-y-3">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[color:var(--foreground)]">
-                  Value tied to one booked appointment
+                  Estimated appointment value
                 </span>
                 <input
                   className="rev-input-field"
@@ -549,7 +549,7 @@ export default async function OnboardingStepPage({
                 />
               </label>
               <p className="text-sm text-[color:var(--text-muted)]">
-                Set the value tied to one booked appointment for this clinic. Keep it directional so Seller can read money clearly from day one.
+                Used to estimate revenue at risk when direct appointment value is missing.
               </p>
             </div>
           ) : null}
@@ -599,7 +599,7 @@ export default async function OnboardingStepPage({
                 <div className="rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)] p-4">
                   <p className="rev-label">What goes live</p>
                   <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
-                    These are the choices REVORY Seller will use to read demand, guide the booking motion, and make booked appointments and revenue visible from the first session.
+                    These are the choices REVORY will use to read clinic data, identify operational leak risks, and estimate revenue at risk from the first session.
                   </p>
                 </div>
 
@@ -610,7 +610,7 @@ export default async function OnboardingStepPage({
                       value: mainOfferLabels[selectedTemplate] || "Not selected",
                     },
                     {
-                      label: "Lead entry",
+                      label: "Data entry",
                       value:
                         (selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) ||
                         "Not selected",
@@ -623,7 +623,7 @@ export default async function OnboardingStepPage({
                         "Not selected",
                     },
                     {
-                      label: "Value per booking",
+                      label: "Estimated value",
                       value: formattedDealValue ?? "Not set",
                     },
                   ].map((item) => (
@@ -647,7 +647,7 @@ export default async function OnboardingStepPage({
                     {(selectedDataSourceType && sourceTypeLabels[selectedDataSourceType]) || "Not selected"}
                   </p>
                   <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                    Seller reads demand from this path first.
+                    REVORY reads clinic evidence from this path first.
                   </p>
                 </div>
                 <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
@@ -662,10 +662,10 @@ export default async function OnboardingStepPage({
                 <div className="rounded-[20px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] p-4">
                   <p className="rev-label">Outcome visible as</p>
                   <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
-                    Booked appointment + revenue
+                    Appointment evidence + estimated risk
                   </p>
                   <p className="mt-1.5 text-sm leading-[1.5] text-[color:var(--text-muted)]">
-                    Dashboard visibility starts from booked outcomes, not from generic activation completion.
+                    Visibility starts from appointment evidence, not from generic activation completion.
                   </p>
                 </div>
               </div>
@@ -673,7 +673,7 @@ export default async function OnboardingStepPage({
               <div className="grid gap-3 md:grid-cols-2">
                 {[
                   {
-                    label: "Seller voice",
+                    label: "Message tone",
                     value:
                       (selectedRecommendedModeKey &&
                         modeLabels[selectedRecommendedModeKey]) ||
@@ -681,7 +681,7 @@ export default async function OnboardingStepPage({
                   },
                   {
                     label: "Activation outcome",
-                    value: "Dashboard becomes the live home for booked appointments and revenue visibility.",
+                    value: "Dashboard becomes the live home for appointment evidence and estimated revenue at risk.",
                   },
                 ].map((item) => (
                   <div
@@ -697,13 +697,13 @@ export default async function OnboardingStepPage({
               </div>
 
               <div className="rev-feedback-warning">
-                Go-live marks this workspace as live and moves the customer into Seller, where booked appointments and revenue become visible.
+                Activation marks this workspace as active and moves the customer into REVORY, where appointment evidence and estimated revenue at risk become visible.
               </div>
 
               <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
                 <p className="rev-label">How revenue becomes visible</p>
                 <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
-                  Revenue does not appear from activation alone. Seller needs booked appointments visible, then applies value per booking so the revenue view stays tied to real bookings.
+                  Revenue at risk does not appear from activation alone. REVORY needs appointment evidence, then applies estimated value when direct appointment value is missing.
                 </p>
               </div>
             </div>

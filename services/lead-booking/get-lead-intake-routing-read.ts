@@ -54,9 +54,9 @@ type LeadIntakeRoutingRead = {
 function formatBookingPathLabel(value: string | null | undefined) {
   switch (value) {
     case "EMAIL":
-      return "Primary booking path (Email)";
+      return "Booking path risk (Email)";
     case "SMS":
-      return "Assisted booking path (SMS)";
+      return "Booking path risk (SMS)";
     default:
       return "Booking path pending";
   }
@@ -69,11 +69,11 @@ function formatIntakeLabel(input: { intakeSourceName: string | null; intakeSourc
 
   switch (input.intakeSourceType) {
     case "CLIENTS_CSV":
-      return "Client export";
+      return "Client context import";
     case "MANUAL_IMPORT":
-      return "Guided import";
+      return "Manual evidence input";
     default:
-      return "Lead source";
+      return "Source evidence";
   }
 }
 
@@ -192,7 +192,7 @@ const getLeadIntakeRoutingReadCached = cache(async (workspaceId: string): Promis
         clientName: opportunity.client.fullName,
         clientPhone: opportunity.client.phone,
         mainOfferKey: opportunity.mainOfferKey,
-        workspaceName: workspace?.name ?? "REVORY Seller",
+        workspaceName: workspace?.name ?? "REVORY",
       });
       const leadState = deriveLeadTrackingState({
         handoffOpenedAt: opportunity.handoffOpenedAt,
@@ -209,7 +209,7 @@ const getLeadIntakeRoutingReadCached = cache(async (workspaceId: string): Promis
         mainOfferLabel: formatLeadBookingMainOffer(opportunity.mainOfferKey),
         sellerVoiceLabel: formatLeadBookingSellerVoice(activationSetup?.recommendedModeKey),
         status: opportunity.status,
-        workspaceName: workspace?.name ?? "REVORY Seller",
+        workspaceName: workspace?.name ?? "REVORY",
       });
 
       return {

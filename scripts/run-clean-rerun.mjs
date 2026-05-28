@@ -182,7 +182,7 @@ async function waitForUrl(page, pattern) {
 }
 
 async function clickContinue(page) {
-  const button = page.getByRole("button", { name: /continue|go live with seller/i });
+  const button = page.getByRole("button", { name: /continue|activate revory read/i });
   await button.click();
 }
 
@@ -204,7 +204,7 @@ async function fillOnboarding(page) {
   await clickContinue(page);
 
   await waitForUrl(page, /\/app\/setup\/deal_value/);
-  await page.getByLabel("Value tied to one booked appointment").fill("650");
+  await page.getByLabel("Estimated appointment value").fill("650");
   await screenshot(page, "04-deal-value");
   await clickContinue(page);
 
@@ -215,7 +215,7 @@ async function fillOnboarding(page) {
 
   await waitForUrl(page, /\/app\/setup\/activation/);
   await screenshot(page, "06-activation");
-  await page.getByRole("button", { name: /go live with .*seller/i }).click();
+  await page.getByRole("button", { name: /activate revory read/i }).click();
 }
 
 async function uploadCsv(page, inputIndex, filePath, shotPrefix) {
@@ -231,7 +231,10 @@ async function uploadCsv(page, inputIndex, filePath, shotPrefix) {
     })
     .click();
   await lane.getByText(fileName, { exact: false }).last().waitFor({ timeout: 60000 });
-  await lane.getByText("Rows reviewed", { exact: false }).waitFor({ timeout: 60000 });
+  await lane
+    .getByText(/Rows reviewed|Rows live|Rows visible/i)
+    .first()
+    .waitFor({ timeout: 60000 });
   await page.waitForTimeout(500);
   await screenshot(page, shotPrefix);
 }

@@ -1,5 +1,9 @@
 # REVORY Seller - Project Documentation
 
+> Historical REVORY Seller reference. Not current public positioning. Current source of truth is REVORY Revenue Leak Detector.
+>
+> Use this document only as historical implementation substrate for the old Seller/booking-assistance foundation. For current product, copy, category, roadmap, and buyer-facing decisions, use `docs/source-of-truth.md`.
+
 Atualizado em: 2026-04-28
 
 ## 1. Resumo executivo

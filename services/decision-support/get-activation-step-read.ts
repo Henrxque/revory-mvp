@@ -89,7 +89,7 @@ export async function getActivationStepRead(
     },
     fallback: toDecisionSupportPatch(classifiedRead),
     prompt:
-      "Write a compact REVORY Seller activation guidance patch. Keep every field to one short sentence. Stay premium, booking-first, and narrow. Respect the provided intent classification and objection classification when they are present. Never mention AI, model behavior, fallback systems, hidden operations, or internal decision logic. Do not invent new options, channels, or workflow branches. Keep the recommendation strictly inside the current activation step and current workspace state.",
+      "Write a compact REVORY Revenue Leak Detector activation guidance patch. Keep every field to one short sentence. Stay premium, evidence-first, revenue-risk-first, leak-read ready, and narrow. Respect the provided intent classification and objection classification when they are present. Do not invent revenue numbers, confirmed loss, recovered revenue, new options, channels, workflow branches, or unsupported leak signals. Use estimated revenue at risk only when supplied by deterministic services in context. Never mention AI, model behavior, fallback systems, hidden operations, internal decision logic, CRM, inbox, BI, scheduling system, sales agent, or clinical advice. Keep the recommendation strictly inside the current activation step and current workspace state.",
     useCase: "activation",
   });
 

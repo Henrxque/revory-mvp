@@ -16,12 +16,12 @@ const signUpSteps = [
   {
     label: "01",
     title: "Create the workspace",
-    text: "Google opens a real workspace instead of a disconnected auth state.",
+    text: "Google or email/password opens a real workspace instead of a disconnected auth state.",
   },
   {
     label: "02",
     title: "Move through activation",
-    text: "REVORY drops the clinic into the same narrow setup path.",
+    text: "REVORY drops the clinic into a narrow workspace setup for structured clinic data.",
   },
 ];
 
@@ -62,7 +62,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           </div>
 
           <div className="mt-8 space-y-5">
-            <p className="rev-kicker">REVORY Seller</p>
+            <p className="rev-kicker">REVORY</p>
             <div className="space-y-3">
               <h1 className="rev-display-hero max-w-[32rem]">
                 Start your{" "}
@@ -71,7 +71,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure Google access creates the workspace and moves straight into setup.
+                Secure access creates the workspace and moves straight into clinic data setup.
               </p>
             </div>
           </div>

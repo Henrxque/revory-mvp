@@ -16,12 +16,12 @@ const signInSteps = [
   {
     label: "01",
     title: "Return to the same workspace",
-    text: "Google brings the user back to the same private workspace.",
+    text: "Google or email/password brings the user back to the same private workspace.",
   },
   {
     label: "02",
-    title: "Resume the Seller path",
-    text: "REVORY reopens the same narrow booking workflow.",
+    title: "Resume the REVORY workspace",
+    text: "REVORY reopens the same narrow revenue leak workspace.",
   },
 ];
 
@@ -62,7 +62,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
 
           <div className="mt-8 space-y-5">
-            <p className="rev-kicker">REVORY Seller</p>
+            <p className="rev-kicker">REVORY</p>
             <div className="space-y-3">
               <h1 className="rev-display-hero max-w-[32rem]">
                 Return to your{" "}
@@ -71,7 +71,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure Google access brings the clinic back to the same booking workflow.
+                Secure access brings the clinic back to the same revenue leak read without adding fake providers.
               </p>
             </div>
           </div>

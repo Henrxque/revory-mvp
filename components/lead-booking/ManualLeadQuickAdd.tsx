@@ -70,7 +70,7 @@ export function ManualLeadQuickAdd({
           }}
           type="button"
         >
-          Quick add
+          Add evidence
         </button>
         {successMessage ? (
           <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--success)]">
@@ -85,13 +85,13 @@ export function ManualLeadQuickAdd({
             <div className="flex items-start justify-between gap-4">
               <div className="max-w-[22rem]">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="rev-kicker">Quick add</p>
+                  <p className="rev-kicker">Evidence add</p>
                 </div>
                 <h3 className="mt-2 text-[1.28rem] font-semibold leading-[1.02] tracking-[-0.04em] text-[color:var(--foreground)]">
-                  Add one lead to today&apos;s booking read.
+                  Add one missing booking-risk input.
                 </h3>
                 <p className="mt-1.5 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-                  Inherits the current offer and booking path automatically.
+                  Inherits the current offer and booking path automatically. This is evidence input, not a CRM workflow.
                 </p>
               </div>
 
@@ -113,7 +113,7 @@ export function ManualLeadQuickAdd({
 
             <div className="mt-4 space-y-2.5">
               <label className="block">
-                <span className="rev-label">Lead name</span>
+                <span className="rev-label">Client or lead name</span>
                 <input
                   autoFocus
                   className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
@@ -188,7 +188,7 @@ export function ManualLeadQuickAdd({
 
                     if (!canSubmit) {
                       setErrorMessage(
-                        "REVORY needs the lead name plus email or phone before this quick add can open a booking read.",
+                        "REVORY needs a name plus email or phone before this evidence input can open a booking-risk read.",
                       );
                       return;
                     }
@@ -220,7 +220,7 @@ export function ManualLeadQuickAdd({
                   }}
                   type="button"
                 >
-                  {isPending ? "Adding..." : "Add lead"}
+                  {isPending ? "Adding..." : "Add evidence"}
                 </button>
               </div>
             </div>

@@ -29,23 +29,23 @@ export function buildDashboardDecisionSupport({
 
   if (overview.supportIntegrity.degradedSections.length > 0 && overview.bookedAppointments > 0) {
     return {
-      badgeLabel: "Seller guidance",
+      badgeLabel: "Leak guidance",
       detectedObjection:
         "A support layer is temporarily thinner, which can weaken confidence if the workspace starts explaining the failure instead of protecting the core read.",
       eyebrow: "Revenue read",
       fallbackLabel: "If support stays thin",
       fallbackNote:
-        "Seller keeps the dashboard anchored in booked proof and revenue, then points back to one refresh move only.",
-      guardrailLabel: "Seller stays narrow",
+        "REVORY keeps the dashboard anchored in appointment evidence and the revenue risk read, then points back to one refresh move only.",
+      guardrailLabel: "REVORY stays narrow",
       guardrailNote:
-        "The safest move stays inside proof refresh. Seller does not widen the workflow when support layers are limited.",
+        "The safest move stays inside evidence refresh. REVORY does not widen the workflow when support layers are limited.",
       nextBestAction:
-        "Refresh booked proof and keep the commercial read short. Revenue and booked proof are still safe to show while the thinner support layer recovers.",
-      recommendedPath: "Revenue -> booked proof -> refresh support",
+        "Refresh appointment evidence and keep the risk read short. Revenue context and appointment evidence are still safe to show while the thinner support layer recovers.",
+      recommendedPath: "Revenue risk read -> appointment evidence -> refresh support",
       signals: [
         {
           label: "Core read",
-          note: "Revenue and booked proof remain visible.",
+          note: "Revenue context and appointment evidence remain visible.",
           value: revenueLabel,
         },
         {
@@ -68,23 +68,23 @@ export function buildDashboardDecisionSupport({
 
   if (overview.bookedAppointments === 0) {
     return {
-      badgeLabel: "Seller guidance",
+      badgeLabel: "Leak guidance",
       detectedObjection:
-        "Revenue still reads like configured potential until booked appointments are visible.",
+        "Revenue risk still reads like configured potential until appointment evidence is visible.",
       eyebrow: "Revenue read",
-      fallbackLabel: "If proof softens",
+      fallbackLabel: "If evidence softens",
       fallbackNote:
-        "If booked proof is still missing, Seller keeps revenue waiting and points back to Booking Inputs.",
-      guardrailLabel: "Seller stays narrow",
+        "If appointment evidence is still missing, REVORY keeps revenue risk waiting and points back to Source Inputs.",
+      guardrailLabel: "REVORY stays narrow",
       guardrailNote:
-        "This recommendation only uses proof already visible inside the workspace.",
+        "This recommendation only uses appointment evidence already visible inside the workspace.",
       nextBestAction:
-        "Open Booking Inputs and add the appointments file first. That is the shortest move from setup to visible commercial proof.",
-      recommendedPath: "Booking Inputs -> booked proof -> revenue view",
+        "Open Source Inputs and add the appointments file first. That is the shortest move from setup to visible leak evidence.",
+      recommendedPath: "Source Inputs -> appointment evidence -> revenue risk read",
       signals: [
         {
-          label: "Booked proof",
-          note: "This is still the missing proof layer.",
+          label: "Appointment evidence",
+          note: "This is still the missing evidence layer.",
           value: "Not visible yet",
         },
         {
@@ -94,41 +94,41 @@ export function buildDashboardDecisionSupport({
         },
         {
           label: "Booking path",
-          note: "The handoff is already defined before proof arrives.",
+          note: "The path is already defined before appointment evidence arrives.",
           value: bookingPathLabel,
         },
       ],
       summary:
-        "Keep the read simple: booked proof first, then let revenue lead.",
-      title: "Booked proof is still the missing link.",
+        "Keep the read simple: appointment evidence first, then let revenue risk lead.",
+      title: "Appointment evidence is still the missing link.",
       tone: "future",
     };
   }
 
   if (overview.upcomingRead.appointments === 0) {
     return {
-      badgeLabel: "Seller guidance",
+      badgeLabel: "Leak guidance",
       detectedObjection:
-        "Revenue proof is visible, but a thin booked calendar can make the workspace feel less current in demo.",
+        "Revenue evidence is visible, but a thin upcoming appointment layer can make the workspace feel less current.",
       eyebrow: "Revenue read",
-      fallbackLabel: "If proof softens",
+      fallbackLabel: "If evidence softens",
       fallbackNote:
-        "If the calendar stays thin, Seller keeps the next move on refreshing booked proof only.",
-      guardrailLabel: "Seller stays narrow",
+        "If the calendar stays thin, REVORY keeps the next move on refreshing appointment evidence only.",
+      guardrailLabel: "REVORY stays narrow",
       guardrailNote:
-        "This recommendation stays inside the current proof layer: revenue, booked appointments, and one refresh move.",
+        "This recommendation stays inside the current evidence layer: revenue context, appointments, and one refresh move.",
       nextBestAction:
-        "Refresh booked visibility so the revenue number keeps a live appointment layer underneath it. Seller looks strongest when revenue and upcoming bookings still agree.",
-      recommendedPath: "Refresh booked proof -> keep revenue and calendar aligned",
+        "Refresh appointment visibility so the revenue risk read keeps a live evidence layer underneath it.",
+      recommendedPath: "Refresh appointment evidence -> keep revenue risk and calendar aligned",
       signals: [
         {
           label: "Revenue visible",
-          note: "This is the current booked revenue read.",
+          note: "This is the current revenue evidence read.",
           value: revenueLabel,
         },
         {
-          label: "Booked appointments",
-          note: "Booked outcomes currently supporting the number above.",
+          label: "Appointment evidence",
+          note: "Appointment outcomes currently supporting the read above.",
           value: `${overview.bookedAppointments}`,
         },
         {
@@ -145,23 +145,23 @@ export function buildDashboardDecisionSupport({
   }
 
   return {
-    badgeLabel: "Seller guidance",
+    badgeLabel: "Leak guidance",
     detectedObjection:
-      "The main risk now is stale proof behind the revenue number.",
+      "The main risk now is stale appointment evidence behind the revenue read.",
     eyebrow: "Revenue read",
-    fallbackLabel: "If proof softens",
+    fallbackLabel: "If evidence softens",
     fallbackNote:
-      "If proof quality drops, Seller falls back to the same narrow move: refresh booked proof.",
-    guardrailLabel: "Seller stays narrow",
+      "If evidence quality drops, REVORY falls back to the same narrow move: refresh appointment evidence.",
+    guardrailLabel: "REVORY stays narrow",
     guardrailNote:
-      "The dashboard keeps one recommendation, one path, and one proof chain.",
+      "The dashboard keeps one recommendation, one path, and one evidence chain.",
     nextBestAction:
-      "Keep booked visibility fresh and keep the read narrow. Seller is strongest when the demo can move from revenue to proof to next move in one short sequence.",
-    recommendedPath: "Revenue -> proof -> one clear next move",
+      "Keep appointment visibility fresh and keep the read narrow. REVORY is strongest when the read can move from revenue risk to evidence to one next fix.",
+    recommendedPath: "Revenue risk -> evidence -> one clear next fix",
     signals: [
       {
         label: "Revenue visible",
-        note: "Booked revenue currently in view.",
+        note: "Revenue context currently in view.",
         value: revenueLabel,
       },
       {
@@ -171,12 +171,12 @@ export function buildDashboardDecisionSupport({
       },
       {
         label: "Booking path",
-        note: "One explicit handoff keeps the proof believable.",
+        note: "One explicit path keeps the operational risk readable.",
         value: bookingPathLabel,
       },
     ],
     summary:
-      "Keep the proof fresh and the next move short.",
+      "Keep the evidence fresh and the next fix short.",
     title: "The revenue read already feels commercially credible.",
     tone: "real",
   };

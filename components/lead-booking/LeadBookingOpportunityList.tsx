@@ -34,7 +34,7 @@ function getNextStepRead(
 ) {
   if (opportunity.status === "READY" && handoffAvailable) {
     return {
-      note: "The opportunity is ready. Use the suggested message if needed, then open the current booking path.",
+      note: "This booking-path risk is ready for bounded action guidance. Use the message if needed, then open the current path.",
       title: "Open the current booking path now",
       tone: "real" as const,
     };
@@ -42,7 +42,7 @@ function getNextStepRead(
 
   if (opportunity.status === "BLOCKED" && opportunity.nextAction === "Add contact identity") {
     return {
-      note: "This path is still blocked because the lead does not have the contact detail the workspace needs next.",
+      note: "This path is still blocked because the record does not have the contact detail the workspace needs next.",
       title: "Capture the contact detail that unlocks this path",
       tone: "future" as const,
     };
@@ -53,7 +53,7 @@ function getNextStepRead(
     opportunity.nextAction === "Align contact to booking path"
   ) {
     return {
-      note: "This lead has contact identity, but not in the channel the current booking path needs.",
+      note: "This record has contact identity, but not in the channel the current booking path needs.",
       title: "Align contact to the current booking path",
       tone: "future" as const,
     };
@@ -61,7 +61,7 @@ function getNextStepRead(
 
   if (opportunity.status === "BLOCKED") {
     return {
-      note: "This opportunity cannot move until the current blocker is corrected.",
+      note: "This operational risk cannot move until the current blocker is corrected.",
       title: "Fix the blocker before booking can move",
       tone: "future" as const,
     };
@@ -69,7 +69,7 @@ function getNextStepRead(
 
   if (opportunity.status === "BOOKED") {
     return {
-      note: "A future booking is already visible, so this opportunity is no longer part of the active booking-assist layer.",
+      note: "A future booking is already visible, so this record is no longer part of active leak action guidance.",
       title: "Booking is already visible",
       tone: "neutral" as const,
     };
@@ -77,14 +77,14 @@ function getNextStepRead(
 
   if (opportunity.status === "CLOSED") {
     return {
-      note: "This opportunity is no longer active inside the current booking read.",
+      note: "This record is no longer active inside the current action read.",
       title: "Opportunity is already closed",
       tone: "neutral" as const,
     };
   }
 
   return {
-    note: "The opportunity still needs a clearer booking read before the next step can open.",
+    note: "This record still needs a clearer booking-risk read before the next step can open.",
     title: "Review the current booking read",
     tone: "neutral" as const,
   };
@@ -198,10 +198,10 @@ export function LeadBookingOpportunityList({
     return (
       <div className="rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.016)] px-3 py-3">
         <p className="text-sm font-semibold text-[color:var(--foreground)]">
-          No active booking read is visible yet.
+          No active booking-risk read is visible yet.
         </p>
         <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-          Bring in the client lane, or use Quick add when today needs one short booking read without opening a bigger workflow.
+          Bring in the client context lane, or use evidence add when today needs one short booking-risk read without opening CRM or a bigger workflow.
         </p>
       </div>
     );
@@ -264,7 +264,7 @@ export function LeadBookingOpportunityList({
 
             {preparedAt ? (
               <p className="mt-2 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                Seller signal: current path opened on {formatPreparedAt(preparedAt)}.
+                Action signal: current path opened on {formatPreparedAt(preparedAt)}.
               </p>
             ) : null}
 
@@ -291,13 +291,13 @@ export function LeadBookingOpportunityList({
 
               {opportunity.nextAction ? (
                 <p className="mt-2 text-[11px] font-medium text-[color:var(--foreground)]">
-                  Seller move now: {opportunity.nextAction}
+                  Risk move now: {opportunity.nextAction}
                 </p>
               ) : null}
 
               {opportunity.suggestedMessage || handoffAvailable ? (
                 <p className="mt-1.5 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                  Use the Action Pack below to take this step inside the current booking read.
+                  Use the Action Pack below to take this step inside the current booking-risk read.
                 </p>
               ) : null}
 
@@ -306,7 +306,7 @@ export function LeadBookingOpportunityList({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-[11px] font-semibold text-[color:var(--foreground)]">
-                        {opportunity.suggestedMessageLabel ?? "Suggested message"}
+                        {opportunity.suggestedMessageLabel ?? "Bounded action guidance"}
                       </p>
                     </div>
                     <button
@@ -323,7 +323,7 @@ export function LeadBookingOpportunityList({
                           setErrorByOpportunity((current) => ({
                             ...current,
                             [opportunity.id]:
-                              "REVORY could not copy this suggested message right now.",
+                              "REVORY could not copy this bounded guidance right now.",
                           }));
                         }
                       }}
@@ -367,7 +367,7 @@ export function LeadBookingOpportunityList({
                                 [opportunity.id]:
                                   error instanceof Error && error.message
                                     ? error.message
-                                    : "REVORY could not open this booking handoff right now.",
+                                    : "REVORY could not open this booking path right now.",
                               }));
                             } finally {
                               setActiveOpportunityId(null);
@@ -389,7 +389,7 @@ export function LeadBookingOpportunityList({
 
                   {handoffAvailable ? (
                     <p className="mt-2 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
-                      {opportunity.handoffNote}. This opens the current booking path on this device and records the assist without implying thread or follow-up.
+                      {opportunity.handoffNote}. This opens the current booking path on this device and records the assist without implying thread, inbox or follow-up automation.
                     </p>
                   ) : null}
                 </div>
@@ -430,7 +430,7 @@ export function LeadBookingOpportunityList({
                             [opportunity.id]:
                               error instanceof Error && error.message
                                 ? error.message
-                                : "REVORY could not open this booking handoff right now.",
+                                : "REVORY could not open this booking path right now.",
                           }));
                         } finally {
                           setActiveOpportunityId(null);

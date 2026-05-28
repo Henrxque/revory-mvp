@@ -177,7 +177,7 @@ export default async function SetupPage() {
     {
       detail: mainOfferLabel ?? "Offer pending",
       label: "Main offer",
-      note: "Offer pushed first.",
+      note: "Sets the risk context.",
       ready: Boolean(mainOfferLabel),
       stepKey: "template",
       type: "pillar",
@@ -185,35 +185,35 @@ export default async function SetupPage() {
     {
       detail: bookingPathLabel ?? "Path pending",
       label: "Booking path",
-      note: "Route leads into booking.",
+      note: "Reveals blocked booking risk.",
       ready: Boolean(bookingPathLabel),
       stepKey: "channel",
       type: "pillar",
     },
     {
       detail: sourceNeedsReview
-        ? "Current lead entry needs review"
+        ? "Current data entry needs review"
         : sourceLabel ?? "Source pending",
-      label: "Lead entry",
+      label: "Data entry",
       note: sourceNeedsReview
         ? "Unsupported input type."
-        : "Where paid leads first appear.",
+        : "Where clinic evidence starts.",
       ready: Boolean(sourceLabel) && !sourceNeedsReview,
       stepKey: "source",
       type: "pillar",
     },
     {
       detail: dealValueLabel ?? "Value pending",
-      label: "Value per booking",
-      note: "Revenue anchor per booking.",
+      label: "Estimated value",
+      note: "Used when direct value is missing.",
       ready: Boolean(appContext.activationSetup.averageDealValue),
       stepKey: "deal_value",
       type: "pillar",
     },
     {
       detail: brandVoiceLabel ?? "Voice pending",
-      label: "Seller voice",
-      note: "Tone for the first booking step.",
+      label: "Message tone",
+      note: "Tone for bounded guidance.",
       ready: Boolean(brandVoiceLabel),
       stepKey: "mode",
       type: "support",
@@ -234,15 +234,15 @@ export default async function SetupPage() {
     Boolean(dealValueLabel);
   const setupHeroTitle = appContext.activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Seller is ready to read revenue."
-      : "Seller is live. Booked proof comes next."
-    : "Finish setup. Launch Seller.";
+      ? "REVORY is ready to read revenue risk."
+      : "REVORY is active. Appointment evidence comes next."
+    : "Finish setup. Activate REVORY.";
   const setupHeroDescription = appContext.activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Booked proof is visible and revenue can now read real bookings."
+      ? "Appointment evidence is visible and REVORY can estimate revenue at risk from real bookings."
       : hasAppointmentsSourceReady
-        ? "Seller is live. Review booked proof so revenue can read real bookings."
-        : "Seller is live. Add booked proof to open revenue."
+        ? "REVORY is active. Review appointment evidence so the revenue leak read can use real bookings."
+        : "REVORY is active. Add appointment evidence to open the revenue leak read."
     : `${configuredPillars.length}/${pillarItems.length} activation choices are already locked.`;
   const missingItems = [
     ...pendingPillars,
@@ -252,11 +252,11 @@ export default async function SetupPage() {
           {
             detail: hasAppointmentsSourceReady
               ? "Review appointments file"
-              : "Add booked appointments file",
-            label: "Booked proof",
+              : "Add appointments file",
+            label: "Appointment evidence",
             note: hasAppointmentsSourceReady
-              ? "Booked outcomes still are not visible."
-              : "Needed before revenue can read real bookings.",
+              ? "Appointment outcomes still are not visible."
+              : "Needed before REVORY can estimate revenue risk from bookings.",
             ready: false,
             type: "support" as const,
           },
@@ -269,9 +269,9 @@ export default async function SetupPage() {
     ...(hasBookedProofVisible
       ? [
           {
-            detail: "Visible in Booking Inputs",
-            label: "Booked proof",
-            note: "Revenue support is live.",
+            detail: "Visible in Clinic Data",
+            label: "Appointment evidence",
+            note: "Revenue risk support is live.",
             ready: true,
             type: "support" as const,
           },
@@ -281,25 +281,25 @@ export default async function SetupPage() {
   const nextMove = appContext.activationSetup.isCompleted
     ? hasBookedProofVisible
       ? {
-          description: "Open Revenue View or refresh Booking Inputs when booked data changes.",
+          description: "Open the leak read or refresh clinic data when appointment evidence changes.",
           href: "/app/dashboard",
-          label: "Open Revenue View",
+          label: "Open Leak Read",
           secondaryHref: "/app/imports",
-          secondaryLabel: "Refresh booked proof",
-          title: "Revenue is ready",
+          secondaryLabel: "Refresh clinic data",
+          title: "Leak read is ready",
         }
       : {
           description: hasAppointmentsSourceReady
-            ? "Review the appointments pass so booked outcomes become visible."
-            : "Add booked proof to complete revenue support.",
+            ? "Review the appointments pass so appointment outcomes become visible."
+            : "Add appointment evidence to support the revenue leak read.",
           href: "/app/imports",
-          label: hasAppointmentsSourceReady ? "Review booked proof" : "Add booked proof",
+          label: hasAppointmentsSourceReady ? "Review appointment evidence" : "Add appointment evidence",
           secondaryHref: null,
           secondaryLabel: null,
-          title: hasAppointmentsSourceReady ? "Booked proof is next" : "Booked proof is next",
+          title: "Appointment evidence is next",
         }
     : {
-        description: `Finish "${currentStep.title}" to lock activation and move into the live booking path.`,
+        description: `Finish "${currentStep.title}" to lock activation and move into the live revenue leak read.`,
         href: continueSetupHref,
         label: "Continue activation",
         secondaryHref: null,
@@ -315,17 +315,17 @@ export default async function SetupPage() {
       };
   const activationSnapshot = [
     {
-      label: "Seller",
+      label: "REVORY",
       tone: appContext.activationSetup.isCompleted ? ("real" as const) : ("future" as const),
       value: appContext.activationSetup.isCompleted ? "Live" : "Pending",
     },
     {
-      label: "Booked proof",
+      label: "Appointment evidence",
       tone: hasBookedProofVisible ? ("real" as const) : ("future" as const),
       value: hasBookedProofVisible ? "Live" : "Pending",
     },
     {
-      label: "Revenue read",
+      label: "Leak read",
       tone: revenuePathLocked ? ("real" as const) : ("future" as const),
       value: revenuePathLocked ? "Ready" : "Pending",
     },
@@ -445,7 +445,7 @@ export default async function SetupPage() {
               How value unlocks
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Lead entry supports proof. Proof supports the revenue read.
+              Clinic data supports evidence. Evidence supports the revenue leak read.
             </p>
           </div>
           <RevoryStatusBadge tone={revenuePathLocked ? "real" : "future"}>
@@ -455,10 +455,10 @@ export default async function SetupPage() {
 
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4">
-            <p className="rev-label">Booked proof path</p>
+            <p className="rev-label">Appointment evidence path</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
-                {sourceLabel ?? "Lead entry pending"}
+                {sourceLabel ?? "Data entry pending"}
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>
               <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
@@ -466,7 +466,7 @@ export default async function SetupPage() {
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>
               <span className="inline-flex items-center rounded-[12px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
-                Booked proof
+                Appointment evidence
               </span>
             </div>
           </div>
@@ -475,7 +475,7 @@ export default async function SetupPage() {
             <p className="rev-label">Revenue clarity</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-[12px] border border-[rgba(46,204,134,0.18)] bg-[rgba(46,204,134,0.06)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
-                Booked proof
+                Appointment evidence
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>
               <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
@@ -483,7 +483,7 @@ export default async function SetupPage() {
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>
               <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
-                Revenue view
+                Leak read
               </span>
             </div>
           </div>
@@ -498,7 +498,7 @@ export default async function SetupPage() {
               Ready now
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              What is already supporting Seller.
+              What is already supporting REVORY.
             </p>
           </div>
             <RevoryStatusBadge tone="real">{readyItems.length}</RevoryStatusBadge>
@@ -530,7 +530,7 @@ export default async function SetupPage() {
               Still missing
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              What still blocks proof or revenue.
+              What still blocks evidence or revenue risk clarity.
             </p>
           </div>
             <RevoryStatusBadge tone={missingItems.length > 0 ? "future" : "neutral"}>
@@ -576,7 +576,7 @@ export default async function SetupPage() {
               Activation path
             </p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">
-              Short path to live Seller.
+              Short path to an active REVORY read.
             </p>
           </div>
           <RevoryStatusBadge tone={appContext.activationSetup.isCompleted ? "real" : "future"}>

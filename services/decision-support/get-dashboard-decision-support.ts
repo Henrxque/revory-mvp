@@ -80,7 +80,7 @@ export async function getDashboardDecisionSupport({
     },
     fallback: toDecisionSupportPatch(classifiedRead),
     prompt:
-      "Write a compact REVORY Seller revenue guidance patch. Keep every field to one short sentence. Stay revenue-first, proof-backed, and commercially honest. Respect the provided intent classification and objection classification when they are present. Never imply revenue that is not supported by booked proof or the configured value per booking. Never mention AI, prompts, hidden fallback systems, or analytics expansion. Keep the advice to one next move only.",
+      "Write a compact REVORY Revenue Leak Detector guidance patch. Keep every field to one short sentence. Stay leak-first, evidence-first, revenue-risk-first, and commercially honest. Respect the provided intent classification and objection classification when they are present. Do not invent revenue numbers, claim confirmed loss, or imply REVORY generated or recovered revenue. Use estimated revenue at risk only when supplied by deterministic services in context. Never imply REVORY is a CRM, inbox, BI tool, scheduling system, sales agent, clinical advisor, hidden fallback system, or analytics expansion. Explain evidence, confidence, and one next safe fix only.",
     useCase: "dashboard",
   });
 

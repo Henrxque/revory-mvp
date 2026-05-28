@@ -111,17 +111,21 @@ enum LeadBookingOpportunityStatus {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  clerkUserId     String?         @unique
-  authProvider    String          @default("clerk")
-  authSubject     String?         @unique
-  email           String          @unique
-  fullName        String?
-  status          UserStatus      @default(ACTIVE)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  ownedWorkspaces Workspace[]
-  triggeredRuns   AutomationRun[] @relation("AutomationTriggeredBy")
+  id                     String          @id @default(cuid())
+  clerkUserId            String?         @unique
+  authProvider           String          @default("clerk")
+  authSubject            String?         @unique
+  email                  String          @unique
+  fullName               String?
+  passwordHash           String?
+  passwordUpdatedAt      DateTime?
+  passwordResetTokenHash String?         @unique
+  passwordResetExpiresAt DateTime?
+  status                 UserStatus      @default(ACTIVE)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  ownedWorkspaces        Workspace[]
+  triggeredRuns          AutomationRun[] @relation("AutomationTriggeredBy")
 
   @@map("users")
 }

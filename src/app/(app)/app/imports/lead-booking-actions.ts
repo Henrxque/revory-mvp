@@ -10,7 +10,7 @@ export async function recordLeadBookingHandoff(opportunityId: string) {
   const appContext = await getAppContext();
 
   if (!appContext) {
-    throw new Error("Your REVORY session expired before the booking handoff could open.");
+    throw new Error("Your REVORY session expired before the booking path could open.");
   }
 
   const opportunity = await prisma.leadBookingOpportunity.findUnique({
@@ -25,11 +25,11 @@ export async function recordLeadBookingHandoff(opportunityId: string) {
   });
 
   if (!opportunity || opportunity.workspaceId !== appContext.workspace.id) {
-    throw new Error("REVORY could not find this booking handoff.");
+    throw new Error("REVORY could not find this booking-path risk.");
   }
 
   if (opportunity.status !== LeadBookingOpportunityStatus.READY) {
-    throw new Error("This opportunity is not ready for booking handoff.");
+    throw new Error("This booking-path risk is not ready for handoff.");
   }
 
   const handoffOpenedAt = new Date();

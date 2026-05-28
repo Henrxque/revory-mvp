@@ -23,6 +23,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
   const sessionUser = session?.user;
   const authSubject = sessionUser?.id ?? null;
   const email = normalizeEmail(sessionUser?.email);
+  const authProvider = sessionUser?.authProvider ?? "google";
 
   if (!authSubject || !email) {
     return null;
@@ -38,7 +39,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
 
   if (existingByAuthSubject) {
     const shouldUpdate =
-      existingByAuthSubject.authProvider !== "google" ||
+      existingByAuthSubject.authProvider !== authProvider ||
       existingByAuthSubject.email !== email ||
       existingByAuthSubject.fullName !== fullName ||
       existingByAuthSubject.status !== UserStatus.ACTIVE;
@@ -52,7 +53,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
         id: existingByAuthSubject.id,
       },
       data: {
-        authProvider: "google",
+        authProvider,
         email,
         fullName,
         status: UserStatus.ACTIVE,
@@ -68,7 +69,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
 
   if (existingByEmail) {
     const shouldUpdate =
-      existingByEmail.authProvider !== "google" ||
+      existingByEmail.authProvider !== authProvider ||
       existingByEmail.authSubject !== authSubject ||
       existingByEmail.fullName !== fullName ||
       existingByEmail.status !== UserStatus.ACTIVE;
@@ -82,7 +83,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
         id: existingByEmail.id,
       },
       data: {
-        authProvider: "google",
+        authProvider,
         authSubject,
         fullName,
         status: UserStatus.ACTIVE,
@@ -92,7 +93,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
 
   return prisma.user.create({
     data: {
-      authProvider: "google",
+      authProvider,
       authSubject,
       email,
       fullName,

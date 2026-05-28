@@ -1,5 +1,9 @@
 # User Journey - REVORY MVP
 
+> Historical journey reference. Not current public positioning. Current source of truth is REVORY Revenue Leak Detector in `docs/source-of-truth.md`.
+>
+> This may still help explain the existing onboarding/import/app substrate, but current user journeys should be interpreted through revenue leak detection, appointment evidence, data quality, estimated revenue at risk, and bounded action guidance.
+
 Este documento descreve a jornada obrigatoria do usuario no MVP da REVORY. O objetivo e alinhar implementacao de produto, persistencia de dados e estados de interface sem alterar o fluxo definido.
 
 ## 1. Usuario chega pela landing

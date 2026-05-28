@@ -32,9 +32,9 @@ Utilitarios compartilhados, helpers, formatadores, wrappers pequenos e funcoes g
 
 ### `services/`
 
-Regras de negocio e orquestracao de casos de uso. Aqui ficam fluxos como onboarding, recovery, reviews, metricas e execucao de jobs simples.
+Regras de negocio e orquestracao de casos de uso. Aqui ficam fluxos como onboarding, imports, revenue leak reads, booking assistance, proof e execucao de jobs simples.
 
-Diretriz de evolucao futura: conforme o projeto crescer, `services/` pode ser organizado por dominio funcional, por exemplo `services/onboarding`, `services/recovery`, `services/reviews` e `services/metrics`. Isso e apenas uma diretriz futura, nao uma obrigacao imediata do MVP.
+Diretriz de evolucao futura: conforme o projeto crescer, `services/` pode ser organizado por dominio funcional, por exemplo `services/onboarding`, `services/imports`, `services/lead-booking`, `services/proof` e `services/revenue-leaks`. Isso e apenas uma diretriz futura, nao uma obrigacao imediata do MVP.
 
 ### `db/`
 
@@ -77,7 +77,7 @@ Schema do banco, migrations e arquivos relacionados ao Prisma.
 ### Regras de Negocio
 
 - `services/` concentra fluxos e decisoes operacionais
-- regras de onboarding, appointments, recovery, reviews e metricas devem nascer aqui
+- regras de onboarding, appointments, imports, booking assistance, proof e revenue leak reads devem nascer aqui
 - componentes nao devem implementar logica central de negocio
 
 ### Validacao

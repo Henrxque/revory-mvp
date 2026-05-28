@@ -9,24 +9,24 @@ export default function PrivacyPage() {
           REVORY Privacy Notice
         </h1>
         <p className="mt-5 text-sm leading-7 text-[color:var(--text-muted)]">
-          REVORY Seller uses account, workspace, setup, import, booking assistance, billing,
-          and product usage data only to operate the software, keep the workspace readable,
-          support billing, and improve reliability. The product is not designed to resell clinic
-          data or run hidden manual services behind the interface.
+          REVORY uses account, workspace, setup, import, billing and product usage data only
+          to operate the software, keep the workspace readable, support billing and improve
+          reliability. The product is not designed to resell clinic data or run hidden manual
+          services behind the interface.
         </p>
         <div className="mt-7 space-y-4 text-sm leading-7 text-[color:var(--text-muted)]">
           <p>
-            Imported appointment and client data is used to generate booked proof, revenue reads,
-            readiness states, suggested messages, and executive summaries inside the customer
-            workspace.
+            Structured appointment, client and import data may be processed to support revenue
+            leak reads, estimated revenue at risk, data quality checks, bounded AI intake,
+            triage and explanation support, and executive summaries inside the customer workspace.
           </p>
           <p>
-            Access to REVORY Seller is authenticated. Billing, when enabled, is handled through
-            Stripe. LLM-assisted suggestions are bounded to short booking assistance and should
-            not be treated as a free-form conversation engine.
+            Access to REVORY is authenticated. Billing, when enabled, is handled through Stripe.
+            LLM-assisted outputs are bounded to intake, triage, explanation and guidance support;
+            they should not be treated as a free-form conversation engine or managed service.
           </p>
           <p>
-            For privacy questions or deletion requests, contact the REVORY operator through the
+            For privacy questions or deletion requests, contact REVORY support through the
             support channel provided during purchase or onboarding.
           </p>
         </div>

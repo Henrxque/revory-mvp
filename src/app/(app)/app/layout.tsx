@@ -38,14 +38,14 @@ function resolveBookingInputsStatus(
   hasBookedProofVisible: boolean,
 ) {
   if (hasBookedProofVisible) {
-    return "Proof visible";
+    return "Data visible";
   }
 
   if (activationCompleted) {
-    return "Proof next";
+    return "Data next";
   }
 
-  return "Proof pending";
+  return "Data pending";
 }
 
 export default async function PrivateAppLayout({
@@ -75,17 +75,17 @@ export default async function PrivateAppLayout({
   );
   const currentStepTitle = activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Revenue ready"
-      : "Booked proof next"
+      ? "Leak read ready"
+      : "Clinic data next"
     : currentStep.title;
   const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
   const workspaceSubtitle = activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Booked proof is live and revenue is ready."
-      : "Activation is live. Add booked proof to open revenue."
+      ? "Clinic data is live and the revenue leak read is ready."
+      : "Activation is live. Add clinic data to open the revenue leak read."
     : `Activation is in progress. ${currentStep.title} comes next.`;
   const currentPlanSignal =
-    billingSummary.plan?.inAppSignal ?? "Billing keeps Seller live.";
+    billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
   const accountInitial = getAccountInitial(user.email);
 
   return (

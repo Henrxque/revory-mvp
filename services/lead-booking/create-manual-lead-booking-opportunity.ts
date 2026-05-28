@@ -94,7 +94,7 @@ async function findExistingClient(input: {
 
   if (emailClient && phoneClient && emailClient.id !== phoneClient.id) {
     throw new Error(
-      "REVORY found conflicting lead identity for this quick add. Review the existing email and phone before creating a new booking read.",
+      "REVORY found conflicting client identity for this evidence input. Review the existing email and phone before creating a new booking-risk read.",
     );
   }
 
@@ -110,12 +110,12 @@ export async function createManualLeadBookingOpportunity(
   const sourceLabel = normalizeSourceLabel(input.sourceLabel);
 
   if (!fullName) {
-    throw new Error("REVORY needs the lead name before this quick add can create a booking read.");
+    throw new Error("REVORY needs the client or lead name before this evidence input can create a booking-risk read.");
   }
 
   if (!email && !phone) {
     throw new Error(
-      "REVORY needs at least one contact detail before this quick add can create a booking read.",
+      "REVORY needs at least one contact detail before this evidence input can create a booking-risk read.",
     );
   }
 
@@ -190,7 +190,7 @@ export async function createManualLeadBookingOpportunity(
   });
 
   const intakeChannel = resolveIntakeChannel(client.email, client.phone);
-  const intakeSourceName = existingOpportunity?.intakeSourceName ?? sourceLabel ?? "Manual quick add";
+  const intakeSourceName = existingOpportunity?.intakeSourceName ?? sourceLabel ?? "Manual evidence input";
   const intakeSourceType = existingOpportunity?.intakeSourceType ?? DataSourceType.MANUAL_IMPORT;
   const opportunity = await prisma.leadBookingOpportunity.upsert({
     create: {

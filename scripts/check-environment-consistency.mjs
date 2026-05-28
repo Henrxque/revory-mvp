@@ -38,6 +38,21 @@ const criticalColumns = [
     table: "workspaces",
     usage: "plan read and billing hierarchy",
   },
+  {
+    column: "passwordHash",
+    table: "users",
+    usage: "email/password auth",
+  },
+  {
+    column: "passwordResetTokenHash",
+    table: "users",
+    usage: "forgot password reset flow",
+  },
+  {
+    column: "passwordResetExpiresAt",
+    table: "users",
+    usage: "forgot password reset expiry",
+  },
 ];
 
 function readEnvFile(filePath) {

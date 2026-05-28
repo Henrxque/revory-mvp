@@ -16,18 +16,16 @@ export function ExecutiveProofSummaryCard({
     <div className="rev-card-premium overflow-hidden rounded-[30px] p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="rev-kicker">Executive proof</p>
+          <p className="rev-kicker">Executive revenue read</p>
           <p className="mt-1 text-[11px] font-medium text-[color:var(--text-muted)]">
-            {read.workspaceName} • {read.periodLabel}
+            {read.workspaceName} / {read.periodLabel}
           </p>
         </div>
         <RevoryStatusBadge tone={read.freshness.tone}>{read.freshness.label}</RevoryStatusBadge>
       </div>
 
       <div className="mt-4 max-w-[36rem] space-y-2">
-        <h3 className="rev-display-panel max-w-[34rem]">
-          {read.headline}
-        </h3>
+        <h3 className="rev-display-panel max-w-[34rem]">{read.headline}</h3>
         <p className="text-sm leading-[1.55] text-[color:var(--text-muted)]">
           {read.summary}
         </p>
@@ -47,8 +45,8 @@ export function ExecutiveProofSummaryCard({
 
           {secondarySignals.map((signal) => (
             <div
-              key={signal.label}
               className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+              key={signal.label}
             >
               <p className="rev-label">{signal.label}</p>
               <p className="mt-2.5 text-[1.25rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--foreground)]">
@@ -62,10 +60,10 @@ export function ExecutiveProofSummaryCard({
         </div>
       ) : null}
 
-        <div className="mt-4 rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.014))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+      <div className="mt-4 rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.014))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-[30rem]">
-            <p className="rev-label">Proof position</p>
+            <p className="rev-label">Evidence position</p>
             <p className="mt-2 text-[15px] font-semibold leading-[1.35] text-[color:var(--foreground)]">
               {read.safeguard.headline}
             </p>
@@ -79,11 +77,14 @@ export function ExecutiveProofSummaryCard({
         </div>
 
         <p className="mt-4 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-          {read.safeguard.coreReadLabel} • {read.safeguard.supportLabel}
+          {read.safeguard.coreReadLabel} / {read.safeguard.supportLabel}
         </p>
 
         <p className="mt-3 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
           {read.freshness.note}
+        </p>
+        <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-subtle)]">
+          Revenue at risk is an estimate based on imported data, not a confirmed accounting loss.
         </p>
       </div>
     </div>

@@ -57,7 +57,7 @@ export function evaluateLeadBookingOpportunity(
       nextAction: null,
       readinessLabel: "Already booked",
       readinessNote:
-        "A future booking is already visible, so this opportunity leaves the active booking-assist layer.",
+        "A future booking is already visible, so this record leaves the active leak action layer.",
       resolvedAt: new Date(),
       status: LeadBookingOpportunityStatus.BOOKED,
     };
@@ -69,7 +69,7 @@ export function evaluateLeadBookingOpportunity(
       nextAction: "set_main_offer",
       readinessLabel: "Blocked by main offer",
       readinessNote:
-        "Seller still needs one main offer locked before this lead can move through a narrow booking path.",
+        "REVORY still needs one main offer locked before this record can move through a narrow booking path.",
       resolvedAt: null,
       status: LeadBookingOpportunityStatus.BLOCKED,
     };
@@ -81,7 +81,7 @@ export function evaluateLeadBookingOpportunity(
       nextAction: "set_booking_path",
       readinessLabel: "Blocked by booking path",
       readinessNote:
-        "The workspace still needs one booking path before this lead can move toward booking.",
+        "The workspace still needs one booking path before this record can move toward booking.",
       resolvedAt: null,
       status: LeadBookingOpportunityStatus.BLOCKED,
     };
@@ -93,7 +93,7 @@ export function evaluateLeadBookingOpportunity(
       nextAction: "capture_contact",
       readinessLabel: "Blocked by contact",
       readinessNote:
-        "This lead still needs a usable contact identity before Seller can show the next booking step.",
+        "This record still needs a usable contact identity before REVORY can show the next booking-risk step.",
       resolvedAt: null,
       status: LeadBookingOpportunityStatus.BLOCKED,
     };
@@ -112,8 +112,8 @@ export function evaluateLeadBookingOpportunity(
       readinessLabel: "Blocked by handoff fit",
       readinessNote:
         input.bookingPath === CommunicationChannel.EMAIL
-          ? "The workspace routes through email, but this lead still does not have an email path available."
-          : "The workspace routes through SMS, but this lead still does not have an SMS path available.",
+          ? "The workspace routes through email, but this record still does not have an email path available."
+          : "The workspace routes through SMS, but this record still does not have an SMS path available.",
       resolvedAt: null,
       status: LeadBookingOpportunityStatus.BLOCKED,
     };
@@ -125,11 +125,11 @@ export function evaluateLeadBookingOpportunity(
       input.bookingPath === CommunicationChannel.EMAIL
         ? "show_email_booking_path"
         : "show_sms_booking_path",
-    readinessLabel: "Ready for booking path",
+    readinessLabel: "Ready for booking-path action",
     readinessNote:
       input.bookingPath === CommunicationChannel.EMAIL
-        ? "The lead has enough identity and routing context for the email booking path to open."
-        : "The lead has enough identity and routing context for the SMS booking path to open.",
+        ? "The record has enough identity and routing context for the email booking path to open."
+        : "The record has enough identity and routing context for the SMS booking path to open.",
     resolvedAt: null,
     status: LeadBookingOpportunityStatus.READY,
   };

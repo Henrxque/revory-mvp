@@ -55,13 +55,13 @@ export function OnboardingStepLayout({
             <p className="rev-kicker">{isAdjustmentMode ? "Setup adjustment" : "Activation"}</p>
             <h2 className="rev-display-panel max-w-[14rem]">
               {isAdjustmentMode
-                ? "Adjust one choice. Keep Seller live."
-                : "Set six choices. Launch one booking system."}
+                ? "Adjust one choice. Keep REVORY active."
+                : "Set six choices. Start one leak read."}
             </h2>
             <p className="text-sm leading-7 text-[color:var(--text-muted)]">
               {isAdjustmentMode
-                ? "This is a narrow setup adjustment, not a new onboarding path. Seller stays live while the selected booking choice is updated."
-                : "REVORY Seller stays narrow on purpose: one main offer, one lead entry, one booking path, and one value per booking. That gives paid leads a faster path to booked appointments and gives revenue a clearer read."}
+                ? "This is a narrow setup adjustment, not a new onboarding path. REVORY stays active while the selected clinic context is updated."
+                : "REVORY stays narrow on purpose: one main offer, one data entry path, one booking path, and one estimated value. That gives the revenue leak read enough evidence without turning setup into a CRM project."}
             </p>
           </div>
 
@@ -86,7 +86,7 @@ export function OnboardingStepLayout({
               <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                 {isAdjustmentMode
                   ? "One adjustment at a time. No setup reset, no CRM sprawl, and no new operational surface."
-                  : "One clear decision per step. One booking motion. No CRM sprawl, no heavy setup project, and no extra detour before Seller can show booked appointments and revenue clearly."}
+                  : "One clear decision per step. One evidence path. No CRM sprawl, no heavy setup project, and no extra detour before REVORY can read appointment evidence and estimated revenue at risk."}
               </p>
             </div>
           </div>
@@ -198,9 +198,9 @@ export function OnboardingStepLayout({
 const stepKeyLabels: Record<OnboardingStepKey, string> = {
   activation: "Activation",
   channel: "Booking Path",
-  deal_value: "Value Per Booking",
-  mode: "Seller Voice",
-  source: "Lead Entry",
+  deal_value: "Estimated Value",
+  mode: "Message Tone",
+  source: "Data Entry",
   template: "Clinic + Offer",
 };
 

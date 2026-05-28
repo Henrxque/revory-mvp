@@ -4,21 +4,21 @@ export const onboardingSteps = [
     title: "Set Clinic + Main Offer",
     eyebrow: "Step 1 of 6",
     description:
-      "Name the clinic and choose the one offer REVORY Seller should push from paid lead to booked appointment first.",
+      "Name the clinic and choose the one primary offer REVORY should use to understand which appointment and booking risks matter most.",
     fieldLabel: "Clinic + main offer",
     helperText:
-      "This anchors Seller to a real MedSpa and one clear booking goal from the start.",
+      "Your primary offer helps REVORY understand which appointment and booking risks matter most.",
     ctaLabel: "Continue",
   },
   {
     key: "source",
-    title: "Choose Your Lead Entry",
+    title: "Choose Your Data Entry",
     eyebrow: "Step 2 of 6",
     description:
-      "Choose where REVORY Seller should read paid demand first so activation starts from real lead flow.",
-    fieldLabel: "Lead entry",
+      "Choose where REVORY should read structured clinic data first so activation starts from real evidence.",
+    fieldLabel: "Data entry",
     helperText:
-      "Choose the cleanest path to bring real demand into Seller without turning setup into a technical project.",
+      "Choose the cleanest path to bring appointment or client evidence into REVORY without turning setup into a technical project.",
     ctaLabel: "Continue",
   },
   {
@@ -26,44 +26,44 @@ export const onboardingSteps = [
     title: "Lock Your Booking Path",
     eyebrow: "Step 3 of 6",
     description:
-      "Set the primary path REVORY Seller should reinforce when a lead is ready to move toward booking.",
+      "Set the primary path REVORY should use to identify blocked booking opportunities and operational leak risks.",
     fieldLabel: "Booking path",
     helperText:
-      "A single primary path keeps booking fast and predictable. Email stays the default; SMS remains assisted when available.",
+      "Your booking path helps REVORY identify blocked booking opportunities and operational leak risks.",
     ctaLabel: "Continue",
   },
   {
     key: "deal_value",
-    title: "Set Value Per Booking",
+    title: "Set Estimated Value",
     eyebrow: "Step 4 of 6",
     description:
-      "Set the revenue tied to one booked appointment so REVORY Seller can read performance against money, not just activity.",
-    fieldLabel: "Value per booking",
+      "Set a directional value so REVORY can estimate revenue at risk when direct appointment value is missing.",
+    fieldLabel: "Estimated value",
     helperText:
-      "Keep this simple and directional. The goal is a clean revenue baseline from day one.",
+      "Used to estimate revenue at risk when direct appointment value is missing.",
     ctaLabel: "Continue",
   },
   {
     key: "mode",
-    title: "Choose Your Booking Voice",
+    title: "Choose Message Tone",
     eyebrow: "Step 5 of 6",
     description:
-      "Choose the tone REVORY Seller should carry while guiding leads toward the first booking step.",
-    fieldLabel: "Seller voice",
+      "Choose the tone REVORY should use for bounded guidance and suggested next-step language.",
+    fieldLabel: "Message tone",
     helperText:
-      "Keep the tone premium and controlled so the booking path feels consistent without needing extra setup.",
+      "Keep the tone premium and controlled so guidance stays consistent without becoming a custom copy system.",
     ctaLabel: "Continue",
   },
   {
     key: "activation",
-    title: "Go Live With Seller",
+    title: "Activate REVORY Read",
     eyebrow: "Step 6 of 6",
     description:
-      "Review the setup, activate the workspace, and move into the live Seller revenue view.",
+      "Review the setup, activate the workspace, and move into the live REVORY leak read.",
     fieldLabel: "Activation readiness",
     helperText:
-      "Activation is the handoff into a live booking-first system with visible booked outcomes and cleaner revenue visibility.",
-    ctaLabel: "Go live with REVORY Seller",
+      "Activation starts the leak-read workflow with appointment evidence, data quality context and estimated revenue at risk.",
+    ctaLabel: "Activate REVORY read",
   },
 ] as const;
 

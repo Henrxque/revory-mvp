@@ -19,9 +19,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "REVORY",
+  title: "REVORY — Revenue Leak Detector for premium MedSpas",
   description:
-    "REVORY Seller is a premium booking acceleration system for MedSpas with guided setup, clear revenue visibility, and faster booked appointments.",
+    "REVORY helps premium MedSpas detect estimated revenue at risk from structured appointment and booking data.",
 };
 
 type RootLayoutProps = Readonly<{

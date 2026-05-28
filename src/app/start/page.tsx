@@ -27,12 +27,12 @@ const planPresentation = {
   BASIC: {
     ctaHref: "/api/billing/checkout?plan=basic",
     features: [
-      "Revenue-first dashboard and booked proof",
-      "Import-first booking inputs",
-      "Daily Booking Brief",
-      "Bounded booking assistance read",
+      "Limited estimated revenue at risk read",
+      "Structured appointment and booking data intake",
+      "Daily Leak Brief",
+      "Bounded action guidance",
       "No Manual Quick Add",
-      "No shareable proof export",
+      "No shareable executive summary",
     ],
     headerTone: "text-[#f3eef9]",
     price: "$370",
@@ -42,12 +42,12 @@ const planPresentation = {
   GROWTH: {
     ctaHref: "/api/billing/checkout?plan=growth",
     features: [
-      "Full Seller core as it exists today",
-      "Revenue-first dashboard and booked proof",
-      "Daily Booking Brief and Action Pack",
-      "Booking Assistance with bounded suggested message",
+      "Full Launch V1 revenue leak read",
+      "Estimated revenue at risk from no-shows, cancellations, and booking risks",
+      "Daily Leak Brief and Action Pack",
+      "Bounded suggested guidance",
       "Manual Quick Add",
-      "Executive Proof Summary with copy, share, and print",
+      "Executive Revenue Summary with copy, share, and print",
     ],
     headerTone: "text-white",
     price: "$570",
@@ -61,7 +61,7 @@ const planPresentation = {
       "Not available for checkout yet",
       "No manual fit review today",
       "No CRM, inbox, automation, or BI expansion",
-      "Must stay inside the narrow Seller model",
+      "Must stay inside the narrow Revenue Leak Detector model",
     ],
     headerTone: "text-[#f3eef9]",
     price: "Later",
@@ -141,7 +141,7 @@ function getBillingMessage(
     case "basic-fit":
       return {
         label: "Basic is limited",
-        text: "Basic is an entry plan with checkout, but it does not include Growth's premium action and proof tools.",
+        text: "Basic is an entry plan with checkout, but it does not include Growth's full leak read, premium actions, or summary sharing.",
         tone: "neutral" as const,
       };
     case "premium-future":
@@ -227,10 +227,17 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     redirect(`/api/billing/checkout?plan=${requestedPlan.toLowerCase()}`);
   }
 
+  const checkoutPlanUnavailable =
+    !checkoutState &&
+    !billingState &&
+    (requestedPlan === "BASIC" || requestedPlan === primaryBillingPlan) &&
+    !isStripeCheckoutConfiguredForPlan(requestedPlan)
+      ? "unavailable"
+      : null;
   const fitBillingState =
     !checkoutState && !billingState && requestedPlan === "PREMIUM"
       ? "premium-future"
-      : billingState;
+      : checkoutPlanUnavailable ?? billingState;
 
   const billingMessage =
     getBillingMessage(
@@ -260,7 +267,7 @@ export default async function StartPage({ searchParams }: StartPageProps) {
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <RevoryStatusBadge tone="accent">Seller billing</RevoryStatusBadge>
+            <RevoryStatusBadge tone="accent">REVORY plan</RevoryStatusBadge>
             <RevoryStatusBadge tone={billingSummary.hasStripeIdentity ? "neutral" : "future"}>
               {billingSummary.hasStripeIdentity ? "Stripe linked" : "Billing next"}
             </RevoryStatusBadge>
@@ -273,6 +280,12 @@ export default async function StartPage({ searchParams }: StartPageProps) {
 
         <section className="mx-auto max-w-[1260px] pb-4 text-center">
           <p className="rev-kicker">Pricing</p>
+          <h1 className="mt-3 font-[family:var(--font-display)] text-[clamp(2.7rem,6vw,5.6rem)] leading-[0.9] tracking-[-0.07em] text-white">
+            Choose how your clinic wants to start detecting revenue at risk.
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#a9a2b6] md:text-base md:leading-8">
+            Revenue leak detection for premium MedSpas, starting with structured appointment and booking data.
+          </p>
         </section>
 
         {billingMessage ? (
@@ -415,11 +428,11 @@ export default async function StartPage({ searchParams }: StartPageProps) {
               })}
               <div className="rounded-[24px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.018)] px-5 py-4 text-left">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#827b91]">
-                  Growth stays the full product
+                  Growth stays the full Launch V1 product
                 </p>
                 <p className="mt-2 text-[0.86rem] leading-7 text-[#8f879d]">
-                  Basic is public and useful for entry, but Growth keeps the premium action
-                  tools and proof sharing that make the MVP complete.
+                  Basic is public and useful for entry, but Growth keeps the full leak read,
+                  premium action tools and executive summary sharing that make the MVP complete.
                 </p>
               </div>
             </div>

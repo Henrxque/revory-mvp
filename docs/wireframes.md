@@ -1,5 +1,9 @@
 # Wireframes - REVORY MVP
 
+> Historical wireframe reference. Not current public positioning. Current source of truth is REVORY Revenue Leak Detector in `docs/source-of-truth.md`.
+>
+> Use these wireframes only for layout/history context. Buyer-facing claims such as recovered revenue, protected revenue, booking acceleration, or older Seller language must be checked against the current source of truth before reuse.
+
 Este documento define wireframes textuais de baixa fidelidade para o MVP da REVORY. O objetivo e orientar implementacao de layout, hierarquia e fluxo sem fechar design visual final.
 
 ## Landing
