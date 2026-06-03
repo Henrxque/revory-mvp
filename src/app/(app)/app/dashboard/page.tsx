@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
+import { RunLeakReadAction } from "@/components/dashboard/RunLeakReadAction";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { ExecutiveProofSummarySheet } from "@/components/proof/ExecutiveProofSummarySheet";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
@@ -17,7 +18,12 @@ import {
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
 import { getExecutiveProofSummaryRead } from "@/services/proof/get-executive-proof-summary-read";
+import {
+  getRevenueLeakReadForWorkspace,
+  type RevenueLeakReadState,
+} from "@/services/revenue-leaks/get-revenue-leak-read";
 import type { RevoryDecisionSupportRead } from "@/types/decision-support";
+import { syncDashboardRevenueLeaks } from "./actions";
 
 function formatCurrency(value: number | null) {
   if (value === null) {
@@ -122,6 +128,54 @@ function formatSourceStatus(status: string) {
       label: "Pending",
       tone: "neutral" as const,
     };
+}
+
+function getRevenueLeakStateLabel(state: RevenueLeakReadState) {
+  switch (state) {
+    case "HAS_REVENUE_AT_RISK":
+      return "Risk visible";
+    case "THIN_DATA":
+      return "Thin value";
+    case "DATA_STALE":
+      return "Data stale";
+    case "NO_FINANCIAL_LEAKS":
+      return "Operational";
+    case "EMPTY":
+      return "No active leaks";
+  }
+}
+
+function getRevenueLeakStateTone(state: RevenueLeakReadState) {
+  switch (state) {
+    case "HAS_REVENUE_AT_RISK":
+      return "accent" as const;
+    case "DATA_STALE":
+    case "THIN_DATA":
+      return "future" as const;
+    case "NO_FINANCIAL_LEAKS":
+      return "neutral" as const;
+    case "EMPTY":
+      return "real" as const;
+  }
+}
+
+function getRevenueLeakHeroHeadline(state: RevenueLeakReadState) {
+  switch (state) {
+    case "HAS_REVENUE_AT_RISK":
+      return "Estimated revenue at risk is now visible.";
+    case "THIN_DATA":
+      return "Leak evidence is visible, but value is still thin.";
+    case "DATA_STALE":
+      return "Your revenue risk read needs fresher data.";
+    case "NO_FINANCIAL_LEAKS":
+      return "Operational risks are visible before financial value.";
+    case "EMPTY":
+      return "Refresh the leak read after clinic data is uploaded.";
+  }
+}
+
+function formatLeakCount(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 function hasLiveImportSource(source: {
@@ -448,17 +502,17 @@ export default async function DashboardPage() {
   const configuredValuePerBooking = activationSetup.averageDealValue
     ? Number(activationSetup.averageDealValue)
     : null;
-  const [overview, dailyBriefRead] = await Promise.all([
+  const [overview, dailyBriefRead, revenueLeakRead] = await Promise.all([
     getDashboardOverview(
       workspace.id,
       configuredValuePerBooking,
     ),
     getDailyBookingBriefRead(workspace.id, activationSetup),
+    getRevenueLeakReadForWorkspace(workspace.id),
   ]);
 
   const monthChip = formatMonthChip();
   const hasBookedProofVisible = overview.bookedAppointments > 0;
-  const revenueLabel = formatCurrency(overview.estimatedImportedRevenue);
   const dealValueLabel = formatDealValue(configuredValuePerBooking);
   const mainOfferLabel = formatMainOfferLabel(activationSetup.selectedTemplate);
   const bookingPathLabel = formatBookingPathLabel(activationSetup.primaryChannel);
@@ -564,6 +618,8 @@ export default async function DashboardPage() {
   const recentMomentum = overview.recentMomentum;
   const retentionRead = overview.retentionRead;
   const renewalRead = overview.renewalRead;
+  const leakStateTone = getRevenueLeakStateTone(revenueLeakRead.state);
+  const topLeak = revenueLeakRead.topLeak;
   const strongestMonthLabel = recentMomentum.strongestMonthLabel;
   const longitudinalSummary = hasBookedProofVisible
     ? recentMomentum.bookedAppointments > 0
@@ -608,43 +664,100 @@ export default async function DashboardPage() {
               <span className="inline-flex min-h-7 items-center rounded-[12px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[10px] font-medium text-[color:var(--text-muted)]">
                 {monthChip}
               </span>
-              <RevoryStatusBadge tone={hasBookedProofVisible ? "real" : "future"}>
-                {hasBookedProofVisible ? "Evidence visible" : "Evidence pending"}
+              <RevoryStatusBadge tone={leakStateTone}>
+                {getRevenueLeakStateLabel(revenueLeakRead.state)}
               </RevoryStatusBadge>
             </div>
 
             <h1 className="rev-display-hero max-w-[31rem]">
-              {hasBookedProofVisible
-                ? "See observed revenue from appointment evidence."
-                : "Upload appointment data to start detecting revenue at risk."}
+              {getRevenueLeakHeroHeadline(revenueLeakRead.state)}
             </h1>
 
             <p className="max-w-[33rem] text-sm leading-[1.5] text-[color:var(--text-muted)]">
-              {fallbackDecisionSupportRead.summary}
+              REVORY reads persisted leak evidence from your clinic data and keeps operational risks separate from estimated financial value.
             </p>
           </div>
 
           <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
-            <p className="rev-label">Observed revenue read</p>
+            <p className="rev-label">Estimated Revenue at Risk This Month</p>
             <p className="mt-3 text-[clamp(2.2rem,3.2vw,3rem)] font-semibold leading-none text-[color:var(--accent-light)]">
-              {revenueLabel}
+              {revenueLeakRead.estimatedRevenueAtRiskLabel}
+            </p>
+            <p className="mt-2 text-[11px] leading-[1.45] text-[color:var(--text-muted)]">
+              Estimate from active persisted leak evidence, not confirmed accounting loss.
             </p>
 
             <div className="mt-4 space-y-2.5 border-t border-[rgba(255,255,255,0.08)] pt-3.5 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[color:var(--text-muted)]">Appointment evidence</span>
+                <span className="text-[color:var(--text-muted)]">Open leak signals</span>
                 <span className="font-semibold text-[color:var(--foreground)]">
-                  {overview.bookedAppointments > 0
-                    ? `${overview.bookedAppointments} booked`
-                    : "Pending"}
+                  {formatLeakCount(revenueLeakRead.activeLeakCount, "signal")}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[color:var(--text-muted)]">Estimated value</span>
+                <span className="text-[color:var(--text-muted)]">Operational risks</span>
                 <span className="font-semibold text-[color:var(--foreground)]">
-                  {dealValueLabel}
+                  {revenueLeakRead.activeOperationalRiskCount}
                 </span>
               </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[color:var(--text-muted)]">Confidence / severity</span>
+                <span className="font-semibold text-[color:var(--foreground)]">
+                  {revenueLeakRead.confidenceSummary.dominant ?? "Pending"} /{" "}
+                  {revenueLeakRead.severitySummary.dominant ?? "Pending"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[16px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.035)] px-3.5 py-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="rev-label">Top leak</p>
+                  <p className="mt-1.5 text-sm font-semibold leading-[1.35] text-[color:var(--foreground)]">
+                    {topLeak ? topLeak.label : "No active leak visible"}
+                  </p>
+                </div>
+                <RevoryStatusBadge tone={topLeak ? leakStateTone : "real"}>
+                  {topLeak ? topLeak.estimatedValueLabel : "Clear"}
+                </RevoryStatusBadge>
+              </div>
+              <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                {topLeak
+                  ? topLeak.reason
+                  : "No persisted open revenue leak is visible in the current read."}
+              </p>
+            </div>
+
+            <div className="mt-3 rounded-[16px] border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.025)] px-3.5 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="rev-label">Data freshness</p>
+                <RevoryStatusBadge
+                  tone={revenueLeakRead.dataFreshnessSummary.hasStaleDataRisk ? "future" : "real"}
+                >
+                  {revenueLeakRead.dataFreshnessSummary.label}
+                </RevoryStatusBadge>
+              </div>
+              <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
+                {revenueLeakRead.dataFreshnessSummary.note}
+              </p>
+            </div>
+
+            <div className="mt-3 rounded-[16px] border border-[rgba(194,9,90,0.22)] bg-[rgba(194,9,90,0.075)] px-3.5 py-3">
+              <p className="rev-label">Recommended action</p>
+              <p className="mt-2 text-[12px] font-medium leading-[1.5] text-[color:var(--foreground)]">
+                {revenueLeakRead.recommendedAction}
+              </p>
+            </div>
+
+            <div className="mt-3">
+              <RunLeakReadAction
+                action={syncDashboardRevenueLeaks}
+                initialState={{
+                  message: "Refresh leak signals from your latest imported data.",
+                  ok: null,
+                  summary: null,
+                }}
+              />
             </div>
 
             <div className="mt-4">

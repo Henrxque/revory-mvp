@@ -16,6 +16,7 @@ type AppSidebarProps = Readonly<{
 
 type SidebarIconKey =
   | "dashboard"
+  | "signals"
   | "appointments"
   | "settings";
 
@@ -48,6 +49,11 @@ const navGroups = (
           href: "/app/dashboard",
           icon: "dashboard",
           label: "Leak Read",
+        },
+        {
+          href: "/app/revenue-leaks",
+          icon: "signals",
+          label: "Revenue Leaks",
         },
         {
           href: "/app/imports",
@@ -98,6 +104,16 @@ function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
           <line x1="8" y1="2" x2="8" y2="6" />
           <line x1="16" y1="2" x2="16" y2="6" />
           <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      );
+    case "signals":
+      return (
+        <svg {...sharedProps}>
+          <path d="M4 19h16" />
+          <path d="M7 16V9" />
+          <path d="M12 16V5" />
+          <path d="M17 16v-4" />
+          <path d="m8.5 8.5 3-3 3 4 3-2.5" />
         </svg>
       );
     case "settings":

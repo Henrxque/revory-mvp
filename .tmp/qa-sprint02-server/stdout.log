@@ -1,0 +1,258 @@
+
+> revory-mvp@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.15.7:3000
+- Environments: .env.local, .env
+✓ Ready in 1571ms
+
+○ Compiling /sign-in/[[...sign-in]] ...
+ GET /sign-in 200 in 387ms (next.js: 56ms, application-code: 331ms)
+ GET /sign-in 200 in 95ms (next.js: 28ms, application-code: 68ms)
+ GET /sign-in 200 in 95ms (next.js: 19ms, application-code: 77ms)
+✓ Finished filesystem cache database compaction in 17.1s
+ GET /start 200 in 741ms (next.js: 66ms, application-code: 674ms)
+ GET /api/auth/session 200 in 948ms (next.js: 883ms, application-code: 65ms)
+ GET /app 200 in 564ms (next.js: 241ms, application-code: 323ms)
+ GET /api/auth/session 200 in 48ms (next.js: 18ms, application-code: 30ms)
+[revory-llm] provider available (model=gpt-4o-mini, timeout_ms=4000)
+ GET /api/auth/session 200 in 38ms (next.js: 19ms, application-code: 19ms)
+[revory-llm] activation success in 2740ms on attempt 1
+[revory-llm] activation success in 1887ms on attempt 1
+ GET /app/setup/template 200 in 5.5s (next.js: 594ms, application-code: 4.9s)
+[revory-llm] activation success in 1551ms on attempt 1
+[revory-llm] activation success in 1660ms on attempt 1
+[revory-llm] activation success in 2480ms on attempt 1
+ GET /app/setup/source 200 in 4.1s (next.js: 9ms, application-code: 4.1s)
+ POST /app/setup/template 303 in 4.2s (next.js: 16ms, application-code: 4.2s)
+  └─ ƒ submitOnboardingStep({}) in 47ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 2214ms on attempt 1
+[revory-llm] activation success in 2230ms on attempt 1
+ GET /app/setup/channel 200 in 4.0s (next.js: 3ms, application-code: 4.0s)
+ POST /app/setup/source 303 in 4.1s (next.js: 109ms, application-code: 4.0s)
+  └─ ƒ submitOnboardingStep({}) in 40ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1536ms on attempt 1
+[revory-llm] activation success in 1270ms on attempt 1
+[revory-llm] activation success in 2272ms on attempt 1
+ GET /app/setup/deal_value 200 in 4.6s (next.js: 6ms, application-code: 4.6s)
+ POST /app/setup/channel 303 in 4.7s (next.js: 25ms, application-code: 4.7s)
+  └─ ƒ submitOnboardingStep({}) in 33ms src/app/(app)/app/setup/actions.ts
+ GET /app 200 in 52ms (next.js: 3ms, application-code: 49ms)
+ POST /app/setup/activation 303 in 208ms (next.js: 16ms, application-code: 192ms)
+  └─ ƒ submitOnboardingStep({}) in 131ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 2127ms on attempt 1
+ GET /app/setup/mode 200 in 4.2s (next.js: 3ms, application-code: 4.2s)
+ POST /app/setup/deal_value 303 in 4.2s (next.js: 16ms, application-code: 4.2s)
+  └─ ƒ submitOnboardingStep({}) in 40ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 2731ms on attempt 1
+ GET /app/setup/activation 200 in 4.1s (next.js: 4ms, application-code: 4.1s)
+ POST /app/setup/mode 303 in 4.3s (next.js: 104ms, application-code: 4.2s)
+  └─ ƒ submitOnboardingStep({}) in 40ms src/app/(app)/app/setup/actions.ts
+[revory-llm] imports success in 2052ms on attempt 1
+ GET /app/imports 200 in 2.2s (next.js: 5ms, application-code: 2.2s)
+[revory-llm] imports success in 2134ms on attempt 1
+ GET /app/imports 200 in 2.3s (next.js: 55ms, application-code: 2.3s)
+[revory-llm] imports success in 1710ms on attempt 1
+ POST /app/imports 200 in 2.1s (next.js: 3ms, application-code: 2.1s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 314ms src/app/(app)/app/imports/actions.ts
+ GET /api/auth/session 200 in 30ms (next.js: 19ms, application-code: 11ms)
+[revory-llm] dashboard success in 1367ms on attempt 2
+[revory-llm] dashboard success in 2223ms on attempt 1
+ GET /app/dashboard 200 in 6.6s (next.js: 38ms, application-code: 6.6s)
+ GET /api/auth/session 200 in 49ms (next.js: 18ms, application-code: 31ms)
+[revory-llm] imports success in 1848ms on attempt 1
+ GET /app/imports 200 in 2.1s (next.js: 3ms, application-code: 2.1s)
+[revory-llm] lead_suggested_message success in 1347ms on attempt 1
+[revory-llm] lead_suggested_message success in 1445ms on attempt 1
+ POST /app/imports 200 in 1651ms (next.js: 3ms, application-code: 1648ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 123ms src/app/(app)/app/imports/actions.ts
+[revory-llm] lead_suggested_message success in 1711ms on attempt 1
+ GET /api/auth/session 200 in 193ms (next.js: 21ms, application-code: 171ms)
+[revory-llm] dashboard success in 1799ms on attempt 1
+[revory-llm] dashboard success in 2017ms on attempt 1
+ GET /app/dashboard 200 in 4.4s (next.js: 3ms, application-code: 4.4s)
+ GET /api/auth/session 200 in 47ms (next.js: 23ms, application-code: 24ms)
+[revory-llm] imports success in 1511ms on attempt 1
+ GET /app/imports 200 in 1630ms (next.js: 5ms, application-code: 1625ms)
+[revory-llm] imports success in 1577ms on attempt 1
+ POST /app/imports 200 in 2.7s (next.js: 3ms, application-code: 2.7s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 1036ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 2.1s (next.js: 4ms, application-code: 2.1s)
+ GET /api/auth/session 200 in 42ms (next.js: 18ms, application-code: 24ms)
+[revory-llm] lead_suggested_message success in 1205ms on attempt 1
+[revory-llm] lead_suggested_message success in 1241ms on attempt 1
+[revory-llm] dashboard success in 1607ms on attempt 1
+[revory-llm] lead_suggested_message success in 1535ms on attempt 1
+[revory-llm] imports success in 1329ms on attempt 1
+[revory-llm] dashboard success in 1605ms on attempt 1
+ GET /app/dashboard 200 in 3.5s (next.js: 7ms, application-code: 3.5s)
+ GET /sign-in 200 in 184ms (next.js: 55ms, application-code: 129ms)
+ GET /sign-in 200 in 130ms (next.js: 28ms, application-code: 102ms)
+ GET /start 200 in 311ms (next.js: 21ms, application-code: 290ms)
+ GET /api/auth/session 200 in 67ms (next.js: 25ms, application-code: 42ms)
+ GET /app 200 in 323ms (next.js: 132ms, application-code: 191ms)
+ GET /api/auth/session 200 in 42ms (next.js: 4ms, application-code: 37ms)
+ GET /api/auth/session 200 in 54ms (next.js: 31ms, application-code: 23ms)
+[revory-llm] activation success in 3308ms on attempt 1
+[revory-llm] activation success in 1469ms on attempt 1
+ GET /app/setup/template 200 in 5.0s (next.js: 48ms, application-code: 4.9s)
+[revory-llm] activation success in 1673ms on attempt 1
+[revory-llm] activation success in 1837ms on attempt 1
+[revory-llm] activation success in 3004ms on attempt 1
+ GET /app/setup/source 200 in 4.8s (next.js: 11ms, application-code: 4.8s)
+ POST /app/setup/template 303 in 4.9s (next.js: 90ms, application-code: 4.8s)
+  └─ ƒ submitOnboardingStep({}) in 26ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1669ms on attempt 1
+[revory-llm] activation success in 1256ms on attempt 1
+[revory-llm] activation success in 2476ms on attempt 1
+ GET /app/setup/channel 200 in 4.5s (next.js: 7ms, application-code: 4.5s)
+ POST /app/setup/source 303 in 4.7s (next.js: 106ms, application-code: 4.6s)
+  └─ ƒ submitOnboardingStep({}) in 63ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1641ms on attempt 1
+ GET /app/setup/deal_value 200 in 3.4s (next.js: 5ms, application-code: 3.4s)
+ POST /app/setup/channel 303 in 3.5s (next.js: 20ms, application-code: 3.5s)
+  └─ ƒ submitOnboardingStep({}) in 25ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 2114ms on attempt 1
+ GET /app/setup/mode 200 in 3.5s (next.js: 5ms, application-code: 3.5s)
+ POST /app/setup/deal_value 303 in 3.5s (next.js: 18ms, application-code: 3.5s)
+  └─ ƒ submitOnboardingStep({}) in 31ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1369ms on attempt 1
+ GET /app 200 in 66ms (next.js: 3ms, application-code: 63ms)
+ POST /app/setup/activation 303 in 183ms (next.js: 19ms, application-code: 165ms)
+  └─ ƒ submitOnboardingStep({}) in 89ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1463ms on attempt 1
+ GET /app/setup/activation 200 in 2.9s (next.js: 4ms, application-code: 2.9s)
+ POST /app/setup/mode 303 in 3.2s (next.js: 199ms, application-code: 3.0s)
+  └─ ƒ submitOnboardingStep({}) in 15ms src/app/(app)/app/setup/actions.ts
+[revory-llm] imports success in 1306ms on attempt 1
+ GET /app/imports 200 in 1411ms (next.js: 6ms, application-code: 1405ms)
+[revory-llm] imports success in 2235ms on attempt 1
+ GET /app/imports 200 in 2.6s (next.js: 46ms, application-code: 2.6s)
+[revory-llm] imports success in 1388ms on attempt 1
+ POST /app/imports 200 in 1596ms (next.js: 4ms, application-code: 1593ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 111ms src/app/(app)/app/imports/actions.ts
+ GET /api/auth/session 200 in 56ms (next.js: 29ms, application-code: 27ms)
+[revory-llm] dashboard success in 1549ms on attempt 1
+[revory-llm] dashboard success in 3415ms on attempt 1
+ GET /app/dashboard 200 in 5.4s (next.js: 186ms, application-code: 5.3s)
+ GET /api/auth/session 200 in 54ms (next.js: 27ms, application-code: 27ms)
+[revory-llm] imports success in 1197ms on attempt 1
+ GET /app/imports 200 in 1353ms (next.js: 6ms, application-code: 1348ms)
+[revory-llm] lead_suggested_message success in 1008ms on attempt 1
+[revory-llm] lead_suggested_message success in 1221ms on attempt 1
+ POST /app/imports 200 in 1777ms (next.js: 5ms, application-code: 1773ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 149ms src/app/(app)/app/imports/actions.ts
+[revory-llm] lead_suggested_message success in 1637ms on attempt 1
+ GET /api/auth/session 200 in 55ms (next.js: 24ms, application-code: 31ms)
+[revory-llm] dashboard success in 1297ms on attempt 1
+[revory-llm] dashboard success in 1491ms on attempt 1
+ GET /app/dashboard 200 in 3.3s (next.js: 4ms, application-code: 3.3s)
+ GET /api/auth/session 200 in 41ms (next.js: 21ms, application-code: 20ms)
+[revory-llm] imports success in 1216ms on attempt 1
+ GET /app/imports 200 in 1337ms (next.js: 4ms, application-code: 1333ms)
+[revory-llm] imports success in 2617ms on attempt 1
+ POST /app/imports 200 in 3.9s (next.js: 4ms, application-code: 3.9s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 1185ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 2.6s (next.js: 3ms, application-code: 2.6s)
+ GET /api/auth/session 200 in 42ms (next.js: 19ms, application-code: 23ms)
+[revory-llm] lead_suggested_message success in 1124ms on attempt 1
+[revory-llm] dashboard success in 1326ms on attempt 1
+[revory-llm] lead_suggested_message success in 1270ms on attempt 1
+[revory-llm] lead_suggested_message success in 1486ms on attempt 1
+[revory-llm] dashboard success in 1791ms on attempt 1
+ GET /app/dashboard 200 in 3.4s (next.js: 17ms, application-code: 3.3s)
+[revory-llm] imports success in 1785ms on attempt 1
+✓ Compiled in 465ms
+✓ Compiled in 656ms
+✓ Compiled in 294ms
+✓ Compiled in 168ms
+✓ Compiled in 175ms
+✓ Compiled in 1102ms
+✓ Compiled in 165ms
+✓ Compiled in 147ms
+ GET /sign-in 200 in 434ms (next.js: 211ms, application-code: 223ms)
+ GET /sign-in 200 in 69ms (next.js: 17ms, application-code: 52ms)
+ GET /start 200 in 485ms (next.js: 147ms, application-code: 338ms)
+ GET /api/auth/session 200 in 164ms (next.js: 142ms, application-code: 22ms)
+ GET /app 200 in 474ms (next.js: 221ms, application-code: 253ms)
+ GET /api/auth/session 200 in 40ms (next.js: 21ms, application-code: 19ms)
+[revory-llm] provider available (model=gpt-4o-mini, timeout_ms=4000)
+ GET /api/auth/session 200 in 41ms (next.js: 3ms, application-code: 38ms)
+[revory-llm] activation success in 3545ms on attempt 1
+[revory-llm] activation success in 3645ms on attempt 1
+ GET /app/setup/template 200 in 7.4s (next.js: 49ms, application-code: 7.3s)
+[revory-llm] activation success in 1747ms on attempt 1
+[revory-llm] activation success in 2362ms on attempt 1
+ GET /app/setup/source 200 in 4.2s (next.js: 4ms, application-code: 4.2s)
+ POST /app/setup/template 303 in 4.3s (next.js: 67ms, application-code: 4.2s)
+  └─ ƒ submitOnboardingStep({}) in 34ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 2944ms on attempt 1
+[revory-llm] activation success in 1836ms on attempt 1
+[revory-llm] activation success in 2265ms on attempt 1
+[revory-llm] activation success in 1697ms on attempt 1
+ GET /app 200 in 49ms (next.js: 3ms, application-code: 46ms)
+ POST /app/setup/activation 303 in 147ms (next.js: 14ms, application-code: 133ms)
+  └─ ƒ submitOnboardingStep({}) in 75ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 3492ms on attempt 1
+ GET /app/setup/channel 200 in 6.5s (next.js: 4ms, application-code: 6.5s)
+ POST /app/setup/source 303 in 6.7s (next.js: 98ms, application-code: 6.6s)
+  └─ ƒ submitOnboardingStep({}) in 44ms src/app/(app)/app/setup/actions.ts
+[revory-llm] activation success in 1593ms on attempt 1
+ GET /app/setup/activation 200 in 3.4s (next.js: 4ms, application-code: 3.4s)
+ POST /app/setup/mode 303 in 3.5s (next.js: 94ms, application-code: 3.4s)
+  └─ ƒ submitOnboardingStep({}) in 23ms src/app/(app)/app/setup/actions.ts
+[revory-llm] imports success in 1349ms on attempt 1
+ GET /app/imports 200 in 1576ms (next.js: 59ms, application-code: 1517ms)
+[revory-llm] imports success in 1548ms on attempt 1
+ GET /app/imports 200 in 1725ms (next.js: 4ms, application-code: 1720ms)
+[revory-llm] provider available (model=gpt-4o-mini, timeout_ms=4000)
+ POST /app/setup/channel 303 in 7.4s (next.js: 18ms, application-code: 7.3s)
+  └─ ƒ submitOnboardingStep({}) in 12ms src/app/(app)/app/setup/actions.ts
+ POST /app/imports 200 in 2.8s (next.js: 5ms, application-code: 2.8s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 110ms src/app/(app)/app/imports/actions.ts
+ POST /app/setup/deal_value 303 in 6.7s (next.js: 95ms, application-code: 6.6s)
+  └─ ƒ submitOnboardingStep({}) in 14ms src/app/(app)/app/setup/actions.ts
+ GET /app/setup/deal_value 200 in 7.4s (next.js: 4ms, application-code: 7.4s)
+[revory-llm] imports success in 2667ms on attempt 1
+ GET /api/auth/session 200 in 30ms (next.js: 19ms, application-code: 11ms)
+[revory-llm] activation success in 2705ms on attempt 2
+[revory-llm] dashboard success in 3126ms on attempt 1
+[revory-llm] activation success in 2954ms on attempt 2
+ GET /app/setup/mode 200 in 9.6s (next.js: 3ms, application-code: 9.5s)
+[revory-llm] dashboard success in 2228ms on attempt 1
+ GET /app/dashboard 200 in 6.2s (next.js: 151ms, application-code: 6.1s)
+ GET /api/auth/session 200 in 42ms (next.js: 19ms, application-code: 23ms)
+[revory-llm] imports success in 1903ms on attempt 1
+ GET /app/imports 200 in 2.1s (next.js: 3ms, application-code: 2.1s)
+[revory-llm] lead_suggested_message success in 1189ms on attempt 1
+[revory-llm] lead_suggested_message success in 1290ms on attempt 1
+ POST /app/imports 200 in 1577ms (next.js: 3ms, application-code: 1573ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 87ms src/app/(app)/app/imports/actions.ts
+ GET /api/auth/session 200 in 39ms (next.js: 24ms, application-code: 15ms)
+[revory-llm] lead_suggested_message success in 856ms on attempt 1
+[revory-llm] lead_suggested_message success in 1291ms on attempt 1
+[revory-llm] lead_suggested_message success in 1344ms on attempt 1
+[revory-llm] lead_suggested_message success in 3223ms on attempt 1
+[revory-llm] dashboard success in 1471ms on attempt 1
+[revory-llm] dashboard success in 2355ms on attempt 1
+ GET /app/dashboard 200 in 5.6s (next.js: 124ms, application-code: 5.5s)
+ GET /api/auth/session 200 in 30ms (next.js: 19ms, application-code: 11ms)
+[revory-llm] imports success in 1950ms on attempt 2
+ GET /app/imports 200 in 6.1s (next.js: 3ms, application-code: 6.1s)
+[revory-llm] imports success in 3495ms on attempt 1
+ POST /app/imports 200 in 4.2s (next.js: 4ms, application-code: 4.2s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 635ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 2.2s (next.js: 4ms, application-code: 2.2s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 1546ms src/app/(app)/app/imports/actions.ts
+ GET /api/auth/session 200 in 38ms (next.js: 21ms, application-code: 17ms)
+[revory-llm] lead_suggested_message success in 1419ms on attempt 1
+[revory-llm] lead_suggested_message success in 1623ms on attempt 1
+[revory-llm] lead_suggested_message success in 1811ms on attempt 1
+[revory-llm] lead_suggested_message success in 1282ms on attempt 1
+[revory-llm] lead_suggested_message success in 1729ms on attempt 1
+[revory-llm] lead_suggested_message success in 3956ms on attempt 1
+[revory-llm] dashboard success in 2011ms on attempt 1
+[revory-llm] dashboard success in 1862ms on attempt 1
+ GET /app/dashboard 200 in 8.1s (next.js: 112ms, application-code: 8.0s)

@@ -110,6 +110,34 @@ enum LeadBookingOpportunityStatus {
   CLOSED
 }
 
+enum RevenueLeakType {
+  NO_SHOW_REVENUE
+  CANCELED_NOT_RECOVERED
+  STALE_BOOKED_PROOF
+  MISSING_CONTACT
+  BOOKING_PATH_BLOCKED
+}
+
+enum RevenueLeakSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RevenueLeakStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum RevenueLeakConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model User {
   id                     String          @id @default(cuid())
   clerkUserId            String?         @unique
@@ -159,6 +187,7 @@ model Workspace {
   reviewRequests           ReviewRequest[]
   metricsSnapshots         MetricsSnapshot[]
   leadBookingOpportunities LeadBookingOpportunity[]
+  revenueLeaks             RevenueLeak[]           @relation("WorkspaceRevenueLeaks")
 
   @@map("workspaces")
 }
@@ -220,6 +249,7 @@ model DataSource {
   clients                   Client[]
   appointments              Appointment[]
   leadBookingOpportunities  LeadBookingOpportunity[]
+  revenueLeaks              RevenueLeak[]           @relation("DataSourceRevenueLeaks")
 
   @@unique([workspaceId, name])
   @@index([workspaceId, type])
@@ -252,6 +282,7 @@ model Client {
   recoveryOpportunities  RecoveryOpportunity[]
   reviewRequests         ReviewRequest[]
   leadBookingOpportunity LeadBookingOpportunity?
+  revenueLeaks           RevenueLeak[]           @relation("ClientRevenueLeaks")
 
   // Effective uniqueness applies when externalId is present.
   @@unique([workspaceId, externalId])
@@ -287,6 +318,7 @@ model Appointment {
   dataSource            DataSource?           @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
   recoveryOpportunities RecoveryOpportunity[]
   reviewRequests        ReviewRequest[]
+  revenueLeaks          RevenueLeak[]          @relation("AppointmentRevenueLeaks")
 
   // Effective uniqueness applies when externalId is present.
   @@unique([workspaceId, externalId])
@@ -412,8 +444,54 @@ model LeadBookingOpportunity {
   workspace          Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   client             Client                       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   intakeDataSource   DataSource?                  @relation(fields: [intakeDataSourceId], references: [id], onDelete: SetNull)
+  revenueLeaks       RevenueLeak[]                @relation("LeadBookingOpportunityRevenueLeaks")
 
   @@index([workspaceId, status, updatedAt])
   @@index([workspaceId, intakeDataSourceId])
   @@map("lead_booking_opportunities")
+}
+
+model RevenueLeak {
+  id                              String                       @id @default(cuid())
+  workspaceId                     String
+  sourceDataSourceId              String?
+  relatedClientId                 String?
+  relatedAppointmentId            String?
+  relatedLeadBookingOpportunityId String?
+  leakType                        RevenueLeakType
+  severity                        RevenueLeakSeverity          @default(MEDIUM)
+  status                          RevenueLeakStatus            @default(OPEN)
+  confidence                      RevenueLeakConfidence        @default(MEDIUM)
+  estimatedValueCents             Int?
+  currency                        String                       @default("USD")
+  detectedAt                      DateTime                     @default(now())
+  sourceWindowStart               DateTime?
+  sourceWindowEnd                 DateTime?
+  reason                          String
+  recommendedAction               String
+  evidenceJson                    Json
+  providerName                    String?
+  serviceName                     String?
+  sourceName                      String?
+  fingerprint                     String
+  resolvedAt                      DateTime?
+  createdAt                       DateTime                     @default(now())
+  updatedAt                       DateTime                     @updatedAt
+  workspace                       Workspace                    @relation("WorkspaceRevenueLeaks", fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceDataSource                DataSource?                  @relation("DataSourceRevenueLeaks", fields: [sourceDataSourceId], references: [id], onDelete: SetNull)
+  relatedClient                   Client?                      @relation("ClientRevenueLeaks", fields: [relatedClientId], references: [id], onDelete: SetNull)
+  relatedAppointment              Appointment?                 @relation("AppointmentRevenueLeaks", fields: [relatedAppointmentId], references: [id], onDelete: SetNull)
+  relatedLeadBookingOpportunity   LeadBookingOpportunity?      @relation("LeadBookingOpportunityRevenueLeaks", fields: [relatedLeadBookingOpportunityId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, fingerprint])
+  @@index([workspaceId, status, detectedAt])
+  @@index([workspaceId, leakType, status])
+  @@index([workspaceId, severity, status])
+  @@index([workspaceId, confidence])
+  @@index([workspaceId, sourceWindowStart, sourceWindowEnd])
+  @@index([sourceDataSourceId])
+  @@index([relatedClientId])
+  @@index([relatedAppointmentId])
+  @@index([relatedLeadBookingOpportunityId])
+  @@map("revenue_leaks")
 }
