@@ -26,6 +26,12 @@ export default function PrivacyPage() {
             they should not be treated as a free-form conversation engine or managed service.
           </p>
           <p>
+            For AI-assisted CSV review, REVORY sends only a bounded, sanitized profile such as
+            column names, field types, fill-rate signals and limited sample shapes. The full CSV
+            file is not sent to the AI provider, and AI review does not import rows, create revenue
+            leaks, or calculate confirmed revenue loss.
+          </p>
+          <p>
             For privacy questions or deletion requests, contact REVORY support through the
             support channel provided during purchase or onboarding.
           </p>

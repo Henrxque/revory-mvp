@@ -75,6 +75,32 @@ function assert(condition, message) {
   }
 }
 
+function assertFileIncludes(filePath, patterns, message) {
+  const content = fs.readFileSync(path.join(projectRoot, filePath), "utf8");
+
+  for (const pattern of patterns) {
+    assert(pattern.test(content), `${message}: missing ${pattern}`);
+  }
+}
+
+function assertStaticLaunchContracts() {
+  assertFileIncludes(
+    path.join("src", "app", "(app)", "app", "imports", "actions.ts"),
+    [/mappingDecisionDraft/, /Review and confirm the final mapping before importing/i],
+    "Import action should require user-reviewed mapping before persistence",
+  );
+  assertFileIncludes(
+    path.join("services", "imports", "ai-csv-triage.ts"),
+    [/full CSV/i, /reviewRequired/i],
+    "AI CSV triage should stay bounded and review-required",
+  );
+  assertFileIncludes(
+    path.join("src", "app", "(app)", "app", "dashboard", "page.tsx"),
+    [/Estimated Revenue at Risk This Month/i, /not confirmed accounting loss/i],
+    "Dashboard should expose launch revenue-risk truth copy",
+  );
+}
+
 async function assertServerReady() {
   const response = await fetch(`${baseUrl}/sign-in`, {
     redirect: "manual",
@@ -104,6 +130,7 @@ async function cleanupPreviousRerunUsers() {
 
     for (const workspace of workspaces) {
       await prisma.$transaction([
+        prisma.revenueLeak.deleteMany({ where: { workspaceId: workspace.id } }),
         prisma.metricsSnapshot.deleteMany({ where: { workspaceId: workspace.id } }),
         prisma.reviewRequest.deleteMany({ where: { workspaceId: workspace.id } }),
         prisma.recoveryOpportunity.deleteMany({ where: { workspaceId: workspace.id } }),
@@ -221,10 +248,42 @@ async function fillOnboarding(page) {
 async function uploadCsv(page, inputIndex, filePath, shotPrefix) {
   const fileName = path.basename(filePath);
   const fileInput = page.locator('input[type="file"]').nth(inputIndex);
-  const lane = fileInput.locator("xpath=ancestor::section[1]");
+  const lane = fileInput.locator(
+    "xpath=ancestor::section[contains(@class, 'rev-shell-panel')][1]",
+  );
 
   await fileInput.setInputFiles(filePath);
-  await lane.getByRole("button", { name: /open review|continue review/i }).click();
+
+  try {
+    await lane.getByText(fileName, { exact: false }).first().waitFor({
+      timeout: 5000,
+    });
+  } catch {
+    // A fast route transition can expose the server-rendered input before the
+    // client change handler is hydrated. Retry the same user selection once.
+    await page.waitForTimeout(750);
+    await fileInput.setInputFiles([]);
+    await fileInput.setInputFiles(filePath);
+    await lane.getByText(fileName, { exact: false }).first().waitFor({
+      timeout: 15000,
+    });
+  }
+
+  await lane.getByText(/Review mapping before importing/i).first().waitFor({
+    timeout: 60000,
+  });
+  await lane
+    .getByText(/AI-assisted|Deterministic fallback|Using saved mapping/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+  await lane
+    .getByText(/AI-assisted mapping is a suggestion, not a final import/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+
+  await lane
+    .getByRole("button", { name: /open review|continue review/i })
+    .click({ timeout: 60000 });
   await lane
     .getByRole("button", {
       name: /confirm and make visible|confirm mapping and make visible/i,
@@ -237,6 +296,76 @@ async function uploadCsv(page, inputIndex, filePath, shotPrefix) {
     .waitFor({ timeout: 60000 });
   await page.waitForTimeout(500);
   await screenshot(page, shotPrefix);
+}
+
+async function assertRouteLoads(page, route, expectedText, shotName) {
+  await gotoStable(page, `${baseUrl}${route}`);
+  await page.getByText(expectedText).first().waitFor({ timeout: 60000 });
+  await screenshot(page, shotName);
+}
+
+async function runLeakReadFromDashboard(page) {
+  await gotoStable(page, `${baseUrl}/app/dashboard`);
+  await page
+    .getByRole("button", { name: /run leak read/i })
+    .first()
+    .click({ timeout: 60000 });
+  await page
+    .getByText(/Leak read refreshed|detected \/|created \/|unchanged/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+  await gotoStable(page, `${baseUrl}/app/dashboard`);
+  await page.getByText(/Estimated Revenue at Risk This Month/i).first().waitFor({
+    timeout: 60000,
+  });
+  await page.getByText(/not confirmed accounting loss/i).first().waitFor({
+    timeout: 60000,
+  });
+  await page.getByText(/Today.s Leak Brief/i).first().waitFor({
+    timeout: 60000,
+  });
+  await page.getByRole("button", { name: /share leak summary/i }).first().waitFor({
+    timeout: 60000,
+  });
+  await screenshot(page, "15-dashboard-after-leak-read");
+}
+
+async function assertRevenueLeaksPage(page) {
+  await gotoStable(page, `${baseUrl}/app/revenue-leaks`);
+  await page.getByText("Revenue Leaks", { exact: true }).first().waitFor({
+    timeout: 60000,
+  });
+  await page
+    .getByText(/Review the revenue risks REVORY detected from your imported clinic data/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+  await page
+    .getByText(/Financial leak|Operational risk|Data quality risk/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+  await page
+    .getByText(/does not count them as confirmed financial loss|not counted as confirmed financial loss|not confirmed financial loss/i)
+    .first()
+    .waitFor({ timeout: 60000 });
+  await screenshot(page, "16-revenue-leaks-page");
+}
+
+async function assertExecutiveShareGate(page) {
+  await gotoStable(page, `${baseUrl}/app/dashboard`);
+  await page
+    .getByRole("button", { name: /share leak summary/i })
+    .first()
+    .click({ timeout: 60000 });
+  await page
+    .getByRole("button", { name: /copy summary/i })
+    .first()
+    .waitFor({ timeout: 60000 });
+  await page
+    .getByRole("button", { name: /print or save PDF/i })
+    .first()
+    .waitFor({ timeout: 60000 });
+  await page.getByRole("button", { name: /close/i }).first().click();
+  await screenshot(page, "17-executive-summary-growth-gate");
 }
 
 function buildMonthlySnapshot(appointments) {
@@ -281,7 +410,17 @@ function verifyMonthlySnapshot(monthly) {
 }
 
 async function collectAndVerifyResults(workspaceId) {
-  const [activation, medSpa, dataSources, appointments, clientsCount, supportClients, supportedBooked] =
+  const [
+    activation,
+    medSpa,
+    dataSources,
+    appointments,
+    clientsCount,
+    supportClients,
+    supportedBooked,
+    revenueLeaksCount,
+    activeFinancialLeaksCount,
+  ] =
     await Promise.all([
       prisma.activationSetup.findUnique({
         where: { workspaceId },
@@ -331,6 +470,20 @@ async function collectAndVerifyResults(workspaceId) {
           workspaceId,
         },
       }),
+      prisma.revenueLeak.count({
+        where: { workspaceId },
+      }),
+      prisma.revenueLeak.count({
+        where: {
+          leakType: {
+            in: ["NO_SHOW_REVENUE", "CANCELED_NOT_RECOVERED"],
+          },
+          status: {
+            in: ["OPEN", "ACKNOWLEDGED"],
+          },
+          workspaceId,
+        },
+      }),
     ]);
 
   const { explicitRevenue, monthly } = buildMonthlySnapshot(appointments);
@@ -360,6 +513,11 @@ async function collectAndVerifyResults(workspaceId) {
     clientsSource?.lastImportSuccessRowCount === expectedResults.clientsImportedRows,
     `Expected ${expectedResults.clientsImportedRows} imported client rows`,
   );
+  assert(revenueLeaksCount > 0, "Expected persisted revenue leaks after manual leak read");
+  assert(
+    activeFinancialLeaksCount > 0,
+    "Expected active financial revenue leaks after manual leak read",
+  );
   verifyMonthlySnapshot(monthly);
 
   return {
@@ -370,6 +528,8 @@ async function collectAndVerifyResults(workspaceId) {
     explicitRevenue,
     medSpa,
     monthly,
+    revenueLeaksCount,
+    activeFinancialLeaksCount,
     supportClients,
     supportedBooked,
   };
@@ -377,6 +537,7 @@ async function collectAndVerifyResults(workspaceId) {
 
 async function main() {
   resetEvidenceDirectory();
+  assertStaticLaunchContracts();
   await cleanupPreviousRerunUsers();
   await assertServerReady();
 
@@ -460,6 +621,18 @@ async function main() {
 
   await gotoStable(page, `${baseUrl}/app/dashboard`);
   await screenshot(page, "14-dashboard-6mo");
+
+  await runLeakReadFromDashboard(page);
+  await assertRevenueLeaksPage(page);
+  await assertExecutiveShareGate(page);
+  await assertRouteLoads(page, "/privacy", /Privacy/i, "18-privacy");
+  await assertRouteLoads(page, "/terms", /Terms/i, "19-terms");
+  await assertRouteLoads(
+    page,
+    "/start",
+    /Choose how your clinic wants to start|Estimated Revenue at Risk This Month/i,
+    "20-start-final",
+  );
 
   const finalWorkspaceContext = await getWorkspaceContext();
   assert(finalWorkspaceContext?.workspace, "Final workspace context was not available.");

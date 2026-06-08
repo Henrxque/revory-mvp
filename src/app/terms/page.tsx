@@ -22,8 +22,21 @@ export default function TermsPage() {
           </p>
           <p>
             Revenue at risk is an estimate based on imported or connected data, not a confirmed
-            accounting loss. Summaries and guidance outputs are not guarantees of conversion,
-            revenue, attribution, clinical outcomes, or business results.
+            accounting loss. Operational and data-quality risks may indicate issues to review,
+            but they are not counted as financial loss unless deterministic financial evidence
+            supports that estimate.
+          </p>
+          <p>
+            AI-assisted CSV review is advisory and requires user review. AI does not import data,
+            create revenue leaks, calculate confirmed revenue loss, or override deterministic
+            validation. Unsupported datasets, including payments and lead-shaped files, may be
+            profiled when visible in the product but are not imported unless the current product
+            flow explicitly supports them.
+          </p>
+          <p>
+            Summaries and guidance outputs are not guarantees of conversion, revenue, attribution,
+            clinical outcomes, legal outcomes, or business results. REVORY does not provide
+            medical, clinical, legal, accounting, or billing advice.
           </p>
           <p>
             If billing is active, subscription access, card updates, and cancellation are handled

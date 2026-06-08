@@ -1,0 +1,64 @@
+
+> revory-mvp@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.15.5:3000
+- Environments: .env.local, .env
+✓ Ready in 1340ms
+
+ GET /sign-in 200 in 1673ms (next.js: 1400ms, application-code: 273ms)
+ GET /start 200 in 473ms (next.js: 92ms, application-code: 381ms)
+ GET /api/auth/session 200 in 1217ms (next.js: 1065ms, application-code: 153ms)
+ GET /app 200 in 827ms (next.js: 256ms, application-code: 571ms)
+ GET /api/auth/session 200 in 39ms (next.js: 27ms, application-code: 13ms)
+ GET /app/setup/template 200 in 1123ms (next.js: 523ms, application-code: 600ms)
+ GET /api/auth/session 200 in 48ms (next.js: 22ms, application-code: 26ms)
+ GET /app/setup/source 200 in 107ms (next.js: 6ms, application-code: 101ms)
+ POST /app/setup/template 303 in 209ms (next.js: 34ms, application-code: 175ms)
+  └─ ƒ submitOnboardingStep({}) in 41ms src/app/(app)/app/setup/actions.ts
+ GET /app/setup/channel 200 in 107ms (next.js: 4ms, application-code: 103ms)
+ POST /app/setup/source 303 in 371ms (next.js: 141ms, application-code: 231ms)
+  └─ ƒ submitOnboardingStep({}) in 60ms src/app/(app)/app/setup/actions.ts
+ GET /app/setup/deal_value 200 in 87ms (next.js: 4ms, application-code: 83ms)
+ POST /app/setup/channel 303 in 146ms (next.js: 18ms, application-code: 127ms)
+  └─ ƒ submitOnboardingStep({}) in 25ms src/app/(app)/app/setup/actions.ts
+ GET /app/setup/mode 200 in 120ms (next.js: 4ms, application-code: 116ms)
+ POST /app/setup/deal_value 303 in 349ms (next.js: 198ms, application-code: 151ms)
+  └─ ƒ submitOnboardingStep({}) in 14ms src/app/(app)/app/setup/actions.ts
+ GET /app/setup/activation 200 in 104ms (next.js: 3ms, application-code: 101ms)
+ POST /app/setup/mode 303 in 262ms (next.js: 106ms, application-code: 155ms)
+  └─ ƒ submitOnboardingStep({}) in 38ms src/app/(app)/app/setup/actions.ts
+ GET /app 200 in 99ms (next.js: 5ms, application-code: 93ms)
+ POST /app/setup/activation 303 in 334ms (next.js: 16ms, application-code: 318ms)
+  └─ ƒ submitOnboardingStep({}) in 206ms src/app/(app)/app/setup/actions.ts
+ GET /app/imports 200 in 170ms (next.js: 8ms, application-code: 162ms)
+ GET /app/imports 200 in 312ms (next.js: 58ms, application-code: 254ms)
+ POST /app/imports 200 in 78ms (next.js: 3ms, application-code: 75ms)
+  └─ ƒ triageCsvFileAction({}) in 62ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 322ms (next.js: 5ms, application-code: 318ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 195ms src/app/(app)/app/imports/actions.ts
+ GET /api/auth/session 200 in 49ms (next.js: 32ms, application-code: 16ms)
+ GET /app/dashboard 200 in 2.3s (next.js: 184ms, application-code: 2.2s)
+ GET /app/imports 200 in 835ms (next.js: 178ms, application-code: 657ms)
+ GET /api/auth/session 200 in 49ms (next.js: 25ms, application-code: 24ms)
+ POST /app/imports 200 in 69ms (next.js: 4ms, application-code: 65ms)
+  └─ ƒ triageCsvFileAction({}) in 54ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 204ms (next.js: 3ms, application-code: 201ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 116ms src/app/(app)/app/imports/actions.ts
+ GET /app/dashboard 200 in 504ms (next.js: 4ms, application-code: 500ms)
+ GET /api/auth/session 200 in 77ms (next.js: 42ms, application-code: 35ms)
+ GET /app/imports 200 in 265ms (next.js: 5ms, application-code: 260ms)
+ GET /api/auth/session 200 in 26ms (next.js: 3ms, application-code: 22ms)
+ POST /app/imports 200 in 56ms (next.js: 4ms, application-code: 53ms)
+  └─ ƒ triageCsvFileAction({}) in 40ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 1257ms (next.js: 4ms, application-code: 1254ms)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 1152ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 59ms (next.js: 5ms, application-code: 53ms)
+  └─ ƒ triageCsvFileAction({}) in 43ms src/app/(app)/app/imports/actions.ts
+ POST /app/imports 200 in 2.7s (next.js: 7ms, application-code: 2.7s)
+  └─ ƒ uploadCsvFile({"status":"idle"}, {}) in 2352ms src/app/(app)/app/imports/actions.ts
+ GET /app/dashboard 200 in 566ms (next.js: 169ms, application-code: 397ms)
+ GET /api/auth/session 200 in 31ms (next.js: 21ms, application-code: 11ms)
+[?25h

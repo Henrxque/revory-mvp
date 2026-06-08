@@ -27,12 +27,12 @@ const planPresentation = {
   BASIC: {
     ctaHref: "/api/billing/checkout?plan=basic",
     features: [
-      "Limited estimated revenue at risk read",
-      "Structured appointment and booking data intake",
+      "Dashboard leak read",
+      "Revenue Leaks Page",
       "Daily Leak Brief",
-      "Bounded action guidance",
+      "AI-assisted CSV review + Data Quality Check",
       "No Manual Quick Add",
-      "No shareable executive summary",
+      "No Executive Summary copy/share/print",
     ],
     headerTone: "text-[#f3eef9]",
     price: "$370",
@@ -42,12 +42,12 @@ const planPresentation = {
   GROWTH: {
     ctaHref: "/api/billing/checkout?plan=growth",
     features: [
-      "Full Launch V1 revenue leak read",
-      "Estimated revenue at risk from no-shows, cancellations, and booking risks",
-      "Daily Leak Brief and Action Pack",
-      "Bounded suggested guidance",
-      "Manual Quick Add",
-      "Executive Revenue Summary with copy, share, and print",
+      "Complete Launch V1 Revenue Leak Detector",
+      "Dashboard leak read and Revenue Leaks Page",
+      "AI-assisted CSV review + Data Quality Check",
+      "Daily Leak Brief and bounded action guidance",
+      "Manual Quick Add for one-off evidence",
+      "Executive Revenue Leak Summary with copy, share, and print",
     ],
     headerTone: "text-white",
     price: "$570",
@@ -141,7 +141,7 @@ function getBillingMessage(
     case "basic-fit":
       return {
         label: "Basic is limited",
-        text: "Basic is an entry plan with checkout, but it does not include Growth's full leak read, premium actions, or summary sharing.",
+        text: "Basic is an entry plan with checkout, but it does not include Growth's manual evidence add or Executive Summary copy/share/print.",
         tone: "neutral" as const,
       };
     case "premium-future":
@@ -431,8 +431,8 @@ export default async function StartPage({ searchParams }: StartPageProps) {
                   Growth stays the full Launch V1 product
                 </p>
                 <p className="mt-2 text-[0.86rem] leading-7 text-[#8f879d]">
-                  Basic is public and useful for entry, but Growth keeps the full leak read,
-                  premium action tools and executive summary sharing that make the MVP complete.
+                  Basic is public and useful for entry, but Growth keeps the manual evidence add
+                  and executive summary sharing that make the MVP package complete.
                 </p>
               </div>
             </div>

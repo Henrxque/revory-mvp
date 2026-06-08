@@ -76,7 +76,7 @@ export function validateCsvStructure(
       buildIssue({
         code: "invalid_structure",
         message:
-          "The CSV header contains an unclosed quoted value. Re-export the file and try again.",
+          "The CSV header contains an unclosed quoted value. CSV files with multiline quoted cells may need to be re-exported before import.",
         severity: "error",
       }),
     );
@@ -108,7 +108,7 @@ export function validateCsvStructure(
         buildIssue({
           code: "invalid_structure",
           lineNumber,
-          message: `Line ${lineNumber} contains an unclosed quoted value. Re-export the CSV and try again.`,
+          message: `Line ${lineNumber} contains an unclosed quoted value. CSV files with multiline quoted cells may need to be re-exported before import.`,
           severity: "error",
         }),
       );

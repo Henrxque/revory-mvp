@@ -8,9 +8,10 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from "react";
 
-import { AssistedImportMappingPreview } from "@/components/imports/AssistedImportMappingPreview";
+import { CsvMappingReview } from "@/components/imports/CsvMappingReview";
 import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import {
   buildAssistedImportConfirmationDraft,
@@ -30,11 +31,15 @@ import {
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { buildImportDecisionSupport } from "@/services/decision-support/build-import-decision-support";
 import { validateCsvStructure } from "@/services/imports/validate-csv-structure";
-import { uploadCsvFile } from "@/src/app/(app)/app/imports/actions";
+import {
+  triageCsvFileAction,
+  uploadCsvFile,
+} from "@/src/app/(app)/app/imports/actions";
 import {
   initialRevoryCsvUploadActionState,
   type RevoryCsvColumn,
   type RevoryCsvTemplateKey,
+  type RevoryCsvTriageReviewState,
   type RevoryCsvUploadActionState,
 } from "@/types/imports";
 
@@ -271,11 +276,16 @@ export function CsvUploadCard({
     initialRevoryCsvUploadActionState,
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const manuallyAdjustedHeadersRef = useRef(new Set<string>());
+  const triageRequestIdRef = useRef(0);
+  const [isTriagePending, startTriageTransition] = useTransition();
   const [clientError, setClientError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [rawFileText, setRawFileText] = useState<string | null>(null);
   const [assistedPayload, setAssistedPayload] = useState<AssistedImportPayload | null>(null);
   const [mapping, setMapping] = useState<Record<string, RevoryCsvColumn | null>>({});
+  const [triageReview, setTriageReview] =
+    useState<RevoryCsvTriageReviewState | null>(null);
   const [isConfirmationStepVisible, setIsConfirmationStepVisible] = useState(false);
   const [showServerState, setShowServerState] = useState(false);
   const state = showServerState ? serverState : initialRevoryCsvUploadActionState;
@@ -474,14 +484,58 @@ export function CsvUploadCard({
     setMapping(nextPayload.mapping);
   }
 
+  function runTriageReview(file: File, requestId: number) {
+    const formData = new FormData();
+
+    formData.append("templateKey", templateKey);
+    formData.append("file", file);
+
+    startTriageTransition(async () => {
+      const result = await triageCsvFileAction(formData);
+
+      if (triageRequestIdRef.current !== requestId) {
+        return;
+      }
+
+      setTriageReview(result);
+
+      if (
+        result.status === "ready" &&
+        result.matchesSelectedTemplate
+      ) {
+        setMapping((currentMapping) => {
+          const nextMapping = { ...currentMapping };
+
+          Object.entries(result.columnMapping).forEach(
+            ([sourceHeader, targetColumn]) => {
+              if (
+                (targetColumn || result.mode === "SAVED_MAPPING") &&
+                !manuallyAdjustedHeadersRef.current.has(sourceHeader)
+              ) {
+                nextMapping[sourceHeader] = targetColumn;
+              }
+            },
+          );
+
+          return nextMapping;
+        });
+      }
+    });
+  }
+
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     const validationError = validateSelectedFile(file);
+    const requestId = triageRequestIdRef.current + 1;
+
+    triageRequestIdRef.current = requestId;
+    manuallyAdjustedHeadersRef.current.clear();
 
     setSelectedFileName(file?.name ?? null);
     setClientError(validationError);
     setIsConfirmationStepVisible(false);
     setShowServerState(false);
+    setTriageReview(null);
 
     if (!file || validationError) {
       setRawFileText(null);
@@ -493,6 +547,7 @@ export function CsvUploadCard({
     try {
       await buildPreview(file);
       setClientError(null);
+      runTriageReview(file, requestId);
     } catch (error) {
       setRawFileText(null);
       setAssistedPayload(null);
@@ -506,6 +561,7 @@ export function CsvUploadCard({
   }
 
   function handleMappingChange(sourceHeader: string, targetColumnValue: string) {
+    manuallyAdjustedHeadersRef.current.add(sourceHeader);
     setClientError(null);
     setIsConfirmationStepVisible(false);
     setMapping((currentMapping) => ({
@@ -787,13 +843,15 @@ export function CsvUploadCard({
         <RevoryDecisionSupportCard read={decisionSupportRead} surface="imports" />
 
         {assistedPayload && currentPreview && confirmationDraft ? (
-          <AssistedImportMappingPreview
+          <CsvMappingReview
             confirmationDraft={confirmationDraft}
             currentPreview={currentPreview}
             initialPreview={assistedPayload.preview}
+            isTriagePending={isTriagePending}
             onMappingChange={handleMappingChange}
             selectedFileName={selectedFileName}
             targetOptions={targetOptions}
+            triage={triageReview}
           />
         ) : null}
 

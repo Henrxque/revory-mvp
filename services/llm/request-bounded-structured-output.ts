@@ -17,6 +17,7 @@ type RequestBoundedStructuredOutputInput<T> = {
   parse: (value: unknown) => T | null;
   prompt: string;
   schema: Record<string, unknown>;
+  timeoutMs?: number;
   useCase: string;
 };
 
@@ -82,7 +83,11 @@ async function requestStructuredOutputAttempt<T>(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), runtimeStatus.timeoutMs);
+  const requestTimeoutMs = Math.min(
+    input.timeoutMs ?? runtimeStatus.timeoutMs,
+    runtimeStatus.timeoutMs,
+  );
+  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
   const startedAt = Date.now();
 
   try {

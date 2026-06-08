@@ -1,15 +1,14 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { DailyBookingBrief } from "@/components/briefs/DailyBookingBrief";
+import { DailyLeakBrief } from "@/components/briefs/DailyLeakBrief";
 import { RunLeakReadAction } from "@/components/dashboard/RunLeakReadAction";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
-import { ExecutiveProofSummarySheet } from "@/components/proof/ExecutiveProofSummarySheet";
+import { ExecutiveRevenueLeakSummarySheet } from "@/components/proof/ExecutiveRevenueLeakSummarySheet";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { canUseBillingPlanFeature } from "@/services/billing/workspace-billing";
-import { getDailyBookingBriefRead } from "@/services/briefs/get-daily-booking-brief-read";
 import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardDecisionSupport } from "@/services/decision-support/get-dashboard-decision-support";
 import { getDashboardOverview } from "@/services/dashboard/get-dashboard-overview";
@@ -17,7 +16,8 @@ import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
-import { getExecutiveProofSummaryRead } from "@/services/proof/get-executive-proof-summary-read";
+import { getDailyLeakBriefRead } from "@/services/revenue-leaks/get-daily-leak-brief-read";
+import { getExecutiveRevenueLeakSummaryRead } from "@/services/revenue-leaks/get-executive-revenue-leak-summary-read";
 import {
   getRevenueLeakReadForWorkspace,
   type RevenueLeakReadState,
@@ -448,11 +448,11 @@ function GrowthProofShareLimitCard() {
   return (
     <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="rev-label">Revenue read sharing</p>
+        <p className="rev-label">Executive leak summary</p>
         <RevoryStatusBadge tone="future">Growth</RevoryStatusBadge>
       </div>
       <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-        Basic keeps the revenue read in-app. Growth adds copy, share, and print for the Executive Revenue Read.
+        Basic keeps the leak read in-app. Growth adds copy, share, and print for the Executive Revenue Leak Summary.
       </p>
     </div>
   );
@@ -502,13 +502,21 @@ export default async function DashboardPage() {
   const configuredValuePerBooking = activationSetup.averageDealValue
     ? Number(activationSetup.averageDealValue)
     : null;
-  const [overview, dailyBriefRead, revenueLeakRead] = await Promise.all([
+  const [
+    overview,
+    revenueLeakRead,
+    dailyLeakBriefRead,
+    executiveRevenueLeakSummaryRead,
+  ] = await Promise.all([
     getDashboardOverview(
       workspace.id,
       configuredValuePerBooking,
     ),
-    getDailyBookingBriefRead(workspace.id, activationSetup),
     getRevenueLeakReadForWorkspace(workspace.id),
+    getDailyLeakBriefRead(workspace.id),
+    getExecutiveRevenueLeakSummaryRead({
+      workspaceId: workspace.id,
+    }),
   ]);
 
   const monthChip = formatMonthChip();
@@ -521,11 +529,6 @@ export default async function DashboardPage() {
     dealValueLabel,
     mainOfferLabel,
     overview,
-  });
-  const executiveProofSummaryRead = getExecutiveProofSummaryRead({
-    dailyBriefRead,
-    overview,
-    workspaceName: workspace.name,
   });
   const canShareExecutiveProof = canUseBillingPlanFeature(
     workspace.planKey,
@@ -651,7 +654,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-5">
-      <DailyBookingBrief read={dailyBriefRead} />
+      <DailyLeakBrief read={dailyLeakBriefRead} />
 
       <section
         id="revenue-view"
@@ -769,7 +772,10 @@ export default async function DashboardPage() {
               </DocumentNavigationLink>
               <div className="mt-2">
                 {canShareExecutiveProof ? (
-                  <ExecutiveProofSummarySheet read={executiveProofSummaryRead} />
+                  <ExecutiveRevenueLeakSummarySheet
+                    read={executiveRevenueLeakSummaryRead}
+                    workspaceName={workspace.name}
+                  />
                 ) : (
                   <GrowthProofShareLimitCard />
                 )}

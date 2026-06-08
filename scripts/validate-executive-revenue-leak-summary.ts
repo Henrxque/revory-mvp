@@ -1,0 +1,426 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { PrismaClient } from "@prisma/client";
+import type {
+  RevenueLeakConfidence,
+  RevenueLeakSeverity,
+  RevenueLeakStatus,
+  RevenueLeakType,
+} from "@prisma/client";
+
+import { getExecutiveRevenueLeakSummaryRead } from "../services/revenue-leaks/get-executive-revenue-leak-summary-read";
+
+const prisma = new PrismaClient();
+const runId = `executive-revenue-leak-summary-${Date.now()}`;
+const emailPrefix = "executive.revenue.leak.summary.qa+";
+const detectedAt = new Date("2026-06-03T12:00:00.000Z");
+const projectRoot = process.cwd();
+
+let openAiFetchCalls = 0;
+const originalFetch = globalThis.fetch;
+
+globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const url = typeof input === "string" ? input : input.toString();
+
+  if (url.includes("openai.com")) {
+    openAiFetchCalls += 1;
+    throw new Error("Unexpected OpenAI call during Executive Revenue Leak Summary QA.");
+  }
+
+  return originalFetch(input, init);
+}) as typeof fetch;
+
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function log(message: string) {
+  console.log(`[executive-revenue-leak-summary-qa] ${message}`);
+}
+
+async function cleanupPreviousRuns() {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+    },
+    where: {
+      email: {
+        startsWith: emailPrefix,
+      },
+    },
+  });
+
+  for (const user of users) {
+    await prisma.workspace.deleteMany({
+      where: {
+        ownerUserId: user.id,
+      },
+    });
+    await prisma.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+  }
+}
+
+async function createWorkspace(suffix: string) {
+  const user = await prisma.user.create({
+    data: {
+      authProvider: "qa",
+      authSubject: `${runId}-${suffix}`,
+      email: `${emailPrefix}${runId}-${suffix}@example.com`,
+      fullName: "Executive Revenue Leak Summary QA",
+    },
+  });
+
+  const workspace = await prisma.workspace.create({
+    data: {
+      billingStatus: "ACTIVE",
+      name: `Executive Revenue Leak Summary QA ${suffix}`,
+      ownerUserId: user.id,
+      planKey: "GROWTH",
+      slug: `executive-revenue-leak-summary-qa-${runId}-${suffix}`,
+      status: "ACTIVE",
+    },
+  });
+
+  await prisma.activationSetup.create({
+    data: {
+      averageDealValue: 1200,
+      currentStep: "activation",
+      isCompleted: true,
+      primaryChannel: "EMAIL",
+      recommendedModeKey: "MODE_A",
+      selectedTemplate: "injectables",
+      workspaceId: workspace.id,
+    },
+  });
+
+  return workspace;
+}
+
+async function createLeak(input: {
+  confidence: RevenueLeakConfidence;
+  detectedAtOffsetMinutes: number;
+  estimatedValueCents?: number | null;
+  fingerprint: string;
+  leakType: RevenueLeakType;
+  recommendedAction?: string;
+  reason?: string;
+  severity: RevenueLeakSeverity;
+  status?: RevenueLeakStatus;
+  workspaceId: string;
+}) {
+  return prisma.revenueLeak.create({
+    data: {
+      confidence: input.confidence,
+      detectedAt: new Date(
+        detectedAt.getTime() + input.detectedAtOffsetMinutes * 60 * 1000,
+      ),
+      estimatedValueCents: input.estimatedValueCents ?? null,
+      evidenceJson: {
+        confidenceReason: `QA confidence reason for ${input.fingerprint}.`,
+        signals: [`qa:${input.fingerprint}`, "executive-summary"],
+        sourceRecordIds: [`source:${input.fingerprint}`],
+        summary: `QA evidence summary for ${input.fingerprint}.`,
+        value: {
+          basis: "QA fixture",
+          estimatedValueCents: input.estimatedValueCents ?? null,
+        },
+      },
+      fingerprint: input.fingerprint,
+      leakType: input.leakType,
+      reason: input.reason ?? `QA reason for ${input.leakType}.`,
+      recommendedAction:
+        input.recommendedAction ?? `Review ${input.leakType} from QA fixture.`,
+      severity: input.severity,
+      status: input.status ?? "OPEN",
+      workspaceId: input.workspaceId,
+    },
+  });
+}
+
+async function assertNoSprint07Migration() {
+  const migrationsPath = path.join(projectRoot, "prisma/migrations");
+  const migrations = await fs.readdir(migrationsPath);
+  const sprint07Migrations = migrations.filter((migration) =>
+    migration.toLowerCase().includes("sprint_07"),
+  );
+
+  assert(
+    sprint07Migrations.length === 0,
+    `Sprint 07 should not create migrations. Found: ${sprint07Migrations.join(", ")}.`,
+  );
+}
+
+async function assertStaticScopeGuardrails() {
+  const files = [
+    "components/proof/ExecutiveRevenueLeakSummaryCard.tsx",
+    "components/proof/ExecutiveRevenueLeakSummarySheet.tsx",
+    "services/revenue-leaks/get-executive-revenue-leak-summary-read.ts",
+  ];
+  const forbiddenPatterns = [
+    /lost revenue/i,
+    /recovered revenue/i,
+    /generated revenue/i,
+    /generated by revory/i,
+    /guaranteed recovery/i,
+    /public share link/i,
+    /chart/i,
+    /trend/i,
+    /comparison/i,
+    /syncRevenueLeaks/i,
+    /detectRevenueLeaks/i,
+    /openai/i,
+    /\bllm\b/i,
+  ];
+
+  for (const file of files) {
+    const source = await fs.readFile(path.join(projectRoot, file), "utf8");
+
+    for (const pattern of forbiddenPatterns) {
+      assert(
+        !pattern.test(source),
+        `${file} contains forbidden Executive Revenue Leak Summary scope/copy: ${pattern}.`,
+      );
+    }
+
+    assert(
+      !/confirmed loss/i.test(source),
+      `${file} should not use confirmed loss phrasing.`,
+    );
+  }
+}
+
+function assertCopyableSummaryGuardrails(copyableSummary: string) {
+  const forbiddenPatterns = [
+    /lost revenue/i,
+    /confirmed loss/i,
+    /recovered revenue/i,
+    /generated revenue/i,
+    /generated by revory/i,
+    /guaranteed recovery/i,
+  ];
+
+  for (const pattern of forbiddenPatterns) {
+    assert(
+      !pattern.test(copyableSummary),
+      `Copyable summary contains forbidden claim: ${pattern}.`,
+    );
+  }
+
+  assert(
+    copyableSummary.includes("Estimated revenue at risk"),
+    "Copyable summary should include estimated revenue at risk.",
+  );
+}
+
+async function main() {
+  log("Checking static guardrails");
+  await assertNoSprint07Migration();
+  await assertStaticScopeGuardrails();
+
+  log("Cleaning previous QA runs");
+  await cleanupPreviousRuns();
+
+  log("Validating EMPTY state");
+  const emptyWorkspace = await createWorkspace("empty");
+  const emptyRead = await getExecutiveRevenueLeakSummaryRead({
+    now: detectedAt,
+    workspaceId: emptyWorkspace.id,
+  });
+
+  assert(emptyRead.state === "EMPTY", `Expected EMPTY, got ${emptyRead.state}.`);
+  assert(emptyRead.estimatedRevenueAtRiskCents === null, "EMPTY should not invent financial value.");
+  assert(emptyRead.topFinancialLeaks.length === 0, "EMPTY should not expose financial leaks.");
+  assert(emptyRead.honestyNote.length > 0, "EMPTY should include honesty note.");
+  assertCopyableSummaryGuardrails(emptyRead.copyableSummary);
+
+  log("Validating HAS_REVENUE_AT_RISK state");
+  const financialWorkspace = await createWorkspace("financial");
+  await createLeak({
+    confidence: "HIGH",
+    detectedAtOffsetMinutes: 10,
+    estimatedValueCents: 200000,
+    fingerprint: "financial-top",
+    leakType: "CANCELED_NOT_RECOVERED",
+    recommendedAction: "Review the highest-value unrecovered cancellation.",
+    severity: "CRITICAL",
+    workspaceId: financialWorkspace.id,
+  });
+  await createLeak({
+    confidence: "MEDIUM",
+    detectedAtOffsetMinutes: 9,
+    estimatedValueCents: 50000,
+    fingerprint: "financial-secondary",
+    leakType: "NO_SHOW_REVENUE",
+    severity: "HIGH",
+    workspaceId: financialWorkspace.id,
+  });
+  await createLeak({
+    confidence: "HIGH",
+    detectedAtOffsetMinutes: 8,
+    estimatedValueCents: 999999,
+    fingerprint: "operational-not-counted",
+    leakType: "BOOKING_PATH_BLOCKED",
+    severity: "HIGH",
+    workspaceId: financialWorkspace.id,
+  });
+  await createLeak({
+    confidence: "LOW",
+    detectedAtOffsetMinutes: 7,
+    estimatedValueCents: 888888,
+    fingerprint: "data-quality-not-counted",
+    leakType: "STALE_BOOKED_PROOF",
+    severity: "LOW",
+    workspaceId: financialWorkspace.id,
+  });
+  await createLeak({
+    confidence: "HIGH",
+    detectedAtOffsetMinutes: 6,
+    estimatedValueCents: 700000,
+    fingerprint: "resolved-excluded",
+    leakType: "NO_SHOW_REVENUE",
+    severity: "CRITICAL",
+    status: "RESOLVED",
+    workspaceId: financialWorkspace.id,
+  });
+  await createLeak({
+    confidence: "HIGH",
+    detectedAtOffsetMinutes: 5,
+    estimatedValueCents: 600000,
+    fingerprint: "dismissed-excluded",
+    leakType: "CANCELED_NOT_RECOVERED",
+    severity: "CRITICAL",
+    status: "DISMISSED",
+    workspaceId: financialWorkspace.id,
+  });
+  const financialRead = await getExecutiveRevenueLeakSummaryRead({
+    now: detectedAt,
+    workspaceId: financialWorkspace.id,
+  });
+
+  assert(
+    financialRead.state === "HAS_REVENUE_AT_RISK",
+    `Expected HAS_REVENUE_AT_RISK, got ${financialRead.state}.`,
+  );
+  assert(
+    financialRead.estimatedRevenueAtRiskCents === 250000,
+    `Expected financial sum of 250000 cents, got ${financialRead.estimatedRevenueAtRiskCents}.`,
+  );
+  assert(financialRead.activeFinancialLeakCount === 2, "Should count only active financial leaks.");
+  assert(financialRead.activeOperationalRiskCount === 1, "Should count active operational risks separately.");
+  assert(financialRead.activeDataQualityRiskCount === 1, "Should count active data-quality risks separately.");
+  assert(
+    financialRead.topFinancialLeaks[0]?.label === "Unrecovered cancellation risk",
+    "Top financial leak should be selected by executive priority.",
+  );
+  assert(
+    financialRead.topOperationalRisks[0]?.label === "Blocked booking path risk",
+    "Top operational risk should be selected separately.",
+  );
+  assert(
+    financialRead.topDataQualityRisks[0]?.label === "Stale appointment evidence",
+    "Top data-quality risk should be selected separately.",
+  );
+  assert(
+    financialRead.topOperationalRisks[0]?.estimatedValueCents === null,
+    "Operational risk should not carry financial value.",
+  );
+  assert(
+    financialRead.topDataQualityRisks[0]?.estimatedValueCents === null,
+    "Data-quality risk should not carry financial value.",
+  );
+  assert(
+    !financialRead.copyableSummary.includes("resolved-excluded") &&
+      !financialRead.copyableSummary.includes("dismissed-excluded"),
+    "Copyable summary should exclude resolved/dismissed leak evidence.",
+  );
+  assert(
+    financialRead.printSections.length > 0,
+    "Executive summary should expose print sections.",
+  );
+  assertCopyableSummaryGuardrails(financialRead.copyableSummary);
+
+  log("Validating OPERATIONAL_ONLY state");
+  const operationalWorkspace = await createWorkspace("operational");
+  await createLeak({
+    confidence: "LOW",
+    detectedAtOffsetMinutes: 4,
+    estimatedValueCents: 990000,
+    fingerprint: "operational-only",
+    leakType: "MISSING_CONTACT",
+    severity: "HIGH",
+    workspaceId: operationalWorkspace.id,
+  });
+  const operationalRead = await getExecutiveRevenueLeakSummaryRead({
+    now: detectedAt,
+    workspaceId: operationalWorkspace.id,
+  });
+
+  assert(
+    operationalRead.state === "OPERATIONAL_ONLY",
+    `Expected OPERATIONAL_ONLY, got ${operationalRead.state}.`,
+  );
+  assert(operationalRead.estimatedRevenueAtRiskCents === null, "Operational-only should not expose financial value.");
+  assert(operationalRead.topOperationalRisks[0]?.estimatedValueCents === null, "Operational top risk should not carry value.");
+
+  log("Validating DATA_STALE state");
+  const staleWorkspace = await createWorkspace("stale");
+  await createLeak({
+    confidence: "MEDIUM",
+    detectedAtOffsetMinutes: 3,
+    estimatedValueCents: 770000,
+    fingerprint: "stale-only",
+    leakType: "STALE_BOOKED_PROOF",
+    severity: "LOW",
+    workspaceId: staleWorkspace.id,
+  });
+  const staleRead = await getExecutiveRevenueLeakSummaryRead({
+    now: detectedAt,
+    workspaceId: staleWorkspace.id,
+  });
+
+  assert(staleRead.state === "DATA_STALE", `Expected DATA_STALE, got ${staleRead.state}.`);
+  assert(staleRead.estimatedRevenueAtRiskCents === null, "Data stale should not expose financial value.");
+  assert(staleRead.dataFreshnessSummary.hasStaleDataRisk, "Data stale should expose freshness warning.");
+  assert(staleRead.topDataQualityRisks[0]?.estimatedValueCents === null, "Data-quality top risk should not carry value.");
+
+  log("Validating THIN_DATA state");
+  const thinWorkspace = await createWorkspace("thin");
+  await createLeak({
+    confidence: "LOW",
+    detectedAtOffsetMinutes: 2,
+    estimatedValueCents: null,
+    fingerprint: "financial-thin",
+    leakType: "NO_SHOW_REVENUE",
+    severity: "MEDIUM",
+    workspaceId: thinWorkspace.id,
+  });
+  const thinRead = await getExecutiveRevenueLeakSummaryRead({
+    now: detectedAt,
+    workspaceId: thinWorkspace.id,
+  });
+
+  assert(thinRead.state === "THIN_DATA", `Expected THIN_DATA, got ${thinRead.state}.`);
+  assert(thinRead.estimatedRevenueAtRiskCents === null, "Thin data should not invent financial value.");
+  assert(thinRead.topFinancialLeaks[0]?.estimatedValueCents === null, "Thin financial leak should remain value-thin.");
+
+  assert(openAiFetchCalls === 0, "Executive Revenue Leak Summary QA should not make OpenAI calls.");
+
+  log("All checks passed");
+}
+
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    globalThis.fetch = originalFetch;
+    await cleanupPreviousRuns().catch(() => undefined);
+    await prisma.$disconnect();
+  });

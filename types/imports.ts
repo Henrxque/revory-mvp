@@ -238,6 +238,35 @@ export const initialRevoryCsvUploadActionState: RevoryCsvUploadActionState = {
   status: "idle",
 };
 
+export type RevoryCsvTriageReviewMode =
+  | "AI_ASSISTED"
+  | "DETERMINISTIC_FALLBACK"
+  | "SAVED_MAPPING";
+
+export type RevoryCsvTriageReviewState = {
+  columnMapping: Record<string, RevoryCsvColumn | null>;
+  confidence: "LOW" | "MEDIUM" | "HIGH";
+  detectedDatasetType:
+    | "APPOINTMENTS"
+    | "CLIENTS"
+    | "LEADS"
+    | "PAYMENTS_UNSUPPORTED"
+    | "UNKNOWN";
+  errorMessage?: string;
+  importSupported: boolean;
+  mappingConfidence: number;
+  matchesSelectedTemplate: boolean;
+  missingFields: string[];
+  mode: RevoryCsvTriageReviewMode;
+  probableSourceFormat: string | null;
+  qualityScore: number;
+  qualityState: "READY" | "REVIEW_REQUIRED" | "BLOCKED" | "UNSUPPORTED";
+  reviewRequired: true;
+  status: "ready" | "error";
+  supportedLeaks: string[];
+  warnings: string[];
+};
+
 export type RevoryCsvRawRow<TColumn extends string> = {
   lineNumber: number;
   values: Partial<Record<TColumn, string>>;

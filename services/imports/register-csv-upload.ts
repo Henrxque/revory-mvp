@@ -52,7 +52,25 @@ export async function registerCsvUploadMetadata({
   workspaceId,
 }: RegisterCsvUploadInput): Promise<DataSource> {
   const receivedAt = new Date();
+  const existingSource = await prisma.dataSource.findUnique({
+    select: {
+      configJson: true,
+    },
+    where: {
+      workspaceId_name: {
+        name: csvUploadSourceNames[templateKey],
+        workspaceId,
+      },
+    },
+  });
+  const currentConfig =
+    existingSource?.configJson &&
+    typeof existingSource.configJson === "object" &&
+    !Array.isArray(existingSource.configJson)
+      ? (existingSource.configJson as Prisma.JsonObject)
+      : {};
   const configJson: Prisma.InputJsonValue = {
+    ...currentConfig,
     lastUpload: {
       fileName,
       fileSizeBytes,
