@@ -467,7 +467,7 @@ export default async function OnboardingStepPage({
                 {
                   value: "APPOINTMENTS_CSV",
                   label: "Appointments upload",
-                  note: "Best when this clinic already has appointment exports and wants the fastest path to booked visibility.",
+                  note: "Best when this clinic already has appointment exports and wants the fastest path to clinic data visibility.",
                 },
                 {
                   value: "CLIENTS_CSV",

@@ -421,7 +421,7 @@ export default async function ImportsPage() {
                 {leadIntakeRead.summary.ready}
               </p>
               <p className="mt-2 max-w-[16rem] text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-                Opportunities clear enough to use the current booking path as bounded action guidance, not confirmed lost revenue.
+                Opportunities clear enough to use the current booking path as bounded action guidance, not confirmed financial loss.
               </p>
             </div>
 

@@ -768,18 +768,18 @@ async function getDashboardOverviewUncached(
   const executiveSummary = hasBookedProofVisible
     ? hasMomentumVisible
       ? !hasMomentumLayerAvailable
-        ? "Observed revenue is still visible. Recent momentum is temporarily unavailable, but the core revenue read remains intact."
+        ? "Appointment revenue evidence is still visible. Recent momentum is temporarily unavailable, but the core revenue read remains intact."
         : !hasAttributionLayerAvailable
-          ? "Observed revenue and recent momentum are visible. Attribution support is temporarily limited, but the core revenue read remains intact."
+          ? "Appointment revenue evidence and recent momentum are visible. Attribution support is temporarily limited, but the core revenue read remains intact."
         : supportedRevenueSharePercent !== null
-          ? `${supportedRevenueSharePercent}% of visible observed revenue already carries client-supported context.`
-          : "Observed revenue is visible and recent momentum is now readable in one short executive pass."
-      : "Observed revenue is visible, but recent value still needs more evidence depth."
+          ? `${supportedRevenueSharePercent}% of visible appointment revenue evidence already carries client-supported context.`
+          : "Appointment revenue evidence is visible and recent momentum is now readable in one short executive pass."
+      : "Appointment revenue evidence is visible, but recent value still needs more evidence depth."
     : "Appointment evidence is the first requirement before REVORY can defend economic value clearly.";
   const executiveTiles = [
     {
-      hint: "Visible observed revenue now",
-      label: "Observed revenue",
+      hint: "Visible appointment revenue evidence now",
+      label: "Revenue evidence",
       value: formatExecutiveCurrency(estimatedImportedRevenue),
     },
     {

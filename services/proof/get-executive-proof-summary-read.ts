@@ -138,7 +138,7 @@ export function getExecutiveProofSummaryRead(input: {
       : ("neutral" as const);
   const copyLines = [
     `${workspaceName} - Executive revenue read (${formatPeriodLabel()})`,
-    `Observed revenue in current read: ${revenueNow}`,
+    `Appointment revenue evidence in current read: ${revenueNow}`,
     `Appointment evidence visible: ${bookedProofSignal.value}`,
     `${recentProofSignal.label}: ${recentProofSignal.value}`,
     `Support status: ${overview.commercialSafeguard.supportLabel}`,
@@ -161,7 +161,7 @@ export function getExecutiveProofSummaryRead(input: {
     signals: [
       {
         isPrimary: true,
-        label: "Observed revenue read",
+        label: "Revenue evidence read",
         note: "Based on imported appointment evidence; not confirmed recovery or accounting loss.",
         tone: bookedProofVisible ? ("real" as const) : ("future" as const),
         value: revenueNow,

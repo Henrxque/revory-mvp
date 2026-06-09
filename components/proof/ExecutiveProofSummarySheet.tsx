@@ -415,7 +415,7 @@ export function ExecutiveProofSummarySheet({
                   Use one short revenue read for internal or commercial review.
                 </h3>
                 <p className="mt-2 text-[12px] leading-[1.55] text-[color:var(--text-muted)]">
-                  This read stays narrow on purpose: observed revenue, appointment evidence, freshness and support context only.
+                  This read stays narrow on purpose: appointment revenue evidence, freshness and support context only.
                 </p>
               </div>
 

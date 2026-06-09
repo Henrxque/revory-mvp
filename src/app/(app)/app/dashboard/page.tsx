@@ -824,7 +824,7 @@ export default async function DashboardPage() {
               {executiveRead.headline}
             </p>
             <p className="mt-3 max-w-[24rem] text-sm leading-[1.55] text-[color:var(--text-muted)]">
-              REVORY keeps this read short: observed revenue, appointment evidence, freshness and support context only.
+              REVORY keeps this read short: appointment revenue evidence, freshness and support context only.
             </p>
           </div>
 
@@ -967,7 +967,7 @@ export default async function DashboardPage() {
                 }
               />
               <AttributionSignalCard
-                hint="Observed revenue already tied to supported client context"
+                hint="Appointment revenue evidence already tied to supported client context"
                 label="Revenue with support"
                 value={formatLimitedCurrency(attributionRead.revenueWithLeadBaseSupport)}
               />

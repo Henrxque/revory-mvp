@@ -350,3 +350,103 @@ C:\Users\hriqu\Documents\revory-mvp\.tmp\manual-audit\rerun
 Pass for MVP self-service launch journey coverage.
 
 The new launch QA command is not a replacement for production credential smoke tests, but it now catches the main launch-breaking risks: broken routes, broken setup/import flow, missing review gate, missing leak sync, empty dashboard after data import, missing Revenue Leaks surface, missing Daily Brief, and broken Growth executive copy/print affordance.
+
+## Legacy Copy Sweep
+
+### Sweep completed
+
+Created:
+
+```text
+docs/sprints/SPRINT_09_LEGACY_COPY_SWEEP.md
+```
+
+The sweep searched public and in-app surfaces for old Seller-era or overclaiming language:
+
+- `REVORY Seller`
+- `Seller`
+- `booking acceleration`
+- `booked visibility`
+- `booking visibility`
+- `booked proof`
+- `booking proof`
+- `proof summary`
+- `observed revenue`
+- `generated revenue`
+- `recovered revenue`
+- `lost revenue`
+- `confirmed loss`
+- `AI detected leaks`
+- `automatic recovery`
+- `CRM`
+- `inbox`
+- `BI suite`
+
+### Safe fixes applied
+
+- Replaced setup copy `fastest path to booked visibility` with `fastest path to clinic data visibility`.
+- Replaced visible `observed revenue` dashboard/read copy with `appointment revenue evidence` / `Revenue evidence`.
+- Replaced import copy `not confirmed lost revenue` with `not confirmed financial loss`.
+- Tightened old proof-era executive read copy where it could become visible again.
+
+### Remaining classified occurrences
+
+- `CRM`, `inbox` and `BI` remain where they are explicit negation/disclaimer language.
+- Proof-era file names, service names and `EXECUTIVE_PROOF_SHARE` remain internal technical debt.
+- Old Seller docs and review files remain historical docs, not current source of truth.
+- Old LLM fallback QA fixture strings remain internal QA technical debt, not launch-facing copy.
+
+### Sweep status
+
+Pass.
+
+No launch-blocking public copy was found after this pass. The remaining legacy terms are either category-protection disclaimers, internal technical naming, or historical documentation.
+
+## Launch Documents
+
+### Created
+
+```text
+docs/launch/REVORY_MVP_LAUNCH_CHECKLIST.md
+docs/launch/REVORY_MVP_KNOWN_LIMITATIONS.md
+```
+
+### Purpose
+
+These are the operational launch references for Henrique before beta/paid launch.
+
+`REVORY_MVP_LAUNCH_CHECKLIST.md` defines what is already locally verified, what still requires production/manual verification, and what blocks paid beta.
+
+`REVORY_MVP_KNOWN_LIMITATIONS.md` defines what REVORY MVP does not support yet, how to explain it honestly, and what must not be implied in sales/demo/onboarding.
+
+### Current launch blocker summary
+
+The remaining blockers are not product-surface implementation blockers. They are production-readiness checks:
+
+- Production database migration.
+- Production auth and password reset.
+- Transactional email delivery.
+- Stripe Basic/Growth checkout.
+- Stripe webhook billing sync.
+- Stripe customer portal.
+- Real-provider AI CSV smoke test if AI CSV assistance is enabled in production.
+- Realistic customer-shaped CSV import check.
+
+### Manual Henrique checklist
+
+Henrique still needs to verify:
+
+- final domain and callback URLs;
+- Stripe product/price mapping;
+- webhook endpoint and secret;
+- sender domain and reset email delivery;
+- Google OAuth on production;
+- real-provider AI smoke with synthetic data;
+- founder demo script;
+- first customer onboarding checklist.
+
+### Status
+
+Launch documents complete.
+
+REVORY is locally launch-QA ready, but paid beta should wait until the external production checks in `docs/launch/REVORY_MVP_LAUNCH_CHECKLIST.md` are completed.
