@@ -60,63 +60,75 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 
-  const stripeCustomerId = await ensureStripeCustomerForWorkspace({
-    existingStripeCustomerId: workspace.stripeCustomerId,
-    userEmail: user.email,
-    userName: user.fullName,
-    workspaceId: workspace.id,
-    workspaceName: workspace.name,
-  });
-
-  const stripe = getStripeServerClient();
-  const stripePriceId = getStripePriceId(requestedPlan);
-
-  await prisma.workspace.update({
-    where: {
-      id: workspace.id,
-    },
-    data: {
-      billingStatus: "INACTIVE",
-      planKey: requestedPlan,
-      stripeCustomerId,
-      stripePriceId,
-    },
-  });
-
-  const checkoutSession = await stripe.checkout.sessions.create({
-    allow_promotion_codes: true,
-    cancel_url: `${getStripeAppUrl()}/start?checkout=cancel&plan=${requestedPlan.toLowerCase()}`,
-    client_reference_id: workspace.id,
-    customer: stripeCustomerId,
-    line_items: [
-      {
-        price: stripePriceId,
-        quantity: 1,
-      },
-    ],
-    metadata: {
-      planKey: requestedPlan,
-      userId: user.id,
+  try {
+    const stripeCustomerId = await ensureStripeCustomerForWorkspace({
+      existingStripeCustomerId: workspace.stripeCustomerId,
+      userEmail: user.email,
+      userName: user.fullName,
       workspaceId: workspace.id,
-    },
-    mode: "subscription",
-    subscription_data: {
+      workspaceName: workspace.name,
+    });
+
+    const stripe = getStripeServerClient();
+    const stripePriceId = getStripePriceId(requestedPlan);
+
+    await prisma.workspace.update({
+      where: {
+        id: workspace.id,
+      },
+      data: {
+        billingStatus: "INACTIVE",
+        planKey: requestedPlan,
+        stripeCustomerId,
+        stripePriceId,
+      },
+    });
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+      allow_promotion_codes: true,
+      cancel_url: `${getStripeAppUrl()}/start?checkout=cancel&plan=${requestedPlan.toLowerCase()}`,
+      client_reference_id: workspace.id,
+      customer: stripeCustomerId,
+      line_items: [
+        {
+          price: stripePriceId,
+          quantity: 1,
+        },
+      ],
       metadata: {
         planKey: requestedPlan,
         userId: user.id,
         workspaceId: workspace.id,
       },
-    },
-    success_url: `${getStripeAppUrl()}/start?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-  });
+      mode: "subscription",
+      subscription_data: {
+        metadata: {
+          planKey: requestedPlan,
+          userId: user.id,
+          workspaceId: workspace.id,
+        },
+      },
+      success_url: `${getStripeAppUrl()}/start?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    });
 
-  if (!checkoutSession.url) {
+    if (!checkoutSession.url) {
+      return NextResponse.redirect(
+        new URL(`/start?billing=error&plan=${requestedPlan.toLowerCase()}`, request.url),
+      );
+    }
+
+    return NextResponse.redirect(checkoutSession.url, {
+      status: 303,
+    });
+  } catch (error) {
+    console.error("[revory-billing] checkout session creation failed", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      planKey: requestedPlan,
+      workspaceId: workspace.id,
+    });
+
     return NextResponse.redirect(
       new URL(`/start?billing=error&plan=${requestedPlan.toLowerCase()}`, request.url),
     );
   }
-
-  return NextResponse.redirect(checkoutSession.url, {
-    status: 303,
-  });
 }

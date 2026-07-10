@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const cwd = process.cwd();
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-4o-mini";
 const DEFAULT_TIMEOUT_MS = 4000;
 
 function normalizeTimeoutMs(value) {

@@ -6,6 +6,13 @@ import { PasswordResetRequestForm } from "@/components/auth/PasswordResetRequest
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 
+export const metadata = {
+  robots: {
+    follow: false,
+    index: false,
+  },
+};
+
 export default async function ForgotPasswordPage() {
   const session = await getAuthSession();
 

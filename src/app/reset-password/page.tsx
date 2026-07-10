@@ -6,6 +6,13 @@ import { PasswordResetConfirmForm } from "@/components/auth/PasswordResetConfirm
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 
+export const metadata = {
+  robots: {
+    follow: false,
+    index: false,
+  },
+};
+
 type ResetPasswordPageProps = Readonly<{
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;

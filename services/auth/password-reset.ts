@@ -5,8 +5,10 @@ import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@/db/prisma";
 import { hashPassword, isPasswordStrongEnough } from "@/services/auth/password-crypto";
 import { getTransactionalEmailConfig, sendPasswordResetEmail } from "@/services/email/transactional-email";
+import { checkRateLimit } from "@/services/security/rate-limit";
 
 const RESET_TOKEN_TTL_MS = 1000 * 60 * 45;
+const RESET_TOKEN_ATTEMPT_WINDOW_MS = 1000 * 60 * 15;
 
 function hashResetToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -26,7 +28,7 @@ export async function requestPasswordReset(email: string) {
     ? await prisma.user.findUnique({ where: { email: normalizedEmail } })
     : null;
 
-  if (!user?.passwordHash) {
+  if (!user?.passwordHash || user.status === "DISABLED") {
     return { deliveryConfigured: isPasswordResetDeliveryConfigured(), sent: false };
   }
 
@@ -62,14 +64,32 @@ export async function resetPasswordWithToken(input: {
   password: string;
   token: string;
 }) {
-  const tokenHash = hashResetToken(input.token.trim());
+  const normalizedToken = input.token.trim();
+  const tokenHash = hashResetToken(normalizedToken);
+  const rateLimit = checkRateLimit({
+    key: `password-reset-token:${tokenHash}`,
+    limit: 10,
+    windowMs: RESET_TOKEN_ATTEMPT_WINDOW_MS,
+  });
+
+  if (rateLimit.limited) {
+    return {
+      message: "Too many reset attempts. Wait a few minutes before trying again.",
+      ok: false as const,
+    };
+  }
+
   const user = await prisma.user.findUnique({
     where: {
       passwordResetTokenHash: tokenHash,
     },
   });
 
-  if (!user?.passwordResetExpiresAt || user.passwordResetExpiresAt.getTime() < Date.now()) {
+  if (
+    !user?.passwordResetExpiresAt ||
+    user.status === "DISABLED" ||
+    user.passwordResetExpiresAt.getTime() < Date.now()
+  ) {
     return {
       message: "This reset link is expired or invalid.",
       ok: false as const,

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getAppContext } from "@/services/app/get-app-context";
 import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { syncRevenueLeaksForWorkspace } from "@/services/revenue-leaks/sync-revenue-leaks";
+import { checkRateLimit } from "@/services/security/rate-limit";
 
 export type SyncDashboardRevenueLeaksState = {
   message: string;
@@ -38,6 +39,20 @@ export async function syncDashboardRevenueLeaks(): Promise<SyncDashboardRevenueL
       message: "Finish activation before running the leak read.",
       ok: false,
       summary: "REVORY needs setup context before syncing revenue leak evidence.",
+    };
+  }
+
+  const rateLimit = checkRateLimit({
+    key: `leak-sync:${appContext.workspace.id}`,
+    limit: 10,
+    windowMs: 1000 * 60 * 10,
+  });
+
+  if (rateLimit.limited) {
+    return {
+      message: "Too many leak read refreshes in a short window.",
+      ok: false,
+      summary: "Wait a few minutes before running the leak read again.",
     };
   }
 

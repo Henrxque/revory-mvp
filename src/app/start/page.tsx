@@ -21,7 +21,7 @@ import {
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 
 const primaryBillingPlan = "GROWTH" as const;
-const secondaryBillingPlans = ["BASIC", "PREMIUM"] as const;
+const orderedBillingPlans = ["BASIC", primaryBillingPlan, "PREMIUM"] as const;
 
 const planPresentation = {
   BASIC: {
@@ -248,9 +248,9 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     );
 
   return (
-    <main className="min-h-screen px-5 py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-[1260px]">
-        <div className="mx-auto mb-8 flex max-w-[1260px] flex-wrap items-center justify-between gap-4 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(20,18,26,0.72)] px-5 py-3.5 backdrop-blur">
+    <main className="min-h-screen px-4 py-3 md:px-6 md:py-4 xl:px-8">
+      <div className="mx-auto max-w-[1360px]">
+        <div className="mx-auto mb-3 flex max-w-[1360px] flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(20,18,26,0.72)] px-4 py-2 backdrop-blur md:px-5">
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/" className="inline-flex shrink-0 items-center">
               <RevoryLogo />
@@ -278,176 +278,127 @@ export default async function StartPage({ searchParams }: StartPageProps) {
           </div>
         </div>
 
-        <section className="mx-auto max-w-[1260px] pb-4 text-center">
+        <section className="mx-auto max-w-[980px] pb-8 text-center md:pb-10">
           <p className="rev-kicker">Pricing</p>
-          <h1 className="mt-3 font-[family:var(--font-display)] text-[clamp(2.7rem,6vw,5.6rem)] leading-[0.9] tracking-[-0.07em] text-white">
-            Choose how your clinic wants to start detecting revenue at risk.
+          <h1 className="mt-1.5 font-[family:var(--font-display)] text-[clamp(1.95rem,3.1vw,3.35rem)] leading-[0.94] tracking-[-0.06em] text-white">
+            Choose your REVORY plan.
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#a9a2b6] md:text-base md:leading-8">
-            Revenue leak detection for premium MedSpas, starting with structured appointment and booking data.
+          <p className="mx-auto mt-1.5 max-w-2xl text-sm leading-5 text-[#a9a2b6]">
+            Growth is the complete self-service plan. Basic is a lighter entry plan. Premium is not available yet.
           </p>
         </section>
 
-        {billingMessage ? (
-          <div className="mx-auto mb-6 max-w-[860px] rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-base font-semibold text-[color:var(--foreground)]">
-                {billingMessage.label}
+        {billingMessage && billingMessage.label !== "Checkout not created" ? (
+          <div className="mx-auto mb-3 flex max-w-[1360px] flex-wrap items-center justify-between gap-x-5 gap-y-2 rounded-[18px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm leading-6 text-[#c6bfd2]">
+                <span className="font-semibold text-[color:var(--foreground)]">
+                  {billingMessage.label}
+                </span>
+                <span className="mx-2 text-[#6f687d]">/</span>
+                {billingMessage.text}
               </p>
-              <RevoryStatusBadge tone={billingMessage.tone}>
-                {billingMessage.label}
-              </RevoryStatusBadge>
             </div>
-            <p className="mt-2 text-sm leading-7 text-[#c6bfd2]">
-              {billingMessage.text}
-            </p>
+            <RevoryStatusBadge tone={billingMessage.tone}>
+              {billingMessage.label}
+            </RevoryStatusBadge>
           </div>
         ) : null}
 
-        <section className="mx-auto max-w-[1260px]">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.14fr)_minmax(320px,0.86fr)]">
-            {(() => {
-              const presentation = planPresentation[primaryBillingPlan];
-              const copy = getPlanCopy(primaryBillingPlan);
-              const isCurrentPlan = billingSummary.planKey === primaryBillingPlan;
+        <section className="mx-auto max-w-[1360px]">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.98fr)_minmax(0,1.06fr)_minmax(0,0.98fr)] lg:items-start xl:gap-6">
+            {orderedBillingPlans.map((planKey) => {
+              const presentation = planPresentation[planKey];
+              const copy = getPlanCopy(planKey);
+              const isCurrentPlan = billingSummary.planKey === planKey;
+              const isPrimaryPlan = planKey === primaryBillingPlan;
+              const isFuturePlan = planKey === "PREMIUM";
 
               return (
                 <div
-                  className={`flex h-full flex-col rounded-[34px] border px-7 py-8 text-left shadow-[0_30px_90px_rgba(0,0,0,0.24)] md:px-9 md:py-9 ${presentation.toneClass}`}
+                  key={planKey}
+                  className={`flex h-full flex-col rounded-[26px] border px-5 py-4 text-left shadow-[0_20px_60px_rgba(0,0,0,0.2)] md:px-6 ${isPrimaryPlan ? "lg:-mt-1 lg:pb-5" : ""} ${presentation.toneClass}`}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <span className="inline-flex rounded-full border border-[rgba(255,110,170,0.36)] bg-[rgba(194,9,90,0.18)] px-3.5 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                        {copy.fitLabel}
-                      </span>
-                      <p className="mt-5 text-[0.76rem] font-semibold uppercase tracking-[0.14em] text-[#8d88a1]">
+                      {isPrimaryPlan ? (
+                        <span className="inline-flex rounded-full border border-[rgba(255,110,170,0.36)] bg-[rgba(194,9,90,0.18)] px-3 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                          {copy.fitLabel}
+                        </span>
+                      ) : (
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-[#8d88a1]">
+                          {copy.fitLabel}
+                        </p>
+                      )}
+                      <p className={isPrimaryPlan ? "mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#8d88a1]" : "mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#8d88a1]"}>
                         {copy.label}
                       </p>
                     </div>
-                    <RevoryStatusBadge tone="accent">Best fit</RevoryStatusBadge>
+                    <RevoryStatusBadge tone={isFuturePlan ? "future" : isPrimaryPlan ? "accent" : "neutral"}>
+                      {isFuturePlan ? "Coming later" : isPrimaryPlan ? "Best fit" : "Entry"}
+                    </RevoryStatusBadge>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-3">
                     <p
-                      className={`font-[family:var(--font-display)] text-[clamp(3.4rem,6vw,5.6rem)] leading-none tracking-[-0.06em] ${presentation.headerTone}`}
+                      className={`font-[family:var(--font-display)] text-[clamp(2.45rem,3.4vw,3.45rem)] leading-none tracking-[-0.055em] ${presentation.headerTone}`}
                     >
                       {presentation.price}
                     </p>
-                    <p className="mt-2.5 text-[0.95rem] leading-7 text-[#9b94aa]">
-                      per month
+                    <p className="mt-1.5 text-[0.8rem] leading-5 text-[#9b94aa]">
+                      {isFuturePlan ? "future tier" : "per month"}
                     </p>
-                    <p className="mt-5 max-w-[42rem] text-[1rem] leading-8 text-[#c7bfce]">
+                    <p className="mt-3 text-[0.84rem] leading-6 text-[#c7bfce]">
                       {copy.framing}
                     </p>
                   </div>
 
-                  <div className="mt-7 h-px bg-[rgba(255,255,255,0.08)]" />
+                  <div className="mt-3.5 h-px bg-[rgba(255,255,255,0.08)]" />
 
-                  <div className="mt-7 grid gap-x-6 gap-y-3.5 md:grid-cols-2">
+                  <div className="mt-3.5 space-y-2">
                     {presentation.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-3">
+                      <div key={feature} className="flex items-start gap-2.5">
                         <PlanCheckIcon />
-                        <p className="text-[0.95rem] leading-8 text-[#aaa2b6]">{feature}</p>
+                        <p className="text-[0.78rem] leading-5 text-[#aaa2b6]">{feature}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-auto pt-8">
-                    <a className="rev-button-primary w-full md:w-auto" href={presentation.ctaHref}>
-                      {isCurrentPlan ? `Continue with ${copy.label}` : copy.ctaLabel}
-                    </a>
+                  <div className="mt-auto pt-4">
+                    {presentation.ctaHref ? (
+                      <a
+                        className={isPrimaryPlan ? "rev-button-primary w-full justify-center" : "rev-button-secondary w-full justify-center"}
+                        href={presentation.ctaHref}
+                      >
+                        {isCurrentPlan ? `Continue with ${copy.label}` : copy.ctaLabel}
+                      </a>
+                    ) : (
+                      <button
+                        className="rev-action-button w-full cursor-not-allowed justify-center opacity-60"
+                        disabled
+                        type="button"
+                      >
+                        {isCurrentPlan ? `Current ${copy.label}` : copy.ctaLabel}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
-            })()}
-
-            <div className="space-y-5">
-              {secondaryBillingPlans.map((planKey) => {
-                const presentation = planPresentation[planKey];
-                const copy = getPlanCopy(planKey);
-                const isCurrentPlan = billingSummary.planKey === planKey;
-
-                return (
-                  <div
-                    key={planKey}
-                    className={`flex flex-col rounded-[28px] border px-6 py-6 text-left shadow-[0_22px_60px_rgba(0,0,0,0.18)] ${presentation.toneClass}`}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#8d88a1]">
-                        {copy.fitLabel}
-                      </p>
-                      <RevoryStatusBadge tone={planKey === "PREMIUM" ? "future" : "neutral"}>
-                        {copy.label}
-                      </RevoryStatusBadge>
-                    </div>
-
-                    <div className="mt-4">
-                      <p
-                        className={`font-[family:var(--font-display)] text-[clamp(2.45rem,3vw,3.2rem)] leading-none tracking-[-0.04em] ${presentation.headerTone}`}
-                      >
-                        {presentation.price}
-                      </p>
-                      <p className="mt-2 text-[0.86rem] leading-6 text-[#8f8aa4]">
-                        per month
-                      </p>
-                      <p className="mt-4 text-[0.9rem] leading-7 text-[#aaa2b6]">
-                        {copy.framing}
-                      </p>
-                    </div>
-
-                    <div className="mt-5 h-px bg-[rgba(255,255,255,0.08)]" />
-
-                    <div className="mt-5 space-y-2.5">
-                      {presentation.features.map((feature) => (
-                        <div key={feature} className="flex items-start gap-3">
-                          <PlanCheckIcon />
-                          <p className="text-[0.88rem] leading-7 text-[#908aa3]">
-                            {feature}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-auto pt-6">
-                      {presentation.ctaHref ? (
-                        <a className="rev-button-secondary w-full" href={presentation.ctaHref}>
-                          {isCurrentPlan ? `Continue with ${copy.label}` : copy.ctaLabel}
-                        </a>
-                      ) : (
-                        <button
-                          className="rev-action-button w-full cursor-not-allowed justify-center opacity-60"
-                          disabled
-                          type="button"
-                        >
-                          {isCurrentPlan ? `Current ${copy.label}` : copy.ctaLabel}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="rounded-[24px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.018)] px-5 py-4 text-left">
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#827b91]">
-                  Growth stays the full Launch V1 product
-                </p>
-                <p className="mt-2 text-[0.86rem] leading-7 text-[#8f879d]">
-                  Basic is public and useful for entry, but Growth keeps the manual evidence add
-                  and executive summary sharing that make the MVP package complete.
-                </p>
-              </div>
-            </div>
+            })}
           </div>
 
-          <div className="mx-auto mt-6 max-w-[760px] text-center">
-            <p className="text-sm leading-7 text-[#8f879d]">
+          <div className="mx-auto mt-3 grid max-w-[1360px] gap-2 rounded-[18px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.018)] px-5 py-2 text-left md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <div>
+              <p className="text-sm leading-6 text-[#8f879d]">
               {getPlanCopy("GROWTH").valueSignal} Basic is the limited entry plan.
               Premium is a future tier and is not available today.
-            </p>
-            <p className="text-sm leading-7 text-[#7f798f]">
+              </p>
+              <p className="text-xs leading-5 text-[#7f798f]">
               Stripe handles checkout, card updates, and cancellation. The paid account
               returns directly into the protected app flow for {workspace.name}.
-            </p>
-            <p className="mt-2 text-xs leading-6 text-[#6f6a7d]">
+              </p>
+            </div>
+            <p className="text-xs leading-5 text-[#6f6a7d]">
               App URL: {getStripeAppUrl()}
             </p>
           </div>

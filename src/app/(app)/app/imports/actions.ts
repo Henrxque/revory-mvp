@@ -26,6 +26,7 @@ import {
   getSavedCsvMappingForHeaders,
   saveConfirmedCsvMapping,
 } from "@/services/imports/saved-csv-mapping";
+import { checkRateLimit } from "@/services/security/rate-limit";
 import { validateCsvStructure } from "@/services/imports/validate-csv-structure";
 import type {
   RevoryAssistedImportConfirmationDraft,
@@ -64,6 +65,7 @@ const canonicalFieldToTemplateColumn: Record<
     totalVisits: "total_visits",
   },
 };
+const CSV_TRIAGE_WINDOW_MS = 1000 * 60 * 10;
 
 function getExpectedDatasetType(templateKey: RevoryCsvTemplateKey) {
   return templateKey === "appointments" ? "APPOINTMENTS" : "CLIENTS";
@@ -256,6 +258,33 @@ export async function triageCsvFileAction(
         confidence: "LOW",
         detectedDatasetType: "UNKNOWN",
         errorMessage: "Finish workspace activation before reviewing import data.",
+        importSupported: false,
+        mappingConfidence: 0,
+        matchesSelectedTemplate: false,
+        missingFields: [],
+        mode: "DETERMINISTIC_FALLBACK",
+        probableSourceFormat: null,
+        qualityScore: 0,
+        qualityState: "BLOCKED",
+        reviewRequired: true,
+        status: "error",
+        supportedLeaks: [],
+        warnings: [],
+      };
+    }
+
+    const rateLimit = checkRateLimit({
+      key: `csv-triage:${appContext.workspace.id}`,
+      limit: 20,
+      windowMs: CSV_TRIAGE_WINDOW_MS,
+    });
+
+    if (rateLimit.limited) {
+      return {
+        columnMapping: {},
+        confidence: "LOW",
+        detectedDatasetType: "UNKNOWN",
+        errorMessage: "Too many CSV reviews in a short window. Wait a few minutes and try again.",
         importSupported: false,
         mappingConfidence: 0,
         matchesSelectedTemplate: false,

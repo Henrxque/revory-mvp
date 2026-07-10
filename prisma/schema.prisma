@@ -9,6 +9,7 @@ datasource db {
 
 enum UserStatus {
   ACTIVE
+  PENDING_VERIFICATION
   INVITED
   DISABLED
 }
@@ -139,21 +140,24 @@ enum RevenueLeakConfidence {
 }
 
 model User {
-  id                     String          @id @default(cuid())
-  clerkUserId            String?         @unique
-  authProvider           String          @default("clerk")
-  authSubject            String?         @unique
-  email                  String          @unique
-  fullName               String?
-  passwordHash           String?
-  passwordUpdatedAt      DateTime?
-  passwordResetTokenHash String?         @unique
-  passwordResetExpiresAt DateTime?
-  status                 UserStatus      @default(ACTIVE)
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  ownedWorkspaces        Workspace[]
-  triggeredRuns          AutomationRun[] @relation("AutomationTriggeredBy")
+  id                         String          @id @default(cuid())
+  clerkUserId                String?         @unique
+  authProvider               String          @default("clerk")
+  authSubject                String?         @unique
+  email                      String          @unique
+  fullName                   String?
+  passwordHash               String?
+  passwordUpdatedAt          DateTime?
+  passwordResetTokenHash     String?         @unique
+  passwordResetExpiresAt     DateTime?
+  emailVerifiedAt            DateTime?
+  emailVerificationTokenHash String?         @unique
+  emailVerificationExpiresAt DateTime?
+  status                     UserStatus      @default(ACTIVE)
+  createdAt                  DateTime        @default(now())
+  updatedAt                  DateTime        @updatedAt
+  ownedWorkspaces            Workspace[]
+  triggeredRuns              AutomationRun[] @relation("AutomationTriggeredBy")
 
   @@map("users")
 }
@@ -187,7 +191,7 @@ model Workspace {
   reviewRequests           ReviewRequest[]
   metricsSnapshots         MetricsSnapshot[]
   leadBookingOpportunities LeadBookingOpportunity[]
-  revenueLeaks             RevenueLeak[]           @relation("WorkspaceRevenueLeaks")
+  revenueLeaks             RevenueLeak[]            @relation("WorkspaceRevenueLeaks")
 
   @@map("workspaces")
 }
@@ -249,7 +253,7 @@ model DataSource {
   clients                   Client[]
   appointments              Appointment[]
   leadBookingOpportunities  LeadBookingOpportunity[]
-  revenueLeaks              RevenueLeak[]           @relation("DataSourceRevenueLeaks")
+  revenueLeaks              RevenueLeak[]            @relation("DataSourceRevenueLeaks")
 
   @@unique([workspaceId, name])
   @@index([workspaceId, type])
@@ -318,7 +322,7 @@ model Appointment {
   dataSource            DataSource?           @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
   recoveryOpportunities RecoveryOpportunity[]
   reviewRequests        ReviewRequest[]
-  revenueLeaks          RevenueLeak[]          @relation("AppointmentRevenueLeaks")
+  revenueLeaks          RevenueLeak[]         @relation("AppointmentRevenueLeaks")
 
   // Effective uniqueness applies when externalId is present.
   @@unique([workspaceId, externalId])
@@ -452,19 +456,19 @@ model LeadBookingOpportunity {
 }
 
 model RevenueLeak {
-  id                              String                       @id @default(cuid())
+  id                              String                  @id @default(cuid())
   workspaceId                     String
   sourceDataSourceId              String?
   relatedClientId                 String?
   relatedAppointmentId            String?
   relatedLeadBookingOpportunityId String?
   leakType                        RevenueLeakType
-  severity                        RevenueLeakSeverity          @default(MEDIUM)
-  status                          RevenueLeakStatus            @default(OPEN)
-  confidence                      RevenueLeakConfidence        @default(MEDIUM)
+  severity                        RevenueLeakSeverity     @default(MEDIUM)
+  status                          RevenueLeakStatus       @default(OPEN)
+  confidence                      RevenueLeakConfidence   @default(MEDIUM)
   estimatedValueCents             Int?
-  currency                        String                       @default("USD")
-  detectedAt                      DateTime                     @default(now())
+  currency                        String                  @default("USD")
+  detectedAt                      DateTime                @default(now())
   sourceWindowStart               DateTime?
   sourceWindowEnd                 DateTime?
   reason                          String
@@ -475,13 +479,13 @@ model RevenueLeak {
   sourceName                      String?
   fingerprint                     String
   resolvedAt                      DateTime?
-  createdAt                       DateTime                     @default(now())
-  updatedAt                       DateTime                     @updatedAt
-  workspace                       Workspace                    @relation("WorkspaceRevenueLeaks", fields: [workspaceId], references: [id], onDelete: Cascade)
-  sourceDataSource                DataSource?                  @relation("DataSourceRevenueLeaks", fields: [sourceDataSourceId], references: [id], onDelete: SetNull)
-  relatedClient                   Client?                      @relation("ClientRevenueLeaks", fields: [relatedClientId], references: [id], onDelete: SetNull)
-  relatedAppointment              Appointment?                 @relation("AppointmentRevenueLeaks", fields: [relatedAppointmentId], references: [id], onDelete: SetNull)
-  relatedLeadBookingOpportunity   LeadBookingOpportunity?      @relation("LeadBookingOpportunityRevenueLeaks", fields: [relatedLeadBookingOpportunityId], references: [id], onDelete: SetNull)
+  createdAt                       DateTime                @default(now())
+  updatedAt                       DateTime                @updatedAt
+  workspace                       Workspace               @relation("WorkspaceRevenueLeaks", fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceDataSource                DataSource?             @relation("DataSourceRevenueLeaks", fields: [sourceDataSourceId], references: [id], onDelete: SetNull)
+  relatedClient                   Client?                 @relation("ClientRevenueLeaks", fields: [relatedClientId], references: [id], onDelete: SetNull)
+  relatedAppointment              Appointment?            @relation("AppointmentRevenueLeaks", fields: [relatedAppointmentId], references: [id], onDelete: SetNull)
+  relatedLeadBookingOpportunity   LeadBookingOpportunity? @relation("LeadBookingOpportunityRevenueLeaks", fields: [relatedLeadBookingOpportunityId], references: [id], onDelete: SetNull)
 
   @@unique([workspaceId, fingerprint])
   @@index([workspaceId, status, detectedAt])

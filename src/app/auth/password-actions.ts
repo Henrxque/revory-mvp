@@ -3,12 +3,17 @@
 import { UserStatus } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { requestEmailVerification } from "@/services/auth/email-verification";
 import { hashPassword, isPasswordStrongEnough } from "@/services/auth/password-crypto";
 import {
   isPasswordResetDeliveryConfigured,
   requestPasswordReset,
   resetPasswordWithToken,
 } from "@/services/auth/password-reset";
+import { checkRateLimit } from "@/services/security/rate-limit";
+
+const AUTH_EMAIL_WINDOW_MS = 1000 * 60 * 15;
+const AUTH_EMAIL_ATTEMPT_LIMIT = 5;
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
@@ -35,6 +40,19 @@ export async function createEmailPasswordAccount(input: {
     };
   }
 
+  const rateLimit = checkRateLimit({
+    key: `signup:${email}`,
+    limit: AUTH_EMAIL_ATTEMPT_LIMIT,
+    windowMs: AUTH_EMAIL_WINDOW_MS,
+  });
+
+  if (rateLimit.limited) {
+    return {
+      message: "Too many signup attempts. Wait a few minutes before trying again.",
+      ok: false as const,
+    };
+  }
+
   if (!isPasswordStrongEnough(input.password)) {
     return {
       message: "Use at least 10 characters for the password.",
@@ -49,6 +67,21 @@ export async function createEmailPasswordAccount(input: {
   });
 
   if (existingUser) {
+    if (existingUser.status === UserStatus.PENDING_VERIFICATION && existingUser.passwordHash) {
+      const verification = await requestEmailVerification({
+        email: existingUser.email,
+        userId: existingUser.id,
+      });
+
+      return {
+        message: verification.sent
+          ? "A verification email was sent again. Confirm your email before signing in."
+          : "Account exists, but REVORY could not send the verification email. Check email setup and try again.",
+        ok: verification.sent as boolean,
+        requiresVerification: true as const,
+      };
+    }
+
     return {
       message: "An account already exists for this email. Sign in or reset the password.",
       ok: false as const,
@@ -62,7 +95,7 @@ export async function createEmailPasswordAccount(input: {
       fullName,
       passwordHash: await hashPassword(input.password),
       passwordUpdatedAt: new Date(),
-      status: UserStatus.ACTIVE,
+      status: UserStatus.PENDING_VERIFICATION,
     },
   });
 
@@ -75,13 +108,35 @@ export async function createEmailPasswordAccount(input: {
     },
   });
 
+  const verification = await requestEmailVerification({
+    email: user.email,
+    userId: user.id,
+  });
+
   return {
-    message: "Account created. Opening REVORY now.",
-    ok: true as const,
+    message: verification.sent
+      ? "Account created. Check your email to confirm your REVORY account."
+      : "Account created, but REVORY could not send the verification email. Check email setup and try again.",
+    ok: verification.sent as boolean,
+    requiresVerification: true as const,
   };
 }
 
 export async function requestPasswordResetAction(input: { email: string }) {
+  const email = normalizeEmail(input.email);
+  const rateLimit = checkRateLimit({
+    key: `password-reset:${email || "unknown"}`,
+    limit: AUTH_EMAIL_ATTEMPT_LIMIT,
+    windowMs: AUTH_EMAIL_WINDOW_MS,
+  });
+
+  if (rateLimit.limited) {
+    return {
+      message: "Too many reset requests. Wait a few minutes before trying again.",
+      ok: false as const,
+    };
+  }
+
   const result = await requestPasswordReset(input.email);
 
   if (!result.deliveryConfigured) {

@@ -29,8 +29,8 @@ export function AuthOptionsPanel({
           </h2>
           <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
             {isSignIn
-              ? "Use Google or email/password to return to the same workspace."
-              : "Use Google or email/password to start the same REVORY workspace setup."}
+              ? "Use Google or confirmed email/password to return to the same workspace."
+              : "Use Google or confirm your email/password account to start REVORY setup."}
           </p>
         </div>
 

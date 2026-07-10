@@ -1,6 +1,6 @@
 import "server-only";
 
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-4o-mini";
 const DEFAULT_TIMEOUT_MS = 4000;
 const loggedProviderStates = new Set<string>();
 

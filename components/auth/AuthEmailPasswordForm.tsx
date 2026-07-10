@@ -37,10 +37,14 @@ export function AuthEmailPasswordForm({
               password,
             });
 
+            setMessage(result.message);
+
             if (!result.ok) {
-              setMessage(result.message);
               return;
             }
+
+            setPassword("");
+            return;
           }
 
           const result = await signIn("credentials", {
@@ -51,7 +55,9 @@ export function AuthEmailPasswordForm({
           });
 
           if (result?.error) {
-            setMessage("Email or password did not match an active REVORY account.");
+            setMessage(
+              "Email or password did not match an active REVORY account. If you just signed up, confirm your email first.",
+            );
             return;
           }
 
@@ -111,7 +117,7 @@ export function AuthEmailPasswordForm({
           ? "Working..."
           : isSignIn
             ? "Continue with email"
-            : "Create workspace with email"}
+            : "Create account with email"}
       </button>
 
       {isSignIn ? (
@@ -123,7 +129,7 @@ export function AuthEmailPasswordForm({
         </Link>
       ) : (
         <p className="text-[10px] leading-[1.45] text-[color:var(--text-subtle)]">
-          Email/password is intentionally simple: no Meta login, no extra provider sprawl.
+          Email/password requires a confirmation link. No Meta login, no extra provider sprawl.
         </p>
       )}
     </form>

@@ -10,6 +10,20 @@ const isGoogleConfigured = Boolean(
   process.env.AUTH_GOOGLE_CLIENT_ID && process.env.AUTH_GOOGLE_CLIENT_SECRET,
 );
 
+function getAuthSecret() {
+  const secret = process.env.AUTH_SECRET?.trim();
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.VERCEL_ENV === "production") {
+    throw new Error("AUTH_SECRET is required in production.");
+  }
+
+  return "revory-local-auth-secret";
+}
+
 const providers = [
   ...(isGoogleConfigured
     ? [
@@ -57,7 +71,7 @@ const providers = [
 ];
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.AUTH_SECRET ?? "revory-local-auth-secret",
+  secret: getAuthSecret(),
   session: {
     strategy: "jwt",
   },

@@ -12,11 +12,18 @@ import {
   normalizeAuthRedirectTarget,
 } from "@/services/auth/redirects";
 
+export const metadata = {
+  robots: {
+    follow: false,
+    index: false,
+  },
+};
+
 const signUpSteps = [
   {
     label: "01",
-    title: "Create the workspace",
-    text: "Google or email/password opens a real workspace instead of a disconnected auth state.",
+    title: "Confirm the account",
+    text: "Google opens verified access immediately. Email/password sends a confirmation link first.",
   },
   {
     label: "02",
@@ -71,7 +78,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure access creates the workspace and moves straight into clinic data setup.
+                Secure access keeps the workspace tied to a real inbox before clinic data setup.
               </p>
             </div>
           </div>

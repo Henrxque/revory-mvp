@@ -32,7 +32,7 @@ type RequestAiCsvTriageInput = {
 const MAX_AI_COLUMNS = 40;
 const MAX_AI_SAMPLE_ROWS = 5;
 const MAX_WARNING_COUNT = 8;
-const AI_TIMEOUT_MS = 4000;
+const AI_TIMEOUT_MS = 8000;
 const DATASET_TYPES = [
   "APPOINTMENTS",
   "CLIENTS",

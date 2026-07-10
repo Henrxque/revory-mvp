@@ -53,6 +53,21 @@ const criticalColumns = [
     table: "users",
     usage: "forgot password reset expiry",
   },
+  {
+    column: "emailVerifiedAt",
+    table: "users",
+    usage: "email verification state for email/password auth",
+  },
+  {
+    column: "emailVerificationTokenHash",
+    table: "users",
+    usage: "email verification token lookup",
+  },
+  {
+    column: "emailVerificationExpiresAt",
+    table: "users",
+    usage: "email verification token expiry",
+  },
 ];
 
 function readEnvFile(filePath) {

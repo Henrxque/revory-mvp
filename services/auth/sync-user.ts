@@ -55,6 +55,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
       data: {
         authProvider,
         email,
+        emailVerifiedAt: existingByAuthSubject.emailVerifiedAt ?? new Date(),
         fullName,
         status: UserStatus.ACTIVE,
       },
@@ -85,6 +86,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
       data: {
         authProvider,
         authSubject,
+        emailVerifiedAt: existingByEmail.emailVerifiedAt ?? new Date(),
         fullName,
         status: UserStatus.ACTIVE,
       },
@@ -96,6 +98,7 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
       authProvider,
       authSubject,
       email,
+      emailVerifiedAt: new Date(),
       fullName,
       status: UserStatus.ACTIVE,
     },

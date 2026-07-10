@@ -12,11 +12,18 @@ import {
   normalizeAuthRedirectTarget,
 } from "@/services/auth/redirects";
 
+export const metadata = {
+  robots: {
+    follow: false,
+    index: false,
+  },
+};
+
 const signInSteps = [
   {
     label: "01",
     title: "Return to the same workspace",
-    text: "Google or email/password brings the user back to the same private workspace.",
+    text: "Google or confirmed email/password brings the user back to the same private workspace.",
   },
   {
     label: "02",
