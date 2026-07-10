@@ -902,7 +902,8 @@
 
     .pricing-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: minmax(0, 680px);
+      justify-content: center;
       gap: 1.5rem;
       margin-top: 3.5rem;
       align-items: start;
@@ -1177,7 +1178,7 @@
     <li><a href="#how">How It Works</a></li>
     <li><a href="#pricing">Pricing</a></li>
     <li><a href="#faq">FAQ</a></li>
-    <li><a href="/start?plan=growth" class="nav-cta">Get Your Leak Read</a></li>
+    <li><a href="/start" class="nav-cta">Get your first leak read</a></li>
   </ul>
 </nav>
 
@@ -1187,13 +1188,13 @@
   <div class="hero-grid"></div>
   <div class="hero-inner">
     <div class="hero-badge">Revenue Leak Detector for premium MedSpas</div>
-    <h1>Getting leads, but not enough <em>booked consults?</em></h1>
+    <h1>See where your MedSpa is <em>leaking revenue.</em></h1>
     <p class="hero-sub">
-      Revory shows premium MedSpas where revenue is leaking across lead follow-up, booked appointments, no-shows and cancellations — starting from your clinic data.
+      REVORY detects no-show and unrecovered cancellation leaks, separates operational risks from financial leaks, and shows what to review first from your clinic data.
     </p>
     <div class="hero-ctas">
-      <a href="/start?plan=growth" class="btn-primary">Get Your Leak Read →</a>
-      <a href="#pricing" class="btn-ghost">Founding Clinic Beta</a>
+      <a href="/start" class="btn-primary">Get your first leak read →</a>
+      <a href="#how" class="btn-ghost">See how it works</a>
     </div>
     <p class="hero-note"><span>✓ CSV-first.</span> &nbsp;✓ Self-service. &nbsp;✓ Estimated revenue at risk.</p>
   </div>
@@ -1239,8 +1240,8 @@
       <div class="trust-icon-wrap">
         <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
       </div>
-      <span class="trust-label">Email Default · SMS Optional</span>
-      <span class="trust-sub">Fully usable on email from day one, with SMS optional when needed</span>
+      <span class="trust-label">Data Freshness Check</span>
+      <span class="trust-sub">Know when stale appointment evidence limits the current read</span>
     </div>
 
     <div class="trust-item">
@@ -1343,20 +1344,20 @@
             </div>
             <div class="mock-stat">
               <span class="mock-stat-val">28</span>
-              <span class="mock-stat-lbl">Appointments booked</span>
+              <span class="mock-stat-lbl">No-show events</span>
             </div>
           </div>
           <div class="mock-row">
-            <span class="mock-label">Booking rate</span>
-            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">18.4%</span></div>
+            <span class="mock-label">Top leak</span>
+            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">No-shows</span></div>
           </div>
           <div class="mock-row">
-            <span class="mock-label">Leads received</span>
-            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">152</span></div>
+            <span class="mock-label">Confidence</span>
+            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">High</span></div>
           </div>
           <div class="mock-row">
-            <span class="mock-label">Avg deal value</span>
-            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">$137</span></div>
+            <span class="mock-label">Data freshness</span>
+            <div style="display:flex;gap:0.5rem;align-items:center"><span class="mock-value">Current</span></div>
           </div>
         </div>
       </div>
@@ -1469,25 +1470,25 @@
       <div class="roi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg>
       </div>
-      <span class="roi-number">Volume</span>
-      <h4>Appointments booked</h4>
-      <p>Keep booked volume visible so the clinic can tell whether the path is actually converting.</p>
+      <span class="roi-number">Evidence</span>
+      <h4>Why the leak appeared</h4>
+      <p>Review the observed appointment evidence behind each financial leak or operational risk.</p>
     </div>
     <div class="roi-card">
       <div class="roi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       </div>
-      <span class="roi-number">Conversion</span>
-      <h4>Conversion in view</h4>
-      <p>Keep the lead-to-booking picture visible without turning the product into bloated BI.</p>
+      <span class="roi-number">Confidence</span>
+      <h4>Know how strong the read is</h4>
+      <p>See whether value comes from direct appointment data, configured averages, or incomplete evidence.</p>
     </div>
     <div class="roi-card">
       <div class="roi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <span class="roi-number">Speed</span>
-      <h4>Speed stays visible</h4>
-      <p>Track the timing signal that matters before expensive intent cools off.</p>
+      <span class="roi-number">Priority</span>
+      <h4>Review the right leak first</h4>
+      <p>Use one short recommended action without turning the read into a sales workflow.</p>
     </div>
   </div>
 </section>
@@ -1586,8 +1587,8 @@
     </div>
     <div class="ideal-card">
       <span class="ideal-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M5.64 5.64l12.72 12.72M18.36 5.64 5.64 18.36"/></svg></span>
-      <h3>Small Multi-Location MedSpas</h3>
-      <p>Great for growing operations that want executive revenue visibility without buying a bloated platform.</p>
+      <h3>Established MedSpas</h3>
+      <p>Great for clinics with consistent appointment volume that want executive revenue-risk visibility without a bloated platform.</p>
     </div>
     <div class="ideal-card">
       <span class="ideal-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.5"/><path d="M8 9h8l-1 6H9L8 9z"/><path d="M9 15l-2 5M15 15l2 5M8 9l-3 3M16 9l3 3"/></svg></span>
@@ -1615,62 +1616,30 @@
 <!-- ——— PRICING ——— -->
 <section id="pricing">
   <span class="section-label">Pricing</span>
-  <h2>Simple pricing.<br/>Built around the leak read.</h2>
-  <p style="max-width:560px;margin:0.75rem auto 0;">Basic is the import-first in-app leak read. Growth is the complete self-service Launch V1 package. Premium is a future tier and is not available yet.</p>
+  <h2>One REVORY offer.<br/>Built around the first leak read.</h2>
+  <p style="max-width:560px;margin:0.75rem auto 0;">Start self-service with structured clinic data, a Data Quality Check, and an evidence-backed revenue-risk read.</p>
   <div class="pricing-grid">
 
-    <div class="price-card">
-      <div class="price-tag">Entry Plan</div>
-      <div class="price-name">Basic</div>
-      <div class="price-amount"><span class="price-currency">$</span><span>370</span></div>
-      <div class="price-period">per month</div>
-      <div class="price-divider"></div>
-      <ul class="price-features">
-        <li class="price-feature">Dashboard leak read</li>
-        <li class="price-feature">Revenue Leaks Page</li>
-        <li class="price-feature">Daily Leak Brief</li>
-        <li class="price-feature">AI-assisted CSV review + Data Quality Check</li>
-        <li class="price-feature">No Manual Quick Add</li>
-        <li class="price-feature">No Executive Summary copy/share/print</li>
-      </ul>
-      <a href="/start?plan=basic" class="btn-ghost">Start with Basic</a>
-    </div>
-
     <div class="price-card featured">
-      <div class="price-tag">Main Plan</div>
-      <div class="price-name">Growth</div>
-      <div class="price-amount"><span class="price-currency">$</span><span>570</span></div>
+      <div class="price-tag">Founding clinic launch price</div>
+      <div class="price-name">REVORY</div>
+      <div class="price-amount"><span class="price-currency">$</span><span>499</span></div>
       <div class="price-period">per month</div>
       <div class="price-divider"></div>
       <ul class="price-features">
-        <li class="price-feature">Complete Revenue Leak Detector Launch V1</li>
-        <li class="price-feature">Dashboard leak read and Revenue Leaks Page</li>
-        <li class="price-feature">AI-assisted CSV review + Data Quality Check</li>
-        <li class="price-feature">Daily Leak Brief and bounded action guidance</li>
-        <li class="price-feature">Manual Quick Add for one-off evidence</li>
+        <li class="price-feature">Revenue Leak Dashboard and Revenue Leaks Page</li>
+        <li class="price-feature">No-show and canceled-not-recovered detection</li>
+        <li class="price-feature">Operational and stale-data risks kept separate</li>
+        <li class="price-feature">CSV intake, mapping review and Data Quality Check</li>
+        <li class="price-feature">Evidence, confidence and recommended actions</li>
+        <li class="price-feature">Daily Leak Brief</li>
         <li class="price-feature">Executive Revenue Leak Summary with copy, share, and print</li>
       </ul>
-      <a href="/start?plan=growth" class="btn-primary">Start with Growth →</a>
-    </div>
-
-    <div class="price-card">
-      <div class="price-tag">Future Tier</div>
-      <div class="price-name">Premium</div>
-      <div class="price-amount" style="font-size:2.25rem;"><span>Later</span></div>
-      <div class="price-period">not available yet</div>
-      <div class="price-divider"></div>
-      <ul class="price-features">
-        <li class="price-feature">Future tier placeholder</li>
-        <li class="price-feature">Not available for checkout yet</li>
-        <li class="price-feature">No manual fit review today</li>
-        <li class="price-feature">No CRM, inbox, automation, or BI expansion</li>
-        <li class="price-feature">Must stay inside the narrow Revenue Leak Detector model</li>
-      </ul>
-      <span class="btn-ghost" style="opacity:0.58;cursor:not-allowed;">Coming later</span>
+      <p style="margin:0 0 1.25rem;color:var(--muted);font-size:0.88rem;line-height:1.6;">Available to the first 10 active clinics. Your price stays locked while your subscription remains active.</p>
+      <a href="/start" class="btn-primary">Get your first leak read →</a>
     </div>
 
   </div>
-  <p style="max-width:680px;margin:1.25rem auto 0;text-align:center;color:var(--muted);font-size:0.9rem;line-height:1.7;">Basic is public and import-first. Growth is the full Revenue Leak Detector package with manual evidence add and executive summary sharing. Premium is future only and does not open checkout or manual review.</p>
 </section>
 
 <!-- ——— FAQ ——— -->
@@ -1707,10 +1676,10 @@
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">
-        Can I use email only, without SMS?
+        Does REVORY recover revenue automatically?
         <div class="faq-toggle">+</div>
       </div>
-      <div class="faq-a">Yes. Email and SMS can support bounded action guidance, but the core product does not depend on a messaging channel.</div>
+      <div class="faq-a">No. REVORY detects estimated revenue at risk and shows what to review first. It does not send follow-ups or claim that revenue was recovered.</div>
     </div>
 
     <div class="faq-item">
@@ -1754,7 +1723,7 @@
     <h2>Revenue leaks hide in clinic data.<br/><em>REVORY shows what to inspect first.</em></h2>
     <p>REVORY helps premium MedSpas turn structured appointment and booking data into a clearer read on estimated revenue at risk.</p>
     <div class="cta-stack">
-      <a href="/start?plan=growth" class="btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem;">Get Your Leak Read →</a>
+      <a href="/start" class="btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem;">Get your first leak read →</a>
       <span class="hero-note"><span>Self-service activation.</span> &nbsp;No bloated rollout. &nbsp;No CRM, inbox or BI bloat.</span>
     </div>
   </div>

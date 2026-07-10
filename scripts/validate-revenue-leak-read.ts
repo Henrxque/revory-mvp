@@ -7,6 +7,7 @@ import type {
 } from "@prisma/client";
 
 import { getRevenueLeakReadForWorkspace } from "../services/revenue-leaks/get-revenue-leak-read";
+import { buildFirstLeakRead } from "../services/revenue-leaks/build-first-leak-read";
 
 const prisma = new PrismaClient();
 const runId = `revenue-leak-read-${Date.now()}`;
@@ -279,12 +280,25 @@ async function main() {
     mainRead.topLeaks.every((leak) => leak.status === "OPEN" || leak.status === "ACKNOWLEDGED"),
     "Top leaks should include only active statuses.",
   );
+  const mainFirstRead = buildFirstLeakRead(mainRead);
+  assert(
+    mainFirstRead.state === "HAS_REVENUE_AT_RISK",
+    "First leak read should preserve the financial state.",
+  );
+  assert(
+    mainFirstRead.topLeak?.category === "FINANCIAL_LEAK",
+    "First leak read should prioritize a financial leak when financial value is visible.",
+  );
 
   log("Validating empty state");
   const emptyRead = await getRevenueLeakReadForWorkspace(emptyWorkspace.id);
   assert(emptyRead.state === "EMPTY", `Expected EMPTY state, got ${emptyRead.state}.`);
   assert(emptyRead.estimatedRevenueAtRiskCents === null, "Empty read should not invent revenue at risk.");
   assert(emptyRead.activeLeakCount === 0, "Empty read should have zero active leaks.");
+  assert(
+    buildFirstLeakRead(emptyRead).state === "EMPTY",
+    "First leak read should expose EMPTY without inventing a signal.",
+  );
 
   log("Validating no-financial-leaks state");
   const operationalRead = await getRevenueLeakReadForWorkspace(
@@ -302,6 +316,15 @@ async function main() {
     operationalRead.topOperationalRisk?.leakType === "MISSING_CONTACT",
     "Operational-only read should expose top operational risk.",
   );
+  const operationalFirstRead = buildFirstLeakRead(operationalRead);
+  assert(
+    operationalFirstRead.state === "OPERATIONAL_ONLY",
+    "First leak read should translate NO_FINANCIAL_LEAKS to OPERATIONAL_ONLY.",
+  );
+  assert(
+    operationalFirstRead.estimatedRevenueAtRiskLabel === "Value pending",
+    "Operational-only first read should not expose operational context as estimated revenue at risk.",
+  );
 
   log("Validating thin-data state");
   const thinDataRead = await getRevenueLeakReadForWorkspace(thinDataWorkspace.id);
@@ -316,6 +339,26 @@ async function main() {
   assert(
     thinDataRead.topFinancialLeak?.leakType === "NO_SHOW_REVENUE",
     "Thin-data read should retain the financial leak evidence.",
+  );
+  assert(
+    buildFirstLeakRead(thinDataRead).state === "THIN_DATA",
+    "First leak read should preserve THIN_DATA.",
+  );
+
+  const staleFirstRead = buildFirstLeakRead({
+    ...mainRead,
+    activeFinancialLeakCount: 0,
+    activeOperationalRiskCount: 0,
+    estimatedRevenueAtRiskCents: null,
+    estimatedRevenueAtRiskLabel: "Value pending",
+    state: "DATA_STALE",
+    topFinancialLeak: null,
+    topLeak: mainRead.topDataQualityRisk,
+    topOperationalRisk: null,
+  });
+  assert(
+    staleFirstRead.state === "DATA_STALE" && staleFirstRead.topLeak?.category === "DATA_QUALITY_RISK",
+    "First leak read should keep stale data separate from financial and operational signals.",
   );
 
   assert(openAiFetchCalls === 0, "Revenue leak read QA should not make OpenAI calls.");

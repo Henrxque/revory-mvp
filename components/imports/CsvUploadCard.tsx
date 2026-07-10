@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { CsvMappingReview } from "@/components/imports/CsvMappingReview";
+import { FirstLeakRead } from "@/components/imports/FirstLeakRead";
 import { RevoryDecisionSupportCard } from "@/components/ui/RevoryDecisionSupportCard";
 import {
   buildAssistedImportConfirmationDraft,
@@ -1002,6 +1003,10 @@ export function CsvUploadCard({
               ))}
             </ul>
           </div>
+        ) : null}
+
+        {statusState.firstLeakRead ? (
+          <FirstLeakRead read={statusState.firstLeakRead} />
         ) : null}
 
         {statusState.importSummary ? (

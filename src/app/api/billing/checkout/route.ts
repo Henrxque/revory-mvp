@@ -10,7 +10,6 @@ import {
 import { ensureStripeCustomerForWorkspace } from "@/services/billing/stripe-sync";
 import {
   getWorkspaceBillingSummary,
-  normalizeBillingPlanKey,
 } from "@/services/billing/workspace-billing";
 import { buildSignUpRedirectPath } from "@/services/auth/redirects";
 import { syncAuthenticatedUser } from "@/services/auth/sync-user";
@@ -19,22 +18,10 @@ import { prisma } from "@/db/prisma";
 
 export async function GET(request: NextRequest) {
   const session = await getAuthSession();
-  const requestedPlan = normalizeBillingPlanKey(
-    request.nextUrl.searchParams.get("plan"),
-  ) ?? "GROWTH";
-  const selectiveBillingState = requestedPlan === "PREMIUM" ? "premium-future" : null;
-
-  if (selectiveBillingState) {
-    return NextResponse.redirect(
-      new URL(
-        `/start?billing=${selectiveBillingState}&plan=${requestedPlan.toLowerCase()}`,
-        request.url,
-      ),
-    );
-  }
+  const requestedPlan = "GROWTH" as const;
 
   if (!session?.user?.id) {
-    const redirectTarget = `/api/billing/checkout?plan=${requestedPlan.toLowerCase()}`;
+    const redirectTarget = "/api/billing/checkout";
 
     return NextResponse.redirect(
       new URL(buildSignUpRedirectPath(redirectTarget), request.url),
@@ -43,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   if (!isStripeCheckoutConfiguredForPlan(requestedPlan)) {
     return NextResponse.redirect(
-      new URL(`/start?billing=unavailable&plan=${requestedPlan.toLowerCase()}`, request.url),
+      new URL("/start?billing=unavailable", request.url),
     );
   }
 
@@ -86,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       allow_promotion_codes: true,
-      cancel_url: `${getStripeAppUrl()}/start?checkout=cancel&plan=${requestedPlan.toLowerCase()}`,
+      cancel_url: `${getStripeAppUrl()}/start?checkout=cancel`,
       client_reference_id: workspace.id,
       customer: stripeCustomerId,
       line_items: [
@@ -113,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     if (!checkoutSession.url) {
       return NextResponse.redirect(
-        new URL(`/start?billing=error&plan=${requestedPlan.toLowerCase()}`, request.url),
+        new URL("/start?billing=error", request.url),
       );
     }
 
@@ -128,7 +115,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.redirect(
-      new URL(`/start?billing=error&plan=${requestedPlan.toLowerCase()}`, request.url),
+      new URL("/start?billing=error", request.url),
     );
   }
 }

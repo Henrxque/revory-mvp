@@ -28,6 +28,9 @@ import {
 } from "@/services/imports/saved-csv-mapping";
 import { checkRateLimit } from "@/services/security/rate-limit";
 import { validateCsvStructure } from "@/services/imports/validate-csv-structure";
+import { buildFirstLeakRead } from "@/services/revenue-leaks/build-first-leak-read";
+import { getRevenueLeakReadForWorkspace } from "@/services/revenue-leaks/get-revenue-leak-read";
+import { syncRevenueLeaksForWorkspace } from "@/services/revenue-leaks/sync-revenue-leaks";
 import type {
   RevoryAssistedImportConfirmationDraft,
   RevoryCsvColumn,
@@ -636,8 +639,23 @@ export async function uploadCsvFile(
       workspaceId: appContext.workspace.id,
     });
     let mappingSaveWarning: string | null = null;
+    let firstLeakReadWarning: string | null = null;
+    let firstLeakRead: RevoryCsvUploadActionState["firstLeakRead"];
 
     if (persistenceResult.successRows > 0) {
+      try {
+        await syncRevenueLeaksForWorkspace({
+          workspaceId: appContext.workspace.id,
+        });
+        firstLeakRead = buildFirstLeakRead(
+          await getRevenueLeakReadForWorkspace(appContext.workspace.id),
+        );
+      } catch (error) {
+        console.error("REVORY could not complete the post-import leak read.", error);
+        firstLeakReadWarning =
+          "The import completed, but the first leak read could not refresh. Open the dashboard and run the read again.";
+      }
+
       try {
         const mappingSaved = await saveConfirmedCsvMapping({
           dataSourceId: dataSource.id,
@@ -659,6 +677,7 @@ export async function uploadCsvFile(
 
     revalidatePath("/app/imports");
     revalidatePath("/app/dashboard");
+    revalidatePath("/app/revenue-leaks");
 
     const errorRows = persistenceResult.errorRows.slice(0, 3);
     const hasPartialErrors = persistenceResult.errorRows.length > 0;
@@ -666,6 +685,7 @@ export async function uploadCsvFile(
     return {
       fileName: dataSource.lastImportFileName ?? fileValue.name,
       failedRows: errorRows,
+      firstLeakRead,
       importSummary: {
         createdAppointmentCount: persistenceResult.createdAppointmentCount,
         createdClientCount: persistenceResult.createdClientCount,
@@ -684,9 +704,11 @@ export async function uploadCsvFile(
         : "Clinic data visibility updated successfully using the confirmed mapping for this file.",
       importedAt: dataSource.lastImportedAt?.toISOString() ?? new Date().toISOString(),
       status: persistenceResult.finalStatus,
-      warnings: mappingSaveWarning
-        ? formatIssuesForUi([...combinedWarnings, mappingSaveWarning])
-        : combinedWarnings,
+      warnings: formatIssuesForUi([
+        ...combinedWarnings,
+        ...(mappingSaveWarning ? [mappingSaveWarning] : []),
+        ...(firstLeakReadWarning ? [firstLeakReadWarning] : []),
+      ]),
     };
   } catch (error) {
     console.error("REVORY import execution failed.", error);

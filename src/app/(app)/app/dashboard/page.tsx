@@ -449,10 +449,10 @@ function GrowthProofShareLimitCard() {
     <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3.5 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <p className="rev-label">Executive leak summary</p>
-        <RevoryStatusBadge tone="future">Growth</RevoryStatusBadge>
+        <RevoryStatusBadge tone="future">Legacy access</RevoryStatusBadge>
       </div>
       <p className="mt-2 text-[11px] leading-[1.5] text-[color:var(--text-muted)]">
-        Basic keeps the leak read in-app. Growth adds copy, share, and print for the Executive Revenue Leak Summary.
+        Copy, share, and print are unavailable on this legacy subscription. The in-app revenue leak read remains available.
       </p>
     </div>
   );

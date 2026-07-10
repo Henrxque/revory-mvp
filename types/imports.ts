@@ -209,12 +209,41 @@ export type RevoryCsvStructuralValidationResult = {
   warnings: RevoryCsvValidationIssue[];
 };
 
+export type RevoryFirstLeakReadState =
+  | "DATA_STALE"
+  | "EMPTY"
+  | "HAS_REVENUE_AT_RISK"
+  | "OPERATIONAL_ONLY"
+  | "THIN_DATA";
+
+export type RevoryFirstLeakRead = {
+  activeDataQualityRiskCount: number;
+  activeFinancialLeakCount: number;
+  activeOperationalRiskCount: number;
+  ctaHref: string;
+  ctaLabel: "Go to dashboard" | "Improve data quality" | "View revenue leaks";
+  estimatedRevenueAtRiskLabel: string;
+  limitation: string;
+  state: RevoryFirstLeakReadState;
+  summary: string;
+  topLeak: {
+    category: "DATA_QUALITY_RISK" | "FINANCIAL_LEAK" | "OPERATIONAL_RISK";
+    confidence: "HIGH" | "LOW" | "MEDIUM";
+    estimatedValueLabel: string;
+    evidence: string;
+    label: string;
+    recommendedAction: string;
+    severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM";
+  } | null;
+};
+
 export type RevoryCsvUploadActionState = {
   fileName?: string;
   failedRows?: Array<{
     lineNumber: number;
     reasons: string[];
   }>;
+  firstLeakRead?: RevoryFirstLeakRead;
   importSummary?: {
     createdAppointmentCount: number;
     createdClientCount: number;
