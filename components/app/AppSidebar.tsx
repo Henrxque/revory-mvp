@@ -9,6 +9,7 @@ type AppSidebarProps = Readonly<{
   activationStatus: string;
   bookingInputsStatus: string;
   currentStepTitle: string;
+  demoMode?: boolean;
   userEmail: string;
   workspaceName: string;
   workspaceStatus: string;
@@ -41,22 +42,23 @@ type SidebarGroup = {
 const navGroups = (
   activationStatus: string,
   bookingInputsStatus: string,
+  demoMode = false,
 ): SidebarGroup[] => [
     {
       label: "REVORY",
       items: [
         {
-          href: "/app/dashboard",
+          href: demoMode ? "#demo-dashboard" : "/app/dashboard",
           icon: "dashboard",
           label: "Leak Read",
         },
         {
-          href: "/app/revenue-leaks",
+          href: demoMode ? "#demo-leaks" : "/app/revenue-leaks",
           icon: "signals",
           label: "Revenue Leaks",
         },
         {
-          href: "/app/imports",
+          href: demoMode ? "#demo-data" : "/app/imports",
           icon: "appointments",
           label: "Clinic Data",
           status: bookingInputsStatus,
@@ -67,7 +69,7 @@ const navGroups = (
       label: "Activation",
       items: [
         {
-          href: "/app/setup",
+          href: demoMode ? "#demo-cta" : "/app/setup",
           icon: "settings",
           label: "Activation Path",
           status: activationStatus,
@@ -176,6 +178,7 @@ export function AppSidebar({
   activationStatus,
   bookingInputsStatus,
   currentStepTitle,
+  demoMode = false,
   userEmail,
   workspaceName,
   workspaceStatus,
@@ -193,7 +196,7 @@ export function AppSidebar({
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-        {navGroups(activationStatus, bookingInputsStatus).map((group) => (
+        {navGroups(activationStatus, bookingInputsStatus, demoMode).map((group) => (
           <div key={group.label} className="space-y-1">
             <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-subtle)]">
               {group.label}
@@ -202,7 +205,9 @@ export function AppSidebar({
             {group.items.map((item) => {
               const isLink = "href" in item;
               const isActive = isLink
-                ? pathname === item.href || pathname.startsWith(`${item.href}/`)
+                ? demoMode
+                  ? item.href === "#demo-dashboard"
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : false;
 
               const itemClassName = `flex items-center gap-3 rounded-[18px] px-3.5 py-2.5 text-[13.5px] transition ${

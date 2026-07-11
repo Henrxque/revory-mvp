@@ -11,19 +11,15 @@ import {
   isStripeBillingConfigured,
   isStripeCheckoutConfiguredForPlan,
 } from "@/services/billing/stripe-runtime";
+import {
+  REVORY_PUBLIC_OFFER,
+  REVORY_PUBLIC_OFFER_FEATURES,
+} from "@/services/billing/public-offer";
 import { syncWorkspaceBillingFromCheckoutSession } from "@/services/billing/stripe-sync";
 import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 
-const publicBillingPlan = "GROWTH" as const;
-const publicOfferFeatures = [
-  "Revenue Leak Dashboard and Revenue Leaks Page",
-  "No-show and canceled-not-recovered detection",
-  "Blocked booking and stale-data risks kept separate from financial leaks",
-  "CSV intake, mapping review, and Data Quality Check",
-  "Evidence, confidence, and a recommended action for every leak",
-  "Daily Leak Brief and Executive Revenue Leak Summary",
-] as const;
+const publicBillingPlan = REVORY_PUBLIC_OFFER.planKey;
 
 function PlanCheckIcon() {
   return (
@@ -219,7 +215,7 @@ export default async function StartPage({ searchParams }: StartPageProps) {
 
             <div className="mt-4 flex flex-wrap items-end gap-x-3 gap-y-1">
               <p className="font-[family:var(--font-display)] text-[clamp(3.1rem,7vw,5rem)] leading-none tracking-[-0.06em] text-white">
-                $499
+                ${REVORY_PUBLIC_OFFER.monthlyPriceUsd}
               </p>
               <p className="pb-1 text-sm text-[#9b94aa]">/ month</p>
             </div>
@@ -230,7 +226,7 @@ export default async function StartPage({ searchParams }: StartPageProps) {
             <div className="my-5 h-px bg-[rgba(255,255,255,0.08)]" />
 
             <div className="grid gap-3 md:grid-cols-2 md:gap-x-6">
-              {publicOfferFeatures.map((feature) => (
+              {REVORY_PUBLIC_OFFER_FEATURES.map((feature) => (
                 <div key={feature} className="flex items-start gap-2.5">
                   <PlanCheckIcon />
                   <p className="text-[0.82rem] leading-5 text-[#aaa2b6]">{feature}</p>

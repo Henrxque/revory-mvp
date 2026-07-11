@@ -1,6 +1,7 @@
 import type { RevoryCsvTriageReviewState } from "@/types/imports";
 
 type DataQualityCheckCardProps = Readonly<{
+  readOnlySample?: boolean;
   triage: RevoryCsvTriageReviewState | null;
 }>;
 
@@ -20,6 +21,7 @@ function formatField(value: string) {
 }
 
 export function DataQualityCheckCard({
+  readOnlySample = false,
   triage,
 }: DataQualityCheckCardProps) {
   if (!triage || triage.status === "error") {
@@ -32,7 +34,9 @@ export function DataQualityCheckCard({
         <div>
           <p className="rev-label">Data quality check</p>
           <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">
-            Evidence coverage before import.
+            {readOnlySample
+              ? "Evidence coverage in this sample."
+              : "Evidence coverage before import."}
           </h3>
           <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
             Missing fields may lower confidence.
@@ -52,7 +56,9 @@ export function DataQualityCheckCard({
         <div className="rounded-[18px] border border-[rgba(46,204,134,0.2)] bg-[rgba(46,204,134,0.06)] px-4 py-4">
           <p className="text-sm font-semibold text-[color:var(--foreground)]">
             {triage.importSupported
-              ? "REVORY can detect these leaks from this file."
+              ? readOnlySample
+                ? "REVORY supports these leak reads from the sample fields."
+                : "REVORY can detect these leaks from this file."
               : "Potential leak coverage only after a supported import."}
           </p>
           {triage.supportedLeaks.length > 0 ? (
@@ -101,7 +107,9 @@ export function DataQualityCheckCard({
             </p>
           )}
           <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">
-            This check does not import automatically or create revenue leaks.
+            {readOnlySample
+              ? "This public sample is read-only and does not import or create revenue leaks."
+              : "This check does not import automatically or create revenue leaks."}
           </p>
         </div>
       </div>

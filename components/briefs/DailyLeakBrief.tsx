@@ -5,10 +5,16 @@ import type {
 } from "@/services/revenue-leaks/get-daily-leak-brief-read";
 
 type DailyLeakBriefProps = Readonly<{
+  detailHref?: string;
+  detailLabel?: string;
   read: DailyLeakBriefRead;
 }>;
 
-export function DailyLeakBrief({ read }: DailyLeakBriefProps) {
+export function DailyLeakBrief({
+  detailHref,
+  detailLabel = "Review Revenue Leaks",
+  read,
+}: DailyLeakBriefProps) {
   const primaryLeak = read.primaryLeak;
 
   return (
@@ -101,9 +107,9 @@ export function DailyLeakBrief({ read }: DailyLeakBriefProps) {
           <div className="mt-4">
             <DocumentNavigationLink
               className="rev-button-primary w-full justify-center"
-              href={read.detailHref}
+              href={detailHref ?? read.detailHref}
             >
-              Review Revenue Leaks
+              {detailLabel}
             </DocumentNavigationLink>
           </div>
         </aside>
