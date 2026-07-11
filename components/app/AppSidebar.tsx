@@ -212,7 +212,7 @@ export function AppSidebar({
 
               const itemClassName = `flex items-center gap-3 rounded-[18px] px-3.5 py-2.5 text-[13.5px] transition ${
                 isActive
-                  ? "bg-[linear-gradient(180deg,rgba(194,9,90,0.18),rgba(194,9,90,0.1))] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(194,9,90,0.22)]"
+                  ? "bg-[linear-gradient(180deg,rgba(67,179,155,0.18),rgba(67,179,155,0.1))] text-[color:var(--foreground)] shadow-[inset_0_0_0_1px_rgba(67,179,155,0.22)]"
                   : "text-[color:var(--text-muted)] hover:bg-[rgba(255,255,255,0.035)] hover:text-[color:var(--foreground)]"
               }`;
 
@@ -263,7 +263,7 @@ export function AppSidebar({
       <div className="border-t border-[color:var(--border)] px-4 py-4">
         <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.14)] text-[13px] font-semibold text-[color:var(--accent-light)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.14)] text-[13px] font-semibold text-[color:var(--accent-light)]">
               {workspaceInitials}
             </div>
 

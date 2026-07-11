@@ -28,7 +28,7 @@ export function PasswordResetRequestForm() {
           autoComplete="email"
           className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="you@clinic.com"
+          placeholder="you@company.com"
           type="email"
           value={email}
         />

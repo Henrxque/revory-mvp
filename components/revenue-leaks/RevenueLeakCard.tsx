@@ -121,7 +121,7 @@ export function RevenueLeakCard({ item }: RevenueLeakCardProps) {
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         {item.category === "FINANCIAL_LEAK" ? (
-          <div className="rounded-[18px] border border-[rgba(194,9,90,0.16)] bg-[rgba(194,9,90,0.055)] px-3 py-3">
+          <div className="rounded-[18px] border border-[rgba(67,179,155,0.16)] bg-[rgba(67,179,155,0.055)] px-3 py-3">
             <p className="rev-label">Estimated value</p>
             <p className="mt-1 text-[13px] font-semibold text-[color:var(--foreground)]">
               {item.estimatedValueLabel}

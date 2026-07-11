@@ -27,7 +27,7 @@ export function FirstLeakRead({ read }: FirstLeakReadProps) {
   const hasFinancialValue = read.state === "HAS_REVENUE_AT_RISK";
 
   return (
-    <section className="rounded-[28px] border border-[rgba(194,9,90,0.3)] bg-[linear-gradient(145deg,rgba(194,9,90,0.1),rgba(255,255,255,0.02))] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)] md:p-6">
+    <section className="rounded-[28px] border border-[rgba(67,179,155,0.3)] bg-[linear-gradient(145deg,rgba(67,179,155,0.1),rgba(255,255,255,0.02))] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)] md:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <p className="rev-kicker">Your first leak read</p>
@@ -41,7 +41,7 @@ export function FirstLeakRead({ read }: FirstLeakReadProps) {
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-[minmax(0,1.1fr)_repeat(3,minmax(0,0.65fr))]">
-        <div className="rounded-[22px] border border-[rgba(194,9,90,0.24)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
+        <div className="rounded-[22px] border border-[rgba(67,179,155,0.24)] bg-[rgba(67,179,155,0.08)] px-4 py-4">
           <p className="rev-label">Estimated Revenue at Risk</p>
           <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-[color:var(--foreground)]">
             {read.estimatedRevenueAtRiskLabel}

@@ -36,7 +36,7 @@ export function RevoryDecisionSupportCard({
         </div>
 
         <div className="mt-3.5 grid gap-2.5 md:grid-cols-3">
-          <div className="rounded-[18px] border border-[rgba(194,9,90,0.2)] bg-[rgba(194,9,90,0.08)] px-3.5 py-3 md:min-h-[6.2rem]">
+          <div className="rounded-[18px] border border-[rgba(67,179,155,0.2)] bg-[rgba(67,179,155,0.08)] px-3.5 py-3 md:min-h-[6.2rem]">
             <p className="rev-label">Next move</p>
             <p className="mt-1.5 text-sm leading-[1.45] text-[color:var(--foreground)]">
               {read.nextBestAction}
@@ -118,7 +118,7 @@ export function RevoryDecisionSupportCard({
           className={`rounded-[20px] px-3.5 py-3 ${
             isActivation
               ? "border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
-              : "border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)]"
+              : "border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.08)]"
           }`}
         >
           <p className="rev-label">{labels.nextMove}</p>

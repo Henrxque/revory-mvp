@@ -89,7 +89,7 @@ export default async function PrivateAppLayout({
   const accountInitial = getAccountInitial(user.email);
 
   return (
-    <main className="min-h-screen bg-[color:var(--background)] px-4 py-4 lg:px-5 lg:py-5">
+    <main className="min-h-screen bg-[color:var(--background)] px-4 py-4 font-[family:var(--font-app)] lg:px-5 lg:py-5">
       <div className="mx-auto grid max-w-[1480px] gap-5 lg:grid-cols-[232px_minmax(0,1fr)]">
         <div className="relative z-50 shrink-0 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
           <AppSidebar
@@ -116,7 +116,7 @@ export default async function PrivateAppLayout({
 
               <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-4 gap-y-2.5">
                 <div className="flex min-w-0 items-center gap-3 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(224,16,106,0.18)] bg-[rgba(194,9,90,0.11)] text-[11px] font-semibold text-[color:var(--accent-light)]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.11)] text-[11px] font-semibold text-[color:var(--accent-light)]">
                     {accountInitial}
                   </div>
                   <div className="min-w-0">
@@ -126,7 +126,7 @@ export default async function PrivateAppLayout({
                     <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
                       {billingSummary.plan ? (
                         <RevoryStatusBadge
-                          className="min-h-6 rounded-full border-[rgba(224,16,106,0.12)] bg-[rgba(194,9,90,0.08)] px-2.5 py-[0.28rem] text-[9px] tracking-[0.12em] text-[color:var(--accent-light)]"
+                          className="min-h-6 rounded-full border-[rgba(67,179,155,0.12)] bg-[rgba(67,179,155,0.08)] px-2.5 py-[0.28rem] text-[9px] tracking-[0.12em] text-[color:var(--accent-light)]"
                           tone={getPlanBadgeTone(billingSummary.planKey)}
                         >
                           {billingSummary.plan.label}
@@ -154,6 +154,11 @@ export default async function PrivateAppLayout({
               </div>
             </div>
           </header>
+
+          <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] px-4 py-3 text-[12px] leading-5 text-[color:var(--text-muted)]">
+            <strong className="text-[color:var(--foreground)]">Legacy migration surface.</strong>{" "}
+            This authenticated experience still runs the discontinued MedSpa-era data model. It is preserved for compatibility and must not be interpreted as the new contractor REVORY capability.
+          </aside>
 
           <section className="min-w-0 overflow-x-clip rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(19,18,26,0.86),rgba(13,12,18,0.86))] p-5 shadow-[var(--shadow-soft)] md:p-7">
             {children}

@@ -205,7 +205,7 @@ function AttributionSignalCard({
     <div
       className={`min-w-0 rounded-[20px] border px-4 py-4 ${
         isPrimary
-          ? "border-[rgba(194,9,90,0.18)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))]"
+          ? "border-[rgba(67,179,155,0.18)] bg-[linear-gradient(180deg,rgba(67,179,155,0.05),rgba(255,255,255,0.02))]"
           : softValue
             ? "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))]"
             : "border-[color:var(--border)] bg-[rgba(255,255,255,0.018)]"
@@ -276,7 +276,7 @@ function ExecutiveSignalCard({
     <div
       className={`min-w-0 rounded-[22px] border px-5 py-4 ${
         isPrimary
-          ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.08),rgba(255,255,255,0.03))] shadow-[0_18px_40px_rgba(0,0,0,0.18)]"
+          ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(67,179,155,0.08),rgba(255,255,255,0.03))] shadow-[0_18px_40px_rgba(0,0,0,0.18)]"
           : softValue
             ? "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.022),rgba(255,255,255,0.012))]"
             : "border-[color:var(--border)] bg-[rgba(255,255,255,0.018)]"
@@ -339,7 +339,7 @@ function MomentumMonthCard({
     <div
       className={`rounded-[20px] border p-4 ${
         isStrongest
-          ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.06)]"
+          ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)]"
           : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
       }`}
     >
@@ -381,7 +381,7 @@ function DashboardNextMoveAside({
   read: RevoryDecisionSupportRead;
 }>) {
   return (
-    <aside className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+    <aside className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] p-4">
       <p className="rev-label">Next move</p>
       <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">
         {read.title}
@@ -1074,7 +1074,7 @@ export default async function DashboardPage() {
 
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
                       <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
+                        className="h-full rounded-full bg-[linear-gradient(90deg,#43b39b,#43b39b)]"
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
@@ -1172,7 +1172,7 @@ export default async function DashboardPage() {
                 className="flex items-center gap-3 rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] px-3.5 py-3"
                 key={appointment.id}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] text-[11px] font-semibold text-[color:var(--accent-light)]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.12)] text-[11px] font-semibold text-[color:var(--accent-light)]">
                   {getInitials(appointment.clientName)}
                 </div>
                 <div className="min-w-0 flex-1">

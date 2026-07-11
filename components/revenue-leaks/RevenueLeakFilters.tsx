@@ -62,7 +62,7 @@ export function RevenueLeakFilters({ activeFilter }: RevenueLeakFiltersProps) {
             key={filter.key}
             className={`inline-flex min-h-9 items-center rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] transition ${
               isActive
-                ? "border-[rgba(224,16,106,0.38)] bg-[rgba(194,9,90,0.15)] text-[color:var(--accent-light)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                ? "border-[rgba(67,179,155,0.38)] bg-[rgba(67,179,155,0.15)] text-[color:var(--accent-light)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
                 : "border-[color:var(--border)] bg-[rgba(255,255,255,0.022)] text-[color:var(--text-muted)] hover:border-[rgba(255,255,255,0.16)] hover:text-[color:var(--foreground)]"
             }`}
             href={href}

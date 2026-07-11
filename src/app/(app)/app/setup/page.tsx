@@ -1,4 +1,4 @@
-﻿import { DataSourceType } from "@prisma/client";
+import { DataSourceType } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 
@@ -372,7 +372,7 @@ export default async function SetupPage() {
             </div>
           </div>
 
-          <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+          <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] p-4">
             <p className="rev-label">Next step</p>
             <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
               {nextMove.title}
@@ -461,7 +461,7 @@ export default async function SetupPage() {
                 {sourceLabel ?? "Data entry pending"}
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>
-              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
+              <span className="inline-flex items-center rounded-[12px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-1.5 text-xs text-[color:var(--foreground)]">
                 {bookingPathLabel ?? "Booking path pending"}
               </span>
               <span className="text-xs text-[color:var(--text-subtle)]">→</span>

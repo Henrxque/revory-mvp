@@ -1,4 +1,4 @@
-import { DM_Sans, Instrument_Serif } from "next/font/google";
+import { DM_Sans, Instrument_Serif, Sora } from "next/font/google";
 import type { Metadata } from "next";
 
 import { AuthJsProvider } from "@/components/auth/AuthJsProvider";
@@ -18,10 +18,28 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
 });
 
+const sora = Sora({
+  display: "swap",
+  subsets: ["latin"],
+  variable: "--font-sora",
+});
+
 export const metadata: Metadata = {
-  title: "REVORY — Revenue Leak Detector for premium MedSpas",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  title: "REVORY — Revenue Leak Intelligence",
   description:
-    "REVORY helps premium MedSpas detect estimated revenue at risk from structured appointment and booking data.",
+    "REVORY is an evidence-first Estimate & Change Order Revenue Leak Detector for high-ticket service businesses.",
+  icons: {
+    icon: "/brand/revory-logo-43b39b-transparent.png",
+    apple: "/brand/revory-logo-43b39b-transparent.png",
+  },
+  openGraph: {
+    title: "REVORY — Revenue Leak Intelligence",
+    description:
+      "Find the money leaking from estimates, follow-ups, and unbilled changes.",
+    images: ["/brand/revory-logo-43b39b-transparent.png"],
+    type: "website",
+  },
 };
 
 type RootLayoutProps = Readonly<{
@@ -31,7 +49,7 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
+      <body className={`${dmSans.variable} ${instrumentSerif.variable} ${sora.variable}`}>
         <AuthJsProvider>{children}</AuthJsProvider>
       </body>
     </html>

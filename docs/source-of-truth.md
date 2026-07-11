@@ -1,116 +1,174 @@
-# Source Of Truth
+# REVORY — Source of Truth
 
-Current public positioning: **REVORY is a Revenue Leak Detector for premium MedSpas**.
+> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-11.
 
-Historical REVORY Seller reference docs may remain in the repository as implementation context, but they are not current public positioning.
+## Product identity
 
-Este repo deve usar como referência principal de produto a lousa:
+REVORY is a self-service B2B SaaS and recurring revenue audit for high-ticket service businesses. It detects and prioritizes money leaking between an estimate and realized revenue.
 
-`C:\Users\hriqu\Documents\aon_csu_project\Revory V3\lousa_escopo_revory_revenue_leak_detector.md`
+**Category:** Revenue Leak Intelligence for High-Ticket Service Businesses.
 
-Essa lousa define o escopo oficial do **REVORY V3 — Revenue Leak Detector**.
+**Narrow category:** Estimate & Change Order Revenue Leak Detector.
 
-## Regra De Prioridade
+**One-liner:** Find the money leaking from estimates, follow-ups, and unbilled changes.
 
-Se houver conflito entre:
+**Core promise:** REVORY shows which estimates and follow-ups may still be recoverable and, only when supported by imported evidence, where approved changes or completed billing may be incomplete.
 
-- README antigo
-- ADRs antigas
-- wireframes antigos
-- copy antiga
-- documentos do REVORY Seller
-- implementação parcial
+REVORY does not operate the customer's business. It sits above exports from the customer's existing stack and answers:
 
-seguir primeiro a lousa acima.
+> Where has the company already invested commercial or operational effort without fully turning it into revenue?
 
-O escopo antigo do REVORY Seller deve ser tratado como histórico e como fundação técnica, não como posicionamento público principal.
+## Brand system
 
-## Resumo Executivo
+- Application background: `#141516`.
+- Alternating application surface/background: `#252729`.
+- Logo and primary identity accent: `#43B39B`.
+- Canonical logo asset: `public/brand/revory-logo-43b39b-transparent.png`.
+- The logo must remain a large transparent PNG, without a white or black backing tile.
+- Hover, glow and surface variants must be derived from these tokens rather than adding competing turquoise values.
+- Use `#252729` as a contained panel/card surface. Full-width section alternation should blend it subtly with `#141516` so the page remains one premium visual system.
+- Landing and marketing headlines use Instrument Serif.
+- Marketing body copy, navigation, labels and buttons use DM Sans.
+- Marketing card titles use bold DM Sans; Instrument Serif is reserved for large section-level impact.
+- Dashboard and authenticated app surfaces use Sora, with DM Sans reserved for denser reading contexts.
 
-O produto deve ser tratado como:
+## Current implementation truth
 
-- Revenue Leak Detector para MedSpas premium;
-- produto premium, self-service e MedSpa-first;
-- Launch V1 forte, não MVP pequeno;
-- detector de estimated revenue at risk;
-- sistema narrow de priorização de vazamentos comerciais;
-- engine determinística de leaks como fonte da verdade;
-- AI barata e controlada apenas como camada de insight, explicação e CSV intake/triage;
-- dashboard leak-first;
-- Revenue Leaks Page;
-- Daily Leak Brief;
-- Executive Revenue Leak Summary.
+This repository still contains active MedSpa-era schema, imports, engine rules, fixtures, tests and authenticated UI. Those capabilities are migration substrate, not the new public product.
 
-## Métrica Central
+As of this source-of-truth update:
 
-Usar:
+- contractor workspace, customer, estimate and activity contracts are not implemented end to end;
+- Quote Recovery findings are not yet available from the current repository;
+- jobs, invoices, change orders, underbilling and margin intelligence are not implemented;
+- no hybrid offer is eligible for public sale from this repository;
+- MedSpa claims and appointment findings must not be relabeled as contractor findings.
 
-> Estimated Revenue at Risk This Month
+Capability becomes sellable only after its roadmap gate passes with executable evidence.
 
-Evitar:
+## Initial market
 
-> Revenue lost
+Serve high-ticket contractors with 5–100 employees, recurring estimate volume, meaningful job value and real exposure to follow-up, scope-change or margin leakage.
 
-Regra:
+Prioritize remodeling, roofing, premium HVAC, pool builders, and kitchen and bath contractors. Primary buyers are owners, general managers, operations managers, sales managers, estimator managers and project managers in smaller companies.
 
-Todo número financeiro precisa deixar claro se é observado, estimado ou risco operacional, e deve carregar confidence/evidence.
+## Product philosophy
 
-## Classificação Obrigatória
+- no mandatory sales or onboarding call;
+- self-service upload, mapping and first analysis;
+- solo-founder-friendly support and operations;
+- CSV/XLSX-first until detection quality and willingness to pay are validated;
+- first useful value in minutes without founder-produced analysis.
 
-Separar sempre:
+Every feature must pass this test:
 
-- Financial leaks: no-show revenue leak, canceled not recovered.
-- Operational leak risks: missing contact leak risk, booking path blocked risk, stale booked proof risk.
+> Does it help the customer find, prioritize, validate or recover leaked revenue faster?
 
-Operational risks não devem ser vendidos como perda financeira confirmada.
+If not, exclude it.
 
-## O Produto Não Deve Virar
+## Two product layers
 
-- CRM;
-- inbox;
-- WhatsApp manager;
-- BI genérico;
-- healthcare analytics suite;
-- practice management system;
-- scheduling system completo;
-- revenue cycle management;
-- consultoria disfarçada;
-- operação manual de recuperação;
-- agente de IA livre;
-- produto clínico/diagnóstico.
+### Quote Recovery
 
-## Guardrails Do Launch V1
+Use customers, leads when available, estimates and activities/follow-ups to detect evidence-backed opportunities such as overdue follow-up, high-value stale estimate, open estimate without activity, estimate aging, missing owner or next step as operational risk, and cautiously recoverable lost estimate.
 
-- Uma engine, várias surfaces.
-- CSV/template-first.
-- Reaproveitar o visual premium atual nas sprints, evitando redesign geral sem necessidade.
-- Data Quality Check obrigatório.
-- AI CSV Intake/Triage permitido e desejado, mas com confirmação humana antes de persistir dados.
-- AI não calcula valor financeiro final.
-- AI não cria leak sem evidence determinística.
-- AI não conversa livremente com o usuário.
-- Toda leak precisa ter evidence, confidence e recommended action.
-- O produto deve explicar limitações dentro da UI para evitar suporte manual.
+This layer must be proven before the first audit or recurring entry offer is sold.
 
-## Leituras Operacionais
+### Revenue Realization
 
-Ao tomar decisões de produto, UX, copy ou implementação, favorecer:
+Cross estimates with jobs, invoices, invoice lines, change orders and job costs to detect, only when the data supports it, approved-but-not-billed amounts, unbilled change orders, deterministic underbilling gaps and margin risk. Text may create a review candidate; it may not prove approval, performance or a financial gap.
 
-- mais clareza sobre dinheiro em risco;
-- mais confiança na leitura;
-- menos suporte manual;
-- mais self-service;
-- mais precisão sobre o que é leak financeiro vs risco operacional;
-- menos configuração;
-- menos exceção por cliente;
-- menos carga operacional para founder solo.
+This layer remains roadmap-only until the corresponding ingestion, matching, reconciliation, tenant-isolation, security and reporting gates pass.
 
-Evitar:
+## Evidence and financial truth
 
-- escopo inflado sem payoff comercial;
-- promessas de automação que o produto não entrega;
-- claims de perda financeira absoluta sem base;
-- múltiplos canais complexos no Launch V1;
-- integrações customizadas antes de validação pagante;
-- IA livre em conversas longas;
-- qualquer coisa que empurre o produto para mini-CRM, mini-BI ou consultoria.
+Every finding must include:
+
+- explicit family, type and financial/operational/data-quality category;
+- status, priority, urgency, severity and confidence;
+- readable reason and traceable source IDs/signals;
+- value basis, formula and calculation inputs when financial;
+- bounded recommended review or recovery action;
+- stable fingerprint and idempotent sync behavior.
+
+Keep these classes separate:
+
+- **Observed amount:** directly present in imported evidence.
+- **Calculated gap:** deterministic reconciliation of supported records.
+- **Estimated recoverable amount:** modeled opportunity, never guaranteed revenue.
+- **Operational risk:** missing process evidence without a defensible financial amount.
+- **Data-quality risk:** missing, stale, conflicting or unmatched data that gates a claim.
+
+Do not use “revenue lost” for an opportunity. Do not sum incompatible value bases. Suppress a financial claim when required data or an unambiguous link is missing.
+
+## Canonical data objects
+
+### Quote Recovery
+
+- workspace/company profile;
+- customer;
+- lead, when available;
+- estimate/quote;
+- activity/follow-up;
+- reps, owners, sources and service types;
+- provenance, source system and external IDs.
+
+### Revenue Realization
+
+- job;
+- invoice and invoice line, when available;
+- change order;
+- job cost;
+- explicit links among customer, estimate, job, invoice and change order;
+- unmatched/conflicting-record review.
+
+Allow partial analysis and expose rule eligibility. Never reuse a MedSpa field merely because its storage type resembles a contractor field.
+
+## MVP sequence
+
+1. Establish canonical contracts, compatibility strategy, isolation and threat model.
+2. Build secure CSV/XLSX intake, confirmed mapping, normalization and Data Quality.
+3. Deliver the deterministic Quote Recovery engine and evidence-first experience.
+4. Prove export/report, second-read behavior, billing and paid-beta readiness.
+5. Add job, invoice, change-order and cost ingestion with explicit matching.
+6. Deliver conservative reconciliation and Revenue Realization rules.
+7. Add guarded history, segmentation, reports and paid-evidence decisions.
+
+The detailed sequence and gates live in [REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md](REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md).
+
+## Packaging direction
+
+Treat these as target hypotheses, not published entitlements:
+
+- Quote Recovery Audit: US$799 one-time;
+- Starter: US$399/month;
+- Full Revenue Leak Audit: US$1,499 one-time;
+- Growth: US$799/month;
+- Pro: US$1,499/month;
+- Multi-location: US$2,499+/month in the future.
+
+No price or plan is eligible until the specific release gate passes with paid or production-like evidence. Existing MedSpa Stripe plan keys and price IDs are protected migration inputs, not proof that the new packages are configured.
+
+## Bounded AI policy
+
+AI may suggest mappings for human confirmation, classify ambiguous text into review candidates, explain deterministic evidence, summarize findings and draft bounded next-review suggestions.
+
+AI must not create a confirmed leak, calculate or overwrite final financial values, infer approval or performed work as fact, send follow-ups, or become required for core value. The deterministic fallback must remain useful.
+
+## Non-goals
+
+Do not turn REVORY into a CRM, sales inbox, autonomous follow-up agent, field-service/dispatch/scheduling platform, accounting or full job-costing suite, construction/project-management system, generic BI builder, forecasting suite, call center, omnichannel layer, or manual consulting service.
+
+## Authority and conflict resolution
+
+Use this order:
+
+1. explicit current user direction;
+2. this file;
+3. [REVORY_ESCOPO_HIBRIDO.md](../REVORY_ESCOPO_HIBRIDO.md) for detailed hypotheses and examples;
+4. the hybrid roadmap and continuous-execution guide;
+5. task-specific documentation;
+6. executable code as evidence of current behavior;
+7. [historical documentation](historical/README.md) as migration context only.
+
+The names QuoteSignal, REVORY Seller, and the former MedSpa REVORY definition are not concurrent product authorities.

@@ -49,7 +49,7 @@ export function AuthGoogleButton({
 
   return (
     <button
-      className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[22px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.028))] px-4 py-3.5 text-left shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(224,16,106,0.22)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.036))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(224,16,106,0.34)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(18,16,24,1)] disabled:cursor-not-allowed disabled:opacity-80"
+      className="group relative flex w-full items-center gap-3 overflow-hidden rounded-[22px] border border-[rgba(255,255,255,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.028))] px-4 py-3.5 text-left shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(67,179,155,0.22)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.036))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(67,179,155,0.34)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(20,21,22,1)] disabled:cursor-not-allowed disabled:opacity-80"
       disabled={isPending}
       onClick={() => {
         startTransition(async () => {

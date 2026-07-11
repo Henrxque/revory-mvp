@@ -78,7 +78,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure access brings the clinic back to the same revenue leak read without adding fake providers.
+                Secure access returns existing users to the same private workspace. The authenticated product remains a clearly marked legacy migration surface until contractor-native slices replace it.
               </p>
             </div>
           </div>

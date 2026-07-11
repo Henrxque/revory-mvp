@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -154,7 +154,7 @@ type StatusTone = "accent" | "danger" | "neutral" | "success" | "warning";
 function getStatusToneClassName(tone: StatusTone) {
   switch (tone) {
     case "accent":
-      return "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.09)] text-[color:var(--accent-light)]";
+      return "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.09)] text-[color:var(--accent-light)]";
     case "success":
       return "border-[rgba(46,204,134,0.24)] bg-[rgba(46,204,134,0.1)] text-[color:var(--success)]";
     case "warning":
@@ -187,7 +187,7 @@ function getFlowStepToneClassName(state: FlowStepState) {
     case "complete":
       return "border-[rgba(46,204,134,0.2)] bg-[rgba(46,204,134,0.08)] text-[color:var(--foreground)]";
     case "current":
-      return "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] text-[color:var(--foreground)]";
+      return "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] text-[color:var(--foreground)]";
     default:
       return "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] text-[color:var(--text-muted)]";
   }
@@ -382,10 +382,10 @@ export function CsvUploadCard({
       hasImportResult,
   );
   const uploadPanelClassName = hasUploadContext
-    ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.05),rgba(255,255,255,0.02))]"
+    ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(67,179,155,0.05),rgba(255,255,255,0.02))]"
     : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]";
   const shellToneClassName = isPrimaryLane
-    ? "border-[rgba(194,9,90,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]"
+    ? "border-[rgba(67,179,155,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))]"
     : "border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.012))]";
   const primaryActionLabel =
     currentPreview?.exactTemplateMatch ? "Open review" : "Continue review";
@@ -627,8 +627,8 @@ export function CsvUploadCard({
       <div
         className={`pointer-events-none absolute top-0 h-40 w-40 rounded-full blur-3xl ${
           templateKey === "appointments"
-            ? "-left-10 bg-[rgba(194,9,90,0.14)]"
-            : "-right-10 bg-[rgba(224,16,106,0.12)]"
+            ? "-left-10 bg-[rgba(67,179,155,0.14)]"
+            : "-right-10 bg-[rgba(67,179,155,0.12)]"
         }`}
       />
 
@@ -639,7 +639,7 @@ export function CsvUploadCard({
             <span
               className={`rounded-full border px-2.5 py-[0.3rem] text-[9px] font-medium uppercase tracking-[0.15em] ${
                 isPrimaryLane
-                  ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] text-[color:var(--accent-light)]"
+                  ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] text-[color:var(--accent-light)]"
                   : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--text-muted)]"
               }`}
             >
@@ -650,7 +650,7 @@ export function CsvUploadCard({
             <div
               className={`flex h-12 w-12 items-center justify-center rounded-[16px] border ${
                 isPrimaryLane
-                  ? "border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.1)] text-[color:var(--accent-light)]"
+                  ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.1)] text-[color:var(--accent-light)]"
                   : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--foreground)]"
               }`}
             >
@@ -754,7 +754,7 @@ export function CsvUploadCard({
               </p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#43b39b,#43b39b)]"
                   style={{ width: `${coveragePercent}%` }}
                 />
               </div>
@@ -811,7 +811,7 @@ export function CsvUploadCard({
             <button
               className={`inline-flex h-12 items-center justify-center gap-2 rounded-[16px] border px-5 text-sm font-semibold transition ${
                 hasUploadContext
-                  ? "border-[rgba(224,16,106,0.28)] bg-[rgba(194,9,90,0.16)] text-white shadow-[0_12px_28px_rgba(194,9,90,0.14)] hover:border-[rgba(224,16,106,0.42)] hover:bg-[rgba(194,9,90,0.24)] hover:shadow-[0_18px_38px_rgba(194,9,90,0.2)]"
+                  ? "border-[rgba(67,179,155,0.28)] bg-[rgba(67,179,155,0.16)] text-[color:var(--foreground)] shadow-[0_12px_28px_rgba(67,179,155,0.14)] hover:border-[rgba(67,179,155,0.42)] hover:bg-[rgba(67,179,155,0.24)] hover:shadow-[0_18px_38px_rgba(67,179,155,0.2)]"
                   : "border-[color:var(--border)] bg-[rgba(255,255,255,0.03)] text-[color:var(--foreground)] hover:border-[color:var(--border-accent)] hover:bg-[rgba(255,255,255,0.05)]"
               }`}
               onClick={() => {
@@ -868,7 +868,7 @@ export function CsvUploadCard({
                   This confirmation applies only to the current file.
                 </p>
               </div>
-              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
                 This file only
               </span>
             </div>
@@ -890,7 +890,7 @@ export function CsvUploadCard({
                   {confirmationDraft.keptConfidentMatchCount}
                 </p>
               </div>
-              <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-3.5">
+              <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-4 py-3.5">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
                   Adjusted manually
                 </p>
@@ -919,7 +919,7 @@ export function CsvUploadCard({
                 Back to mapping
               </button>
               <button
-                className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.42)] bg-[linear-gradient(180deg,#d90f68_0%,#bc0c58_100%)] px-5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(194,9,90,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(255,110,170,0.52)] hover:bg-[linear-gradient(180deg,#eb1775_0%,#c90d5d_100%)] hover:shadow-[0_24px_46px_rgba(194,9,90,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
+                className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(67,179,155,0.42)] bg-[linear-gradient(180deg,#43b39b_0%,#43b39b_100%)] px-5 text-sm font-semibold text-black shadow-[0_18px_36px_rgba(67,179,155,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(67,179,155,0.52)] hover:bg-[linear-gradient(180deg,#43b39b_0%,#43b39b_100%)] hover:shadow-[0_24px_46px_rgba(67,179,155,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
                 disabled={!canSubmit || isPending}
                 type="submit"
               >
@@ -931,7 +931,7 @@ export function CsvUploadCard({
         ) : null}
 
         {isPending ? (
-          <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-5 py-4">
+          <div className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="rev-label">{inProgressLabel}</p>
@@ -942,7 +942,7 @@ export function CsvUploadCard({
                   Keep this page open until the result returns.
                 </p>
               </div>
-              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+              <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
                 Current file
               </span>
             </div>
@@ -1079,7 +1079,7 @@ export function CsvUploadCard({
                   {statusState.mappingExecutionSummary.keptConfidentMatchCount}
                 </p>
                 </div>
-                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-4 py-4">
+                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-4 py-4">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">
                     Adjusted manually
                   </p>
@@ -1163,7 +1163,7 @@ export function CsvUploadCard({
           </p>
           {!isConfirmationStepVisible && currentPreview ? (
             <button
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(224,16,106,0.42)] bg-[linear-gradient(180deg,#d90f68_0%,#bc0c58_100%)] px-5 text-sm font-semibold text-white shadow-[0_18px_36px_rgba(194,9,90,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(255,110,170,0.52)] hover:bg-[linear-gradient(180deg,#eb1775_0%,#c90d5d_100%)] hover:shadow-[0_24px_46px_rgba(194,9,90,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
+              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[18px] border border-[rgba(67,179,155,0.42)] bg-[linear-gradient(180deg,#43b39b_0%,#43b39b_100%)] px-5 text-sm font-semibold text-black shadow-[0_18px_36px_rgba(67,179,155,0.2)] transition hover:-translate-y-[1px] hover:border-[rgba(67,179,155,0.52)] hover:bg-[linear-gradient(180deg,#43b39b_0%,#43b39b_100%)] hover:shadow-[0_24px_46px_rgba(67,179,155,0.26)] disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(255,255,255,0.06)] disabled:text-[color:var(--text-muted)] disabled:shadow-none"
               disabled={!canOpenConfirmation || isPending}
               onClick={handleOpenConfirmation}
               type="button"

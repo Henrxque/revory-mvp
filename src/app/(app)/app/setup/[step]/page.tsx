@@ -1,4 +1,4 @@
-﻿import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -596,7 +596,7 @@ export default async function OnboardingStepPage({
           {currentStepKey === "activation" ? (
             <div className="space-y-4">
               <div className="space-y-3">
-                <div className="rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.08)] p-4">
+                <div className="rounded-[22px] border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.08)] p-4">
                   <p className="rev-label">What goes live</p>
                   <p className="mt-2.5 text-sm leading-[1.55] text-[color:var(--text-muted)]">
                     These are the choices REVORY will use to read clinic data, identify operational leak risks, and estimate revenue at risk from the first session.
@@ -650,7 +650,7 @@ export default async function OnboardingStepPage({
                     REVORY reads clinic evidence from this path first.
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] p-4">
+                <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] p-4">
                   <p className="rev-label">REVORY hands off to</p>
                   <p className="mt-2 text-sm font-semibold text-[color:var(--foreground)]">
                     {(selectedPrimaryChannel && channelLabels[selectedPrimaryChannel]) || "Not selected"}

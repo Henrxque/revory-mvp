@@ -31,7 +31,7 @@ export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
 
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
             {primarySignal ? (
-              <div className="rounded-[24px] border border-[rgba(194,9,90,0.24)] bg-[linear-gradient(180deg,rgba(194,9,90,0.095),rgba(255,255,255,0.024))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              <div className="rounded-[24px] border border-[rgba(67,179,155,0.24)] bg-[linear-gradient(180deg,rgba(67,179,155,0.095),rgba(255,255,255,0.024))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <p className="rev-label">{primarySignal.label}</p>
                 <p className="mt-3 text-[clamp(2rem,3vw,2.55rem)] font-semibold leading-none tracking-[-0.05em] text-[color:var(--foreground)]">
                   {primarySignal.value}
@@ -62,7 +62,7 @@ export function DailyBookingBrief({ read }: DailyBookingBriefProps) {
         </div>
 
         <aside className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.034),rgba(255,255,255,0.014))] p-4.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <div className="rounded-[18px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.055)] px-3.5 py-3">
+          <div className="rounded-[18px] border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.055)] px-3.5 py-3">
             <p className="rev-label">Today&apos;s next move</p>
             <p className="mt-2.5 text-[13px] font-semibold text-[color:var(--foreground)]">
               {read.nextMove.label}

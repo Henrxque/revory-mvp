@@ -38,7 +38,7 @@ export function DailyLeakBrief({
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
-            <div className="rounded-[22px] border border-[rgba(194,9,90,0.2)] bg-[linear-gradient(180deg,rgba(194,9,90,0.085),rgba(255,255,255,0.024))] px-4 py-4">
+            <div className="rounded-[22px] border border-[rgba(67,179,155,0.2)] bg-[linear-gradient(180deg,rgba(67,179,155,0.085),rgba(255,255,255,0.024))] px-4 py-4">
               <p className="rev-label">{read.primarySignal.label}</p>
               <p className="mt-2 text-[1.75rem] font-semibold leading-none tracking-[-0.045em] text-[color:var(--foreground)]">
                 {read.primarySignal.value}
@@ -71,7 +71,7 @@ export function DailyLeakBrief({
         </div>
 
         <aside className="rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.034),rgba(255,255,255,0.014))] p-4.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <div className="rounded-[18px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.055)] px-3.5 py-3">
+          <div className="rounded-[18px] border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.055)] px-3.5 py-3">
               <p className="rev-label">Recommended action</p>
               <p className="mt-2.5 text-[13px] font-semibold leading-[1.45] text-[color:var(--foreground)]">
                 {read.recommendedAction}

@@ -94,15 +94,15 @@ export function ExecutiveProofSummarySheet({
         --text: #f5f4f8;
         --muted: #87849a;
         --subtle: #5f5c71;
-        --accent: #c2095a;
-        --accent-soft: rgba(194,9,90,0.1);
+        --accent: #43b39b;
+        --accent-soft: rgba(67,179,155,0.1);
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
         min-height: 100vh;
         background:
-          radial-gradient(circle at top left, rgba(194,9,90,0.18), transparent 28%),
+          radial-gradient(circle at top left, rgba(67,179,155,0.18), transparent 28%),
           linear-gradient(180deg, #121019 0%, #0c0b0f 100%);
         color: var(--text);
         font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
@@ -198,7 +198,7 @@ export function ExecutiveProofSummarySheet({
         border: 1px solid var(--border);
       }
       .signal-primary {
-        background: linear-gradient(180deg, rgba(194,9,90,0.1), rgba(255,255,255,0.03));
+        background: linear-gradient(180deg, rgba(67,179,155,0.1), rgba(255,255,255,0.03));
         padding: 20px;
       }
       .signal-card {

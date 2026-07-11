@@ -107,7 +107,7 @@ export function ExecutiveRevenueLeakSummaryCard({
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.22fr)_minmax(0,0.9fr)_minmax(0,0.9fr)]">
-        <div className="rounded-[24px] border border-[rgba(194,9,90,0.24)] bg-[linear-gradient(180deg,rgba(194,9,90,0.1),rgba(255,255,255,0.03))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]">
+        <div className="rounded-[24px] border border-[rgba(67,179,155,0.24)] bg-[linear-gradient(180deg,rgba(67,179,155,0.1),rgba(255,255,255,0.03))] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]">
           <p className="rev-label">Estimated revenue at risk</p>
           <p className="mt-3 text-[clamp(2rem,3vw,2.6rem)] font-semibold leading-none tracking-[-0.05em] text-[color:var(--foreground)]">
             {read.estimatedRevenueAtRiskLabel}
@@ -191,7 +191,7 @@ export function ExecutiveRevenueLeakSummaryCard({
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[rgba(194,9,90,0.22)] bg-[rgba(194,9,90,0.07)] px-4 py-4">
+          <div className="rounded-[20px] border border-[rgba(67,179,155,0.22)] bg-[rgba(67,179,155,0.07)] px-4 py-4">
             <p className="rev-label">Recommended executive action</p>
             <p className="mt-2 text-[13px] font-semibold leading-[1.45] text-[color:var(--foreground)]">
               {read.recommendedExecutiveAction}

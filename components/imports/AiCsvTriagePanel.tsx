@@ -45,7 +45,7 @@ export function AiCsvTriagePanel({
             The full CSV is not sent to the AI provider.
           </p>
         </div>
-        <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(194,9,90,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
+        <span className="rounded-full border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent-light)]">
           {isPending ? "Reviewing" : triage ? modeLabel : "Waiting"}
         </span>
       </div>

@@ -1,4 +1,4 @@
-﻿import type { OnboardingStep, OnboardingStepKey } from "@/services/onboarding/wizard-steps";
+import type { OnboardingStep, OnboardingStepKey } from "@/services/onboarding/wizard-steps";
 
 type OnboardingStepLayoutProps = Readonly<{
   children?: React.ReactNode;
@@ -75,7 +75,7 @@ export function OnboardingStepLayout({
               </div>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.06)]">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#c2095a,#e0106a)]"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#43b39b,#43b39b)]"
                   style={{ width: progressWidth }}
                 />
               </div>
@@ -102,7 +102,7 @@ export function OnboardingStepLayout({
                   key={stepKey}
                   className={`rounded-[22px] border px-4 py-4 ${
                     isCurrent
-                      ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.16),rgba(255,255,255,0.03))]"
+                      ? "border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(67,179,155,0.16),rgba(255,255,255,0.03))]"
                       : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
                   }`}
                 >

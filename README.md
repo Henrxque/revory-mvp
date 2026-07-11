@@ -1,44 +1,40 @@
 # REVORY
 
-REVORY is now a Revenue Leak Detector for premium MedSpas.
+REVORY is Revenue Leak Intelligence for High-Ticket Service Businesses. It begins with Quote Recovery across estimates and follow-ups, then expands—after explicit evidence and release gates—into Revenue Realization across jobs, invoices, change orders, underbilling and margin risk.
 
-The current product foundation includes onboarding, imports, billing, dashboard reads, booking evidence, bounded action guidance, and executive summaries. The public positioning now follows the V3 source of truth: show where revenue is at risk from structured appointment and booking data without turning into CRM, inbox, BI, scheduling software, consulting, or an AI sales agent.
+## Migration status
 
-## Source Of Truth
+This repository is being migrated from the discontinued MedSpa REVORY implementation. The current schema and authenticated product still contain appointment, booking and clinic behavior. They are reusable technical substrate, not proof that the hybrid contractor domain is implemented.
 
-Use [docs/source-of-truth.md](docs/source-of-truth.md) as the primary product reference.
+Do not market or sell estimate, change-order, invoice, underbilling or margin capability from this repository until the corresponding roadmap gate passes.
 
-When old docs, wireframes, README text, or partial implementation conflict with the source of truth, follow the narrower V3 Revenue Leak Detector interpretation.
+## Living product documents
 
-## Product Focus
+- [Canonical source of truth](docs/source-of-truth.md)
+- [Detailed hybrid scope](REVORY_ESCOPO_HIBRIDO.md)
+- [Product and launch roadmap](docs/REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md)
+- [Continuous execution guide](docs/REVORY_CONTINUOUS_EXECUTION_GUIDE.md)
+- [Migration inventory and vertical-slice plan](docs/REVORY_MIGRATION_INVENTORY_AND_VERTICAL_SLICES.md)
+- [Historical documentation policy](docs/historical/README.md)
 
-- Premium
-- Self-service
-- MedSpa-first
-- Revenue leak-first
-- Estimated revenue at risk
-- CSV-first intake
-- Evidence and confidence before claims
-- Bounded AI only for intake, triage, explanation, and guidance
+## Product guardrails
 
-## Avoid
-
-- CRM
-- Inbox
-- BI bloat
-- Scheduling system
-- Revenue cycle management
-- Consulting service
-- AI sales assistant
-- Claims of confirmed lost revenue without evidence
+- Premium and self-service
+- High-ticket-service-business-first
+- CSV/XLSX-first
+- Evidence and Data Quality before financial claims
+- Explicit matching, provenance and workspace isolation
+- Deterministic core with optional bounded AI
+- No CRM, inbox, autonomous follow-up, FSM, accounting, project-management or generic BI expansion
 
 ## Stack
 
 - Next.js
 - TypeScript
 - Tailwind CSS
+- Prisma/PostgreSQL
 
-## How To Start
+## Local development
 
 ```bash
 npm install
@@ -47,16 +43,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Scripts
+Useful checks:
 
 ```bash
-npm run dev
-npm run build
-npm run start
 npm run lint
 npm run typecheck
+npm run build
+npm run db:validate
 ```
 
-## Environment Variables
-
-Copy `.env.example` to `.env.local` and adjust values for the environment.
+Copy `.env.example` to `.env.local` and set values for the intended environment. Do not reuse or change production secrets, Stripe resources, domains or deployments as part of the domain migration without separate verification and authorization.

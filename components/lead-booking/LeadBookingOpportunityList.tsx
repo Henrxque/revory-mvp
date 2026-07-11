@@ -93,7 +93,7 @@ function getNextStepRead(
 function getOpportunityCardClassName(status: LeadBookingOpportunityItem["status"]) {
   switch (status) {
     case "READY":
-      return "rounded-[22px] border border-[rgba(194,9,90,0.28)] bg-[linear-gradient(180deg,rgba(194,9,90,0.1),rgba(255,255,255,0.022))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]";
+      return "rounded-[22px] border border-[rgba(67,179,155,0.28)] bg-[linear-gradient(180deg,rgba(67,179,155,0.1),rgba(255,255,255,0.022))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]";
     case "BLOCKED":
       return "rounded-[22px] border border-[rgba(255,184,77,0.2)] bg-[linear-gradient(180deg,rgba(255,184,77,0.055),rgba(255,255,255,0.018))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]";
     default:
@@ -228,7 +228,7 @@ export function LeadBookingOpportunityList({
             id={getOpportunityAnchorId(opportunity.id)}
             className={`${getOpportunityCardClassName(opportunity.status)} ${
               isFocused
-                ? "ring-1 ring-[rgba(255,110,170,0.28)] shadow-[0_0_0_1px_rgba(255,110,170,0.08)]"
+                ? "ring-1 ring-[rgba(67,179,155,0.28)] shadow-[0_0_0_1px_rgba(67,179,155,0.08)]"
                 : ""
             }`}
           >

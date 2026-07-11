@@ -1,14 +1,7 @@
-import type { Metadata } from "next";
-
-import { RevoryDemoDashboard } from "@/components/demo/RevoryDemoDashboard";
-import { REVORY_DEMO_READ } from "@/services/demo/revory-demo-fixture";
-
-export const metadata: Metadata = {
-  description:
-    "Explore a fictional, read-only REVORY revenue-risk read for a sample premium MedSpa.",
-  title: "REVORY Demo — Sample Revenue Leak Read",
-};
+import { redirect } from "next/navigation";
 
 export default function DemoPage() {
-  return <RevoryDemoDashboard read={REVORY_DEMO_READ} />;
+  // The public demo represents the discontinued MedSpa product and must not be
+  // presented as evidence of the new contractor-native REVORY capability.
+  redirect("/");
 }

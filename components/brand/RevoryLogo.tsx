@@ -11,26 +11,27 @@ export function RevoryLogo({
   compact = false,
   iconOnly = false,
 }: RevoryLogoProps) {
-  const imageSize = compact ? 36 : 52;
+  const imageHeight = compact ? 52 : 72;
+  const imageWidth = Math.round(imageHeight * (1254 / 1146));
   const wordmarkSize = compact
-    ? "text-[0.98rem] tracking-[0.14em]"
-    : "text-[1.12rem] tracking-[0.12em]";
+    ? "text-[1.05rem] tracking-[0.14em]"
+    : "text-[1.3rem] tracking-[0.12em]";
 
   return (
-    <div className={`flex items-center gap-3 ${className ?? ""}`}>
+    <div className={`flex items-center gap-3.5 ${className ?? ""}`}>
       <div className="flex items-center">
         <Image
           alt="REVORY"
-          height={imageSize}
+          height={imageHeight}
           priority
-          src="/brand/revory-logo-mark.png"
-          width={Math.round(imageSize * 1.46)}
+          src="/brand/revory-logo-43b39b-transparent.png"
+          width={imageWidth}
         />
       </div>
 
       {iconOnly ? null : (
         <span
-          className={`font-[family:var(--font-display)] uppercase leading-none text-[color:var(--foreground)] ${wordmarkSize}`}
+          className={`font-[family:var(--font-body)] font-bold uppercase leading-none text-[color:var(--foreground)] ${wordmarkSize}`}
         >
           REVORY
         </span>

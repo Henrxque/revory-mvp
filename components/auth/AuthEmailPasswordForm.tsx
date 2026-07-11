@@ -71,7 +71,7 @@ export function AuthEmailPasswordForm({
           <input
             className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
             onChange={(event) => setFullName(event.target.value)}
-            placeholder="Clinic owner or operator"
+            placeholder="Company owner or operator"
             value={fullName}
           />
         </label>
@@ -83,7 +83,7 @@ export function AuthEmailPasswordForm({
           autoComplete="email"
           className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="you@clinic.com"
+          placeholder="you@company.com"
           type="email"
           value={email}
         />

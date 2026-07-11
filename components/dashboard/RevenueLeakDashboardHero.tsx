@@ -99,7 +99,7 @@ export function RevenueLeakDashboardHero({
           </p>
         </div>
 
-        <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(194,9,90,0.12),rgba(255,255,255,0.03))] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+        <div className="rounded-[22px] border border-[color:var(--border-accent)] bg-[linear-gradient(180deg,rgba(67,179,155,0.12),rgba(255,255,255,0.03))] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
           <p className="rev-label">Estimated Revenue at Risk This Month</p>
           <p className="mt-3 text-[clamp(2.2rem,3.2vw,3rem)] font-semibold leading-none text-[color:var(--accent-light)]">
             {read.estimatedRevenueAtRiskLabel}
@@ -163,7 +163,7 @@ export function RevenueLeakDashboardHero({
             </p>
           </div>
 
-          <div className="mt-3 rounded-[16px] border border-[rgba(194,9,90,0.22)] bg-[rgba(194,9,90,0.075)] px-3.5 py-3">
+          <div className="mt-3 rounded-[16px] border border-[rgba(67,179,155,0.22)] bg-[rgba(67,179,155,0.075)] px-3.5 py-3">
             <p className="rev-label">Recommended action</p>
             <p className="mt-2 text-[12px] font-medium leading-[1.5] text-[color:var(--foreground)]">
               {read.recommendedAction}

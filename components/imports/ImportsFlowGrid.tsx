@@ -55,7 +55,7 @@ export function ImportsFlowGrid({
   return (
     <div className={isFocusedLayout ? "grid min-w-0 gap-6" : "grid min-w-0 gap-6"}>
       <div className="grid gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[rgba(194,9,90,0.18)] bg-[rgba(194,9,90,0.06)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[rgba(67,179,155,0.18)] bg-[rgba(67,179,155,0.06)] px-4 py-3">
           <div>
             <p className="rev-label">Primary lane</p>
             <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">

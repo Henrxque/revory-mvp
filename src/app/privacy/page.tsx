@@ -3,37 +3,26 @@ import Link from "next/link";
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-[color:var(--background)] px-5 py-8 text-[color:var(--foreground)]">
-      <section className="mx-auto max-w-3xl rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(19,18,26,0.94),rgba(12,11,17,0.96))] p-6 shadow-[var(--shadow-soft)] md:p-9">
+      <section className="rev-card-premium mx-auto max-w-3xl rounded-[30px] p-6 md:p-9">
         <p className="rev-kicker">Privacy</p>
         <h1 className="mt-3 text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.06em]">
           REVORY Privacy Notice
         </h1>
         <p className="mt-5 text-sm leading-7 text-[color:var(--text-muted)]">
-          REVORY uses account, workspace, setup, import, billing and product usage data only
-          to operate the software, keep the workspace readable, support billing and improve
-          reliability. The product is not designed to resell clinic data or run hidden manual
-          services behind the interface.
+          REVORY uses account, workspace, setup, import, billing and product-usage data to operate the software, protect workspace access and improve reliability. It is not designed to resell customer data or hide manual analysis behind the interface.
         </p>
         <div className="mt-7 space-y-4 text-sm leading-7 text-[color:var(--text-muted)]">
           <p>
-            Structured appointment, client and import data may be processed to support revenue
-            leak reads, estimated revenue at risk, data quality checks, bounded AI intake,
-            triage and explanation support, and executive summaries inside the customer workspace.
+            The current authenticated environment contains legacy MedSpa-era data contracts preserved for migration compatibility. New contractor-native analysis and onboarding are not enabled yet.
           </p>
           <p>
-            Access to REVORY is authenticated. Billing, when enabled, is handled through Stripe.
-            LLM-assisted outputs are bounded to intake, triage, explanation and guidance support;
-            they should not be treated as a free-form conversation engine or managed service.
+            Future estimate, customer, activity, job, invoice, change-order and cost imports must remain isolated by workspace and retain source provenance, external IDs and explicit matching evidence.
           </p>
           <p>
-            For AI-assisted CSV review, REVORY sends only a bounded, sanitized profile such as
-            column names, field types, fill-rate signals and limited sample shapes. The full CSV
-            file is not sent to the AI provider, and AI review does not import rows, create revenue
-            leaks, or calculate confirmed revenue loss.
+            When AI-assisted intake is enabled, it must receive only a bounded and sanitized profile sufficient for mapping or explanation, require human confirmation where appropriate, and preserve a deterministic fallback.
           </p>
           <p>
-            For privacy questions or deletion requests, contact REVORY support through the
-            support channel provided during purchase or onboarding.
+            Billing, when enabled and explicitly offered, is handled through Stripe. Production retention, deletion/export and vendor terms must be verified before a contractor paid beta opens.
           </p>
         </div>
         <Link className="rev-action-button mt-8 inline-flex" href="/">

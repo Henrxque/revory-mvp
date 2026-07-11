@@ -67,7 +67,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
           </div>
         </section>
 
-        <section className="rev-accent-mist-soft rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,22,32,0.98),rgba(18,16,24,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
+        <section className="rev-accent-mist-soft rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(37,39,41,0.98),rgba(20,21,22,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
           <div className="space-y-5">
             <div className="space-y-2.5">
               <p className="rev-kicker">Account recovery</p>

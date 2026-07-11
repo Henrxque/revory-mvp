@@ -1,32 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0c0b0f;
-  --background-secondary: #111018;
-  --background-card: #15141c;
-  --background-card-hover: #1c1b26;
-  --foreground: #f5f4f8;
-  --surface: rgba(21, 20, 28, 0.9);
-  --surface-muted: rgba(17, 16, 24, 0.92);
-  --surface-elevated: rgba(25, 23, 33, 0.94);
+  --brand-background: #141516;
+  --brand-surface: #252729;
+  --brand-primary: #43b39b;
+  --brand-accent: #43b39b;
+  --brand-primary-hover: color-mix(in srgb, var(--brand-primary) 84%, white);
+  --background: var(--brand-background);
+  --background-secondary: var(--brand-surface);
+  --background-card: color-mix(in srgb, var(--brand-primary) 4%, var(--brand-surface));
+  --background-card-hover: color-mix(in srgb, var(--brand-primary) 7%, var(--brand-surface));
+  --foreground: color-mix(in srgb, var(--brand-primary) 8%, white);
+  --surface: color-mix(in srgb, var(--brand-primary) 3%, transparent);
+  --surface-muted: color-mix(in srgb, var(--brand-primary) 2%, var(--brand-surface));
+  --surface-elevated: color-mix(in srgb, var(--brand-primary) 5%, var(--brand-surface));
   --surface-hairline: rgba(255, 255, 255, 0.045);
-  --surface-soft: rgba(194, 9, 90, 0.08);
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --border-accent: rgba(194, 9, 90, 0.28);
-  --accent: #c2095a;
-  --accent-light: #e0106a;
-  --accent-strong: #c2095a;
-  --text-muted: #b0a9bd;
-  --text-subtle: #7b7488;
+  --surface-soft: rgba(67,179,155, 0.08);
+  --border: color-mix(in srgb, var(--foreground) 9%, transparent);
+  --border-strong: color-mix(in srgb, var(--foreground) 16%, transparent);
+  --border-accent: rgba(67,179,155, 0.28);
+  --accent: var(--brand-primary);
+  --accent-light: var(--brand-primary-hover);
+  --accent-strong: var(--brand-accent);
+  --text-muted: color-mix(in srgb, var(--foreground) 70%, var(--background));
+  --text-subtle: color-mix(in srgb, var(--foreground) 48%, var(--background));
   --success: #2ecc86;
   --warning: #f5a623;
   --danger: #ff728d;
-  --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
-  --font-display: var(--font-instrument-serif), Georgia, serif;
   --shadow-soft: 0 18px 54px rgba(0, 0, 0, 0.22);
   --shadow-panel: 0 26px 74px rgba(0, 0, 0, 0.28);
-  --shadow-accent: 0 18px 38px rgba(194, 9, 90, 0.18);
+  --shadow-accent: 0 18px 38px rgba(67,179,155, 0.18);
 }
 
 * {
@@ -38,12 +41,16 @@ html {
 }
 
 body {
+  --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-app: var(--font-sora), var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-display: var(--font-app);
+  --font-marketing-display: var(--font-instrument-serif), Georgia, serif;
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 18% 0%, rgba(194, 9, 90, 0.2), transparent 30%),
-    radial-gradient(circle at 82% 12%, rgba(113, 53, 86, 0.14), transparent 30%),
-    linear-gradient(180deg, #111018 0%, #0c0b0f 62%, #09080c 100%);
+    radial-gradient(circle at 18% 0%, rgba(67, 179, 155, 0.14), transparent 30%),
+    radial-gradient(circle at 82% 12%, rgba(67, 179, 155, 0.07), transparent 30%),
+    var(--brand-background);
   color: var(--foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -74,7 +81,7 @@ body::before {
 .rev-shell-hero {
   border: 1px solid var(--border);
   background:
-    radial-gradient(circle at 12% 0%, rgba(194, 9, 90, 0.16), transparent 34%),
+    radial-gradient(circle at 12% 0%, rgba(67,179,155, 0.16), transparent 34%),
     linear-gradient(180deg, rgba(26, 24, 34, 0.98), rgba(11, 10, 15, 0.98));
   box-shadow: var(--shadow-panel), inset 0 1px 0 var(--surface-hairline);
 }
@@ -90,7 +97,7 @@ body::before {
 .rev-card-premium {
   border: 1px solid var(--border);
   background:
-    radial-gradient(circle at 12% 0%, rgba(194, 9, 90, 0.085), transparent 34%),
+    radial-gradient(circle at 12% 0%, rgba(67,179,155, 0.085), transparent 34%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.034), rgba(255, 255, 255, 0.014)),
     rgba(18, 17, 25, 0.94);
   box-shadow:
@@ -129,7 +136,7 @@ body::before {
   top: -1.75rem;
   height: 12rem;
   width: 12rem;
-  background: rgba(194, 9, 90, 0.13);
+  background: rgba(67,179,155, 0.13);
   filter: blur(58px);
 }
 
@@ -139,18 +146,18 @@ body::before {
   top: 0.75rem;
   height: 9rem;
   width: 9rem;
-  background: rgba(224, 16, 106, 0.07);
+  background: rgba(67,179,155, 0.07);
   filter: blur(54px);
 }
 
 .rev-accent-mist-soft::before {
-  background: rgba(194, 9, 90, 0.1);
+  background: rgba(67,179,155, 0.1);
   height: 10rem;
   width: 10rem;
 }
 
 .rev-accent-mist-soft::after {
-  background: rgba(224, 16, 106, 0.05);
+  background: rgba(67,179,155, 0.05);
   height: 7.5rem;
   width: 7.5rem;
 }
@@ -237,16 +244,16 @@ body::before {
 }
 
 .rev-button-primary {
-  border: 1px solid rgba(255, 94, 155, 0.44);
-  background: linear-gradient(180deg, #e0146d 0%, #b90a55 100%);
-  color: #fff;
+  border: 1px solid rgba(67,179,155, 0.44);
+  background: linear-gradient(180deg, #43b39b 0%, #43b39b 100%);
+  color: var(--brand-background);
   box-shadow: var(--shadow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .rev-button-primary:hover {
-  background: linear-gradient(180deg, #ef1b78 0%, #c40c5c 100%);
-  border-color: rgba(255, 125, 177, 0.56);
-  box-shadow: 0 22px 46px rgba(194, 9, 90, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, #43b39b 0%, #43b39b 100%);
+  border-color: rgba(67,179,155, 0.56);
+  box-shadow: 0 22px 46px rgba(67,179,155, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
 }
 
@@ -274,8 +281,8 @@ body::before {
 }
 
 .rev-button-ghost:hover {
-  border-color: rgba(224, 16, 106, 0.45);
-  background: rgba(194, 9, 90, 0.14);
+  border-color: rgba(67,179,155, 0.45);
+  background: rgba(67,179,155, 0.14);
   transform: translateY(-1px);
 }
 
@@ -313,15 +320,15 @@ body::before {
 }
 
 .rev-action-button-primary {
-  border: 1px solid rgba(224, 16, 106, 0.38);
-  background: rgba(194, 9, 90, 0.16);
+  border: 1px solid rgba(67,179,155, 0.38);
+  background: rgba(67,179,155, 0.16);
   color: var(--foreground);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .rev-action-button-primary:hover {
-  border-color: rgba(255, 110, 170, 0.5);
-  background: rgba(194, 9, 90, 0.23);
+  border-color: rgba(67,179,155, 0.5);
+  background: rgba(67,179,155, 0.23);
   transform: translateY(-1px);
 }
 
@@ -332,7 +339,7 @@ body::before {
 .rev-action-button-primary:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(194, 9, 90, 0.18),
+    0 0 0 3px rgba(67,179,155, 0.18),
     0 0 0 1px rgba(255, 255, 255, 0.16),
     var(--shadow-accent);
 }
@@ -373,7 +380,7 @@ body::before {
 .rev-input-field:focus {
   border-color: var(--border-accent);
   background: var(--background-card-hover);
-  box-shadow: 0 0 0 3px rgba(194, 9, 90, 0.14);
+  box-shadow: 0 0 0 3px rgba(67,179,155, 0.14);
 }
 
 .rev-select-field {
@@ -383,7 +390,7 @@ body::before {
   border-radius: 1rem;
   background:
     linear-gradient(180deg, rgba(21, 20, 28, 0.98), rgba(21, 20, 28, 0.98)),
-    linear-gradient(135deg, rgba(194, 9, 90, 0.08), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, rgba(67,179,155, 0.08), rgba(255, 255, 255, 0.02)),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a7890' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-position:
     0 0,
@@ -406,7 +413,7 @@ body::before {
 .rev-select-field:focus {
   border-color: var(--border-accent);
   background: var(--background-card-hover);
-  box-shadow: 0 0 0 3px rgba(194, 9, 90, 0.14);
+  box-shadow: 0 0 0 3px rgba(67,179,155, 0.14);
 }
 
 .rev-feedback-success,
@@ -456,7 +463,7 @@ select {
 }
 
 ::selection {
-  background: rgba(194, 9, 90, 0.28);
+  background: rgba(67,179,155, 0.28);
   color: var(--foreground);
 }
 
@@ -472,7 +479,7 @@ select {
 .cl-footerActionLink,
 .cl-formResendCodeLink,
 .cl-identityPreviewEditButton {
-  color: #ff3f90 !important;
+  color: #43b39b !important;
 }
 
 .cl-userPreviewMainIdentifier,
@@ -520,7 +527,7 @@ select {
 
 [class*="identityPreviewEditButton"],
 [class*="footerActionLink"] {
-  color: #ff3f90 !important;
+  color: #43b39b !important;
 }
 
 .rev-auth-clerk [class^="cl-"],
@@ -548,8 +555,8 @@ select {
 .rev-auth-clerk [class*="footerActionLink"],
 .rev-auth-clerk [class*="identityPreviewEditButton"],
 .rev-auth-clerk [class*="linkButton"] {
-  color: #ff3f90 !important;
-  -webkit-text-fill-color: #ff3f90 !important;
+  color: #43b39b !important;
+  -webkit-text-fill-color: #43b39b !important;
   opacity: 1 !important;
   filter: none !important;
 }
@@ -661,8 +668,8 @@ select {
 .cl-modalContent [class*="pageListItemActive"],
 [class*="modalContent"] [class*="navbarButtonActive"],
 [class*="modalContent"] [class*="pageListItemActive"] {
-  background: rgba(194, 9, 90, 0.12) !important;
-  border-color: rgba(194, 9, 90, 0.24) !important;
+  background: rgba(67,179,155, 0.12) !important;
+  border-color: rgba(67,179,155, 0.24) !important;
 }
 
 .cl-modalContent [class*="navbarButtonActive"] *,
