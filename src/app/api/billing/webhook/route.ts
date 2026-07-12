@@ -12,6 +12,7 @@ import {
   syncWorkspaceBillingFromInvoice,
   syncWorkspaceBillingFromStripeSubscription,
 } from "@/services/billing/stripe-sync";
+import { fulfillRevoryCheckoutSession } from "@/services/billing/entitlements";
 
 const handledStripeEvents = new Set<Stripe.Event.Type>([
   "checkout.session.completed",
@@ -65,9 +66,11 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed":
-        await syncWorkspaceBillingFromCheckoutSession(
-          (event.data.object as Stripe.Checkout.Session).id,
-        );
+        if ((event.data.object as Stripe.Checkout.Session).metadata?.offerKey) {
+          await fulfillRevoryCheckoutSession(event.data.object as Stripe.Checkout.Session);
+        } else {
+          await syncWorkspaceBillingFromCheckoutSession((event.data.object as Stripe.Checkout.Session).id);
+        }
         break;
       case "customer.subscription.created":
       case "customer.subscription.updated":

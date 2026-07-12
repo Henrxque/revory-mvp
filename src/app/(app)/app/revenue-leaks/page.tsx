@@ -1,173 +1,21 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { RunLeakReadAction } from "@/components/dashboard/RunLeakReadAction";
-import { RevenueLeakFilters } from "@/components/revenue-leaks/RevenueLeakFilters";
-import { RevenueLeakList } from "@/components/revenue-leaks/RevenueLeakList";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
-import {
-  getOnboardingStepPath,
-  resolveOnboardingStepKey,
-} from "@/services/onboarding/wizard-steps";
-import {
-  getRevenueLeakListForWorkspace,
-  type RevenueLeakListFilter,
-} from "@/services/revenue-leaks/get-revenue-leak-list";
-import { syncDashboardRevenueLeaks } from "../dashboard/actions";
+import { getQuoteRecoveryRead, type QuoteRecoveryReadFilter } from "@/services/quote-recovery/read-model";
 
-type RevenueLeaksPageProps = Readonly<{
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}>;
+const filters: Array<[QuoteRecoveryReadFilter, string]> = [["ACTIVE","Active"],["FINANCIAL","Financial"],["OPERATIONAL","Operational"],["HIGH_PRIORITY","High priority"],["RESOLVED","Resolved"],["DISMISSED","Dismissed"]];
+function money(cents: number) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(cents / 100); }
+function label(value: string) { return value.toLowerCase().split("_").map((part) => part[0].toUpperCase() + part.slice(1)).join(" "); }
 
-const supportedFilters = new Set<RevenueLeakListFilter>([
-  "ALL_ACTIVE",
-  "FINANCIAL",
-  "OPERATIONAL",
-  "DATA_QUALITY",
-  "HIGH_SEVERITY",
-  "LOW_CONFIDENCE",
-  "RESOLVED",
-  "DISMISSED",
-]);
-
-export default async function RevenueLeaksPage({
-  searchParams,
-}: RevenueLeaksPageProps) {
-  const appContext = await getAppContext();
-
-  if (!appContext) {
-    redirect(buildSignInRedirectPath("/app/revenue-leaks"));
-  }
-
-  if (
-    !appContext.activationSetup.isCompleted &&
-    !isInternalMigrationPreviewEnabled()
-  ) {
-    redirect(
-      getOnboardingStepPath(
-        resolveOnboardingStepKey(appContext.activationSetup.currentStep),
-      ),
-    );
-  }
-
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const filter = resolveFilter(resolvedSearchParams.filter);
-  const read = await getRevenueLeakListForWorkspace({
-    filter,
-    workspaceId: appContext.workspace.id,
-  });
-
-  return (
-    <div className="space-y-6">
-      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-5">
-          <div className="max-w-3xl">
-            <div className="flex flex-wrap gap-2">
-              <RevoryStatusBadge tone="accent">Leak evidence</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">
-                Estimate, not accounting loss
-              </RevoryStatusBadge>
-            </div>
-
-            <h1 className="mt-4 text-[34px] font-semibold tracking-[-0.065em] text-[color:var(--foreground)] md:text-[46px]">
-              Revenue Leaks
-            </h1>
-            <p className="mt-3 max-w-2xl text-[15px] leading-7 text-[color:var(--text-muted)]">
-              Review the preserved evidence-list experience while contractor-native findings remain behind their release gate.
-            </p>
-          </div>
-
-          <RunLeakReadAction
-            action={syncDashboardRevenueLeaks}
-            initialState={{
-              message: "Refresh leak signals from your latest imported data.",
-              ok: null,
-              summary: null,
-            }}
-          />
-        </div>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-3">
-          <SummaryTile
-            label="Active signals"
-            value={read.activeCount}
-            note="Open or acknowledged evidence"
-          />
-          <SummaryTile
-            label="Resolved"
-            value={read.resolvedCount}
-            note="Manually closed evidence"
-          />
-          <SummaryTile
-            label="Dismissed"
-            value={read.dismissedCount}
-            note="Signals removed from active read"
-          />
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="rev-label">Signal view</p>
-            <p className="mt-1 text-[13px] leading-6 text-[color:var(--text-muted)]">
-              Filter the evidence list without turning it into a reporting suite.
-            </p>
-          </div>
-          <RevoryStatusBadge tone="neutral">
-            {read.filteredCount} visible
-          </RevoryStatusBadge>
-        </div>
-
-        <RevenueLeakFilters activeFilter={filter} />
-      </section>
-
-      <RevenueLeakList activeFilter={filter} items={read.items} />
-
-      <section className="rounded-[24px] border border-[rgba(245,166,35,0.22)] bg-[rgba(245,166,35,0.07)] p-4">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[color:var(--warning)]">
-          Product truth
-        </p>
-        <p className="mt-2 max-w-3xl text-[13px] leading-6 text-[color:var(--text-muted)]">
-          Compatibility findings remain migration evidence. Operational and data-quality risks may block revenue, but REVORY does not count them as confirmed financial loss or contractor-native output.
-        </p>
-      </section>
-    </div>
-  );
+export default async function OpportunitiesPage({ searchParams }: { searchParams?: Promise<{ filter?: string }> }) {
+  const context = await getAppContext(); if (!context) redirect(buildSignInRedirectPath("/app/revenue-leaks"));
+  const params = searchParams ? await searchParams : {}; const filter = filters.some(([key]) => key === params.filter) ? params.filter as QuoteRecoveryReadFilter : "ACTIVE";
+  const read = await getQuoteRecoveryRead(context.workspace.id, filter);
+  return <div className="space-y-6"><section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7"><div className="flex flex-wrap justify-between gap-5"><div className="max-w-3xl"><p className="rev-kicker">Quote Recovery opportunities</p><h1 className="rev-display-hero mt-3">Prioritize the estimates worth reviewing first.</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Financial estimates, operational gaps and data-quality limits stay visibly separate.</p></div><a className="rev-button-secondary" href="/app/quote-recovery/export">Export current findings</a></div><div className="mt-6 grid gap-3 sm:grid-cols-3"><Metric label="Active" value={read.summary.activeCount} /><Metric label="Resolved" value={read.summary.resolvedCount} /><Metric label="Dismissed" value={read.summary.dismissedCount} /></div></section>
+  <nav aria-label="Opportunity filters" className="flex flex-wrap gap-2">{filters.map(([key,text]) => <Link className={filter === key ? "rev-button-primary !min-h-9 !px-4 !py-2" : "rev-button-secondary !min-h-9 !px-4 !py-2"} href={`/app/revenue-leaks?filter=${key}`} key={key}>{text}</Link>)}</nav>
+  <section className="space-y-3">{read.findings.length ? read.findings.map((finding) => <Link className="block rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,.02)] p-5 transition hover:border-[color:var(--border-accent)]" href={`/app/revenue-leaks/${finding.id}`} key={finding.id}><div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_180px]"><div><div className="flex flex-wrap gap-2"><RevoryStatusBadge tone={finding.valueBasis === "OPERATIONAL" ? "neutral" : "accent"}>{label(finding.findingType)}</RevoryStatusBadge><RevoryStatusBadge tone={finding.severity === "HIGH" || finding.severity === "CRITICAL" ? "future" : "neutral"}>{finding.severity.toLowerCase()}</RevoryStatusBadge></div><h2 className="mt-3 text-lg font-bold">Estimate {finding.estimateExternalId}</h2><p className="mt-1 text-sm leading-6 text-[color:var(--text-muted)]">{finding.reason}</p></div><div className="md:text-right"><p className="text-xl font-bold">{finding.valueCents === null ? "No financial value" : money(finding.valueCents)}</p><p className="mt-1 text-xs text-[color:var(--text-muted)]">{label(finding.valueBasis)} · {label(finding.confidence)} confidence</p><p className="mt-3 text-xs font-semibold text-[color:var(--accent-light)]">Review evidence →</p></div></div></Link>) : <div className="rounded-[24px] border border-dashed border-[color:var(--border)] p-8 text-center"><p className="font-bold">No findings in this view.</p><p className="mt-2 text-sm text-[color:var(--text-muted)]">Change the filter or import a current estimate export.</p></div>}</section></div>;
 }
-
-function SummaryTile({
-  label,
-  note,
-  value,
-}: Readonly<{
-  label: string;
-  note: string;
-  value: number;
-}>) {
-  return (
-    <div className="rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.022)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
-      <p className="rev-label">{label}</p>
-      <p className="mt-2 text-[28px] font-semibold tracking-[-0.05em] text-[color:var(--foreground)]">
-        {value}
-      </p>
-      <p className="mt-1 text-[12px] leading-5 text-[color:var(--text-muted)]">
-        {note}
-      </p>
-    </div>
-  );
-}
-
-function resolveFilter(
-  value: string | string[] | undefined,
-): RevenueLeakListFilter {
-  const candidate = Array.isArray(value) ? value[0] : value;
-
-  if (candidate && supportedFilters.has(candidate as RevenueLeakListFilter)) {
-    return candidate as RevenueLeakListFilter;
-  }
-
-  return "ALL_ACTIVE";
-}
+function Metric({label,value}:{label:string;value:number}) { return <div className="rounded-[18px] border border-[color:var(--border)] bg-[rgba(20,21,22,.7)] p-4"><p className="rev-label">{label}</p><p className="mt-2 text-2xl font-bold">{value}</p></div>; }

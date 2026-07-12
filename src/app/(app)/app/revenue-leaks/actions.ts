@@ -1,89 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { RevenueLeakStatus } from "@prisma/client";
+import type { QuoteRecoveryDisposition, RevenueLeakStatus } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
 import { getAppContext } from "@/services/app/get-app-context";
 
-export type RevenueLeakStatusActionState = {
-  message: string;
-  ok: boolean;
-};
-
-export async function acknowledgeRevenueLeakAction(
-  revenueLeakId: string,
-): Promise<RevenueLeakStatusActionState> {
-  return updateRevenueLeakStatus({
-    id: revenueLeakId,
-    nextStatus: "ACKNOWLEDGED",
-    successMessage: "Revenue leak signal acknowledged.",
-  });
-}
-
-export async function dismissRevenueLeakAction(
-  revenueLeakId: string,
-): Promise<RevenueLeakStatusActionState> {
-  return updateRevenueLeakStatus({
-    id: revenueLeakId,
-    nextStatus: "DISMISSED",
-    successMessage: "Revenue leak signal dismissed from the active read.",
-  });
-}
-
-async function updateRevenueLeakStatus(input: {
-  id: string;
-  nextStatus: Extract<RevenueLeakStatus, "ACKNOWLEDGED" | "DISMISSED">;
-  successMessage: string;
-}): Promise<RevenueLeakStatusActionState> {
-  const appContext = await getAppContext();
-
-  if (!appContext) {
-    return {
-      message: "Your REVORY session expired before this signal could be updated.",
-      ok: false,
-    };
-  }
-
-  const leak = await prisma.revenueLeak.findUnique({
-    select: {
-      id: true,
-      status: true,
-      workspaceId: true,
-    },
-    where: {
-      id: input.id,
-    },
-  });
-
-  if (!leak || leak.workspaceId !== appContext.workspace.id) {
-    return {
-      message: "REVORY could not find this revenue leak signal in your workspace.",
-      ok: false,
-    };
-  }
-
-  if (leak.status === "RESOLVED" || leak.status === "DISMISSED") {
-    return {
-      message: "This signal is already closed and was not reopened automatically.",
-      ok: false,
-    };
-  }
-
-  await prisma.revenueLeak.update({
-    data: {
-      status: input.nextStatus,
-    },
-    where: {
-      id: leak.id,
-    },
-  });
-
-  revalidatePath("/app/revenue-leaks");
-  revalidatePath("/app/dashboard");
-
-  return {
-    message: input.successMessage,
-    ok: true,
-  };
-}
+async function setDisposition(input:{id:string;status:RevenueLeakStatus;disposition:QuoteRecoveryDisposition;recoveredValueCents?:number|null}){const context=await getAppContext();if(!context)return;const finding=await prisma.quoteRecoveryFinding.findFirst({where:{id:input.id,workspaceId:context.workspace.id}});if(!finding)return;await prisma.$transaction([prisma.quoteRecoveryFinding.update({where:{id:finding.id},data:{status:input.status,disposition:input.disposition,recoveredValueCents:input.recoveredValueCents??null,dispositionedAt:new Date(),resolvedAt:input.status==="RESOLVED"?new Date():null}}),prisma.workspaceAuditEvent.create({data:{workspaceId:context.workspace.id,actorUserId:context.user.id,action:`FINDING_${input.disposition}`,metadataJson:{findingId:finding.id,estimatedValueCents:finding.valueCents,recoveredValueCents:input.recoveredValueCents??null}}})]);revalidatePath("/app/dashboard");revalidatePath("/app/revenue-leaks");revalidatePath(`/app/revenue-leaks/${input.id}`);revalidatePath("/app/history")}
+export async function acknowledgeQuoteRecoveryFinding(id:string){const context=await getAppContext();if(!context)return;const finding=await prisma.quoteRecoveryFinding.findFirst({where:{id,workspaceId:context.workspace.id}});if(!finding)return;await prisma.quoteRecoveryFinding.update({where:{id},data:{status:"ACKNOWLEDGED"}});revalidatePath(`/app/revenue-leaks/${id}`)}
+export async function resolveQuoteRecoveryFinding(id:string){await setDisposition({id,status:"RESOLVED",disposition:"REVIEWED"})}
+export async function dismissQuoteRecoveryFinding(id:string){await setDisposition({id,status:"DISMISSED",disposition:"FALSE_POSITIVE"})}
+export async function recoverQuoteRecoveryFinding(id:string,formData:FormData){const dollars=Number(formData.get("recoveredValue"));if(!Number.isFinite(dollars)||dollars<0)return;await setDisposition({id,status:"RESOLVED",disposition:"RECOVERED",recoveredValueCents:Math.round(dollars*100)})}

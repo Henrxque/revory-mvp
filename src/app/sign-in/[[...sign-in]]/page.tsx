@@ -78,7 +78,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure access returns existing users to the same private workspace. The authenticated product remains a clearly marked legacy migration surface until contractor-native slices replace it.
+                Secure access returns existing users to the same private Quote Recovery workspace and its imported evidence.
               </p>
             </div>
           </div>

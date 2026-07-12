@@ -1,0 +1,2 @@
+externalId,customerExternalId,leadExternalId,estimateExternalId,jobExternalId,occurredAt,activityType,outcome,nextStep
+ACT-001,CUST-001,LEAD-001,EST-001,,2026-07-02T14:00:00Z,email,sent,Call customer

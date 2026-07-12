@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         </p>
         <div className="mt-7 space-y-4 text-sm leading-7 text-[color:var(--text-muted)]">
           <p>
-            The current authenticated environment contains legacy MedSpa-era data contracts preserved for migration compatibility. New contractor-native analysis and onboarding are not enabled yet.
+            REVORY processes workspace-scoped contractor exports for Quote Recovery analysis. Historical internal migration structures are not presented as current product capability.
           </p>
           <p>
             Future estimate, customer, activity, job, invoice, change-order and cost imports must remain isolated by workspace and retain source provenance, external IDs and explicit matching evidence.

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { ImportsFlowGrid } from "@/components/imports/ImportsFlowGrid";
+import { CanonicalImportPanel } from "@/components/imports/CanonicalImportPanel";
 import { DocumentNavigationLink } from "@/components/navigation/DocumentNavigationLink";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -130,6 +131,8 @@ export default async function ImportsPage() {
           </aside>
         </div>
       </section>
+
+      <CanonicalImportPanel />
 
       <section id="booking-inputs-flow">
         <ImportsFlowGrid

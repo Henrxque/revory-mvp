@@ -139,6 +139,64 @@ enum RevenueLeakConfidence {
   HIGH
 }
 
+enum CanonicalEntityType {
+  CUSTOMER
+  LEAD
+  ESTIMATE
+  ACTIVITY
+  JOB
+  INVOICE
+  CHANGE_ORDER
+  COST
+}
+
+enum RevoryValueBasis {
+  OBSERVED
+  CALCULATED
+  ESTIMATED
+  OPERATIONAL
+  DATA_QUALITY
+}
+
+enum CanonicalImportStatus {
+  PENDING_REVIEW
+  READY
+  COMMITTED
+  REJECTED
+}
+
+enum QuoteRecoveryFindingType {
+  OVERDUE_FOLLOW_UP
+  HIGH_VALUE_STALE_QUOTE
+  OPEN_ESTIMATE_NO_ACTIVITY
+  ESTIMATE_AGING_RISK
+  MISSING_OWNER_OR_NEXT_STEP
+  RECOVERABLE_LOST_QUOTE
+}
+
+enum RevoryOfferKey {
+  QUOTE_RECOVERY_AUDIT
+  STARTER
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum AnalysisRunStatus {
+  READY
+  COMPLETED
+}
+
+enum QuoteRecoveryDisposition {
+  NONE
+  REVIEWED
+  RECOVERED
+  FALSE_POSITIVE
+}
+
 model User {
   id                         String          @id @default(cuid())
   clerkUserId                String?         @unique
@@ -163,24 +221,24 @@ model User {
 }
 
 model Workspace {
-  id                       String                   @id @default(cuid())
+  id                       String                         @id @default(cuid())
   name                     String
-  slug                     String                   @unique
+  slug                     String                         @unique
   ownerUserId              String
-  status                   WorkspaceStatus          @default(DRAFT)
+  status                   WorkspaceStatus                @default(DRAFT)
   // Active mode effectively used by the workspace after activation.
-  activeModeKey            FlowModeKey              @default(MODE_A)
+  activeModeKey            FlowModeKey                    @default(MODE_A)
   // Minimal billing foundation for Stripe Checkout, webhook sync, and plan gating.
   planKey                  BillingPlanKey?
-  billingStatus            BillingStatus            @default(INACTIVE)
-  stripeCustomerId         String?                  @unique
-  stripeSubscriptionId     String?                  @unique
+  billingStatus            BillingStatus                  @default(INACTIVE)
+  stripeCustomerId         String?                        @unique
+  stripeSubscriptionId     String?                        @unique
   stripePriceId            String?
   currentPeriodEnd         DateTime?
-  cancelAtPeriodEnd        Boolean                  @default(false)
-  createdAt                DateTime                 @default(now())
-  updatedAt                DateTime                 @updatedAt
-  owner                    User                     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  cancelAtPeriodEnd        Boolean                        @default(false)
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  owner                    User                           @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
   medSpaProfile            MedSpaProfile?
   activationSetup          ActivationSetup?
   dataSources              DataSource[]
@@ -191,9 +249,184 @@ model Workspace {
   reviewRequests           ReviewRequest[]
   metricsSnapshots         MetricsSnapshot[]
   leadBookingOpportunities LeadBookingOpportunity[]
-  revenueLeaks             RevenueLeak[]            @relation("WorkspaceRevenueLeaks")
+  revenueLeaks             RevenueLeak[]                  @relation("WorkspaceRevenueLeaks")
+  canonicalImportSessions  CanonicalImportSession[]
+  canonicalRecords         CanonicalRecord[]
+  savedCanonicalMappings   SavedCanonicalMapping[]
+  quoteRecoveryFindings    QuoteRecoveryFinding[]
+  entitlements             WorkspaceEntitlement[]
+  analysisRuns             QuoteRecoveryAnalysisRun[]
+  dataSettings             WorkspaceDataSettings?
+  digestPreference         QuoteRecoveryDigestPreference?
+  auditEvents              WorkspaceAuditEvent[]
 
   @@map("workspaces")
+}
+
+model WorkspaceEntitlement {
+  id                      String            @id @default(cuid())
+  workspaceId             String
+  offerKey                RevoryOfferKey
+  status                  EntitlementStatus @default(ACTIVE)
+  stripeCheckoutSessionId String?           @unique
+  stripePaymentIntentId   String?
+  stripeSubscriptionId    String?
+  startsAt                DateTime          @default(now())
+  endsAt                  DateTime?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  workspace               Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, offerKey, status])
+  @@index([stripeSubscriptionId])
+  @@map("workspace_entitlements")
+}
+
+model QuoteRecoveryAnalysisRun {
+  id                  String            @id @default(cuid())
+  workspaceId         String
+  importSessionId     String?
+  status              AnalysisRunStatus @default(READY)
+  findingSnapshotJson Json
+  activeCount         Int               @default(0)
+  estimatedValueCents Int               @default(0)
+  dataQualityJson     Json
+  completedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("quote_recovery_analysis_runs")
+}
+
+model CanonicalImportSession {
+  id                  String                @id @default(cuid())
+  workspaceId         String
+  idempotencyKey      String
+  status              CanonicalImportStatus @default(PENDING_REVIEW)
+  sourceFileNamesJson Json
+  mappingJson         Json
+  dataQualityJson     Json
+  eligibilityJson     Json
+  rowCount            Int                   @default(0)
+  acceptedCount       Int                   @default(0)
+  rejectedCount       Int                   @default(0)
+  committedAt         DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  workspace           Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  records             CanonicalRecord[]
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, status, createdAt])
+  @@map("canonical_import_sessions")
+}
+
+model CanonicalRecord {
+  id                      String                 @id @default(cuid())
+  workspaceId             String
+  importSessionId         String
+  entityType              CanonicalEntityType
+  sourceSystem            String
+  externalId              String
+  relationExternalIdsJson Json
+  provenanceJson          Json
+  payloadJson             Json
+  occurredAt              DateTime?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  workspace               Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  importSession           CanonicalImportSession @relation(fields: [importSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, entityType, sourceSystem, externalId])
+  @@index([workspaceId, entityType, occurredAt])
+  @@index([workspaceId, importSessionId])
+  @@map("canonical_records")
+}
+
+model SavedCanonicalMapping {
+  id              String              @id @default(cuid())
+  workspaceId     String
+  entityType      CanonicalEntityType
+  sourceSignature String
+  mappingJson     Json
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  workspace       Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, entityType, sourceSignature])
+  @@map("saved_canonical_mappings")
+}
+
+model QuoteRecoveryFinding {
+  id                  String                   @id @default(cuid())
+  workspaceId         String
+  findingType         QuoteRecoveryFindingType
+  status              RevenueLeakStatus        @default(OPEN)
+  severity            RevenueLeakSeverity      @default(MEDIUM)
+  confidence          RevenueLeakConfidence    @default(MEDIUM)
+  valueBasis          RevoryValueBasis
+  valueCents          Int?
+  currency            String                   @default("USD")
+  estimateExternalId  String
+  fingerprint         String
+  reason              String
+  recommendedAction   String
+  evidenceJson        Json
+  detectedAt          DateTime                 @default(now())
+  lastSeenAt          DateTime                 @default(now())
+  resolvedAt          DateTime?
+  disposition         QuoteRecoveryDisposition @default(NONE)
+  recoveredValueCents Int?
+  dispositionedAt     DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  workspace           Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, fingerprint])
+  @@index([workspaceId, status, detectedAt])
+  @@index([workspaceId, findingType, status])
+  @@map("quote_recovery_findings")
+}
+
+model WorkspaceDataSettings {
+  id                    String    @id @default(cuid())
+  workspaceId           String    @unique
+  retentionDays         Int       @default(365)
+  lastExportedAt        DateTime?
+  lastAnalysisDeletedAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_data_settings")
+}
+
+model QuoteRecoveryDigestPreference {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  enabled     Boolean   @default(false)
+  weekday     Int       @default(1)
+  lastSentAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("quote_recovery_digest_preferences")
+}
+
+model WorkspaceAuditEvent {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  actorUserId  String?
+  action       String
+  metadataJson Json
+  createdAt    DateTime  @default(now())
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("workspace_audit_events")
 }
 
 model MedSpaProfile {

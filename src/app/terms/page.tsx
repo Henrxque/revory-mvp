@@ -22,7 +22,7 @@ export default function TermsPage() {
             AI-assisted mapping or explanation is advisory, bounded and subject to user review. AI does not create confirmed leaks, calculate final financial values, send follow-ups or override deterministic validation.
           </p>
           <p>
-            Outputs are not guarantees of recovery, revenue, accounting treatment, legal outcomes or business results. REVORY does not provide legal, accounting, tax or billing advice.
+            Outputs are not guarantees of recovery, revenue, accounting conclusions, legal outcomes or business results. REVORY does not provide legal, accounting, tax or billing advice.
           </p>
         </div>
         <Link className="rev-action-button mt-8 inline-flex" href="/">

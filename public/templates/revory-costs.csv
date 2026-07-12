@@ -1,0 +1,2 @@
+externalId,jobExternalId,invoiceExternalId,amountCents,incurredAt,category
+COST-001,JOB-001,,250000,2026-07-16T14:00:00Z,materials

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/db/prisma";
 
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
@@ -11,8 +12,8 @@ import {
   getOnboardingStep,
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
-import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
+import { hasCurrentRevoryAccess } from "@/services/billing/entitlements";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -34,21 +35,6 @@ function getPlanBadgeTone(planKey: string | null | undefined) {
   return "neutral" as const;
 }
 
-function resolveBookingInputsStatus(
-  activationCompleted: boolean,
-  hasBookedProofVisible: boolean,
-) {
-  if (hasBookedProofVisible) {
-    return "Data visible";
-  }
-
-  if (activationCompleted) {
-    return "Data next";
-  }
-
-  return "Data pending";
-}
-
 export default async function PrivateAppLayout({
   children,
 }: PrivateAppLayoutProps) {
@@ -61,30 +47,34 @@ export default async function PrivateAppLayout({
   const { activationSetup, user, workspace } = appContext;
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();
+  const hasRevoryEntitlement = await hasCurrentRevoryAccess(workspace.id);
 
-  if (!billingSummary.hasActiveAccess && !internalPreview) {
+  if (!billingSummary.hasActiveAccess && !hasRevoryEntitlement && !internalPreview) {
     redirect("/start");
   }
 
-  const bookedProofRead = await getBookedProofRead(workspace.id);
-  const hasBookedProofVisible = bookedProofRead.hasBookedProofVisible;
-  const bookingInputsStatus = resolveBookingInputsStatus(
-    activationSetup.isCompleted,
-    hasBookedProofVisible,
-  );
+  const canonicalRecordCount = await prisma.canonicalRecord.count({
+    where: { workspaceId: workspace.id },
+  });
+  const hasCanonicalData = canonicalRecordCount > 0;
+  const bookingInputsStatus = hasCanonicalData
+    ? "Data visible"
+    : activationSetup.isCompleted
+      ? "Data next"
+      : "Data pending";
   const currentStep = getOnboardingStep(
     resolveOnboardingStepKey(activationSetup.currentStep),
   );
   const currentStepTitle = activationSetup.isCompleted
-    ? hasBookedProofVisible
+    ? hasCanonicalData
       ? "Leak read ready"
       : "Data import next"
     : currentStep.title;
   const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
   const workspaceSubtitle = activationSetup.isCompleted
-    ? hasBookedProofVisible
-      ? "Imported evidence is visible and the revenue leak read is ready."
-      : "Activation is live. Add structured exports to prepare the revenue leak read."
+    ? hasCanonicalData
+      ? `${canonicalRecordCount} canonical records support the current Quote Recovery read.`
+      : "Activation is live. Add estimate exports to prepare the Quote Recovery read."
     : `Activation is in progress. ${currentStep.title} comes next.`;
   const currentPlanSignal =
     billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
@@ -160,7 +150,7 @@ export default async function PrivateAppLayout({
           {internalPreview ? (
             <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] px-4 py-3 text-[12px] leading-5 text-[color:var(--text-muted)]">
               <strong className="text-[color:var(--foreground)]">Internal migration preview.</strong>{" "}
-              The premium shell and proven horizontal flows are restored locally. Financial findings remain gated by the contractor-native data contracts and deterministic rules.
+              The contractor-native Quote Recovery slice is active locally. Audit checkout remains gated by dedicated Stripe sandbox configuration.
             </aside>
           ) : null}
 

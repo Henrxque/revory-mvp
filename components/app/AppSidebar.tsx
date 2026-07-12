@@ -20,6 +20,7 @@ type SidebarIconKey =
   | "signals"
   | "imports"
   | "billing"
+  | "history"
   | "settings";
 
 type SidebarItem =
@@ -56,7 +57,7 @@ const navGroups = (
         {
           href: demoMode ? "#demo-leaks" : "/app/revenue-leaks",
           icon: "signals",
-          label: "Revenue Leaks",
+          label: "Quote Recovery",
         },
         {
           href: demoMode ? "#demo-data" : "/app/imports",
@@ -64,6 +65,7 @@ const navGroups = (
           label: "Data Imports",
           status: bookingInputsStatus,
         },
+        { href: demoMode ? "#demo-history" : "/app/history", icon: "history", label: "Analysis history" },
       ],
     },
     {
@@ -75,6 +77,7 @@ const navGroups = (
           label: "Activation Path",
           status: activationStatus,
         },
+        { href: demoMode ? "#demo-settings" : "/app/settings", icon: "settings", label: "Data & settings" },
         {
           href: "/start",
           icon: "billing",
@@ -138,6 +141,8 @@ function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
           <path d="M7 15h4" />
         </svg>
       );
+    case "history":
+      return <svg {...sharedProps}><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>;
   }
 }
 
@@ -204,7 +209,7 @@ export function AppSidebar({
       <div className="border-b border-[color:var(--border)] px-5 py-5">
         <RevoryLogo compact />
         <p className="mt-3 text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)]">
-          Estimated revenue at risk, leak evidence and next fix
+          Quote Recovery evidence and next review
         </p>
       </div>
 

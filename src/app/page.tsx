@@ -1,615 +1,113 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { getAuthSession } from "@/auth";
-
-const LANDING_REFERENCE_PATH = path.join(
-  process.cwd(),
-  "src",
-  "content",
-  "revory-landing-reference.html",
-);
-
-const FOOTER_YEAR = 2026;
-
-function extractBetween(content: string, startMarker: string, endMarker: string) {
-  const startIndex = content.indexOf(startMarker);
-
-  if (startIndex < 0) {
-    return "";
-  }
-
-  const contentStart = startIndex + startMarker.length;
-  const endIndex = content.indexOf(endMarker, contentStart);
-
-  if (endIndex < 0) {
-    return content.slice(contentStart);
-  }
-
-  return content.slice(contentStart, endIndex);
-}
-
-function extractLandingMarkup(content: string) {
-  const startIndex = content.indexOf("<nav");
-  const footerIndex = content.indexOf("<footer");
-
-  if (startIndex < 0) {
-    return "";
-  }
-
-  if (footerIndex < 0) {
-    return content.slice(startIndex);
-  }
-
-  return content.slice(startIndex, footerIndex);
-}
-
-function normalizeReferenceText(content: string) {
-  const replacements: Array<[string, string]> = [
-    ["â€”", "\u2014"],
-    ["â€“", "\u2013"],
-    ["â€˜", "\u2018"],
-    ["â€™", "\u2019"],
-    ["â€œ", "\u201c"],
-    ["â€\u009d", "\u201d"],
-    ["â€¦", "\u2026"],
-    ["â†’", "\u2192"],
-    ["âœ“", "\u2713"],
-    ["â˜…", "\u2605"],
-    ["Â·", "\u00b7"],
-    ["Â©", "\u00a9"],
-    ["Â", ""],
-  ];
-
-  return replacements.reduce(
-    (normalizedContent, [from, to]) => normalizedContent.replaceAll(from, to),
-    content,
-  );
-}
-
-function applyBrandText(content: string) {
-  const replacements: Array<[string, string]> = [
-    ["QuoteSignal", "REVORY"],
-    ["REVORY", "REVORY"],
-    ["Revory", "REVORY"],
-    ["hello@revory.com", "hello@revory.com"],
-    ["premium MedSpas", "premium home service companies"],
-    ["premium MedSpa", "premium home service company"],
-    ["MedSpas", "home service companies"],
-    ["MedSpa", "home services"],
-    ["clinic data", "quote data"],
-    ["Clinic Data", "Quote Data"],
-    ["clinics", "home service teams"],
-    ["clinic", "home service team"],
-    ["appointments", "estimates"],
-    ["appointment", "estimate"],
-    ["booking", "quote"],
-    ["bookings", "quotes"],
-    ["no-shows", "stale quotes"],
-    ["cancellations", "overdue follow-ups"],
-    ["No-Show And Cancellation Signals", "Stale Estimate And Follow-Up Signals"],
-    ["No-show signal", "Stale estimate signal"],
-    ["Unrecovered cancellation signal", "Overdue follow-up signal"],
-    ["Blocked Booking Opportunities", "Blocked Close Opportunities"],
-    ["Blocked booking opportunities", "Blocked close opportunities"],
-    ["Appointments booked", "Quotes in view"],
-    ["Email Default � SMS Optional", "CSV First, Guided Review"],
-    ["Revenue Leak Detector for premium home service companies", "Estimate Revenue Leak Detector for home services"],
-    ["Revenue Leak Detector for premium home services", "Estimate Revenue Leak Detector for home services"],
-    ["Revenue Leak Detector for home service companies", "Estimate Revenue Leak Detector for home services"],
-    ["Complete Revenue Leak Detector", "Complete Estimate Revenue Leak Detector"],
-    ["Revenue Leaks Page", "Quote Leaks Page"],
-    ["Revenue Leak Summary", "Quote Leak Summary"],
-    ["Daily Leak Brief", "Daily Quote Leak Brief"],
-    ["Dashboard leak read", "Dashboard quote leak read"],
-    ["revenue leak detector", "quote leak detector"],
-    ["revenue leaks", "quote leaks"],
-    ["Revenue leaks", "Quote leaks"],
-    ["Start With Your Quote Data", "Start With Quote Data"],
-    ["Start With Quote Data \u2192", "Start With Quote Data \u2192"],
-  ];
-
-  return replacements.reduce(
-    (brandedContent, [from, to]) => brandedContent.replaceAll(from, to),
-    content,
-  );
-}
-
-function applyREVORYTheme(css: string) {
-  return css
-    .replaceAll("--crimson: #C2095A;", "--crimson: #43B39B;")
-    .replaceAll("--crimson-light: #E0106A;", "--crimson-light: #43B39B;")
-    .replaceAll("--crimson-dim: rgba(194, 9, 90, 0.15);", "--crimson-dim: rgba(67, 179, 155, 0.13);")
-    .replaceAll("--crimson-glow: rgba(194, 9, 90, 0.35);", "--crimson-glow: rgba(67, 179, 155, 0.28);")
-    .replaceAll("--bg-primary: #0C0B0F;", "--bg-primary: #141516;")
-    .replaceAll("--bg-secondary: #111018;", "--bg-secondary: #252729;")
-    .replaceAll("--bg-card: #15141C;", "--bg-card: color-mix(in srgb, #252729 32%, #141516);")
-    .replaceAll("--bg-card-hover: #1C1B26;", "--bg-card-hover: color-mix(in srgb, #252729 48%, #141516);")
-    .replaceAll("--border-crimson: rgba(194,9,90,0.3);", "--border-crimson: rgba(67,179,155,0.28);")
-    .replaceAll("--text-muted: #7A7890;", "--text-muted: #88A6B8;")
-    .replaceAll("--text-subtle: #4A4860;", "--text-subtle: #48677C;")
-    .replaceAll("#C2095A", "#43B39B")
-    .replaceAll("#E0106A", "#43B39B")
-    .replaceAll("rgba(194,9,90", "rgba(67,179,155")
-    .replaceAll("rgba(194, 9, 90", "rgba(67, 179, 155")
-    .replaceAll("rgba(12,11,15,0.85)", "rgba(20,21,22,0.94)")
-    .replaceAll("#0C0B0F", "#141516")
-    .replaceAll("#111018", "#252729")
-    .replaceAll("#15141C", "#1A1B1C")
-    .replaceAll("#1C1B26", "#1D1F20");
-}
-
-function adaptReferenceCss(css: string) {
-  const themedCss = applyREVORYTheme(normalizeReferenceText(css));
-
-  return `${themedCss
-    .replace(/body\s*\{/g, ".revory-landing-page {")
-    .replace(/html\s*\{/g, ".revory-landing-page-root {")
-    .replace(/nav\s*\{/g, ".revory-landing-page nav {")
-    .replace(/section\s*\{/g, ".revory-landing-page section {")
-    .replace(/footer\s*\{/g, ".revory-landing-page-root footer {")}
-
-    .revory-landing-page {
-      --font-display: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
-      --font-italic: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
-      --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
-      background:
-        radial-gradient(ellipse at 50% 18%, rgba(67, 179, 155, 0.1) 0%, transparent 42%),
-        #141516;
-    }
-
-    .revory-landing-page nav {
-      background: rgba(20, 21, 22, 0.94);
-    }
-
-    .revory-landing-page .prelaunch-notice {
-      border-bottom: 1px solid rgba(67, 179, 155, 0.2);
-      background: color-mix(in srgb, #43B39B 8%, #141516);
-      padding: 0.7rem 1rem;
-      color: #9ed7ca;
-      font-family: var(--font-body);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      line-height: 1.5;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .revory-landing-page .logo {
-      gap: 0.72rem;
-    }
-
-    .revory-landing-page .logo-icon,
-    .revory-landing-page .logo-icon img {
-      height: 56px !important;
-      width: auto !important;
-    }
-
-    .revory-landing-page .logo-icon img {
-      object-fit: contain;
-    }
-
-    .revory-landing-page .logo-wordmark {
-      font-family: var(--font-display) !important;
-      font-size: 1.22rem !important;
-      font-weight: 400 !important;
-      letter-spacing: 0 !important;
-      text-transform: none !important;
-    }
-
-    .revory-landing-page h1,
-    .revory-landing-page h2 {
-      font-family: var(--font-display);
-      font-weight: 400;
-      letter-spacing: 0;
-    }
-
-    .revory-landing-page h3,
-    .revory-landing-page h4 {
-      font-family: var(--font-body);
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .revory-landing-page h1 {
-      font-size: clamp(2.95rem, 6.35vw, 5.7rem);
-      line-height: 0.98;
-    }
-
-    .revory-landing-page h2 {
-      letter-spacing: 0;
-      line-height: 0.98;
-    }
-
-    .revory-landing-page em,
-    .revory-landing-page .italic-accent {
-      font-family: var(--font-display);
-      font-style: italic;
-      font-weight: 400;
-      letter-spacing: 0;
-      color: #43b39b;
-    }
-
-    .revory-landing-page .hero-sub {
-      max-width: 700px;
-      font-size: 1.08rem;
-      line-height: 1.72;
-    }
-
-    .revory-landing-page .section-label,
-    .revory-landing-page .hero-badge,
-    .revory-landing-page .trust-label,
-    .revory-landing-page .price-tag {
-      font-family: var(--font-body);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-
-    .revory-landing-page .hero-glow {
-      background: radial-gradient(ellipse at center, rgba(67, 179, 155, 0.16) 0%, transparent 70%);
-    }
-
-    .revory-landing-page .hero-badge {
-      background: rgba(67, 179, 155, 0.075);
-      border-color: rgba(67, 179, 155, 0.24);
-      color: #43b39b;
-    }
-
-    .revory-landing-page #trust {
-      padding: 0 2rem 2.25rem;
-      border: 0;
-      background: transparent;
-    }
-
-    .revory-landing-page .trust-inner {
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.075);
-      border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008)),
-        color-mix(in srgb, #252729 32%, #141516);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
-    }
-
-    .revory-landing-page .trust-item {
-      padding: 1.75rem 1.25rem;
-      border-color: rgba(255, 255, 255, 0.055);
-    }
-
-    .revory-landing-page #solution,
-    .revory-landing-page #features,
-    .revory-landing-page #self-service {
-      background:
-        radial-gradient(circle at 18% 12%, rgba(67, 179, 155, 0.045), transparent 28%),
-        color-mix(in srgb, #252729 36%, #141516);
-      border-block: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .revory-landing-page .solution-visual {
-      padding: 2.15rem;
-      border-color: rgba(255, 255, 255, 0.09);
-      border-radius: 22px;
-      background:
-        linear-gradient(145deg, rgba(67, 179, 155, 0.045), transparent 42%),
-        #181a1b;
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.035);
-    }
-
-    .revory-landing-page .solution-visual::before {
-      height: 1px;
-      background: linear-gradient(90deg, transparent 8%, rgba(67, 179, 155, 0.78), transparent 92%);
-    }
-
-    .revory-landing-page .mock-dashboard {
-      gap: 1.05rem;
-    }
-
-    .revory-landing-page .mock-stat {
-      min-height: 112px;
-      padding: 1.35rem 1rem;
-      border-color: rgba(255, 255, 255, 0.08);
-      border-radius: 13px;
-      background: rgba(20, 21, 22, 0.86);
-    }
-
-    .revory-landing-page .mock-stat-val {
-      font-size: 1.72rem;
-      letter-spacing: -0.035em;
-    }
-
-    .revory-landing-page .mock-stat-lbl {
-      display: block;
-      margin-top: 0.35rem;
-      line-height: 1.35;
-    }
-
-    .revory-landing-page .mock-row {
-      min-height: 54px;
-      padding: 0.95rem 1.15rem;
-      border-color: rgba(255, 255, 255, 0.075);
-      border-radius: 11px;
-      background: rgba(20, 21, 22, 0.72);
-    }
-
-    .revory-landing-page .mock-label {
-      color: color-mix(in srgb, white 58%, #43b39b);
-    }
-
-    .revory-landing-page .mock-value {
-      font-size: 0.94rem;
-      font-weight: 700;
-    }
-
-    .revory-landing-page .btn-primary,
-    .revory-landing-page .nav-cta {
-      background: #43b39b;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 18px 46px rgba(67, 179, 155, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-      color: #ffffff !important;
-    }
-
-    .revory-landing-page .btn-primary:hover,
-    .revory-landing-page .nav-cta:hover {
-      background: color-mix(in srgb, #43b39b 84%, white) !important;
-      box-shadow: 0 0 30px rgba(67, 179, 155, 0.28);
-    }
-
-    .revory-landing-page .roi-stats {
-      align-items: stretch;
-    }
-
-    .revory-landing-page .roi-card {
-      display: flex;
-      min-height: 236px;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 2.15rem 1.35rem;
-    }
-
-    .revory-landing-page .roi-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: fit-content;
-      margin: 0 0 0.95rem;
-      padding: 0.32rem 0.7rem;
-      border: 1px solid rgba(67, 179, 155, 0.18);
-      border-radius: 999px;
-      background: rgba(67, 179, 155, 0.075);
-      color: #43b39b;
-      font-family: var(--font-body);
-      font-size: 0.72rem;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .revory-landing-page .roi-card h4 {
-      font-family: var(--font-body);
-      font-size: 1rem;
-      line-height: 1.25;
-      letter-spacing: 0;
-    }
-
-    .revory-landing-page .roi-card p {
-      max-width: 230px;
-      margin: 0 auto;
-      font-size: 0.88rem;
-      line-height: 1.68;
-    }
-
-    .revory-landing-page .price-card.featured {
-      border-color: rgba(67, 179, 155, 0.28);
-      box-shadow: 0 0 80px rgba(67, 179, 155, 0.11);
-    }
-
-    .revory-landing-page-root footer {
-      background: #141516;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .revory-landing-page-root footer .footer-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.72rem;
-    }
-
-    .revory-landing-page-root footer .logo-icon,
-    .revory-landing-page-root footer .logo-icon img {
-      height: 50px !important;
-      width: auto !important;
-    }
-
-    .revory-landing-page-root footer .logo-icon img {
-      display: block;
-      object-fit: contain;
-    }
-
-    .revory-landing-page-root footer .logo-wordmark {
-      font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif !important;
-      font-size: 1.22rem !important;
-      font-weight: 400 !important;
-      letter-spacing: 0 !important;
-      line-height: 1 !important;
-      text-transform: none !important;
-      color: #f5f4f8 !important;
-    }
-
-    @media (max-width: 640px) {
-      .revory-landing-page #trust {
-        padding-inline: 1rem;
-      }
-
-      .revory-landing-page .trust-inner {
-        border-radius: 18px;
-      }
-
-      .revory-landing-page .logo-icon,
-      .revory-landing-page .logo-icon img {
-        height: 50px !important;
-      }
-
-      .revory-landing-page h1 {
-        font-size: clamp(2.35rem, 11.5vw, 3.05rem);
-        line-height: 1.02;
-        letter-spacing: 0;
-      }
-
-      .revory-landing-page .hero-sub {
-        font-size: 1rem;
-        line-height: 1.68;
-      }
-
-      .revory-landing-page .roi-card {
-        min-height: auto;
-        padding: 2rem 1.35rem;
-      }
-    }
-  `;
-}
-
-function replaceFirst(content: string, pattern: RegExp, replacement: string) {
-  return content.replace(pattern, replacement);
-}
-
-const REVORY_PROBLEM_GRID = `
-  <div class="problem-grid">
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></span>
-      <h3>Stale estimates hide close risk</h3>
-      <p>Open quotes age quietly until high-value jobs stop getting inspected.</p>
-    </div>
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-      <h3>Follow-ups lose urgency</h3>
-      <p>Aging quotes need visible priority before the office team has to guess what still deserves action.</p>
-    </div>
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg></span>
-      <h3>Quote paths get blocked</h3>
-      <p>Missing contact details, owner gaps, or unclear next steps keep demand stuck before the team sees the risk.</p>
-    </div>
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.66 3.13 3 7 3s7-1.34 7-3V5"/><path d="M5 11v6c0 1.66 3.13 3 7 3s7-1.34 7-3v-6"/></svg></span>
-      <h3>Estimate evidence gets stale</h3>
-      <p>A revenue read loses trust when quote amount, status, activity, or customer evidence has not been refreshed.</p>
-    </div>
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-      <h3>High-ticket jobs blur together</h3>
-      <p>Without value, age, and confidence signals, expensive jobs compete with low-value noise.</p>
-    </div>
-    <div class="problem-card">
-      <span class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 7v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4Z"/><path d="m9 12 2 2 4-5"/></svg></span>
-      <h3>Revenue risk needs confidence</h3>
-      <p>REVORY separates operational risk from confirmed financial loss so teams know what to inspect first.</p>
-    </div>
-  </div>`;
-
-function adaptReferenceMarkup(markup: string) {
-  const logoMarkup = [
-    '<div class="logo-icon">',
-    '<img src="/brand/revory-logo-43b39b-transparent.png" alt="REVORY" style="height:56px;width:auto;display:block;" />',
-    "</div>",
-  ].join("");
-
-  let adaptedMarkup = applyBrandText(normalizeReferenceText(markup))
-    .replace(
-      /<div class="logo-icon"><img src="data:image\/png;base64,[\s\S]*?<\/div>/g,
-      logoMarkup,
-    )
-    .replace(
-      /<span class="logo-wordmark"[^>]*>[^<]+<\/span>/g,
-      '<span class="logo-wordmark">REVORY</span>',
-    )
-    .replaceAll('href="#pricing" class="btn-primary"', 'href="/start" class="btn-primary"')
-    .replaceAll('href="#pricing" class="nav-cta"', 'href="/start" class="nav-cta"')
-    .replaceAll('href="#" class="btn-primary"', 'href="/start" class="btn-primary"')
-    .replaceAll('href="/start?plan=growth"', 'href="/start"')
-    .replaceAll('href="#"', 'href="/"')
-    .replaceAll('href="#how"', 'href="#how"')
-    .replaceAll('href="#pricing"', 'href="#pricing"');
-
-  adaptedMarkup = adaptedMarkup.replace(
-    "</nav>",
-    '</nav><div class="prelaunch-notice">Private build — the US$799 Quote Recovery Audit opens only after its product and security gates pass.</div>',
-  );
-
-  adaptedMarkup = replaceFirst(
-    adaptedMarkup,
-    /<div class="hero-badge">[\s\S]*?<\/div>/,
-    '<div class="hero-badge">Quote Recovery Audit — launch gate in progress</div>',
-  );
-
-  adaptedMarkup = replaceFirst(
-    adaptedMarkup,
-    /<h1>[\s\S]*?<\/h1>/,
-    "<h1>Detect quote leaks hidden in your <em>estimate data.</em></h1>",
-  );
-
-  adaptedMarkup = replaceFirst(
-    adaptedMarkup,
-    /<p class="hero-sub">[\s\S]*?<\/p>/,
-    '<p class="hero-sub">REVORY is being built to help HVAC, roofing and home service teams inspect revenue still at risk from stale estimates, overdue follow-ups and weak next-step evidence without turning into a CRM, inbox, dispatch or BI tool.</p>',
-  );
-
-  adaptedMarkup = replaceFirst(
-    adaptedMarkup,
-    /<section id="problem">[\s\S]*?<div class="problem-grid">[\s\S]*?<\/div>\s*<\/section>/,
-    `<section id="problem">
-  <div class="problem-header">
-    <span class="section-label">The Problem</span>
-    <h2>Your quote data already shows where <em>revenue is at risk.</em></h2>
-    <p style="margin-top:1rem;">Most home service companies do not need another bloated operating system to see the problem. They need a clear read on stale estimates, overdue follow-ups, blocked close opportunities, aging evidence, high-ticket noise and revenue confidence before those leaks become invisible.</p>
-  </div>${REVORY_PROBLEM_GRID}
-</section>`,
-  );
-
-  adaptedMarkup = adaptedMarkup
-    .replaceAll("CSV-first", "CSV-first")
-    .replaceAll("Self-service", "Self-service")
-    .replaceAll("Estimated revenue at risk", "Estimated quote revenue at risk")
-    .replaceAll("one main offer", "one main quote motion")
-    .replaceAll("patient", "customer")
-    .replaceAll("patients", "customers")
-    .replaceAll("treatment", "job")
-    .replaceAll("treatments", "jobs")
-    .replaceAll("aesthetics", "home services")
-    .replaceAll("lead source", "estimate source")
-    .replaceAll("lead sources", "estimate sources")
-    .replaceAll("blocked quote opportunities", "blocked close opportunities")
-    .replaceAll("structured estimate and quote data", "structured estimate and customer data")
-    .replaceAll("structured estimate data", "structured estimate and customer data")
-    .replaceAll("Estimate Data", "Quote Data")
-    .replaceAll("quote systems", "field service systems")
-    .replaceAll("quote team", "office team")
-    .replaceAll("quote teams", "office teams")
-    .replaceAll("Start With Your Quote Data", "Start With Quote Data")
-    .replaceAll("Start With Quote Data ?", "Start With Quote Data \u2192")
-    .replaceAll("Start With Quote Data \u2192", "Preview $799 Audit \u2192")
-    .replaceAll("Start With Quote Data", "Preview $799 Audit")
-    .replaceAll("Start with Growth ?", "Start with Growth")
-    .replaceAll("Email us ?", "Email us")
-    .replaceAll("? CSV-first.", "\u2713 CSV-first.")
-    .replaceAll("? Self-service.", "\u2713 Self-service.")
-    .replaceAll("? Estimated quote revenue at risk.", "\u2713 Estimated quote revenue at risk.")
-    .replaceAll("What home service teams usually ask before they start.", "What teams usually ask before they start.")
-    .replaceAll("add the quote data you need", "upload the estimate data you need")
-    .replaceAll("structured estimate and quote data", "structured estimate and customer data")
-    .replaceAll("structured quote and estimate data", "structured estimate and customer data")
-    .replaceAll("No Manual Quick Add", "No manual quick add")
-    .replaceAll("No Executive Summary copy/share/print", "No executive summary copy/share/print");
-
-  return adaptedMarkup;
-}
+import { RevoryLogo } from "@/components/brand/RevoryLogo";
+
+export const metadata: Metadata = {
+  title: "REVORY — Quote Recovery for High-Ticket Contractors",
+  description:
+    "Upload estimate and follow-up exports. REVORY surfaces stale high-value quotes, overdue follow-ups and missing next-step evidence for review.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "REVORY — Quote Recovery for High-Ticket Contractors",
+    description:
+      "Find which estimates and follow-ups may still deserve recovery attention — with evidence, confidence and clear limits.",
+    type: "website",
+  },
+};
+
+type SignalIcon =
+  | "clock"
+  | "value"
+  | "activity"
+  | "aging"
+  | "owner"
+  | "review";
+
+const currentSignals: ReadonlyArray<{
+  icon: SignalIcon;
+  text: string;
+  title: string;
+}> = [
+  {
+    icon: "clock",
+    title: "Overdue follow-up",
+    text: "Flags an explicit follow-up date that has passed.",
+  },
+  {
+    icon: "value",
+    title: "High-value stale estimate",
+    text: "Prioritizes open estimates with value and no recent activity.",
+  },
+  {
+    icon: "activity",
+    title: "Open estimate, no activity",
+    text: "Shows the operational evidence gap without inventing a dollar loss.",
+  },
+  {
+    icon: "aging",
+    title: "Estimate aging risk",
+    text: "Surfaces estimates beyond a transparent aging threshold.",
+  },
+  {
+    icon: "owner",
+    title: "Missing owner or next step",
+    text: "Keeps process risk separate from estimated recoverable value.",
+  },
+  {
+    icon: "review",
+    title: "Conservative lost-quote review",
+    text: "Requires recent loss evidence, value and an explicit next step.",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Upload exports",
+    text: "Add canonical CSV or XLSX exports for customers, estimates and activities.",
+  },
+  {
+    number: "02",
+    title: "Confirm Data Quality",
+    text: "Review mapping, duplicates, eligibility and unmatched links before analysis.",
+  },
+  {
+    number: "03",
+    title: "Inspect the read",
+    text: "See prioritized findings, source lineage, confidence and the next review action.",
+  },
+] as const;
+
+const faq = [
+  [
+    "Does REVORY replace our CRM or field service system?",
+    "No. REVORY is a narrow intelligence layer over exports from the tools your team already uses.",
+  ],
+  [
+    "Does REVORY send follow-ups automatically?",
+    "No. It identifies evidence-backed opportunities and recommends a review. Your team decides and acts.",
+  ],
+  [
+    "Is estimated recoverable revenue guaranteed?",
+    "No. It is a modeled opportunity based on imported estimate evidence, never confirmed accounting loss or guaranteed recovery.",
+  ],
+  [
+    "What data can we start with?",
+    "Canonical customer, estimate and activity exports are the core Quote Recovery inputs. CSV and XLSX are supported.",
+  ],
+  [
+    "What about invoices, change orders, underbilling and margin?",
+    "Those belong to the Revenue Realization roadmap. They remain gated until ingestion, matching and reconciliation pass their own release tests.",
+  ],
+  [
+    "Is the US$799 audit available now?",
+    "The product flow is being validated privately. Checkout activates only after the remaining browser, Stripe sandbox and launch-security gates pass.",
+  ],
+] as const;
 
 export default async function HomePage() {
   const session = await getAuthSession();
@@ -618,58 +116,450 @@ export default async function HomePage() {
     redirect("/app");
   }
 
-  const referenceHtml = await readFile(LANDING_REFERENCE_PATH, "utf8");
-  const rawCss = extractBetween(referenceHtml, "<style>", "</style>");
-  const landingCss = adaptReferenceCss(rawCss);
-  const landingMarkup = adaptReferenceMarkup(extractLandingMarkup(referenceHtml));
+  return (
+    <main className="rev-landing-page min-h-screen font-[family:var(--font-body)]">
+      <nav
+        aria-label="Primary navigation"
+        className="sticky top-0 z-50 border-b border-[color:var(--border)] bg-[rgba(20,21,22,.9)] px-5 py-2.5 backdrop-blur-2xl"
+      >
+        <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-5">
+          <Link aria-label="REVORY home" href="/">
+            <RevoryLogo compact />
+          </Link>
+          <div className="hidden items-center gap-7 text-sm font-medium text-[color:var(--text-muted)] md:flex">
+            <a className="rev-nav-link" href="#how">
+              How it works
+            </a>
+            <a className="rev-nav-link" href="#signals">
+              Signals
+            </a>
+            <a className="rev-nav-link" href="#pricing">
+              Pricing
+            </a>
+            <a className="rev-nav-link" href="#faq">
+              FAQ
+            </a>
+          </div>
+          <div className="flex gap-2">
+            <Link className="rev-button-ghost hidden sm:inline-flex" href="/sign-in">
+              Sign in
+            </Link>
+            <Link className="rev-button-primary" href="/start">
+              Preview the audit
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="border-b border-[rgba(67,179,155,.16)] bg-[rgba(67,179,155,.045)] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[.16em] text-[color:var(--accent-light)]">
+        Private launch · Audit checkout remains gated until validation is complete
+      </div>
+
+      <section className="rev-hero mx-auto flex max-w-[1240px] flex-col items-center px-5 pb-16 pt-14 text-center md:pb-20 md:pt-16">
+        <p className="rev-hero-badge">Quote Recovery for high-ticket contractors</p>
+        <h1 className="mt-6 max-w-[980px] text-balance font-[family:var(--font-marketing-display)] text-[clamp(3rem,5.7vw,5.65rem)] leading-[.94] tracking-[-.018em]">
+          Find the estimates that still deserve{" "}
+          <em className="text-[color:var(--accent-light)]">recovery attention.</em>
+        </h1>
+        <p className="mt-6 max-w-[760px] text-[16px] leading-7 text-[color:var(--text-muted)] md:text-[17px]">
+          REVORY turns estimate and follow-up exports into a prioritized,
+          evidence-first read for remodeling, roofing, premium HVAC, pool building,
+          and kitchen-and-bath teams.
+        </p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <Link className="rev-button-primary" href="/start">
+            Preview the US$799 audit →
+          </Link>
+          <a className="rev-button-secondary" href="#how">
+            See how the read works
+          </a>
+        </div>
+        <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
+          Self-service · CSV/XLSX-first · Deterministic rules · No CRM replacement
+        </p>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] px-5 pb-20">
+        <div className="rev-trust-strip grid overflow-hidden rounded-[24px] sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Estimate-first", "The quote remains the central object."],
+            ["Evidence-first", "Every finding includes traceable source fields."],
+            ["Honest values", "Estimated and operational bases stay separate."],
+            ["Built to review", "REVORY recommends; your team decides."],
+          ].map(([title, text]) => (
+            <div className="rev-trust-item" key={title}>
+              <h2 className="font-bold">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                {text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rev-section-band scroll-mt-24" id="how">
+        <div className="mx-auto grid max-w-[1240px] items-center gap-12 px-5 py-24 lg:grid-cols-[minmax(0,.92fr)_minmax(420px,1.08fr)]">
+          <div>
+            <SectionIntro
+              body="The workflow stays narrow: import the evidence, confirm its quality, then inspect what deserves attention first."
+              kicker="How it works"
+              title={
+                <>
+                  A short read, not another <em>operating system.</em>
+                </>
+              }
+            />
+            <div className="mt-9 grid gap-3">
+              {steps.map(({ number, text, title }) => (
+                <article className="rev-step-card" key={number}>
+                  <span className="rev-step-number">{number}</span>
+                  <div>
+                    <h3 className="font-bold">{title}</h3>
+                    <p className="mt-1.5 text-sm leading-6 text-[color:var(--text-muted)]">
+                      {text}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+          <SampleRead />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="signals">
+        <SectionIntro
+          body="Current claims map directly to implemented Tier 1 rules. Missing evidence suppresses unsupported financial output."
+          kicker="Current Quote Recovery scope"
+          title={
+            <>
+              Six deterministic signals. <em>No inflated analytics.</em>
+            </>
+          }
+        />
+        <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {currentSignals.map(({ icon, text, title }) => (
+            <article className="rev-marketing-card rounded-[22px] p-6" key={title}>
+              <SignalIcon type={icon} />
+              <h3 className="mt-6 font-bold">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+                {text}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="rev-section-band">
+        <div className="mx-auto grid max-w-[1240px] gap-10 px-5 py-24 lg:grid-cols-2">
+          <div>
+            <p className="rev-kicker">Product truth</p>
+            <h2 className="mt-4 font-[family:var(--font-marketing-display)] text-[clamp(2.6rem,4.5vw,4.35rem)] leading-[.98]">
+              Quote Recovery is current.{" "}
+              <em className="text-[color:var(--accent-light)]">
+                Revenue Realization is gated.
+              </em>
+            </h2>
+          </div>
+          <div className="grid gap-4">
+            <RoadmapCard
+              text="Estimate and activity intake, Data Quality, six Quote Recovery rules, evidence detail, dispositions, history and export."
+              title="Available in the current local product"
+            />
+            <RoadmapCard
+              gated
+              text="Invoice reconciliation, approved change orders, deterministic underbilling and margin-risk findings require Sprints 7–11."
+              title="Roadmap — not sold as current capability"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="pricing">
+        <SectionIntro
+          centered
+          body="Prices remain validation targets until the commercial gates pass. No legacy Stripe price is reused."
+          kicker="Pricing hypothesis"
+          title={
+            <>
+              Start with one focused <em>Quote Recovery read.</em>
+            </>
+          }
+        />
+        <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
+          <PriceCard
+            body="A focused self-service read with prioritized findings, evidence, CSV export and an executive report."
+            cta="Preview the audit"
+            label="Quote Recovery Audit"
+            note="one time"
+            price="$799"
+            primary
+          />
+          <PriceCard
+            body="Adds repeated reads and movement over time after the audit and paid-beta gates pass."
+            cta="Review the recurring plan"
+            label="Starter"
+            note="per month · gated"
+            price="$399"
+          />
+        </div>
+      </section>
+
+      <section className="rev-section-band scroll-mt-24" id="faq">
+        <div className="mx-auto max-w-4xl px-5 py-24">
+          <SectionIntro
+            body="Short answers, clear limitations and no hidden service layer."
+            kicker="FAQ"
+            title={
+              <>
+                Questions before the <em>first import.</em>
+              </>
+            }
+          />
+          <div className="mt-10 divide-y divide-[color:var(--border)] border-y border-[color:var(--border)]">
+            {faq.map(([question, answer]) => (
+              <details className="group py-5" key={question}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold">
+                  <span>{question}</span>
+                  <span className="text-xl text-[color:var(--accent-light)] transition-transform group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="max-w-3xl pt-3 text-sm leading-7 text-[color:var(--text-muted)]">
+                  {answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] px-5 py-24">
+        <div className="rev-shell-hero rev-accent-mist rounded-[34px] px-6 py-16 text-center md:px-12">
+          <p className="rev-kicker">Start narrow</p>
+          <h2 className="mx-auto mt-4 max-w-4xl font-[family:var(--font-marketing-display)] text-[clamp(2.8rem,5vw,4.8rem)] leading-[.96]">
+            See which estimates your team should{" "}
+            <em className="text-[color:var(--accent-light)]">inspect first.</em>
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
+            Upload structured exports, confirm Data Quality and get a prioritized
+            Quote Recovery read without replacing your operating stack.
+          </p>
+          <Link className="rev-button-primary mt-7" href="/start">
+            Preview the audit →
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-[color:var(--border)] px-5 py-8">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-5">
+          <RevoryLogo compact />
+          <p className="text-xs text-[color:var(--text-subtle)]">
+            © 2026 REVORY. Quote Recovery intelligence for high-ticket service
+            businesses.
+          </p>
+          <div className="flex gap-5 text-xs text-[color:var(--text-muted)]">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/sign-in">Sign in</Link>
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
+function SectionIntro({
+  body,
+  centered = false,
+  kicker,
+  title,
+}: {
+  body: string;
+  centered?: boolean;
+  kicker: string;
+  title: ReactNode;
+}) {
+  return (
+    <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
+      <p className="rev-kicker">{kicker}</p>
+      <h2 className="mt-4 font-[family:var(--font-marketing-display)] text-[clamp(2.55rem,4.4vw,4.25rem)] leading-[.98] tracking-[-.012em] [&_em]:text-[color:var(--accent-light)]">
+        {title}
+      </h2>
+      <p className="mt-5 text-[15px] leading-7 text-[color:var(--text-muted)]">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+function SampleRead() {
+  return (
+    <aside className="rev-sample-read rounded-[30px] p-5 md:p-7">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="rev-label">Illustrative sample read</p>
+          <h2 className="mt-2 text-xl font-bold">Estimated opportunity at risk</h2>
+        </div>
+        <span className="rounded-full border border-[color:var(--border-accent)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--accent-light)]">
+          Sample data
+        </span>
+      </div>
+      <div className="mt-5 rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.075)] p-5">
+        <p className="rev-label">Estimated recoverable</p>
+        <p className="mt-2 text-4xl font-bold">$126K</p>
+        <p className="mt-2 text-xs leading-5 text-[color:var(--text-muted)]">
+          {"Modeled from imported estimate value and rule evidence — not guaranteed revenue."}
+        </p>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="rev-card rounded-2xl p-4">
+          <p className="rev-label">Stale high-value</p>
+          <p className="mt-2 text-2xl font-bold">9</p>
+        </div>
+        <div className="rev-card rounded-2xl p-4">
+          <p className="rev-label">Overdue follow-up</p>
+          <p className="mt-2 text-2xl font-bold">21</p>
+        </div>
+      </div>
+      <div className="mt-3 space-y-2 text-xs">
+        {[
+          ["HVAC replacement", "$18.4K", "21 days"],
+          ["Roof replacement", "$12.8K", "16 days"],
+          ["Pool renovation", "Operational", "Missing next step"],
+        ].map(([name, value, signal]) => (
+          <div className="rev-sample-row" key={name}>
+            <span className="font-bold">{name}</span>
+            <span className="text-right text-[color:var(--text-muted)]">
+              {value} · {signal}
+            </span>
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function SignalIcon({ type }: { type: SignalIcon }) {
+  const paths: Record<SignalIcon, ReactNode> = {
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.5V12l3 2" />
+      </>
+    ),
+    value: (
+      <>
+        <path d="M12 3v18" />
+        <path d="M16.5 6.5h-6.2a3 3 0 0 0 0 6h3.4a3 3 0 0 1 0 6H7" />
+      </>
+    ),
+    activity: (
+      <>
+        <path d="M3 12h4l2.2-5 4.1 10 2.2-5H21" />
+      </>
+    ),
+    aging: (
+      <>
+        <path d="M8 3h8M8 21h8" />
+        <path d="M9 3c0 4 6 4.5 6 9s-6 5-6 9" />
+        <path d="M15 3c0 4-6 4.5-6 9s6 5 6 9" />
+      </>
+    ),
+    owner: (
+      <>
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3.5 19c.6-3.4 2.4-5.2 5.5-5.2 1.5 0 2.7.4 3.6 1.2" />
+        <path d="M15 15h6M18 12v6" />
+      </>
+    ),
+    review: (
+      <>
+        <path d="M12 3 20 7v5c0 4.8-3.1 8-8 9-4.9-1-8-4.2-8-9V7l8-4Z" />
+        <path d="m9 12 2 2 4-5" />
+      </>
+    ),
+  };
 
   return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: landingCss }} />
-      <Script id="revory-landing-faq" strategy="afterInteractive">
-        {`
-          window.toggleFaq = function toggleFaq(element) {
-            const item = element && element.closest ? element.closest('.faq-item') : null;
-            if (!item) return;
-            item.classList.toggle('open');
-          };
-        `}
-      </Script>
+    <div className="rev-signal-icon">
+      <svg
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+        viewBox="0 0 24 24"
+      >
+        {paths[type]}
+      </svg>
+    </div>
+  );
+}
 
-      <main className="revory-landing-page-root">
-        <div
-          className="revory-landing-page"
-          dangerouslySetInnerHTML={{ __html: landingMarkup }}
-        />
+function RoadmapCard({
+  gated = false,
+  text,
+  title,
+}: {
+  gated?: boolean;
+  text: string;
+  title: string;
+}) {
+  return (
+    <article
+      className={`rev-marketing-card rounded-[22px] border p-5 ${
+        gated ? "border-[rgba(245,166,35,.22)]" : "border-[color:var(--border-accent)]"
+      }`}
+    >
+      <p
+        className={`text-xs font-bold uppercase tracking-wider ${
+          gated ? "text-[color:var(--warning)]" : "text-[color:var(--accent-light)]"
+        }`}
+      >
+        {gated ? "Gated" : "Current"}
+      </p>
+      <h3 className="mt-3 font-bold">{title}</h3>
+      <p className="mt-2 text-sm leading-7 text-[color:var(--text-muted)]">{text}</p>
+    </article>
+  );
+}
 
-        <footer>
-          <div className="footer-logo">
-            <div className="logo-icon">
-              <Image
-                alt="REVORY"
-                height={50}
-                src="/brand/revory-logo-43b39b-transparent.png"
-                width={62}
-              />
-            </div>
-            <span className="logo-wordmark">REVORY</span>
-          </div>
-          <span className="footer-copy">
-            {"\u00a9"} {FOOTER_YEAR} REVORY. Estimate Revenue Leak Detector for home services.
-          </span>
-          <ul className="footer-links">
-            <li>
-              <Link href="/privacy">Privacy</Link>
-            </li>
-            <li>
-              <Link href="/terms">Terms</Link>
-            </li>
-            <li>
-              <Link href="/sign-in">Sign in</Link>
-            </li>
-          </ul>
-        </footer>
-      </main>
-    </>
+function PriceCard({
+  body,
+  cta,
+  label,
+  note,
+  price,
+  primary = false,
+}: {
+  body: string;
+  cta: string;
+  label: string;
+  note: string;
+  price: string;
+  primary?: boolean;
+}) {
+  return (
+    <article
+      className={`rev-marketing-card flex min-h-[370px] flex-col rounded-[28px] border p-6 ${
+        primary ? "rev-price-primary border-[color:var(--border-accent)]" : "border-[color:var(--border)]"
+      }`}
+    >
+      <p className="rev-label">{primary ? "Primary offer" : "Recurring gate"}</p>
+      <h3 className="mt-3 text-xl font-bold">{label}</h3>
+      <p className="mt-7 text-5xl font-bold tracking-[-.05em]">{price}</p>
+      <p className="mt-2 text-xs uppercase tracking-wider text-[color:var(--text-subtle)]">
+        {note}
+      </p>
+      <p className="mt-6 text-sm leading-7 text-[color:var(--text-muted)]">{body}</p>
+      <Link
+        className={primary ? "rev-button-primary mt-auto" : "rev-button-secondary mt-auto"}
+        href="/start"
+      >
+        {cta}
+      </Link>
+    </article>
   );
 }

@@ -1,0 +1,13 @@
+CREATE TYPE "QuoteRecoveryDisposition" AS ENUM ('NONE','REVIEWED','RECOVERED','FALSE_POSITIVE');
+ALTER TABLE "quote_recovery_findings" ADD COLUMN "disposition" "QuoteRecoveryDisposition" NOT NULL DEFAULT 'NONE';
+ALTER TABLE "quote_recovery_findings" ADD COLUMN "recoveredValueCents" INTEGER;
+ALTER TABLE "quote_recovery_findings" ADD COLUMN "dispositionedAt" TIMESTAMP(3);
+CREATE TABLE "workspace_data_settings" ("id" TEXT PRIMARY KEY,"workspaceId" TEXT NOT NULL,"retentionDays" INTEGER NOT NULL DEFAULT 365,"lastExportedAt" TIMESTAMP(3),"lastAnalysisDeletedAt" TIMESTAMP(3),"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE UNIQUE INDEX "workspace_data_settings_workspaceId_key" ON "workspace_data_settings"("workspaceId");
+CREATE TABLE "quote_recovery_digest_preferences" ("id" TEXT PRIMARY KEY,"workspaceId" TEXT NOT NULL,"enabled" BOOLEAN NOT NULL DEFAULT false,"weekday" INTEGER NOT NULL DEFAULT 1,"lastSentAt" TIMESTAMP(3),"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE UNIQUE INDEX "quote_recovery_digest_preferences_workspaceId_key" ON "quote_recovery_digest_preferences"("workspaceId");
+CREATE TABLE "workspace_audit_events" ("id" TEXT PRIMARY KEY,"workspaceId" TEXT NOT NULL,"actorUserId" TEXT,"action" TEXT NOT NULL,"metadataJson" JSONB NOT NULL,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX "workspace_audit_events_workspaceId_createdAt_idx" ON "workspace_audit_events"("workspaceId","createdAt");
+ALTER TABLE "workspace_data_settings" ADD CONSTRAINT "workspace_data_settings_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "quote_recovery_digest_preferences" ADD CONSTRAINT "quote_recovery_digest_preferences_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "workspace_audit_events" ADD CONSTRAINT "workspace_audit_events_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
