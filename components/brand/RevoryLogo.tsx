@@ -31,7 +31,7 @@ export function RevoryLogo({
 
       {iconOnly ? null : (
         <span
-          className={`font-[family:var(--font-body)] font-bold uppercase leading-none text-[color:var(--foreground)] ${wordmarkSize}`}
+          className={`font-[family:var(--font-instrument-serif)] font-normal uppercase leading-none text-[color:var(--foreground)] ${wordmarkSize}`}
         >
           REVORY
         </span>

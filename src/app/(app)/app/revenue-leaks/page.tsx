@@ -6,6 +6,7 @@ import { RevenueLeakList } from "@/components/revenue-leaks/RevenueLeakList";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import {
   getOnboardingStepPath,
   resolveOnboardingStepKey,
@@ -40,7 +41,10 @@ export default async function RevenueLeaksPage({
     redirect(buildSignInRedirectPath("/app/revenue-leaks"));
   }
 
-  if (!appContext.activationSetup.isCompleted) {
+  if (
+    !appContext.activationSetup.isCompleted &&
+    !isInternalMigrationPreviewEnabled()
+  ) {
     redirect(
       getOnboardingStepPath(
         resolveOnboardingStepKey(appContext.activationSetup.currentStep),
@@ -71,7 +75,7 @@ export default async function RevenueLeaksPage({
               Revenue Leaks
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-7 text-[color:var(--text-muted)]">
-              Review the revenue risks REVORY detected from your imported clinic data.
+              Review the preserved evidence-list experience while contractor-native findings remain behind their release gate.
             </p>
           </div>
 
@@ -127,7 +131,7 @@ export default async function RevenueLeaksPage({
           Product truth
         </p>
         <p className="mt-2 max-w-3xl text-[13px] leading-6 text-[color:var(--text-muted)]">
-          Revenue at risk is an estimate from imported clinic data. Operational and data-quality risks may block revenue, but REVORY does not count them as confirmed financial loss.
+          Compatibility findings remain migration evidence. Operational and data-quality risks may block revenue, but REVORY does not count them as confirmed financial loss or contractor-native output.
         </p>
       </section>
     </div>

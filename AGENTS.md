@@ -40,7 +40,7 @@ When code differs from the source of truth, report the gap. Existing MedSpa beha
 - Canonical transparent logo: `public/brand/revory-logo-43b39b-transparent.png`
 - Keep the logo background transparent; do not place it inside a black or white square
 - Derive hover, glow and surface variants from the canonical tokens instead of introducing a second turquoise
-- Use `#252729` primarily for contained cards and panels; full-width alternating sections should use a subtle mix with `#141516`, not a hard color band
+- Treat `#252729` as the maximum elevated-surface anchor, not the default solid card fill; normal cards should use roughly a 32% mix with `#141516`, with stronger mixes reserved for hover or emphasis
 - Landing/marketing titles and impact statements use Instrument Serif
 - Landing body copy, buttons, labels and navigation use DM Sans
 - Card titles across marketing pages use bold DM Sans, never Instrument Serif
@@ -50,6 +50,9 @@ Do not turn REVORY into a CRM, inbox, autonomous follow-up agent, FSM, dispatch 
 
 ## Migration Safety
 
+- Rebuild on the working REVORY platform; do not replace proven horizontal capabilities with blank, paused or placeholder implementations merely because the domain is changing.
+- Preserve auth, user/workspace isolation, billing plumbing, email delivery, imports/mapping, Data Quality, bounded-AI infrastructure, dashboard composition, evidence primitives and test harnesses unless executable evidence proves they are unsafe.
+- Before removing or disabling a working route, classify it as `keep`, `restore`, `adapt` or `retire`, document the replacement dependency, and preserve the underlying implementation until the replacement passes its gate.
 - Do not mechanically rename MedSpa domain objects into contractor objects.
 - Do not run destructive migrations or reuse clinical fields with new financial meanings.
 - Preserve unmatched and conflicting records; never silently link records by approximate name or amount.

@@ -26,7 +26,7 @@ REVORY does not operate the customer's business. It sits above exports from the 
 - Canonical logo asset: `public/brand/revory-logo-43b39b-transparent.png`.
 - The logo must remain a large transparent PNG, without a white or black backing tile.
 - Hover, glow and surface variants must be derived from these tokens rather than adding competing turquoise values.
-- Use `#252729` as a contained panel/card surface. Full-width section alternation should blend it subtly with `#141516` so the page remains one premium visual system.
+- Treat `#252729` as the maximum elevated-surface anchor. Normal cards should blend roughly 32% of it into `#141516`; stronger mixes are reserved for hover or emphasis. Full-width alternation must remain equally subtle.
 - Landing and marketing headlines use Instrument Serif.
 - Marketing body copy, navigation, labels and buttons use DM Sans.
 - Marketing card titles use bold DM Sans; Instrument Serif is reserved for large section-level impact.
@@ -45,6 +45,23 @@ As of this source-of-truth update:
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 
 Capability becomes sellable only after its roadmap gate passes with executable evidence.
+
+## Rebuild, do not restart
+
+The migration must build on the proven REVORY platform. Domain-specific MedSpa behavior is replaced deliberately, but horizontal capabilities remain reusable product infrastructure.
+
+Preserve and adapt, rather than reset:
+
+- Google and email/password authentication;
+- user synchronization, workspace creation and tenant isolation;
+- Vercel project, production domains and environment configuration;
+- Stripe checkout, portal, webhook and entitlement plumbing, while keeping old price mappings protected;
+- CSV parsing, mapping review, saved mappings, normalization and Data Quality flows;
+- bounded-AI provider/fallback infrastructure;
+- dashboard, finding, brief, proof and export composition patterns;
+- evidence, confidence, severity, fingerprints, idempotency and test harnesses.
+
+A working horizontal route may be disabled only when keeping it live would create a false product claim or unsafe external action. Its implementation must remain available for adaptation until the replacement passes its gate.
 
 ## Initial market
 

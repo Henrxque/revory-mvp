@@ -19,6 +19,7 @@
     "qa:launch-readiness": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-launch-readiness.ts",
     "qa:public-demo": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-public-demo.ts",
     "qa:public-demo:browser": "node scripts/verify-public-demo-browser.mjs",
+    "qa:sprint-0": "node scripts/validate-sprint-0-product-truth.mjs",
     "smoke:ai-csv-provider": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/smoke-ai-csv-provider.ts",
     "llm:env": "node scripts/check-llm-env.mjs",
     "llm:smoke": "node scripts/smoke-llm-bounded-runtime.mjs",

@@ -28,3 +28,4 @@ Thumbs.db
 .google-auth-production.env
 .resend-production.env
 .openai-production.env
+SECRETS.txt

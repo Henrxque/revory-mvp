@@ -9,6 +9,7 @@ import { ExecutiveRevenueLeakSummarySheet } from "@/components/proof/ExecutiveRe
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { canUseBillingPlanFeature } from "@/services/billing/workspace-billing";
 import { buildDashboardDecisionSupport } from "@/services/decision-support/build-dashboard-decision-support";
 import { getDashboardDecisionSupport } from "@/services/decision-support/get-dashboard-decision-support";
@@ -442,7 +443,10 @@ export default async function DashboardPage() {
     redirect(buildSignInRedirectPath("/app/dashboard"));
   }
 
-  if (!appContext.activationSetup.isCompleted) {
+  if (
+    !appContext.activationSetup.isCompleted &&
+    !isInternalMigrationPreviewEnabled()
+  ) {
     redirect(
       getOnboardingStepPath(
         resolveOnboardingStepKey(appContext.activationSetup.currentStep),

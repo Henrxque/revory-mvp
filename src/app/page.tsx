@@ -74,6 +74,7 @@ function normalizeReferenceText(content: string) {
 
 function applyBrandText(content: string) {
   const replacements: Array<[string, string]> = [
+    ["QuoteSignal", "REVORY"],
     ["REVORY", "REVORY"],
     ["Revory", "REVORY"],
     ["hello@revory.com", "hello@revory.com"],
@@ -91,6 +92,13 @@ function applyBrandText(content: string) {
     ["bookings", "quotes"],
     ["no-shows", "stale quotes"],
     ["cancellations", "overdue follow-ups"],
+    ["No-Show And Cancellation Signals", "Stale Estimate And Follow-Up Signals"],
+    ["No-show signal", "Stale estimate signal"],
+    ["Unrecovered cancellation signal", "Overdue follow-up signal"],
+    ["Blocked Booking Opportunities", "Blocked Close Opportunities"],
+    ["Blocked booking opportunities", "Blocked close opportunities"],
+    ["Appointments booked", "Quotes in view"],
+    ["Email Default � SMS Optional", "CSV First, Guided Review"],
     ["Revenue Leak Detector for premium home service companies", "Estimate Revenue Leak Detector for home services"],
     ["Revenue Leak Detector for premium home services", "Estimate Revenue Leak Detector for home services"],
     ["Revenue Leak Detector for home service companies", "Estimate Revenue Leak Detector for home services"],
@@ -120,8 +128,8 @@ function applyREVORYTheme(css: string) {
     .replaceAll("--crimson-glow: rgba(194, 9, 90, 0.35);", "--crimson-glow: rgba(67, 179, 155, 0.28);")
     .replaceAll("--bg-primary: #0C0B0F;", "--bg-primary: #141516;")
     .replaceAll("--bg-secondary: #111018;", "--bg-secondary: #252729;")
-    .replaceAll("--bg-card: #15141C;", "--bg-card: #252729;")
-    .replaceAll("--bg-card-hover: #1C1B26;", "--bg-card-hover: #2D3032;")
+    .replaceAll("--bg-card: #15141C;", "--bg-card: color-mix(in srgb, #252729 32%, #141516);")
+    .replaceAll("--bg-card-hover: #1C1B26;", "--bg-card-hover: color-mix(in srgb, #252729 48%, #141516);")
     .replaceAll("--border-crimson: rgba(194,9,90,0.3);", "--border-crimson: rgba(67,179,155,0.28);")
     .replaceAll("--text-muted: #7A7890;", "--text-muted: #88A6B8;")
     .replaceAll("--text-subtle: #4A4860;", "--text-subtle: #48677C;")
@@ -132,8 +140,8 @@ function applyREVORYTheme(css: string) {
     .replaceAll("rgba(12,11,15,0.85)", "rgba(20,21,22,0.94)")
     .replaceAll("#0C0B0F", "#141516")
     .replaceAll("#111018", "#252729")
-    .replaceAll("#15141C", "#252729")
-    .replaceAll("#1C1B26", "#2D3032");
+    .replaceAll("#15141C", "#1A1B1C")
+    .replaceAll("#1C1B26", "#1D1F20");
 }
 
 function adaptReferenceCss(css: string) {
@@ -159,6 +167,20 @@ function adaptReferenceCss(css: string) {
       background: rgba(20, 21, 22, 0.94);
     }
 
+    .revory-landing-page .prelaunch-notice {
+      border-bottom: 1px solid rgba(67, 179, 155, 0.2);
+      background: color-mix(in srgb, #43B39B 8%, #141516);
+      padding: 0.7rem 1rem;
+      color: #9ed7ca;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      line-height: 1.5;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
     .revory-landing-page .logo {
       gap: 0.72rem;
     }
@@ -174,9 +196,9 @@ function adaptReferenceCss(css: string) {
     }
 
     .revory-landing-page .logo-wordmark {
-      font-family: var(--font-body) !important;
+      font-family: var(--font-display) !important;
       font-size: 1.22rem !important;
-      font-weight: 700 !important;
+      font-weight: 400 !important;
       letter-spacing: 0 !important;
       text-transform: none !important;
     }
@@ -251,7 +273,7 @@ function adaptReferenceCss(css: string) {
       border-radius: 24px;
       background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008)),
-        color-mix(in srgb, #252729 48%, #141516);
+        color-mix(in srgb, #252729 32%, #141516);
       box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
     }
 
@@ -412,9 +434,9 @@ function adaptReferenceCss(css: string) {
     }
 
     .revory-landing-page-root footer .logo-wordmark {
-      font-family: var(--font-body) !important;
+      font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif !important;
       font-size: 1.22rem !important;
-      font-weight: 700 !important;
+      font-weight: 400 !important;
       letter-spacing: 0 !important;
       line-height: 1 !important;
       text-transform: none !important;
@@ -511,14 +533,20 @@ function adaptReferenceMarkup(markup: string) {
     .replaceAll('href="#pricing" class="btn-primary"', 'href="/start" class="btn-primary"')
     .replaceAll('href="#pricing" class="nav-cta"', 'href="/start" class="nav-cta"')
     .replaceAll('href="#" class="btn-primary"', 'href="/start" class="btn-primary"')
+    .replaceAll('href="/start?plan=growth"', 'href="/start"')
     .replaceAll('href="#"', 'href="/"')
     .replaceAll('href="#how"', 'href="#how"')
     .replaceAll('href="#pricing"', 'href="#pricing"');
 
+  adaptedMarkup = adaptedMarkup.replace(
+    "</nav>",
+    '</nav><div class="prelaunch-notice">Private build — the US$799 Quote Recovery Audit opens only after its product and security gates pass.</div>',
+  );
+
   adaptedMarkup = replaceFirst(
     adaptedMarkup,
     /<div class="hero-badge">[\s\S]*?<\/div>/,
-    '<div class="hero-badge">Estimate Revenue Leak Detector for home services</div>',
+    '<div class="hero-badge">Quote Recovery Audit — launch gate in progress</div>',
   );
 
   adaptedMarkup = replaceFirst(
@@ -530,7 +558,7 @@ function adaptReferenceMarkup(markup: string) {
   adaptedMarkup = replaceFirst(
     adaptedMarkup,
     /<p class="hero-sub">[\s\S]*?<\/p>/,
-    '<p class="hero-sub">REVORY helps HVAC, roofing and home service teams see where revenue is still at risk from stale estimates, overdue follow-ups, blocked close opportunities and weak next-step evidence without turning into a CRM, inbox, dispatch or BI tool.</p>',
+    '<p class="hero-sub">REVORY is being built to help HVAC, roofing and home service teams inspect revenue still at risk from stale estimates, overdue follow-ups and weak next-step evidence without turning into a CRM, inbox, dispatch or BI tool.</p>',
   );
 
   adaptedMarkup = replaceFirst(
@@ -566,6 +594,8 @@ function adaptReferenceMarkup(markup: string) {
     .replaceAll("quote teams", "office teams")
     .replaceAll("Start With Your Quote Data", "Start With Quote Data")
     .replaceAll("Start With Quote Data ?", "Start With Quote Data \u2192")
+    .replaceAll("Start With Quote Data \u2192", "Preview $799 Audit \u2192")
+    .replaceAll("Start With Quote Data", "Preview $799 Audit")
     .replaceAll("Start with Growth ?", "Start with Growth")
     .replaceAll("Email us ?", "Email us")
     .replaceAll("? CSV-first.", "\u2713 CSV-first.")

@@ -8,12 +8,12 @@
   --brand-primary-hover: color-mix(in srgb, var(--brand-primary) 84%, white);
   --background: var(--brand-background);
   --background-secondary: var(--brand-surface);
-  --background-card: color-mix(in srgb, var(--brand-primary) 4%, var(--brand-surface));
-  --background-card-hover: color-mix(in srgb, var(--brand-primary) 7%, var(--brand-surface));
+  --background-card: color-mix(in srgb, var(--brand-surface) 32%, var(--brand-background));
+  --background-card-hover: color-mix(in srgb, var(--brand-surface) 48%, var(--brand-background));
   --foreground: color-mix(in srgb, var(--brand-primary) 8%, white);
   --surface: color-mix(in srgb, var(--brand-primary) 3%, transparent);
-  --surface-muted: color-mix(in srgb, var(--brand-primary) 2%, var(--brand-surface));
-  --surface-elevated: color-mix(in srgb, var(--brand-primary) 5%, var(--brand-surface));
+  --surface-muted: color-mix(in srgb, var(--brand-surface) 24%, var(--brand-background));
+  --surface-elevated: color-mix(in srgb, var(--brand-surface) 40%, var(--brand-background));
   --surface-hairline: rgba(255, 255, 255, 0.045);
   --surface-soft: rgba(67,179,155, 0.08);
   --border: color-mix(in srgb, var(--foreground) 9%, transparent);

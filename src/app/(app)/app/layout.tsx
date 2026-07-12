@@ -12,6 +12,7 @@ import {
   resolveOnboardingStepKey,
 } from "@/services/onboarding/wizard-steps";
 import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
+import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -59,8 +60,9 @@ export default async function PrivateAppLayout({
 
   const { activationSetup, user, workspace } = appContext;
   const billingSummary = getWorkspaceBillingSummary(workspace);
+  const internalPreview = isInternalMigrationPreviewEnabled();
 
-  if (!billingSummary.hasActiveAccess) {
+  if (!billingSummary.hasActiveAccess && !internalPreview) {
     redirect("/start");
   }
 
@@ -76,13 +78,13 @@ export default async function PrivateAppLayout({
   const currentStepTitle = activationSetup.isCompleted
     ? hasBookedProofVisible
       ? "Leak read ready"
-      : "Clinic data next"
+      : "Data import next"
     : currentStep.title;
   const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
   const workspaceSubtitle = activationSetup.isCompleted
     ? hasBookedProofVisible
-      ? "Clinic data is live and the revenue leak read is ready."
-      : "Activation is live. Add clinic data to open the revenue leak read."
+      ? "Imported evidence is visible and the revenue leak read is ready."
+      : "Activation is live. Add structured exports to prepare the revenue leak read."
     : `Activation is in progress. ${currentStep.title} comes next.`;
   const currentPlanSignal =
     billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
@@ -155,10 +157,12 @@ export default async function PrivateAppLayout({
             </div>
           </header>
 
-          <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] px-4 py-3 text-[12px] leading-5 text-[color:var(--text-muted)]">
-            <strong className="text-[color:var(--foreground)]">Legacy migration surface.</strong>{" "}
-            This authenticated experience still runs the discontinued MedSpa-era data model. It is preserved for compatibility and must not be interpreted as the new contractor REVORY capability.
-          </aside>
+          {internalPreview ? (
+            <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] px-4 py-3 text-[12px] leading-5 text-[color:var(--text-muted)]">
+              <strong className="text-[color:var(--foreground)]">Internal migration preview.</strong>{" "}
+              The premium shell and proven horizontal flows are restored locally. Financial findings remain gated by the contractor-native data contracts and deterministic rules.
+            </aside>
+          ) : null}
 
           <section className="min-w-0 overflow-x-clip rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(19,18,26,0.86),rgba(13,12,18,0.86))] p-5 shadow-[var(--shadow-soft)] md:p-7">
             {children}
