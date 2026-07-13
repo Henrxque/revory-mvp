@@ -173,6 +173,9 @@ export default async function HomePage() {
           <a className="rev-button-secondary" href="#how">
             See how the read works
           </a>
+          <Link className="rev-button-ghost" href="/demo">
+            Explore sample workspace
+          </Link>
         </div>
         <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
           Self-service · CSV/XLSX-first · Deterministic rules · No CRM replacement

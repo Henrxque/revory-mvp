@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 
 import type { CanonicalEntityType, CanonicalRecordContract } from "@/domain/revory/contracts";
 import { assertWorkspaceScopedRecord } from "@/domain/revory/contracts";
+import { parseCanonicalCsv } from "@/services/canonical-intake/csv-profile";
 import { canonicalFields, quoteRecoveryEligibility } from "@/services/canonical-intake/definitions";
 
 export const CANONICAL_MAX_FILES = 8;
@@ -14,25 +15,10 @@ export type IntakeFile = { bytes: Uint8Array; entityType: CanonicalEntityType; f
 export type IntakeIssue = { code: string; fileName: string; message: string; rowNumber?: number };
 export type IntakePlan = { accepted: boolean; idempotencyKey: string; records: CanonicalRecordContract[]; issues: IntakeIssue[]; mappings: Record<string, Record<string, string>>; eligibility: Record<string, { eligible: boolean; missingFields: string[] }>; linkCoverage: { linked: number; unmatched: number; conflicting: number } };
 
-function parseCsv(text: string) {
-  const rows: string[][] = [];
-  let row: string[] = [], value = "", quoted = false;
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    if (char === '"' && quoted && text[i + 1] === '"') { value += '"'; i += 1; }
-    else if (char === '"') quoted = !quoted;
-    else if (char === "," && !quoted) { row.push(value); value = ""; }
-    else if ((char === "\n" || char === "\r") && !quoted) { if (char === "\r" && text[i + 1] === "\n") i += 1; row.push(value); if (row.some((cell) => cell.trim())) rows.push(row); row = []; value = ""; }
-    else value += char;
-  }
-  row.push(value); if (row.some((cell) => cell.trim())) rows.push(row);
-  return rows;
-}
-
 async function readRows(file: IntakeFile): Promise<{ headers: string[]; rows: unknown[][]; formulaRows: number[] }> {
   if (file.fileName.toLowerCase().endsWith(".csv")) {
-    const parsed = parseCsv(new TextDecoder("utf-8", { fatal: true }).decode(file.bytes));
-    return { headers: parsed[0]?.map((v) => v.trim()) ?? [], rows: parsed.slice(1), formulaRows: [] };
+    const parsed = parseCanonicalCsv(new TextDecoder("utf-8", { fatal: true }).decode(file.bytes));
+    return { headers: parsed.headers, rows: parsed.rows, formulaRows: [] };
   }
   if (!file.fileName.toLowerCase().endsWith(".xlsx")) throw new Error("Only .csv and .xlsx files are accepted.");
   const workbook = new ExcelJS.Workbook();
@@ -97,5 +83,5 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
   const duplicates = records.length - new Set(records.map((r) => `${r.entityType}:${r.sourceSystem}:${r.externalId}`)).size;
   if (duplicates) issues.push({ code: "DUPLICATE_EXTERNAL_ID", fileName: "batch", message: `${duplicates} duplicate external ID record(s) must be resolved.` });
   const idempotencyKey = createHash("sha256").update([input.workspaceId, ...signatures.sort(), JSON.stringify(mappings)].join("|")).digest("hex");
-  return { accepted: issues.every((issue) => !["FILE_TOO_LARGE", "INVALID_DIMENSIONS", "DUPLICATE_HEADERS", "FORMULA_REJECTED", "INVALID_MAPPING", "DUPLICATE_EXTERNAL_ID"].includes(issue.code)) && records.length > 0, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting: duplicates } };
+  return { accepted: issues.every((issue) => !["FILE_TOO_LARGE", "INVALID_DIMENSIONS", "DUPLICATE_HEADERS", "FORMULA_REJECTED", "INVALID_MAPPING", "MISSING_REQUIRED", "DUPLICATE_EXTERNAL_ID"].includes(issue.code)) && records.length > 0, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting: duplicates } };
 }

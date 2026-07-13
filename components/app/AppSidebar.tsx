@@ -71,12 +71,6 @@ const navGroups = (
     {
       label: "Workspace",
       items: [
-        {
-          href: demoMode ? "#demo-cta" : "/app/setup",
-          icon: "settings",
-          label: "Activation Path",
-          status: activationStatus,
-        },
         { href: demoMode ? "#demo-settings" : "/app/settings", icon: "settings", label: "Data & settings" },
         {
           href: "/start",
@@ -177,15 +171,11 @@ function getStatusTone(status?: string) {
     return "neutral";
   }
 
-  if (status === "Data visible" || status === "Activated") {
+  if (status === "Data visible" || status === "Read ready") {
     return "success";
   }
 
-  if (status === "Data next" || status === "Activating") {
-    return "warning";
-  }
-
-  if (status === "Data pending") {
+  if (status === "Data needed" || status === "Import needed") {
     return "warning";
   }
 
@@ -205,15 +195,38 @@ export function AppSidebar({
   const workspaceInitials = getWorkspaceInitials(workspaceName);
 
   return (
-    <aside className="pointer-events-auto relative z-50 flex h-full flex-col rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(18,17,25,0.98),rgba(10,9,14,0.98))] shadow-[var(--shadow-panel)]">
-      <div className="border-b border-[color:var(--border)] px-5 py-5">
+    <aside className="pointer-events-auto relative z-50 flex h-auto flex-col rounded-[24px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(27,29,30,0.98),rgba(20,21,22,0.99))] shadow-[var(--shadow-panel)] lg:h-full lg:rounded-[30px]">
+      <div className="border-b border-[color:var(--border)] px-4 py-3 lg:px-5 lg:py-5">
         <RevoryLogo compact />
-        <p className="mt-3 text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)]">
+        <p className="mt-3 hidden text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)] lg:block">
           Quote Recovery evidence and next review
         </p>
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+      <nav aria-label="Mobile workspace navigation" className="grid grid-cols-4 gap-1 p-2 lg:hidden">
+        {[
+          [demoMode ? "#demo-dashboard" : "/app/dashboard", "dashboard", "Read"],
+          [demoMode ? "#demo-leaks" : "/app/revenue-leaks", "signals", "Findings"],
+          [demoMode ? "#demo-data" : "/app/imports", "imports", "Imports"],
+          [demoMode ? "#demo-settings" : "/app/settings", "settings", "Settings"],
+        ].map(([href, icon, label]) => (
+          <Link
+            className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1.5 py-2 text-[10px] ${
+              pathname === href || pathname.startsWith(`${href}/`)
+                ? "bg-[rgba(67,179,155,0.14)] text-[color:var(--foreground)]"
+                : "text-[color:var(--text-muted)]"
+            }`}
+            href={href}
+            key={href}
+            prefetch={false}
+          >
+            <SidebarIcon icon={icon as SidebarIconKey} />
+            <span className="truncate">{label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      <nav className="hidden flex-1 space-y-6 overflow-y-auto px-3 py-5 lg:block">
         {navGroups(activationStatus, bookingInputsStatus, demoMode).map((group) => (
           <div key={group.label} className="space-y-1">
             <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--text-subtle)]">
@@ -278,7 +291,7 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <div className="border-t border-[color:var(--border)] px-4 py-4">
+      <div className="hidden border-t border-[color:var(--border)] px-4 py-4 lg:block">
         <div className="rounded-[20px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <div className="flex items-center gap-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[13px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.14)] text-[13px] font-semibold text-[color:var(--accent-light)]">

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.REVORY_QA_DIST_DIR || ".next",
   async headers() {
     return [
       {

@@ -1,165 +1,99 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import path from "node:path";
-
+import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3010";
-const artifactsDirectory = path.join(process.cwd(), "artifacts");
+const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3002";
+const outputDir = path.join(process.cwd(), ".tmp", "public-demo");
+const qaDistDir = path.join(process.cwd(), ".next-demo-qa");
+fs.mkdirSync(outputDir, { recursive: true });
+let serverProcess = null;
 
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-async function inspectPage(page) {
-  return page.evaluate(() => ({
-    ctaHref: Array.from(document.querySelectorAll("a")).find((element) =>
-      element.textContent?.includes("Start with REVORY"),
-    )?.getAttribute("href"),
-    downloadHref: document.querySelector("a[download]")?.getAttribute("href"),
-    fileInputs: document.querySelectorAll('input[type="file"]').length,
-    forms: document.querySelectorAll("form").length,
-    hasHorizontalOverflow:
-      document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    importActions: Array.from(document.querySelectorAll("a,button")).filter(
-      (element) => element.textContent?.trim().toLowerCase() === "import",
-    ).length,
-    mutationButtons: document.querySelectorAll("button").length,
-    protectedAppLinks: Array.from(document.querySelectorAll("a")).filter((element) =>
-      element.getAttribute("href")?.startsWith("/app"),
-    ).length,
-    sampleDisclosureVisible: document.body.innerText
-      .toLowerCase()
-      .includes("sample data — not a live clinic account"),
-    title: document.title,
-  }));
-}
-
-async function main() {
-  await fs.mkdir(artifactsDirectory, { recursive: true });
-
-  const browser = await chromium.launch({ headless: true });
-
+async function isReady() {
   try {
-    const desktopPage = await browser.newPage({
-      viewport: { height: 1000, width: 1440 },
-    });
-    const desktopErrors = [];
-
-    desktopPage.on("console", (message) => {
-      if (message.type() === "error") {
-        desktopErrors.push(message.text());
-      }
-    });
-    desktopPage.on("pageerror", (error) => desktopErrors.push(error.message));
-
-    const desktopResponse = await desktopPage.goto(`${appUrl}/demo`, {
-      waitUntil: "networkidle",
-    });
-    const desktopRead = await inspectPage(desktopPage);
-
-    await desktopPage.screenshot({
-      fullPage: true,
-      path: path.join(artifactsDirectory, "revory-demo-desktop.png"),
-    });
-
-    assert(desktopResponse?.status() === 200, "/demo should return HTTP 200.");
-    assert(desktopRead.fileInputs === 0, "/demo must not expose file input.");
-    assert(desktopRead.forms === 0, "/demo must not expose a form.");
-    assert(desktopRead.importActions === 0, "/demo must not expose Import action.");
-    assert(
-      desktopRead.mutationButtons === 0,
-      "/demo must not expose action buttons that suggest live mutations.",
-    );
-    assert(
-      desktopRead.protectedAppLinks === 0,
-      "/demo must not link visitors into protected /app routes.",
-    );
-    assert(
-      desktopRead.downloadHref === "/demo/revory-demo-appointments.csv",
-      "Sample CSV download should point to the public fixture.",
-    );
-    assert(desktopRead.ctaHref === "/start", "Paid CTA should point to /start.");
-    assert(
-      desktopRead.sampleDisclosureVisible,
-      "Sample-data disclosure should be visible.",
-    );
-    assert(
-      !desktopRead.hasHorizontalOverflow,
-      "Desktop demo should not overflow horizontally.",
-    );
-    assert(desktopErrors.length === 0, `Desktop console errors: ${desktopErrors.join(" | ")}`);
-
-    const csvResponse = await desktopPage.request.get(
-      `${appUrl}/demo/revory-demo-appointments.csv`,
-    );
-    const csvText = await csvResponse.text();
-
-    assert(csvResponse.status() === 200, "Sample CSV should return HTTP 200.");
-    assert(
-      csvText.trim().split(/\r?\n/).length - 1 === 14,
-      "Sample CSV should contain 14 records.",
-    );
-
-    const paidFlowPage = await browser.newPage();
-
-    await paidFlowPage.goto(`${appUrl}/demo`, { waitUntil: "networkidle" });
-    await paidFlowPage.getByRole("link", { name: "Start with REVORY" }).click();
-    await paidFlowPage.waitForURL(/\/sign-up/);
-
-    const paidFlowUrl = new URL(paidFlowPage.url());
-
-    assert(
-      paidFlowUrl.pathname.startsWith("/sign-up"),
-      "Unauthenticated paid CTA should enter the sign-up flow.",
-    );
-    assert(
-      paidFlowUrl.searchParams.get("redirect_url") === "/start",
-      "Sign-up flow should return to the paid /start route.",
-    );
-
-    await paidFlowPage.close();
-
-    const mobilePage = await browser.newPage({
-      viewport: { height: 844, width: 390 },
-    });
-    const mobileErrors = [];
-
-    mobilePage.on("console", (message) => {
-      if (message.type() === "error") {
-        mobileErrors.push(message.text());
-      }
-    });
-    mobilePage.on("pageerror", (error) => mobileErrors.push(error.message));
-
-    const mobileResponse = await mobilePage.goto(`${appUrl}/demo`, {
-      waitUntil: "networkidle",
-    });
-    const mobileRead = await inspectPage(mobilePage);
-
-    await mobilePage.screenshot({
-      fullPage: true,
-      path: path.join(artifactsDirectory, "revory-demo-mobile.png"),
-    });
-
-    assert(mobileResponse?.status() === 200, "Mobile /demo should return HTTP 200.");
-    assert(
-      !mobileRead.hasHorizontalOverflow,
-      "Mobile demo should not overflow horizontally.",
-    );
-    assert(mobileErrors.length === 0, `Mobile console errors: ${mobileErrors.join(" | ")}`);
-
-    console.log("[public-demo-browser] Desktop and mobile checks passed.");
-    console.log(`[public-demo-browser] Title: ${desktopRead.title}`);
-    console.log("[public-demo-browser] CSV: HTTP 200 with 14 records.");
-    console.log(`[public-demo-browser] Screenshots: ${artifactsDirectory}`);
-  } finally {
-    await browser.close();
+    const response = await fetch(`${baseURL}/demo`, { redirect: "manual" });
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+async function ensureServer() {
+  if (await isReady()) return;
+  if (process.env.REVORY_QA_BASE_URL) {
+    throw new Error(`Configured demo QA server is unavailable at ${baseURL}.`);
+  }
+  const envSource = fs.readFileSync(path.join(process.cwd(), ".env"), "utf8");
+  const databaseLine = envSource.split(/\r?\n/).find((line) => line.trim().startsWith("DATABASE_URL="));
+  const databaseUrl = databaseLine?.slice(databaseLine.indexOf("=") + 1).trim().replace(/^['"]|['"]$/g, "");
+  if (!databaseUrl || !["localhost", "127.0.0.1", "::1"].includes(new URL(databaseUrl).hostname)) {
+    throw new Error("Demo browser QA requires the local PostgreSQL URL from .env.");
+  }
+  const nextBin = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
+  serverProcess = spawn(process.execPath, [nextBin, "dev", "--port", "3002"], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      AUTH_URL: baseURL,
+      DATABASE_URL: databaseUrl,
+      NEXTAUTH_URL: baseURL,
+      NEXT_PUBLIC_APP_URL: baseURL,
+      REVORY_LLM_ENABLED: "false",
+      REVORY_QA_DIST_DIR: ".next-demo-qa",
+    },
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    if (await isReady()) return;
+    if (serverProcess.exitCode !== null) throw new Error("Isolated demo QA server exited early.");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error("Isolated demo QA server did not become ready.");
+}
+
+await ensureServer();
+const browser = await chromium.launch({ headless: true });
+try {
+  for (const [name, width, height] of [
+    ["desktop", 1440, 1000],
+    ["mobile", 390, 844],
+  ]) {
+    const context = await browser.newContext({ baseURL, viewport: { width, height } });
+    const page = await context.newPage();
+    const errors = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    const response = await page.goto("/demo", { waitUntil: "networkidle" });
+    if (!response?.ok()) throw new Error(`${name} demo returned ${response?.status()}`);
+    if (!(await page.getByText("See the evidence behind a Quote Recovery read.").isVisible())) {
+      throw new Error(`${name} demo headline missing`);
+    }
+    if (!(await page.getByText("Synthetic sample data").isVisible())) {
+      throw new Error(`${name} sample label missing`);
+    }
+    const body = await page.locator("body").innerText();
+    if (/QuoteSignal|MedSpa|clinic|appointment|patient|treatment|no[ -]?show|booking/i.test(body)) {
+      throw new Error(`${name} demo contains prohibited legacy copy`);
+    }
+    const horizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    if (horizontalOverflow > 1) {
+      throw new Error(`${name} demo has ${horizontalOverflow}px horizontal overflow`);
+    }
+    const csv = await context.request.get("/demo/quote-recovery.csv");
+    if (csv.status() !== 200 || !(await csv.text()).includes("EST-SAMPLE-1042")) {
+      throw new Error(`${name} sample CSV export failed`);
+    }
+    if (errors.length) throw new Error(`${name} demo console errors: ${errors.join(" | ")}`);
+    await page.screenshot({ path: path.join(outputDir, `demo-${name}.png`), fullPage: true });
+    await context.close();
+  }
+} finally {
+  await browser.close();
+  if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");
+  fs.rmSync(qaDistDir, { force: true, recursive: true });
+}
+console.log("Canonical public sample workspace desktop/mobile: PASS");

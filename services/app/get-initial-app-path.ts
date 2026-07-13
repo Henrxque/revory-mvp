@@ -1,22 +1,12 @@
 import "server-only";
 
+import { prisma } from "@/db/prisma";
 import type { AppContext } from "@/services/app/get-app-context";
-import {
-  getOnboardingStepPath,
-  resolveOnboardingStepKey,
-} from "@/services/onboarding/wizard-steps";
-import { getBookedProofRead } from "@/services/proof/get-booked-proof-read";
 
 export async function getInitialAppPath(appContext: AppContext) {
-  if (appContext.activationSetup.isCompleted) {
-    const bookedProofRead = await getBookedProofRead(appContext.workspace.id);
+  const canonicalRecordCount = await prisma.canonicalRecord.count({
+    where: { workspaceId: appContext.workspace.id },
+  });
 
-    return bookedProofRead.hasBookedProofVisible
-      ? "/app/dashboard"
-      : "/app/imports";
-  }
-
-  return getOnboardingStepPath(
-    resolveOnboardingStepKey(appContext.activationSetup.currentStep),
-  );
+  return canonicalRecordCount > 0 ? "/app/dashboard" : "/app/imports";
 }

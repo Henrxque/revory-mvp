@@ -1,12 +1,71 @@
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 
 import { chromium } from "playwright";
 
-const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3000";
+const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3003";
 const dir = path.join(process.cwd(), ".tmp", "sprint-4-1");
+const qaDistDir = path.join(process.cwd(), ".next-landing-qa");
 fs.mkdirSync(dir, { recursive: true });
+let serverProcess = null;
+let serverLog = "";
 
+async function isReady() {
+  try {
+    const response = await fetch(baseURL, { redirect: "manual" });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureServer() {
+  if (await isReady()) return;
+  if (process.env.REVORY_QA_BASE_URL) {
+    throw new Error(`Configured landing QA server is unavailable at ${baseURL}.`);
+  }
+  const envSource = fs.readFileSync(path.join(process.cwd(), ".env"), "utf8");
+  const databaseLine = envSource
+    .split(/\r?\n/)
+    .find((line) => line.trim().startsWith("DATABASE_URL="));
+  const databaseUrl = databaseLine
+    ?.slice(databaseLine.indexOf("=") + 1)
+    .trim()
+    .replace(/^['"]|['"]$/g, "");
+  if (!databaseUrl || !["localhost", "127.0.0.1", "::1"].includes(new URL(databaseUrl).hostname)) {
+    throw new Error("Landing browser QA requires the local PostgreSQL URL from .env.");
+  }
+  const nextBin = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
+  serverProcess = spawn(process.execPath, [nextBin, "dev", "--port", "3003"], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      AUTH_URL: baseURL,
+      DATABASE_URL: databaseUrl,
+      NEXTAUTH_URL: baseURL,
+      NEXT_PUBLIC_APP_URL: baseURL,
+      REVORY_LLM_ENABLED: "false",
+      REVORY_QA_DIST_DIR: ".next-landing-qa",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+  });
+  serverProcess.stdout.on("data", (chunk) => {
+    serverLog = `${serverLog}${chunk}`.slice(-12000);
+  });
+  serverProcess.stderr.on("data", (chunk) => {
+    serverLog = `${serverLog}${chunk}`.slice(-12000);
+  });
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    if (await isReady()) return;
+    if (serverProcess.exitCode !== null) throw new Error("Isolated landing QA server exited early.");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error("Isolated landing QA server did not become ready.");
+}
+
+await ensureServer();
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -22,7 +81,9 @@ try {
     });
 
     const response = await page.goto("/", { waitUntil: "networkidle" });
-    if (!response?.ok()) throw new Error(`${name} returned ${response?.status()}`);
+    if (!response?.ok()) {
+      throw new Error(`${name} returned ${response?.status()}\n${serverLog}`);
+    }
     if (!(await page.getByText("Find the estimates that still deserve").isVisible())) {
       throw new Error(`${name} hero missing`);
     }
@@ -69,7 +130,7 @@ try {
         }),
       );
       await firstSignal.hover();
-      await page.waitForTimeout(450);
+      await page.waitForTimeout(900);
       const afterHover = await firstSignal.evaluate(
         (element) => ({
           boxShadow: getComputedStyle(element).boxShadow,
@@ -110,6 +171,8 @@ try {
   }
 } finally {
   await browser.close();
+  if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");
+  fs.rmSync(qaDistDir, { force: true, recursive: true });
 }
 
 console.log("Sprint 4.1 landing interactions, glow, desktop/mobile and one-page checkout: PASS");

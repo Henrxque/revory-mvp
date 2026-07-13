@@ -14,11 +14,12 @@ Status: implemented locally on 2026-07-12. The additive migration was applied on
 - Atomic Prisma transaction, deterministic batch idempotency key and canonical-record upserts.
 - Saved mapping signatures per workspace/entity/header set.
 - Server-derived workspace authorization and per-workspace rate limiting.
+- Deterministic comma, semicolon and tab profiling with unambiguous structure checks.
+- Common alternate-header suggestions for Customer, Lead, Estimate and Activity.
+- Optional bounded-AI mapping suggestions over sanitized profiles only, followed by deterministic validation and explicit human confirmation.
 
 ## Exit evidence
 
 `qa:sprints-1-3` proves formula blocking, thin-data ineligibility and stable idempotency. Invalid plans cannot reach persistence, and the transaction commits the whole accepted batch or none of it.
 
-## Deliberate limit
-
-The canonical UI currently accepts exact REVORY template headers. Assisted arbitrary-header mapping remains in the preserved legacy importer and will be adapted only after canonical mapping UX is reviewed; it is not silently applied to contractor data.
+`qa:canonical-assisted-intake` additionally verifies alternate headers, supported delimiters, unavailable/timeout/invalid AI behavior, low confidence, missing required fields, wrong datasets, duplicate targets, confirmation, idempotency and workspace isolation. Revenue Realization datasets remain prepared contracts and are not exposed as current public upload capabilities.

@@ -17,8 +17,9 @@ Status: recurring product slice implemented locally; paid-beta release gate rema
 
 - Stripe checkout/webhook cannot be verified until the company setup is complete and dedicated Stripe sandbox values are configured.
 - Resend delivery remains paused until its API key and verified sender exist.
-- Automated retention enforcement, production backup/restore exercise, external monitoring and production security scan require the deployment environment.
-- The authenticated Sprint 4 browser harness still needs a valid local NextAuth test session.
+- Protected, idempotent retention enforcement is implemented and locally tested; its production schedule remains a deployment gate.
+- Production backup/restore exercise, external monitoring and production security scan require deployment evidence.
+- The authenticated Sprint 4 browser gate now passes locally; final-domain authentication remains an external launch gate.
 
 ## Exit
 

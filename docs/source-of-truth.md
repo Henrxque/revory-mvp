@@ -34,14 +34,17 @@ REVORY does not operate the customer's business. It sits above exports from the 
 
 ## Current implementation truth
 
-This repository still contains active MedSpa-era schema, imports, engine rules, fixtures, tests and authenticated UI. Those capabilities are migration substrate, not the new public product.
+This repository still contains MedSpa-era schema, import services, engine rules, fixtures, tests and isolated compatibility UI. Those capabilities are migration substrate, not the active public or authenticated product.
 
 As of the local implementation on 2026-07-12:
 
 - canonical contractor records, secure intake and deterministic Quote Recovery rules are implemented locally;
-- the contractor-native dashboard, opportunity detail, dispositions and exports are implemented but still require authenticated browser gate sign-off;
+- the canonical assisted importer, deterministic Data Quality, explicit mapping confirmation and atomic workspace-scoped persistence are implemented and locally verified;
+- the contractor-native dashboard, opportunity detail, dispositions and exports passed the isolated authenticated desktop/mobile browser gate;
 - the public landing passed the Sprint 4.1 contractor-copy, forbidden-term and desktop/mobile browser gates;
+- the public read-only sample workspace passed desktop/mobile browser verification with synthetic contractor data;
 - the Sprint 6 recurring loop, second-read movement, recovered-value separation, digest boundary and workspace data controls are implemented locally;
+- protected idempotent retention enforcement is implemented and locally tested, but deployment scheduling is not verified;
 - dedicated Audit/Starter entitlement and checkout code exists, but Stripe sandbox configuration and end-to-end payment evidence are missing;
 - the Starter paid-beta gate remains closed until Stripe, email delivery and production operational checks pass;
 - jobs, invoices, change orders, underbilling and margin intelligence are not implemented;

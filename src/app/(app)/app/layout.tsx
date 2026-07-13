@@ -8,10 +8,6 @@ import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import {
-  getOnboardingStep,
-  resolveOnboardingStepKey,
-} from "@/services/onboarding/wizard-steps";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { hasCurrentRevoryAccess } from "@/services/billing/entitlements";
 
@@ -44,7 +40,7 @@ export default async function PrivateAppLayout({
     redirect(buildSignInRedirectPath("/app"));
   }
 
-  const { activationSetup, user, workspace } = appContext;
+  const { user, workspace } = appContext;
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();
   const hasRevoryEntitlement = await hasCurrentRevoryAccess(workspace.id);
@@ -59,23 +55,14 @@ export default async function PrivateAppLayout({
   const hasCanonicalData = canonicalRecordCount > 0;
   const bookingInputsStatus = hasCanonicalData
     ? "Data visible"
-    : activationSetup.isCompleted
-      ? "Data next"
-      : "Data pending";
-  const currentStep = getOnboardingStep(
-    resolveOnboardingStepKey(activationSetup.currentStep),
-  );
-  const currentStepTitle = activationSetup.isCompleted
-    ? hasCanonicalData
-      ? "Leak read ready"
-      : "Data import next"
-    : currentStep.title;
-  const activationStatus = activationSetup.isCompleted ? "Activated" : "Activating";
-  const workspaceSubtitle = activationSetup.isCompleted
-    ? hasCanonicalData
-      ? `${canonicalRecordCount} canonical records support the current Quote Recovery read.`
-      : "Activation is live. Add estimate exports to prepare the Quote Recovery read."
-    : `Activation is in progress. ${currentStep.title} comes next.`;
+    : "Data needed";
+  const currentStepTitle = hasCanonicalData
+    ? "Quote Recovery ready"
+    : "Import evidence";
+  const activationStatus = hasCanonicalData ? "Read ready" : "Import needed";
+  const workspaceSubtitle = hasCanonicalData
+    ? `${canonicalRecordCount} canonical records support the current Quote Recovery read.`
+    : "Add customer, estimate and activity exports to prepare the first Quote Recovery read.";
   const currentPlanSignal =
     billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
   const accountInitial = getAccountInitial(user.email);
@@ -132,11 +119,8 @@ export default async function PrivateAppLayout({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Link
-                    className="rev-action-button min-h-8 px-3.5 py-1.5 text-[12px]"
-                    href="/app/setup"
-                  >
-                    Setup
+                  <Link className="rev-action-button min-h-8 px-3.5 py-1.5 text-[12px]" href="/app/imports">
+                    Import data
                   </Link>
                   <AuthSignOutButton
                     className="min-h-8 border-transparent bg-transparent px-2.5 py-1.5 text-[12px] text-[#9690a2] hover:border-transparent hover:bg-[rgba(255,255,255,0.016)] hover:text-[color:var(--foreground)]"
@@ -154,7 +138,7 @@ export default async function PrivateAppLayout({
             </aside>
           ) : null}
 
-          <section className="min-w-0 overflow-x-clip rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(19,18,26,0.86),rgba(13,12,18,0.86))] p-5 shadow-[var(--shadow-soft)] md:p-7">
+          <section className="min-w-0 overflow-x-clip rounded-[30px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(24,26,27,0.9),rgba(20,21,22,0.94))] p-5 shadow-[var(--shadow-soft)] md:p-7">
             {children}
           </section>
         </div>

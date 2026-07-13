@@ -1,6 +1,6 @@
 # Sprint 4 — Quote Recovery experience
 
-Status: implementation complete locally; exit gate not signed off because the automated authenticated browser harness could not establish a local NextAuth QA session.
+Status: **PASS locally** on 2026-07-12 with isolated authenticated browser evidence.
 
 ## Implemented
 
@@ -13,4 +13,4 @@ Status: implementation complete locally; exit gate not signed off because the au
 
 ## Evidence and exit
 
-Typecheck, ESLint and production build pass. `scripts/verify-sprint-4-browser.mjs` creates isolated fixtures and checks desktop/mobile, detail and export, but the already-running local NextAuth server rejected both programmatic QA authentication methods. The UI exit gate therefore remains **not yet passed** rather than being signed off without browser evidence.
+`scripts/verify-sprint-4-browser.mjs` starts a dedicated local Next.js instance, requires a loopback PostgreSQL URL, creates an isolated credentials user/workspace, uses the real sign-in UI, imports canonical alternate-header files and verifies Data Quality, dashboard, evidence detail, disposition, formula-safe export and mobile layout. The fixture and isolated build output are removed after the run. The gate passes with `npm run qa:sprint-4:browser`.
