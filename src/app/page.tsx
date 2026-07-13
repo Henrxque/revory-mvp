@@ -101,7 +101,7 @@ const faq = [
   ],
   [
     "What about invoices, change orders, underbilling and margin?",
-    "Jobs, invoices, change orders and costs can now be ingested and reconciled in the internal product. Premium findings, Full Revenue Leak Audit claims and pricing remain gated until Sprint 9 rule and report tests pass.",
+    "Jobs, invoices, change orders and costs can be ingested, reconciled and turned into evidence-first Tier 2 findings in the internal product. The Full Revenue Leak Audit remains unavailable for sale until independent logic review, customer validation and commercial configuration pass.",
   ],
   [
     "Is the US$799 audit available now?",
@@ -271,7 +271,7 @@ export default async function HomePage() {
             />
             <RoadmapCard
               gated
-              text="Canonical ingestion and explicit reconciliation are implemented locally. Change-order, underbilling and margin findings still require Sprints 9–11 and their commercial gates."
+              text="Tier 2 change-order, underbilling and margin findings are implemented locally with evidence views and an executive report. Controlled sale still requires independent logic review, customer validation and commercial configuration; Growth and Pro remain later gates."
               title="Roadmap — not sold as current capability"
             />
           </div>

@@ -1,2 +1,2 @@
-externalId,jobExternalId,estimateExternalId,invoiceExternalId,status,approvedAmount,currency,approvedAt
-CO-001,JOB-001,EST-001,,approved,1500.00,USD,2026-07-20T14:00:00Z
+externalId,jobExternalId,estimateExternalId,invoiceExternalId,status,billingStatus,approvedAmount,currency,approvedAt,description
+CO-001,JOB-001,EST-001,,approved,unbilled,1500.00,USD,2026-07-20T14:00:00Z,Approved built-in shelving

@@ -16,6 +16,7 @@ import { persistSecureIntakePlan } from "@/services/canonical-intake/persist-int
 import { buildSecureIntakePlan, type IntakeFile } from "@/services/canonical-intake/secure-intake";
 import { createQuoteRecoveryAnalysisRun } from "@/services/quote-recovery/analysis-runs";
 import { syncQuoteRecoveryFindingsForWorkspace } from "@/services/quote-recovery/sync-findings";
+import { syncRevenueRealizationFindingsForWorkspace } from "@/services/revenue-realization/sync-findings";
 import { checkRateLimit } from "@/services/security/rate-limit";
 
 export type CanonicalReviewFile = CanonicalMappingReview & {
@@ -205,10 +206,12 @@ export async function importCanonicalFiles(
     }
     const result = await persistSecureIntakePlan({ workspaceId: context.workspace.id, plan });
     const findingSync = await syncQuoteRecoveryFindingsForWorkspace(context.workspace.id);
+    await syncRevenueRealizationFindingsForWorkspace(context.workspace.id);
     if (result.created) await createQuoteRecoveryAnalysisRun(context.workspace.id);
     revalidatePath("/app/imports");
     revalidatePath("/app/dashboard");
     revalidatePath("/app/revenue-realization");
+    revalidatePath("/app/revenue-realization/report");
     return {
       status: "committed",
       message: result.created

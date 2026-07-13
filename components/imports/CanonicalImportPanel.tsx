@@ -48,8 +48,13 @@ export function CanonicalImportPanel() {
   );
   const [pending, startTransition] = useTransition();
 
-  function submitReview(formData: FormData) {
+  function submitReview() {
     startTransition(async () => {
+      const formData = new FormData();
+      formData.set("sourceSystem", sourceSystem);
+      for (const [entityType, file] of Object.entries(selectedFiles.current)) {
+        if (file) formData.set(`file_${entityType}`, file);
+      }
       setImportState(initialCanonicalImportActionState);
       setReview(await reviewCanonicalFiles(formData));
     });
@@ -101,7 +106,7 @@ export function CanonicalImportPanel() {
   return (
     <section className="rev-shell-panel rounded-[28px] p-6 md:p-7">
       <div className="max-w-3xl space-y-3">
-        <p className="rev-kicker">Canonical secure intake · Sprints 7–8 local preview</p>
+        <p className="rev-kicker">Canonical secure intake · Sprint 9 local product gate</p>
         <h2 className="rev-display-section">Profile, review, then commit the evidence.</h2>
         <p className="text-sm leading-6 text-[color:var(--text-muted)]">
           REVORY profiles structure and headers deterministically. Optional AI may suggest
@@ -183,9 +188,9 @@ export function CanonicalImportPanel() {
           {pending ? "Profiling…" : "Profile files and review mapping"}
         </button>
         <p className="max-w-xl text-xs leading-5 text-[color:var(--text-subtle)]">
-          Jobs, invoices, change orders and costs now support local ingestion and
-          deterministic reconciliation review. They do not create premium findings or
-          unlock Revenue Realization pricing before Sprint 9.
+          Jobs, invoices, change orders and costs support deterministic Tier 2 findings
+          after explicit matching. Imports do not unlock Revenue Realization pricing or
+          certify accounting loss.
         </p>
       </div>
       </form>

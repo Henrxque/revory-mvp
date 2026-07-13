@@ -6,6 +6,7 @@ export type CanonicalEntityType = (typeof canonicalEntityTypes)[number];
 export type ValueBasis = "OBSERVED" | "CALCULATED" | "ESTIMATED" | "OPERATIONAL" | "DATA_QUALITY";
 export type FindingConfidence = "LOW" | "MEDIUM" | "HIGH";
 export type FindingSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type FindingUrgency = "LOW" | "MEDIUM" | "HIGH";
 
 export type RecordProvenance = {
   fileName: string;

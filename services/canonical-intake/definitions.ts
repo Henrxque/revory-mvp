@@ -3,7 +3,7 @@ import type { CanonicalEntityType } from "@/domain/revory/contracts";
 export type CanonicalFieldDefinition = {
   required?: boolean;
   relation?: boolean;
-  type: "string" | "date" | "integer" | "money" | "boolean";
+  type: "string" | "date" | "integer" | "money" | "boolean" | "percentage";
 };
 
 const common = { externalId: { required: true, type: "string" } } as const;
@@ -13,9 +13,9 @@ export const canonicalFields: Record<CanonicalEntityType, Record<string, Canonic
   LEAD: { ...common, customerExternalId: { relation: true, type: "string" }, createdAt: { type: "date" }, status: { type: "string" }, owner: { type: "string" }, source: { type: "string" } },
   ESTIMATE: { ...common, customerExternalId: { relation: true, type: "string" }, leadExternalId: { relation: true, type: "string" }, jobExternalId: { relation: true, type: "string" }, status: { required: true, type: "string" }, amountCents: { type: "money" }, createdAt: { required: true, type: "date" }, sentAt: { type: "date" }, closedAt: { type: "date" }, lostAt: { type: "date" }, lastActivityAt: { type: "date" }, nextFollowUpAt: { type: "date" }, owner: { type: "string" }, nextStep: { type: "string" }, currency: { type: "string" } },
   ACTIVITY: { ...common, customerExternalId: { relation: true, type: "string" }, leadExternalId: { relation: true, type: "string" }, estimateExternalId: { required: true, relation: true, type: "string" }, jobExternalId: { relation: true, type: "string" }, occurredAt: { required: true, type: "date" }, activityType: { required: true, type: "string" }, outcome: { type: "string" }, nextStep: { type: "string" } },
-  JOB: { ...common, customerExternalId: { relation: true, type: "string" }, estimateExternalId: { relation: true, type: "string" }, status: { type: "string" }, contractValueCents: { type: "money" }, contractValueIncludesApprovedChanges: { type: "boolean" }, currency: { type: "string" }, startedAt: { type: "date" }, completedAt: { type: "date" } },
+  JOB: { ...common, customerExternalId: { relation: true, type: "string" }, estimateExternalId: { relation: true, type: "string" }, status: { type: "string" }, contractValueCents: { type: "money" }, contractValueIncludesApprovedChanges: { type: "boolean" }, currency: { type: "string" }, targetGrossMarginBps: { type: "percentage" }, scopeChangeFlag: { type: "boolean" }, notes: { type: "string" }, startedAt: { type: "date" }, completedAt: { type: "date" } },
   INVOICE: { ...common, customerExternalId: { relation: true, type: "string" }, jobExternalId: { relation: true, type: "string" }, estimateExternalId: { relation: true, type: "string" }, status: { type: "string" }, amountCents: { type: "money" }, currency: { type: "string" }, issuedAt: { type: "date" }, paidAt: { type: "date" }, dueAt: { type: "date" } },
-  CHANGE_ORDER: { ...common, jobExternalId: { required: true, relation: true, type: "string" }, estimateExternalId: { relation: true, type: "string" }, invoiceExternalId: { relation: true, type: "string" }, status: { type: "string" }, approvedAmountCents: { type: "money" }, currency: { type: "string" }, approvedAt: { type: "date" } },
+  CHANGE_ORDER: { ...common, jobExternalId: { required: true, relation: true, type: "string" }, estimateExternalId: { relation: true, type: "string" }, invoiceExternalId: { relation: true, type: "string" }, status: { type: "string" }, billingStatus: { type: "string" }, approvedAmountCents: { type: "money" }, currency: { type: "string" }, approvedAt: { type: "date" }, description: { type: "string" } },
   COST: { ...common, jobExternalId: { required: true, relation: true, type: "string" }, invoiceExternalId: { relation: true, type: "string" }, amountCents: { required: true, type: "money" }, currency: { type: "string" }, incurredAt: { type: "date" }, category: { type: "string" } },
 };
 

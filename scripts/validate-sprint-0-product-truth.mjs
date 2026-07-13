@@ -28,17 +28,18 @@ check(
 );
 check(
   "historical-name-normalized",
-  home.includes('["QuoteSignal", "REVORY"]'),
-  "Historical QuoteSignal markup is normalized before public rendering.",
+  !home.includes("QuoteSignal"),
+  "Historical QuoteSignal naming does not reach public rendering.",
 );
 check(
   "visible-prelaunch-gate",
-  home.includes("the US$799 Quote Recovery Audit opens only after its product and security gates pass"),
+  home.includes("Audit checkout remains gated until validation is complete") &&
+    home.includes("Prices remain validation targets until the commercial gates pass"),
   "Landing visibly marks the US$799 offer as prelaunch and gated.",
 );
 check(
   "no-legacy-growth-cta",
-  home.includes('.replaceAll(\'href="/start?plan=growth"\', \'href="/start"\')'),
+  !home.includes("/start?plan=growth"),
   "Public audit CTAs remove the historical Growth query parameter.",
 );
 check(

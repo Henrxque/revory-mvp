@@ -139,7 +139,7 @@ try {
   );
   fs.writeFileSync(
     jobsPath,
-    "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Completion Date\nJOB-QA-1,completed,100000,false,USD,2026-06-30\n",
+    "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Target Margin Percent,Scope Change Flag,Project Notes,Completion Date\nJOB-QA-1,completed,100000,false,USD,40,false,Final scope documented,2026-06-30\n",
   );
   fs.writeFileSync(
     invoicesPath,
@@ -147,11 +147,11 @@ try {
   );
   fs.writeFileSync(
     changesPath,
-    "CO ID,Project ID,Approval Status,Approved Value,Currency,Approval Date\nCO-QA-1,JOB-QA-1,approved,10000,USD,2026-06-10\n",
+    "CO ID,Project ID,Approval Status,Billing Status,Approved Value,Currency,Approval Date,Scope Description\nCO-QA-1,JOB-QA-1,approved,unbilled,10000,USD,2026-06-10,Approved premium material upgrade\n",
   );
   fs.writeFileSync(
     costsPath,
-    "Expense ID,Project ID,Actual Cost,Currency,Expense Date,Expense Category\nCOST-QA-1,JOB-QA-1,40000,USD,2026-06-20,materials\n",
+    "Expense ID,Project ID,Actual Cost,Currency,Expense Date,Expense Category\nCOST-QA-1,JOB-QA-1,55000,USD,2026-06-20,materials\n",
   );
 
   await ensureLocalQaServer();
@@ -177,13 +177,6 @@ try {
   await page.getByLabel("Customers file").setInputFiles(customersPath);
   await page.getByLabel("Estimates file").setInputFiles(estimatesPath);
   await page.getByLabel("Activities file").setInputFiles(activitiesPath);
-  await page.waitForTimeout(300);
-  const selectedQuoteFiles = await page.locator('input[type="file"]').evaluateAll((inputs) =>
-    inputs.filter((input) => input.files?.length).map((input) => input.files?.[0]?.name),
-  );
-  if (selectedQuoteFiles.length !== 3) {
-    throw new Error(`Browser did not retain the selected Quote Recovery files: ${selectedQuoteFiles.join(", ")}`);
-  }
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "mapping-failure.png"), fullPage: true });
@@ -213,8 +206,8 @@ try {
   await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 });
 
   await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
-  if (!(await page.getByText("Reconcile only what explicit source evidence can support.").isVisible())) {
-    throw new Error("Revenue Realization reconciliation headline missing.");
+  if (!(await page.getByText("Turn defensible reconciliation into review-ready findings.").isVisible())) {
+    throw new Error("Revenue Realization Sprint 9 headline missing.");
   }
   if (!(await page.getByText("$50,000.00").first().isVisible())) {
     throw new Error("Reconstructable calculated billing difference missing.");
@@ -222,7 +215,30 @@ try {
   if (!(await page.getByText("Every explicit link resolves to exactly one record.").isVisible())) {
     throw new Error("Explicit matching review did not resolve fixture links.");
   }
-  await page.screenshot({ path: path.join(evidenceDir, "reconciliation-desktop.png"), fullPage: true });
+  for (const expected of ["UNDERBILLING GAP", "APPROVED CHANGE ORDER NOT BILLED", "MARGIN AT RISK", "$10,000.00", "$19,000.00"]) {
+    if (!(await page.getByText(expected, { exact: true }).first().isVisible())) {
+      throw new Error(`Sprint 9 finding evidence missing: ${expected}`);
+    }
+  }
+  const findingCountBeforeRefresh = await prisma.revenueRealizationFinding.count({ where: { workspaceId: workspace.id } });
+  await page.getByRole("button", { name: "Refresh deterministic findings" }).click();
+  await page.waitForLoadState("networkidle");
+  const findingCountAfterRefresh = await prisma.revenueRealizationFinding.count({ where: { workspaceId: workspace.id } });
+  if (findingCountBeforeRefresh !== findingCountAfterRefresh) {
+    throw new Error(`Sprint 9 persisted rerun drifted from ${findingCountBeforeRefresh} to ${findingCountAfterRefresh} findings.`);
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-9-findings-desktop.png"), fullPage: true });
+  await page.getByText("UNDERBILLING GAP", { exact: true }).first().click();
+  await page.getByText("Source lineage").waitFor();
+  if (!(await page.getByText("This calculated gap contributes to the executive billing-gap total.", { exact: false }).isVisible())) {
+    throw new Error("Dedicated Sprint 9 evidence view is missing its additive-boundary label.");
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-9-evidence-desktop.png"), fullPage: true });
+  await page.goto("/app/revenue-realization/report", { waitUntil: "networkidle" });
+  if (!(await page.getByText("Executive Revenue Realization read").isVisible())) {
+    throw new Error(`Full Revenue Leak executive report is missing. URL=${page.url()} BODY=${(await page.locator("body").innerText()).slice(-1800)} SERVER=${serverLogs}`);
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-9-report-desktop.png"), fullPage: true });
 
   await page.goto("/app/dashboard", { waitUntil: "networkidle" });
   if (!(await page.getByText("See what may still be recoverable").isVisible())) {
@@ -255,21 +271,21 @@ try {
   }
   await page.screenshot({ path: path.join(evidenceDir, "dashboard-mobile.png"), fullPage: true });
   await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
-  if (!(await page.getByText("Reconcile only what explicit source evidence can support.").isVisible())) {
+  if (!(await page.getByText("Turn defensible reconciliation into review-ready findings.").isVisible())) {
     throw new Error("Mobile Revenue Realization headline missing.");
   }
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   if (horizontalOverflow > 1) throw new Error(`Revenue Realization mobile overflow: ${horizontalOverflow}px`);
-  await page.screenshot({ path: path.join(evidenceDir, "reconciliation-mobile.png"), fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-9-findings-mobile.png"), fullPage: true });
   if (await page.locator("[data-nextjs-dialog],.vite-error-overlay").count()) {
     throw new Error("Framework error overlay detected.");
   }
   if (errors.length) throw new Error(`Browser console errors: ${errors.join(" | ")}`);
   await context.close();
   console.log(
-    "Sprint 4 plus Sprints 7-8 authenticated browser: login, assisted imports, Data Quality, dashboard, evidence, disposition, export, explicit reconciliation and mobile: PASS",
+    "Sprint 4 plus Sprints 7-9 authenticated browser: login, assisted imports, Data Quality, dashboard, persisted Tier 2 findings, dedicated evidence, executive report, idempotent rerun and mobile: PASS",
   );
 } finally {
   if (browser) await browser.close().catch(() => {});

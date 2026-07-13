@@ -1,73 +1,55 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import type { JobBillingReconciliation } from "@/domain/revory/revenue-realization";
+import { RevenueRealizationFindingIcon } from "@/components/revenue-realization/RevenueRealizationFindingIcon";
+import type { JobBillingReconciliation, RevenueRealizationFindingType } from "@/domain/revory/revenue-realization";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { getRevenueRealizationRead } from "@/services/revenue-realization/get-revenue-realization-read";
+import {
+  getRevenueRealizationFindingRead,
+  getRevenueRealizationRead,
+} from "@/services/revenue-realization/get-revenue-realization-read";
+import { refreshRevenueRealizationFindings } from "./actions";
 
-function money(valueCents: number | null, currency: string | null) {
-  if (valueCents === null || !currency) return "Suppressed";
+function money(valueCents: number | null, currency: string | null = "USD") {
+  if (valueCents === null || !currency) return "No financial value";
   return new Intl.NumberFormat("en-US", { currency, style: "currency" }).format(valueCents / 100);
+}
+
+function Metric({ label, note, value }: { label: string; note?: string; value: string }) {
+  return (
+    <div className="rev-card rounded-[18px] p-4">
+      <p className="rev-label">{label}</p>
+      <p className="mt-2 text-lg font-bold">{value}</p>
+      {note ? <p className="mt-1 text-[11px] leading-5 text-[color:var(--text-muted)]">{note}</p> : null}
+    </div>
+  );
 }
 
 function ReconciliationCard({ row }: { row: JobBillingReconciliation }) {
   return (
-    <article className="rev-card-premium min-w-0 rounded-[24px] p-5">
+    <article className="rev-card min-w-0 rounded-[22px] p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="rev-label">Job {row.jobExternalId}</p>
-          <h3 className="mt-2 text-lg font-bold">
+          <h3 className="mt-2 text-base font-bold">
             {row.state === "ELIGIBLE" ? "Reconstructable billing comparison" : "Financial output suppressed"}
           </h3>
         </div>
-        <span
-          className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
-            row.state === "ELIGIBLE"
-              ? "border-[color:var(--border-accent)] text-[color:var(--accent-light)]"
-              : "border-[color:var(--border)] text-[color:var(--text-muted)]"
-          }`}
-        >
+        <span className="rounded-full border border-[color:var(--border-accent)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--accent-light)]">
           {row.valueBasis.replaceAll("_", " ")}
         </span>
       </div>
-
       {row.state === "ELIGIBLE" ? (
         <>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Expected billing basis" value={money(row.expectedBillingCents, row.currency)} />
-            <Metric label="Observed eligible invoices" value={money(row.invoicedCents, row.currency)} />
-            <Metric label="Calculated difference" value={money(row.calculatedGapCents, row.currency)} />
-            <Metric label="Observed job costs" value={money(row.observedCostCents, row.currency)} />
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Metric label="Expected billing" value={money(row.expectedBillingCents, row.currency)} />
+            <Metric label="Observed invoices" value={money(row.invoicedCents, row.currency)} />
+            <Metric label="Calculated gap" value={money(row.calculatedGapCents, row.currency)} />
           </div>
           <p className="mt-4 text-xs leading-5 text-[color:var(--text-muted)]">
             <strong className="text-[color:var(--foreground)]">Formula:</strong> {row.formula}.
-            This is a deterministic reconciliation output, not a released finding or guaranteed loss.
           </p>
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-[color:var(--border)]">
-            <table className="w-full min-w-[640px] text-left text-xs">
-              <thead className="text-[color:var(--text-subtle)]">
-                <tr>
-                  <th className="px-3 py-2">Source record</th>
-                  <th className="px-3 py-2">Observed field</th>
-                  <th className="px-3 py-2">Value</th>
-                  <th className="px-3 py-2">Lineage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {row.inputEvidence.map((input) => (
-                  <tr className="border-t border-[color:var(--border)]" key={`${input.externalId}:${input.field}`}>
-                    <td className="px-3 py-2.5 font-bold">{input.externalId}</td>
-                    <td className="px-3 py-2.5 text-[color:var(--text-muted)]">{input.field}</td>
-                    <td className="px-3 py-2.5 text-[color:var(--text-muted)]">{money(input.valueCents, row.currency)}</td>
-                    <td className="px-3 py-2.5 text-[color:var(--text-muted)]">
-                      {input.provenance.fileName} · row {input.provenance.rowNumber}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </>
       ) : (
         <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-[color:var(--text-muted)]">
@@ -78,33 +60,24 @@ function ReconciliationCard({ row }: { row: JobBillingReconciliation }) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rev-card rounded-[18px] p-4">
-      <p className="rev-label">{label}</p>
-      <p className="mt-2 text-lg font-bold">{value}</p>
-    </div>
-  );
-}
-
 export default async function RevenueRealizationPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/revenue-realization"));
-  const read = await getRevenueRealizationRead(context.workspace.id);
+  const [read, findingRead] = await Promise.all([
+    getRevenueRealizationRead(context.workspace.id),
+    getRevenueRealizationFindingRead(context.workspace.id),
+  ]);
 
   if (!read || read.summary.recordCounts.JOB === 0) {
     return (
-      <div className="space-y-5">
-        <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
-          <p className="rev-kicker">Revenue Realization · local gated preview</p>
-          <h1 className="rev-display-hero mt-3 max-w-[42rem]">Add explicit job and billing evidence before comparing records.</h1>
-          <p className="mt-4 max-w-[44rem] text-sm leading-7 text-[color:var(--text-muted)]">
-            Sprint 8 never guesses a link from names or amounts. Import jobs, invoices,
-            change orders and costs with external IDs to review eligibility.
-          </p>
-          <Link className="rev-button-primary mt-6" href="/app/imports">Import Revenue Realization data</Link>
-        </section>
-      </div>
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
+        <p className="rev-kicker">Revenue Realization · local gated preview</p>
+        <h1 className="rev-display-hero mt-3 max-w-[42rem]">Add explicit job and billing evidence before comparing records.</h1>
+        <p className="mt-4 max-w-[44rem] text-sm leading-7 text-[color:var(--text-muted)]">
+          REVORY never guesses links from names or amounts. Import jobs, invoices, change orders and costs with external IDs.
+        </p>
+        <Link className="rev-button-primary mt-6" href="/app/imports">Import Revenue Realization data</Link>
+      </section>
     );
   }
 
@@ -112,61 +85,83 @@ export default async function RevenueRealizationPage() {
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <p className="rev-kicker">Revenue Realization · Sprints 7–8 local gate</p>
-        <h1 className="rev-display-hero mt-3 max-w-[44rem]">Reconcile only what explicit source evidence can support.</h1>
-        <p className="mt-4 max-w-[48rem] text-sm leading-7 text-[color:var(--text-muted)]">
-          Matching uses external IDs only. Ambiguity, missing currency, incomplete status or
-          an unknown contract basis suppresses the calculated output. Sprint 9 findings and pricing remain gated.
+        <p className="rev-kicker">Revenue Realization · Sprint 9 local product gate</p>
+        <h1 className="rev-display-hero mt-3 max-w-[46rem]">Turn defensible reconciliation into review-ready findings.</h1>
+        <p className="mt-4 max-w-[50rem] text-sm leading-7 text-[color:var(--text-muted)]">
+          Tier 2 rules run without AI. Every financial value has an observed or calculated basis;
+          ambiguous links and incomplete inputs suppress the claim. Findings are review opportunities,
+          not confirmed accounting loss or guaranteed recovery.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link className="rev-button-primary" href="/app/revenue-realization/report">Open executive report</Link>
+          <Link className="rev-button-secondary" href="/app/imports">Review imports</Link>
+          <form action={refreshRevenueRealizationFindings}>
+            <button className="rev-button-ghost" type="submit">Refresh deterministic findings</button>
+          </form>
+        </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Eligible jobs" value={String(read.summary.eligibleJobs)} />
-          <Metric label="Suppressed jobs" value={String(read.summary.suppressedJobs)} />
-          <Metric label="Matched links" value={String(read.summary.matchedLinks)} />
-          <Metric label="Links needing review" value={String(read.summary.unmatchedLinks + read.summary.conflictLinks)} />
+          <Metric label="Calculated billing gap" note="Primary additive gap only" value={money(findingRead.summary.calculatedUnderbillingCents, findingRead.summary.currency)} />
+          <Metric label="Approved CO review" note="Observed; not added again" value={money(findingRead.summary.approvedChangeOrderReviewCents, findingRead.summary.currency)} />
+          <Metric label="Margin basis at risk" note="Calculated separately" value={money(findingRead.summary.marginAtRiskCents, findingRead.summary.currency)} />
+          <Metric label="Operational candidates" note="No financial value" value={String(findingRead.summary.operationalCount)} />
         </div>
       </section>
 
       <section className="rev-shell-panel rounded-[28px] p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="rev-kicker">Tier 2 eligibility</p>
-            <h2 className="rev-display-section mt-2">Rules stay off until their bases are complete.</h2>
+            <p className="rev-kicker">Premium findings</p>
+            <h2 className="rev-display-section mt-2">Evidence first. Totals remain deliberately separate.</h2>
           </div>
-          <Link className="rev-button-secondary" href="/app/imports">Review imports</Link>
+          <span className="rev-label">{findingRead.summary.activeCount} active</span>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
-          {Object.entries(read.eligibility).map(([rule, state]) => (
-            <article className="rev-card rounded-[20px] p-4" key={rule}>
-              <p className="text-sm font-bold">{rule.replaceAll("_", " ")}</p>
-              <p className={`mt-2 text-xs font-bold ${state.eligible ? "text-[color:var(--accent-light)]" : "text-[color:var(--text-muted)]"}`}>
-                {state.eligible ? "Eligible for deterministic review" : "Suppressed by Data Quality"}
-              </p>
-              {state.missingFields.length ? <p className="mt-2 text-xs leading-5 text-[color:var(--text-subtle)]">Needs: {state.missingFields.join(", ")}</p> : null}
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <p className="rev-kicker">Reconciliation ledger</p>
-          <h2 className="rev-display-section mt-2">Every calculation remains reconstructable.</h2>
-        </div>
-        {read.reconciliations.map((row) => <ReconciliationCard key={row.jobExternalId} row={row} />)}
+        {findingRead.findings.length ? (
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            {findingRead.findings.map((finding) => (
+              <Link className="rev-card-premium rev-card-hover rounded-[22px] p-5" href={`/app/revenue-realization/findings/${finding.id}`} key={finding.id}>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.1)] text-[color:var(--accent-light)]">
+                    <RevenueRealizationFindingIcon type={finding.findingType as RevenueRealizationFindingType} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="rev-label">Job {finding.jobExternalId}</p>
+                        <h3 className="mt-2 text-base font-bold">{finding.findingType.replaceAll("_", " ")}</h3>
+                      </div>
+                      <strong>{money(finding.valueCents, finding.currency)}</strong>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{finding.reason}</p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider text-[color:var(--text-subtle)]">
+                      <span>{finding.valueBasis}</span><span>·</span><span>{finding.confidence} confidence</span><span>·</span><span>P{finding.priority}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="rev-card mt-5 rounded-[20px] p-5 text-sm leading-6 text-[color:var(--text-muted)]">
+            No active Tier 2 finding is supported by the current evidence. Refresh after importing Sprint 9 fields such as explicit billing status or target gross margin.
+          </div>
+        )}
       </section>
 
       <section className="rev-shell-panel rounded-[28px] p-6">
-        <p className="rev-kicker">Unmatched and conflict review</p>
-        <h2 className="mt-2 text-xl font-bold">No silent linking</h2>
+        <p className="rev-kicker">Reconciliation ledger</p>
+        <h2 className="rev-display-section mt-2">Every gap remains reconstructable from source rows.</h2>
+        <div className="mt-5 grid gap-4">{read.reconciliations.map((row, index) => <ReconciliationCard key={`${row.jobExternalId}:${index}`} row={row} />)}</div>
+      </section>
+
+      <section className="rev-shell-panel rounded-[28px] p-6">
+        <p className="rev-kicker">Explicit-link review</p>
+        <h2 className="rev-display-section mt-2">No silent linking.</h2>
         {reviewLinks.length ? (
-          <div className="mt-4 space-y-2">
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
             {reviewLinks.map((match) => (
-              <article className="rounded-2xl border border-[color:var(--border)] p-4 text-sm" key={`${match.sourceRecordKey}:${match.relationField}`}>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <strong>{match.sourceEntityType} {match.sourceExternalId} → {match.targetEntityType} {match.targetExternalId}</strong>
-                  <span className="rev-label">{match.state}</span>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-[color:var(--text-muted)]">{match.reason}</p>
+              <article className="rev-card rounded-[18px] p-4" key={`${match.sourceRecordKey}:${match.relationField}`}>
+                <strong>{match.sourceEntityType} {match.sourceExternalId} → {match.targetEntityType} {match.targetExternalId}</strong>
+                <p className="mt-2 text-xs leading-5 text-[color:var(--text-muted)]">{match.state}: {match.reason}</p>
               </article>
             ))}
           </div>

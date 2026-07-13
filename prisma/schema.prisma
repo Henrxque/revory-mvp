@@ -174,6 +174,26 @@ enum QuoteRecoveryFindingType {
   RECOVERABLE_LOST_QUOTE
 }
 
+enum RevenueRealizationFindingType {
+  UNDERBILLING_GAP
+  APPROVED_CHANGE_ORDER_NOT_BILLED
+  MARGIN_AT_RISK
+  SUSPECTED_MISSING_CHANGE_ORDER
+  SCOPE_CREEP_REVIEW_CANDIDATE
+}
+
+enum RevoryFindingCategory {
+  FINANCIAL
+  OPERATIONAL
+  DATA_QUALITY
+}
+
+enum RevoryFindingUrgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 enum RevoryOfferKey {
   QUOTE_RECOVERY_AUDIT
   STARTER
@@ -221,44 +241,45 @@ model User {
 }
 
 model Workspace {
-  id                       String                         @id @default(cuid())
-  name                     String
-  slug                     String                         @unique
-  ownerUserId              String
-  status                   WorkspaceStatus                @default(DRAFT)
+  id                         String                         @id @default(cuid())
+  name                       String
+  slug                       String                         @unique
+  ownerUserId                String
+  status                     WorkspaceStatus                @default(DRAFT)
   // Active mode effectively used by the workspace after activation.
-  activeModeKey            FlowModeKey                    @default(MODE_A)
+  activeModeKey              FlowModeKey                    @default(MODE_A)
   // Minimal billing foundation for Stripe Checkout, webhook sync, and plan gating.
-  planKey                  BillingPlanKey?
-  billingStatus            BillingStatus                  @default(INACTIVE)
-  stripeCustomerId         String?                        @unique
-  stripeSubscriptionId     String?                        @unique
-  stripePriceId            String?
-  currentPeriodEnd         DateTime?
-  cancelAtPeriodEnd        Boolean                        @default(false)
-  createdAt                DateTime                       @default(now())
-  updatedAt                DateTime                       @updatedAt
-  owner                    User                           @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
-  medSpaProfile            MedSpaProfile?
-  activationSetup          ActivationSetup?
-  dataSources              DataSource[]
-  clients                  Client[]
-  appointments             Appointment[]
-  automationRuns           AutomationRun[]
-  recoveryOpportunities    RecoveryOpportunity[]
-  reviewRequests           ReviewRequest[]
-  metricsSnapshots         MetricsSnapshot[]
-  leadBookingOpportunities LeadBookingOpportunity[]
-  revenueLeaks             RevenueLeak[]                  @relation("WorkspaceRevenueLeaks")
-  canonicalImportSessions  CanonicalImportSession[]
-  canonicalRecords         CanonicalRecord[]
-  savedCanonicalMappings   SavedCanonicalMapping[]
-  quoteRecoveryFindings    QuoteRecoveryFinding[]
-  entitlements             WorkspaceEntitlement[]
-  analysisRuns             QuoteRecoveryAnalysisRun[]
-  dataSettings             WorkspaceDataSettings?
-  digestPreference         QuoteRecoveryDigestPreference?
-  auditEvents              WorkspaceAuditEvent[]
+  planKey                    BillingPlanKey?
+  billingStatus              BillingStatus                  @default(INACTIVE)
+  stripeCustomerId           String?                        @unique
+  stripeSubscriptionId       String?                        @unique
+  stripePriceId              String?
+  currentPeriodEnd           DateTime?
+  cancelAtPeriodEnd          Boolean                        @default(false)
+  createdAt                  DateTime                       @default(now())
+  updatedAt                  DateTime                       @updatedAt
+  owner                      User                           @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  medSpaProfile              MedSpaProfile?
+  activationSetup            ActivationSetup?
+  dataSources                DataSource[]
+  clients                    Client[]
+  appointments               Appointment[]
+  automationRuns             AutomationRun[]
+  recoveryOpportunities      RecoveryOpportunity[]
+  reviewRequests             ReviewRequest[]
+  metricsSnapshots           MetricsSnapshot[]
+  leadBookingOpportunities   LeadBookingOpportunity[]
+  revenueLeaks               RevenueLeak[]                  @relation("WorkspaceRevenueLeaks")
+  canonicalImportSessions    CanonicalImportSession[]
+  canonicalRecords           CanonicalRecord[]
+  savedCanonicalMappings     SavedCanonicalMapping[]
+  quoteRecoveryFindings      QuoteRecoveryFinding[]
+  revenueRealizationFindings RevenueRealizationFinding[]
+  entitlements               WorkspaceEntitlement[]
+  analysisRuns               QuoteRecoveryAnalysisRun[]
+  dataSettings               WorkspaceDataSettings?
+  digestPreference           QuoteRecoveryDigestPreference?
+  auditEvents                WorkspaceAuditEvent[]
 
   @@map("workspaces")
 }
@@ -388,6 +409,42 @@ model QuoteRecoveryFinding {
   @@index([workspaceId, status, detectedAt])
   @@index([workspaceId, findingType, status])
   @@map("quote_recovery_findings")
+}
+
+model RevenueRealizationFinding {
+  id                     String                        @id @default(cuid())
+  workspaceId            String
+  findingType            RevenueRealizationFindingType
+  category               RevoryFindingCategory
+  status                 RevenueLeakStatus             @default(OPEN)
+  priority               Int
+  urgency                RevoryFindingUrgency
+  severity               RevenueLeakSeverity           @default(MEDIUM)
+  confidence             RevenueLeakConfidence         @default(MEDIUM)
+  valueBasis             RevoryValueBasis
+  valueCents             Int?
+  currency               String                        @default("USD")
+  jobExternalId          String
+  changeOrderExternalId  String?
+  fingerprint            String
+  reason                 String
+  formula                String?
+  calculationInputsJson  Json
+  recommendedAction      String
+  evidenceJson           Json
+  additiveToExecutiveGap Boolean                       @default(false)
+  detectedAt             DateTime                      @default(now())
+  lastSeenAt             DateTime                      @default(now())
+  resolvedAt             DateTime?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  workspace              Workspace                     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, fingerprint])
+  @@index([workspaceId, status, priority])
+  @@index([workspaceId, findingType, status])
+  @@index([workspaceId, jobExternalId])
+  @@map("revenue_realization_findings")
 }
 
 model WorkspaceDataSettings {

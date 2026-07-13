@@ -1,6 +1,6 @@
 # Sprint 8 — Matching and reconciliation engine
 
-Status: **PASS locally** on 2026-07-12. Sprint 9 findings and Full Revenue Leak Audit sale remain gated.
+Status: **PASS locally** on 2026-07-12. Sprint 9 findings are now implemented locally; Full Revenue Leak Audit controlled sale remains separately gated.
 
 ## Delivered
 

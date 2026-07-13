@@ -44,6 +44,7 @@ function normalize(value: unknown, type: string): string | number | boolean | nu
   if (value === null || value === undefined || value === "") return null;
   const raw = typeof value === "object" && value && "text" in value ? String((value as { text: unknown }).text) : String(value).trim();
   if (type === "money") { const number = Number(raw.replace(/[$,\s]/g, "")); return Number.isFinite(number) ? Math.round(number * 100) : null; }
+  if (type === "percentage") { const number = Number(raw.replace(/[%,\s]/g, "")); return Number.isFinite(number) && number >= 0 && number <= 100 ? Math.round(number * 100) : null; }
   if (type === "integer") { const number = Number.parseInt(raw, 10); return Number.isFinite(number) ? number : null; }
   if (type === "boolean") return ["true", "yes", "1"].includes(raw.toLowerCase());
   if (type === "date") { const date = new Date(raw); return Number.isNaN(date.valueOf()) ? null : date.toISOString(); }

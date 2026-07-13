@@ -1,6 +1,6 @@
 # REVORY — Source of Truth
 
-> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-12.
+> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-13.
 
 ## Product identity
 
@@ -36,7 +36,7 @@ REVORY does not operate the customer's business. It sits above exports from the 
 
 This repository still contains MedSpa-era schema, import services, engine rules, fixtures, tests and isolated compatibility UI. Those capabilities are migration substrate, not the active public or authenticated product.
 
-As of the local implementation on 2026-07-12:
+As of the local implementation on 2026-07-13:
 
 - canonical contractor records, secure intake and deterministic Quote Recovery rules are implemented locally;
 - the canonical assisted importer, deterministic Data Quality, explicit mapping confirmation and atomic workspace-scoped persistence are implemented and locally verified;
@@ -49,7 +49,9 @@ As of the local implementation on 2026-07-12:
 - the Starter paid-beta gate remains closed until Stripe, email delivery and production operational checks pass;
 - jobs, invoices, change orders and costs now have canonical assisted ingestion, explicit matching and a locally verified deterministic reconciliation ledger;
 - ambiguous links, incomplete bases and currency conflicts suppress financial output; no fuzzy name/amount matching is used;
-- change-order, underbilling and margin findings, the Full Revenue Leak Audit and Growth/Pro packaging remain unimplemented and gated behind Sprint 9 or later;
+- Tier 2 underbilling, explicitly unbilled approved-change, margin-basis and bounded scope-review findings are implemented locally with stable fingerprints, persisted idempotent sync, dedicated evidence views and a Full Revenue Leak executive report;
+- the Sprint 9 deterministic corpus, AI-off equivalence, workspace-isolation, mixed-currency suppression and authenticated desktop/mobile flow pass locally;
+- the Full Revenue Leak Audit controlled-sale gate remains closed pending a genuinely independent logic review, customer validation and commercial configuration; Growth/Pro packaging remains later-sprint scope;
 - no hybrid offer is yet eligible for public sale from this repository;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 
@@ -104,7 +106,7 @@ This layer must be proven before the first audit or recurring entry offer is sol
 
 Cross estimates with jobs, invoices, invoice lines, change orders and job costs to detect, only when the data supports it, approved-but-not-billed amounts, unbilled change orders, deterministic underbilling gaps and margin risk. Text may create a review candidate; it may not prove approval, performance or a financial gap.
 
-This layer remains roadmap-only until the corresponding ingestion, matching, reconciliation, tenant-isolation, security and reporting gates pass.
+This layer is implemented as a local gated product surface. It is not sellable until independent logic review, customer validation and the remaining commercial/security release evidence pass.
 
 ## Evidence and financial truth
 

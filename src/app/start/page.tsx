@@ -42,18 +42,19 @@ const offers = [
   },
   {
     description:
-      "Local reconciliation substrate exists; Full Audit access remains gated until Tier 2 rule and report gates pass.",
+      "Tier 2 findings and the executive report pass the local product gate; controlled access remains gated by independent review and commercial configuration.",
     features: [
       "Explicit record matching",
       "Unmatched and conflict review",
       "Deterministic billing reconciliation",
-      "Change-order and margin evidence",
+      "Evidence-first Tier 2 findings",
+      "Full Revenue Leak executive report",
     ],
     label: "Full Revenue Leak Audit",
     offerKey: null,
     price: "$1,499",
     priceNote: "one-time future target",
-    stage: "Roadmap gated",
+    stage: "Commercial gate pending",
   },
 ] as const;
 
