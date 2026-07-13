@@ -197,6 +197,7 @@ enum RevoryFindingUrgency {
 enum RevoryOfferKey {
   QUOTE_RECOVERY_AUDIT
   STARTER
+  GROWTH
 }
 
 enum EntitlementStatus {
@@ -279,6 +280,7 @@ model Workspace {
   analysisRuns               QuoteRecoveryAnalysisRun[]
   dataSettings               WorkspaceDataSettings?
   digestPreference           QuoteRecoveryDigestPreference?
+  intelligenceSnapshots      RevenueIntelligenceSnapshot[]
   auditEvents                WorkspaceAuditEvent[]
 
   @@map("workspaces")
@@ -445,6 +447,28 @@ model RevenueRealizationFinding {
   @@index([workspaceId, findingType, status])
   @@index([workspaceId, jobExternalId])
   @@map("revenue_realization_findings")
+}
+
+model RevenueIntelligenceSnapshot {
+  id                            String    @id @default(cuid())
+  workspaceId                   String
+  importSessionId               String?
+  stateFingerprint              String
+  quoteFindingSnapshotJson      Json
+  realizationFindingSnapshotJson Json
+  segmentSnapshotJson           Json
+  quoteEstimatedValueCents      Int       @default(0)
+  calculatedBillingGapCents     Int?
+  approvedChangeReviewCents     Int?
+  marginAtRiskCents             Int?
+  operationalCount              Int       @default(0)
+  currency                      String?
+  createdAt                     DateTime  @default(now())
+  workspace                     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, stateFingerprint])
+  @@index([workspaceId, createdAt])
+  @@map("revenue_intelligence_snapshots")
 }
 
 model WorkspaceDataSettings {

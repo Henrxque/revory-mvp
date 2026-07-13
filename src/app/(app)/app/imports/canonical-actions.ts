@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
 import { canonicalEntityTypes } from "@/domain/revory/contracts";
 import { getAppContext } from "@/services/app/get-app-context";
+import { getCanonicalVolumePolicy } from "@/services/billing/growth-access";
 import {
   buildCanonicalMappingReview,
   calculateReviewedMappingConfidence,
@@ -18,6 +19,7 @@ import { createQuoteRecoveryAnalysisRun } from "@/services/quote-recovery/analys
 import { syncQuoteRecoveryFindingsForWorkspace } from "@/services/quote-recovery/sync-findings";
 import { syncRevenueRealizationFindingsForWorkspace } from "@/services/revenue-realization/sync-findings";
 import { checkRateLimit } from "@/services/security/rate-limit";
+import { captureGrowthIntelligenceSnapshot } from "@/services/growth-intelligence/snapshots";
 
 export type CanonicalReviewFile = CanonicalMappingReview & {
   aiProviderUsed: boolean;
@@ -193,7 +195,8 @@ export async function importCanonicalFiles(
       files.push({ ...file, mapping, sourceSystem });
     }
 
-    const plan = await buildSecureIntakePlan({ workspaceId: context.workspace.id, files });
+    const volumePolicy = await getCanonicalVolumePolicy(context.workspace.id);
+    const plan = await buildSecureIntakePlan({ workspaceId: context.workspace.id, files, limits: volumePolicy });
     if (!plan.accepted) {
       return {
         status: "error",
@@ -207,11 +210,15 @@ export async function importCanonicalFiles(
     const result = await persistSecureIntakePlan({ workspaceId: context.workspace.id, plan });
     const findingSync = await syncQuoteRecoveryFindingsForWorkspace(context.workspace.id);
     await syncRevenueRealizationFindingsForWorkspace(context.workspace.id);
-    if (result.created) await createQuoteRecoveryAnalysisRun(context.workspace.id);
+    if (result.created) {
+      await createQuoteRecoveryAnalysisRun(context.workspace.id);
+      await captureGrowthIntelligenceSnapshot(context.workspace.id);
+    }
     revalidatePath("/app/imports");
     revalidatePath("/app/dashboard");
     revalidatePath("/app/revenue-realization");
     revalidatePath("/app/revenue-realization/report");
+    revalidatePath("/app/history");
     return {
       status: "committed",
       message: result.created

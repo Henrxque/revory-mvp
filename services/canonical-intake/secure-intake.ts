@@ -11,6 +11,16 @@ export const CANONICAL_MAX_FILES = 8;
 export const CANONICAL_MAX_FILE_BYTES = 8 * 1024 * 1024;
 export const CANONICAL_MAX_ROWS_PER_FILE = 25_000;
 export const CANONICAL_MAX_COLUMNS = 120;
+export type IntakeVolumeLimits = {
+  maxFileBytes: number;
+  maxFiles: number;
+  maxRowsPerFile: number;
+};
+export const DEFAULT_CANONICAL_VOLUME_LIMITS: IntakeVolumeLimits = {
+  maxFileBytes: CANONICAL_MAX_FILE_BYTES,
+  maxFiles: CANONICAL_MAX_FILES,
+  maxRowsPerFile: CANONICAL_MAX_ROWS_PER_FILE,
+};
 
 export type IntakeFile = { bytes: Uint8Array; entityType: CanonicalEntityType; fileName: string; mimeType?: string; sourceSystem: string; mapping: Record<string, string> };
 export type IntakeIssue = { code: string; fileName: string; message: string; rowNumber?: number };
@@ -51,16 +61,17 @@ function normalize(value: unknown, type: string): string | number | boolean | nu
   return raw;
 }
 
-export async function buildSecureIntakePlan(input: { workspaceId: string; files: IntakeFile[] }): Promise<IntakePlan> {
+export async function buildSecureIntakePlan(input: { workspaceId: string; files: IntakeFile[]; limits?: IntakeVolumeLimits }): Promise<IntakePlan> {
   const issues: IntakeIssue[] = [], records: CanonicalRecordContract[] = [], mappings: Record<string, Record<string, string>> = {};
+  const limits = input.limits ?? DEFAULT_CANONICAL_VOLUME_LIMITS;
   if (!input.workspaceId.trim()) throw new Error("Workspace authorization is required.");
-  if (input.files.length === 0 || input.files.length > CANONICAL_MAX_FILES) throw new Error(`Upload between 1 and ${CANONICAL_MAX_FILES} files.`);
+  if (input.files.length === 0 || input.files.length > limits.maxFiles) throw new Error(`Upload between 1 and ${limits.maxFiles} files for the current plan.`);
   const signatures: string[] = [];
   for (const file of input.files) {
-    if (file.bytes.byteLength > CANONICAL_MAX_FILE_BYTES) { issues.push({ code: "FILE_TOO_LARGE", fileName: file.fileName, message: "File exceeds the 8 MB limit." }); continue; }
+    if (file.bytes.byteLength > limits.maxFileBytes) { issues.push({ code: "FILE_TOO_LARGE", fileName: file.fileName, message: `File exceeds the ${Math.round(limits.maxFileBytes / 1024 / 1024)} MB limit for the current plan.` }); continue; }
     signatures.push(createHash("sha256").update(file.bytes).digest("hex"));
     const { headers, rows, formulaRows } = await readRows(file);
-    if (!headers.length || headers.length > CANONICAL_MAX_COLUMNS || rows.length > CANONICAL_MAX_ROWS_PER_FILE) { issues.push({ code: "INVALID_DIMENSIONS", fileName: file.fileName, message: "File dimensions exceed the supported limits." }); continue; }
+    if (!headers.length || headers.length > CANONICAL_MAX_COLUMNS || rows.length > limits.maxRowsPerFile) { issues.push({ code: "INVALID_DIMENSIONS", fileName: file.fileName, message: `File dimensions exceed the current plan limit of ${limits.maxRowsPerFile.toLocaleString("en-US")} rows per file.` }); continue; }
     if (new Set(headers.map((h) => h.toLowerCase())).size !== headers.length) { issues.push({ code: "DUPLICATE_HEADERS", fileName: file.fileName, message: "Duplicate headers must be resolved before import." }); continue; }
     if (formulaRows.length) { issues.push({ code: "FORMULA_REJECTED", fileName: file.fileName, message: "Formula cells are not accepted; export observed values only.", rowNumber: formulaRows[0] }); continue; }
     const definitions = canonicalFields[file.entityType]; mappings[file.fileName] = file.mapping;

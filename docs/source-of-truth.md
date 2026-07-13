@@ -52,6 +52,9 @@ As of the local implementation on 2026-07-13:
 - Tier 2 underbilling, explicitly unbilled approved-change, margin-basis and bounded scope-review findings are implemented locally with stable fingerprints, persisted idempotent sync, dedicated evidence views and a Full Revenue Leak executive report;
 - the Sprint 9 deterministic corpus, AI-off equivalence, workspace-isolation, mixed-currency suppression and authenticated desktop/mobile flow pass locally;
 - the Full Revenue Leak Audit controlled-sale gate remains closed pending a genuinely independent logic review, customer validation and commercial configuration; Growth/Pro packaging remains later-sprint scope;
+- Sprint 10 Growth intelligence is implemented locally with idempotent 12-month snapshots, source/owner/service segmentation, explicit minimum-sample and mixed-currency suppression, one bounded weekly management decision, an authenticated PDF, a Growth-entitlement email boundary and plan-aware import limits;
+- thin cohorts remain visible as suppressed and never become performance rankings; Quote Recovery estimates and Revenue Realization calculated gaps remain separate value bases;
+- Growth remains commercially closed: the Sprint 9 predecessor gate, independent customer evidence, dedicated billing configuration, email delivery and production scheduling/operations are not complete;
 - no hybrid offer is yet eligible for public sale from this repository;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 

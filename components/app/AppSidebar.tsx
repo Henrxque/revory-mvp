@@ -71,7 +71,7 @@ const navGroups = (
           icon: "reconciliation",
           label: "Revenue Realization",
         },
-        { href: demoMode ? "#demo-history" : "/app/history", icon: "history", label: "Analysis history" },
+        { href: demoMode ? "#demo-history" : "/app/history", icon: "history", label: "Growth intelligence" },
       ],
     },
     {
@@ -218,12 +218,13 @@ export function AppSidebar({
         </p>
       </div>
 
-      <nav aria-label="Mobile workspace navigation" className="grid grid-cols-5 gap-1 p-2 lg:hidden">
+      <nav aria-label="Mobile workspace navigation" className="grid grid-cols-6 gap-1 p-2 lg:hidden">
         {[
           [demoMode ? "#demo-dashboard" : "/app/dashboard", "dashboard", "Read"],
           [demoMode ? "#demo-leaks" : "/app/revenue-leaks", "signals", "Findings"],
           [demoMode ? "#demo-data" : "/app/revenue-realization", "reconciliation", "Realize"],
           [demoMode ? "#demo-data" : "/app/imports", "imports", "Imports"],
+          [demoMode ? "#demo-history" : "/app/history", "history", "Growth"],
           [demoMode ? "#demo-settings" : "/app/settings", "settings", "Settings"],
         ].map(([href, icon, label]) => (
           <Link

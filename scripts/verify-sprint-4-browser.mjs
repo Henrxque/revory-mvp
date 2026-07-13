@@ -124,9 +124,13 @@ try {
   fs.writeFileSync(
     estimatesPath,
     [
-      "Quote ID,Customer ID,Quote Status,Quote Amount,Quote Date,Last Contact Date,Next Follow Up,Owner,Next Step",
-      "EST-QA-1,CUS-QA-1,open,18000,2026-01-02,2026-01-10,2026-02-01,,Review evidence",
-      "EST-QA-2,CUS-QA-1,open,9500,2026-02-02,2026-02-04,2026-03-01,Alex,Follow up",
+      "Quote ID,Customer ID,Quote Status,Quote Amount,Quote Date,Last Contact Date,Next Follow Up,Owner,Lead Source,Service Type,Next Step",
+      "EST-QA-1,CUS-QA-1,open,18000,2026-01-02,2026-01-10,2026-02-01,Alex,Referral,Roofing,Review evidence",
+      "EST-QA-2,CUS-QA-1,open,9500,2026-02-02,2026-02-04,2026-03-01,Alex,Referral,Roofing,Follow up",
+      "EST-QA-3,CUS-QA-1,open,12000,2026-02-03,2026-02-05,2026-03-02,Alex,Referral,Roofing,Follow up",
+      "EST-QA-4,CUS-QA-1,open,14000,2026-02-04,2026-02-06,2026-03-03,Alex,Referral,Roofing,Follow up",
+      "EST-QA-5,CUS-QA-1,open,16000,2026-02-05,2026-02-07,2026-03-04,Alex,Referral,Roofing,Follow up",
+      "EST-QA-6,CUS-QA-1,open,17000,2026-02-06,2026-02-08,2026-03-05,Alex,Referral,Roofing,Follow up",
     ].join("\n"),
   );
   fs.writeFileSync(
@@ -139,11 +143,25 @@ try {
   );
   fs.writeFileSync(
     jobsPath,
-    "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Target Margin Percent,Scope Change Flag,Project Notes,Completion Date\nJOB-QA-1,completed,100000,false,USD,40,false,Final scope documented,2026-06-30\n",
+    [
+      "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Owner,Lead Source,Service Type,Target Margin Percent,Scope Change Flag,Project Notes,Completion Date",
+      "JOB-QA-1,completed,100000,false,USD,Alex,Referral,Roofing,40,false,Final scope documented,2026-06-30",
+      "JOB-QA-2,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-3,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-4,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-5,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+    ].join("\n"),
   );
   fs.writeFileSync(
     invoicesPath,
-    "Invoice Number,Project ID,Billing Status,Invoice Total,Currency,Invoice Date\nINV-QA-1,JOB-QA-1,issued,60000,USD,2026-06-15\n",
+    [
+      "Invoice Number,Project ID,Billing Status,Invoice Total,Currency,Invoice Date",
+      "INV-QA-1,JOB-QA-1,issued,60000,USD,2026-06-15",
+      "INV-QA-2,JOB-QA-2,issued,10000,USD,2026-06-15",
+      "INV-QA-3,JOB-QA-3,issued,10000,USD,2026-06-15",
+      "INV-QA-4,JOB-QA-4,issued,10000,USD,2026-06-15",
+      "INV-QA-5,JOB-QA-5,issued,10000,USD,2026-06-15",
+    ].join("\n"),
   );
   fs.writeFileSync(
     changesPath,
@@ -177,6 +195,9 @@ try {
   await page.getByLabel("Customers file").setInputFiles(customersPath);
   await page.getByLabel("Estimates file").setInputFiles(estimatesPath);
   await page.getByLabel("Activities file").setInputFiles(activitiesPath);
+  const selectedQuoteFiles = await page.locator('#canonical-intake-form input[type="file"]').evaluateAll((inputs) => inputs.map((input) => input.files?.[0]?.name).filter(Boolean));
+  if (selectedQuoteFiles.length !== 3) throw new Error(`Expected 3 selected quote files, found ${selectedQuoteFiles.join(", ") || "none"}.`);
+  await page.waitForTimeout(250);
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "mapping-failure.png"), fullPage: true });
@@ -199,6 +220,7 @@ try {
   await page.getByLabel("Invoices file").setInputFiles(invoicesPath);
   await page.getByLabel("Change orders file").setInputFiles(changesPath);
   await page.getByLabel("Costs file").setInputFiles(costsPath);
+  await page.waitForTimeout(250);
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 });
   await page.getByLabel(/I reviewed each mapping/).check();
@@ -264,6 +286,24 @@ try {
     throw new Error("Workspace-scoped CSV export failed.");
   }
 
+  await page.goto("/app/history", { waitUntil: "networkidle" });
+  if (!(await page.getByText("Turn recurring reads into one guarded weekly decision.").isVisible())) {
+    throw new Error("Growth intelligence headline missing.");
+  }
+  if (!(await page.getByText(/Review .* first\./).first().isVisible())) {
+    throw new Error(`Sample-guarded weekly decision missing. BODY=${(await page.locator("body").innerText()).slice(-1800)}`);
+  }
+  if (!(await page.getByText("Source, owner and service concentration.").isVisible())) {
+    throw new Error("Growth segmentation surface missing.");
+  }
+  const pdfResponse = await context.request.get("/app/history/report.pdf");
+  const pdfBytes = await pdfResponse.body();
+  if (pdfResponse.status() !== 200 || pdfResponse.headers()["content-type"] !== "application/pdf" || pdfBytes.subarray(0, 4).toString() !== "%PDF") {
+    throw new Error(`Growth executive PDF failed. status=${pdfResponse.status()} content-type=${pdfResponse.headers()["content-type"]}`);
+  }
+  fs.writeFileSync(path.join(evidenceDir, "sprint-10-growth-report.pdf"), pdfBytes);
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-10-growth-desktop.png"), fullPage: true });
+
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto("/app/dashboard", { waitUntil: "networkidle" });
   if (!(await page.getByText("See what may still be recoverable").isVisible())) {
@@ -279,13 +319,20 @@ try {
   );
   if (horizontalOverflow > 1) throw new Error(`Revenue Realization mobile overflow: ${horizontalOverflow}px`);
   await page.screenshot({ path: path.join(evidenceDir, "sprint-9-findings-mobile.png"), fullPage: true });
+  await page.goto("/app/history", { waitUntil: "networkidle" });
+  if (!(await page.getByText("Turn recurring reads into one guarded weekly decision.").isVisible())) {
+    throw new Error("Mobile Growth intelligence headline missing.");
+  }
+  const growthOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  if (growthOverflow > 1) throw new Error(`Growth intelligence mobile overflow: ${growthOverflow}px`);
+  await page.screenshot({ path: path.join(evidenceDir, "sprint-10-growth-mobile.png"), fullPage: true });
   if (await page.locator("[data-nextjs-dialog],.vite-error-overlay").count()) {
     throw new Error("Framework error overlay detected.");
   }
   if (errors.length) throw new Error(`Browser console errors: ${errors.join(" | ")}`);
   await context.close();
   console.log(
-    "Sprint 4 plus Sprints 7-9 authenticated browser: login, assisted imports, Data Quality, dashboard, persisted Tier 2 findings, dedicated evidence, executive report, idempotent rerun and mobile: PASS",
+    "Sprint 4 plus Sprints 7-10 authenticated browser: login, assisted imports, Data Quality, dashboard, Tier 2 findings, guarded Growth decision, PDF, idempotent snapshots and mobile: PASS",
   );
 } finally {
   if (browser) await browser.close().catch(() => {});

@@ -4,12 +4,7 @@ import { useRef, useState, useTransition } from "react";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
 import { canonicalFields } from "@/services/canonical-intake/definitions";
-import {
-  importCanonicalFiles,
-  reviewCanonicalFiles,
-  type CanonicalImportActionState,
-  type CanonicalReviewActionState,
-} from "@/src/app/(app)/app/imports/canonical-actions";
+import type { CanonicalImportActionState, CanonicalReviewActionState } from "@/src/app/(app)/app/imports/canonical-actions";
 
 const activeDatasets = [
   ["CUSTOMER", "Customers", "Customer identity and contact context", "QUOTE_RECOVERY"],
@@ -48,15 +43,17 @@ export function CanonicalImportPanel() {
   );
   const [pending, startTransition] = useTransition();
 
-  function submitReview() {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.set("sourceSystem", sourceSystem);
-      for (const [entityType, file] of Object.entries(selectedFiles.current)) {
-        if (file) formData.set(`file_${entityType}`, file);
+  function submitReview(submittedFormData: FormData) {
+    for (const [entityType] of activeDatasets) {
+      const submitted = submittedFormData.get(`file_${entityType}`);
+      if (submitted && typeof submitted !== "string" && submitted.size > 0) {
+        selectedFiles.current[entityType] = submitted;
       }
+    }
+    startTransition(async () => {
       setImportState(initialCanonicalImportActionState);
-      setReview(await reviewCanonicalFiles(formData));
+      const response = await fetch("/api/canonical-intake/review", { body: submittedFormData, method: "POST" });
+      setReview(await response.json() as CanonicalReviewActionState);
     });
   }
 
@@ -78,7 +75,8 @@ export function CanonicalImportPanel() {
       for (const file of review?.files ?? []) {
         formData.set(`mapping_${file.entityType}`, JSON.stringify(file.mapping));
       }
-      setImportState(await importCanonicalFiles(initialCanonicalImportActionState, formData));
+      const response = await fetch("/api/canonical-intake/import", { body: formData, method: "POST" });
+      setImportState(await response.json() as CanonicalImportActionState);
     });
   }
 
@@ -106,7 +104,7 @@ export function CanonicalImportPanel() {
   return (
     <section className="rev-shell-panel rounded-[28px] p-6 md:p-7">
       <div className="max-w-3xl space-y-3">
-        <p className="rev-kicker">Canonical secure intake · Sprint 9 local product gate</p>
+        <p className="rev-kicker">Canonical secure intake · Sprint 10 local product gate</p>
         <h2 className="rev-display-section">Profile, review, then commit the evidence.</h2>
         <p className="text-sm leading-6 text-[color:var(--text-muted)]">
           REVORY profiles structure and headers deterministically. Optional AI may suggest
