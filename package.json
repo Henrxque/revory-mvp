@@ -9,6 +9,9 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "env:check": "node scripts/check-environment-consistency.mjs",
+    "email:check": "node scripts/check-resend-readiness.mjs",
+    "email:smoke": "node scripts/smoke-resend-delivery.mjs",
+    "qa:email": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-resend-email.ts",
     "qa:clean-rerun": "node scripts/run-clean-rerun.mjs",
     "qa:revenue-leaks": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-revenue-leak-engine.ts",
     "qa:revenue-leak-read": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-revenue-leak-read.ts",
@@ -62,6 +65,7 @@
     "playwright": "^1.58.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^6.17.2",
     "stripe": "^22.0.0"
   },
   "devDependencies": {

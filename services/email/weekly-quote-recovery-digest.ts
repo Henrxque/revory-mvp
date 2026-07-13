@@ -2,7 +2,12 @@ import "server-only";
 
 import { prisma } from "@/db/prisma";
 import { getGrowthAccess } from "@/services/billing/growth-access";
-import { getTransactionalEmailConfig } from "@/services/email/transactional-email";
+import {
+  createEmailIdempotencyKey,
+  escapeEmailHtml,
+  getTransactionalEmailConfig,
+  sendTransactionalEmail,
+} from "@/services/email/transactional-email";
 import { buildCurrentGrowthIntelligence } from "@/services/growth-intelligence/snapshots";
 import { getQuoteRecoveryMovement } from "@/services/quote-recovery/movement";
 
@@ -37,24 +42,20 @@ export async function sendWeeklyGrowthDigest(workspaceId: string) {
   const calculatedLabel = calculatedGap === null
     ? "suppressed (mixed currencies)"
     : money(calculatedGap, currency);
-  const response = await fetch("https://api.resend.com/emails", {
-    body: JSON.stringify({
-      from: config.from,
-      html: `<h1>Weekly management decision</h1><p><strong>${providerDecisionHeadline}</strong></p><p>${providerDecisionRationale}</p><h2>Movement</h2><p><strong>${movement.newCount}</strong> new &middot; <strong>${movement.persistentCount}</strong> persistent &middot; <strong>${movement.worseningCount}</strong> worsening &middot; <strong>${movement.resolvedCount}</strong> resolved.</p><p>Customer-confirmed recovered: <strong>${money(movement.recoveredValueCents)}</strong>.<br/>Calculated billing gap: <strong>${calculatedLabel}</strong>.</p><p>Review source evidence in REVORY before acting.</p>`,
-      subject: "Your weekly REVORY management decision",
-      text: `Weekly decision: ${providerDecisionHeadline}\n${providerDecisionRationale}\n\nQuote Recovery movement\nNew: ${movement.newCount}\nPersistent: ${movement.persistentCount}\nWorsening: ${movement.worseningCount}\nResolved: ${movement.resolvedCount}\nCustomer-confirmed recovered: ${money(movement.recoveredValueCents)}\nCalculated billing gap: ${calculatedLabel}\n\nReview source evidence in REVORY before acting.`,
-      to: workspace.owner.email,
-    }),
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-      "Idempotency-Key": `revory-growth-weekly-${workspaceId}-${new Date().toISOString().slice(0, 10)}`,
-    },
-    method: "POST",
+  const safeHeadline = escapeEmailHtml(providerDecisionHeadline);
+  const safeRationale = escapeEmailHtml(providerDecisionRationale);
+  const safeCalculatedLabel = escapeEmailHtml(calculatedLabel);
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const delivery = await sendTransactionalEmail({
+    html: `<h1>Weekly management decision</h1><p><strong>${safeHeadline}</strong></p><p>${safeRationale}</p><h2>Movement</h2><p><strong>${movement.newCount}</strong> new &middot; <strong>${movement.persistentCount}</strong> persistent &middot; <strong>${movement.worseningCount}</strong> worsening &middot; <strong>${movement.resolvedCount}</strong> resolved.</p><p>Customer-confirmed recovered: <strong>${money(movement.recoveredValueCents)}</strong>.<br/>Calculated billing gap: <strong>${safeCalculatedLabel}</strong>.</p><p>Review source evidence in REVORY before acting.</p>`,
+    idempotencyKey: createEmailIdempotencyKey("weekly-growth", `${workspaceId}:${dateKey}`),
+    subject: "Your weekly REVORY management decision",
+    text: `Weekly decision: ${providerDecisionHeadline}\n${providerDecisionRationale}\n\nQuote Recovery movement\nNew: ${movement.newCount}\nPersistent: ${movement.persistentCount}\nWorsening: ${movement.worseningCount}\nResolved: ${movement.resolvedCount}\nCustomer-confirmed recovered: ${money(movement.recoveredValueCents)}\nCalculated billing gap: ${calculatedLabel}\n\nReview source evidence in REVORY before acting.`,
+    to: workspace.owner.email,
   });
-  if (!response.ok) {
-    console.error(JSON.stringify({ level: "error", message: "weekly_growth_digest_failed", status: response.status, workspaceId }));
-    return { reason: "PROVIDER_ERROR" as const, sent: false };
+  if (!delivery.sent) {
+    console.error(JSON.stringify({ level: "error", message: "weekly_growth_digest_failed", reason: delivery.reason, workspaceId }));
+    return { reason: delivery.reason ?? "PROVIDER_ERROR" as const, sent: false };
   }
   await prisma.quoteRecoveryDigestPreference.update({ data: { lastSentAt: new Date() }, where: { workspaceId } });
   console.log(JSON.stringify({ level: "info", message: "weekly_growth_digest_sent", workspaceId }));
