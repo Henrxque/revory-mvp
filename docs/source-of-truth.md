@@ -1,6 +1,6 @@
 # REVORY — Source of Truth
 
-> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-11.
+> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-12.
 
 ## Product identity
 
@@ -47,7 +47,9 @@ As of the local implementation on 2026-07-12:
 - protected idempotent retention enforcement is implemented and locally tested, but deployment scheduling is not verified;
 - dedicated Audit/Starter entitlement and checkout code exists, but Stripe sandbox configuration and end-to-end payment evidence are missing;
 - the Starter paid-beta gate remains closed until Stripe, email delivery and production operational checks pass;
-- jobs, invoices, change orders, underbilling and margin intelligence are not implemented;
+- jobs, invoices, change orders and costs now have canonical assisted ingestion, explicit matching and a locally verified deterministic reconciliation ledger;
+- ambiguous links, incomplete bases and currency conflicts suppress financial output; no fuzzy name/amount matching is used;
+- change-order, underbilling and margin findings, the Full Revenue Leak Audit and Growth/Pro packaging remain unimplemented and gated behind Sprint 9 or later;
 - no hybrid offer is yet eligible for public sale from this repository;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 

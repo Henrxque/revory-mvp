@@ -1,11 +1,12 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 
 import { chromium } from "playwright";
 
 const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3003";
-const dir = path.join(process.cwd(), ".tmp", "sprint-4-1");
+const dir = path.join(os.tmpdir(), "revory-sprint-4-1");
 const qaDistDir = path.join(process.cwd(), ".next-landing-qa");
 fs.mkdirSync(dir, { recursive: true });
 let serverProcess = null;
@@ -129,7 +130,15 @@ try {
           transform: getComputedStyle(element).transform,
         }),
       );
-      await firstSignal.hover();
+      await firstSignal.scrollIntoViewIfNeeded();
+      const signalBox = await firstSignal.boundingBox();
+      if (!signalBox) throw new Error("Signal card has no browser box.");
+      await page.mouse.move(1, 1);
+      await page.mouse.move(
+        signalBox.x + signalBox.width / 2,
+        signalBox.y + signalBox.height / 2,
+        { steps: 12 },
+      );
       await page.waitForTimeout(900);
       const afterHover = await firstSignal.evaluate(
         (element) => ({
@@ -137,6 +146,8 @@ try {
           transform: getComputedStyle(element).transform,
         }),
       );
+      const isHovered = await firstSignal.evaluate((element) => element.matches(":hover"));
+      if (!isHovered) throw new Error("Browser pointer did not enter the signal card.");
       if (
         beforeHover.boxShadow === afterHover.boxShadow ||
         beforeHover.transform === afterHover.transform

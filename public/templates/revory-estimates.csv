@@ -1,2 +1,2 @@
-externalId,customerExternalId,leadExternalId,jobExternalId,status,amountCents,createdAt,sentAt,closedAt,lostAt,lastActivityAt,nextFollowUpAt,owner,nextStep,currency
-EST-001,CUST-001,LEAD-001,,open,1250000,2026-07-01T14:00:00Z,2026-07-01T15:00:00Z,,,2026-07-02T14:00:00Z,2026-07-10T14:00:00Z,Example Owner,Review quote,USD
+externalId,customerExternalId,leadExternalId,jobExternalId,status,estimateAmount,createdAt,sentAt,closedAt,lostAt,lastActivityAt,nextFollowUpAt,owner,nextStep,currency
+EST-001,CUST-001,LEAD-001,,open,12500.00,2026-07-01T14:00:00Z,2026-07-01T15:00:00Z,,,2026-07-02T14:00:00Z,2026-07-10T14:00:00Z,Example Owner,Review quote,USD

@@ -48,11 +48,19 @@ async function readSubmittedFiles(formData: FormData) {
   }> = [];
   for (const entityType of canonicalEntityTypes) {
     const value = formData.get(`file_${entityType}`);
-    if (!(value instanceof File) || value.size === 0) continue;
+    if (
+      typeof value === "string" ||
+      !value ||
+      typeof value.arrayBuffer !== "function" ||
+      value.size === 0
+    ) continue;
+    const fileName = typeof value.name === "string" && value.name.trim()
+      ? value.name
+      : `${entityType.toLowerCase()}.csv`;
     files.push({
       bytes: new Uint8Array(await value.arrayBuffer()),
       entityType,
-      fileName: value.name,
+      fileName,
       mimeType: value.type,
     });
   }
@@ -200,6 +208,7 @@ export async function importCanonicalFiles(
     if (result.created) await createQuoteRecoveryAnalysisRun(context.workspace.id);
     revalidatePath("/app/imports");
     revalidatePath("/app/dashboard");
+    revalidatePath("/app/revenue-realization");
     return {
       status: "committed",
       message: result.created

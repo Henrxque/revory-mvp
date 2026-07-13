@@ -38,3 +38,7 @@ All browser harnesses start isolated local Next.js instances with a local-only d
 - Sprint 6 paid-beta gate: **BLOCKED** on Stripe, email, final-domain auth and production operational evidence.
 
 Recommendation: **ready for founder manual product testing; not ready for paid sandbox sign-off or paid beta**. The next authorized work should be the external checklist, not Sprint 7.
+
+## Subsequent authorization
+
+After this closure report, the founder explicitly authorized local implementation of Sprints 7 and 8. That authorization does not change the BLOCKED external/commercial gates recorded above and does not authorize Sprint 9 findings, pricing activation or production changes.

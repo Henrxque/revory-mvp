@@ -5,6 +5,7 @@ import type { CanonicalEntityType, CanonicalRecordContract } from "@/domain/revo
 import { assertWorkspaceScopedRecord } from "@/domain/revory/contracts";
 import { parseCanonicalCsv } from "@/services/canonical-intake/csv-profile";
 import { canonicalFields, quoteRecoveryEligibility } from "@/services/canonical-intake/definitions";
+import { buildRevenueRealizationRead } from "@/services/revenue-realization/reconciliation-engine";
 
 export const CANONICAL_MAX_FILES = 8;
 export const CANONICAL_MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -77,7 +78,11 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
     }
   }
   const availableEstimateFields = new Set(records.filter((r) => r.entityType === "ESTIMATE").flatMap((r) => Object.entries(r.payload).filter(([, v]) => v !== null).map(([k]) => k)));
-  const eligibility = Object.fromEntries(Object.entries(quoteRecoveryEligibility).map(([rule, required]) => { const missingFields = required.filter((field) => !availableEstimateFields.has(field)); return [rule, { eligible: missingFields.length === 0, missingFields }]; }));
+  const quoteEligibility = Object.fromEntries(Object.entries(quoteRecoveryEligibility).map(([rule, required]) => { const missingFields = required.filter((field) => !availableEstimateFields.has(field)); return [rule, { eligible: missingFields.length === 0, missingFields }]; }));
+  const realizationEligibility = records.length
+    ? buildRevenueRealizationRead(records).eligibility
+    : {};
+  const eligibility = { ...quoteEligibility, ...realizationEligibility };
   const knownIds = new Set(records.map((r) => `${r.entityType}:${r.externalId}`)); let linked = 0, unmatched = 0;
   for (const record of records) for (const [field, id] of Object.entries(record.relationExternalIds)) { const type = field.replace("ExternalId", "").replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase(); if (knownIds.has(`${type}:${id}`)) linked += 1; else unmatched += 1; }
   const duplicates = records.length - new Set(records.map((r) => `${r.entityType}:${r.sourceSystem}:${r.externalId}`)).size;

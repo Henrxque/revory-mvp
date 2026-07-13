@@ -1,10 +1,11 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 
 const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3002";
-const outputDir = path.join(process.cwd(), ".tmp", "public-demo");
+const outputDir = path.join(os.tmpdir(), "revory-public-demo");
 const qaDistDir = path.join(process.cwd(), ".next-demo-qa");
 fs.mkdirSync(outputDir, { recursive: true });
 let serverProcess = null;

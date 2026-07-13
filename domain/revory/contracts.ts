@@ -47,6 +47,18 @@ export type QuoteRecoveryFindingContract = {
   evidence: Array<{ field: string; value: string | number | null; provenance: RecordProvenance }>;
 };
 
+export type RevenueRealizationRuleKey =
+  | "JOB_BILLING_RECONCILIATION"
+  | "APPROVED_CHANGE_ORDER_BASIS"
+  | "COST_REVENUE_BASIS";
+
+export type ExplicitMatchState = "MATCHED" | "UNMATCHED" | "CONFLICT";
+
+export type RevenueRealizationEligibility = Record<
+  RevenueRealizationRuleKey,
+  { eligible: boolean; missingFields: string[] }
+>;
+
 export const entityRelationships: Record<CanonicalEntityType, readonly string[]> = {
   CUSTOMER: [],
   LEAD: ["customerExternalId"],

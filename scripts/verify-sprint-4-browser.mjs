@@ -1,6 +1,7 @@
 import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -17,7 +18,7 @@ const authSubject = `qa|${runId}`;
 const email = `${runId}@example.invalid`;
 const password = "Sprint4-QA-Password";
 let baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3001";
-const evidenceDir = path.join(process.cwd(), ".tmp", "sprint-4");
+const evidenceDir = path.join(os.tmpdir(), "revory-sprint-4");
 const fixtureDir = path.join(evidenceDir, "fixtures");
 const qaDistDir = path.join(process.cwd(), ".next-qa");
 fs.mkdirSync(fixtureDir, { recursive: true });
@@ -112,6 +113,10 @@ try {
   const customersPath = path.join(fixtureDir, "customers.csv");
   const estimatesPath = path.join(fixtureDir, "estimates.csv");
   const activitiesPath = path.join(fixtureDir, "activities.csv");
+  const jobsPath = path.join(fixtureDir, "jobs.csv");
+  const invoicesPath = path.join(fixtureDir, "invoices.csv");
+  const changesPath = path.join(fixtureDir, "change-orders.csv");
+  const costsPath = path.join(fixtureDir, "costs.csv");
   fs.writeFileSync(
     customersPath,
     "Customer ID,Customer Name,Email Address\nCUS-QA-1,Sample Contractor,owner@example.invalid\n",
@@ -131,6 +136,22 @@ try {
       "ACT-QA-1,EST-QA-1,2026-01-10,email,No reply,Review evidence",
       "ACT-QA-2,EST-QA-2,2026-02-04,call,No reply,Follow up",
     ].join("\n"),
+  );
+  fs.writeFileSync(
+    jobsPath,
+    "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Completion Date\nJOB-QA-1,completed,100000,false,USD,2026-06-30\n",
+  );
+  fs.writeFileSync(
+    invoicesPath,
+    "Invoice Number,Project ID,Billing Status,Invoice Total,Currency,Invoice Date\nINV-QA-1,JOB-QA-1,issued,60000,USD,2026-06-15\n",
+  );
+  fs.writeFileSync(
+    changesPath,
+    "CO ID,Project ID,Approval Status,Approved Value,Currency,Approval Date\nCO-QA-1,JOB-QA-1,approved,10000,USD,2026-06-10\n",
+  );
+  fs.writeFileSync(
+    costsPath,
+    "Expense ID,Project ID,Actual Cost,Currency,Expense Date,Expense Category\nCOST-QA-1,JOB-QA-1,40000,USD,2026-06-20,materials\n",
   );
 
   await ensureLocalQaServer();
@@ -156,6 +177,13 @@ try {
   await page.getByLabel("Customers file").setInputFiles(customersPath);
   await page.getByLabel("Estimates file").setInputFiles(estimatesPath);
   await page.getByLabel("Activities file").setInputFiles(activitiesPath);
+  await page.waitForTimeout(300);
+  const selectedQuoteFiles = await page.locator('input[type="file"]').evaluateAll((inputs) =>
+    inputs.filter((input) => input.files?.length).map((input) => input.files?.[0]?.name),
+  );
+  if (selectedQuoteFiles.length !== 3) {
+    throw new Error(`Browser did not retain the selected Quote Recovery files: ${selectedQuoteFiles.join(", ")}`);
+  }
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "mapping-failure.png"), fullPage: true });
@@ -165,8 +193,36 @@ try {
   });
   await page.getByLabel(/I reviewed each mapping/).check();
   await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
-  await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 });
+  await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 }).catch(async () => {
+    await page.screenshot({ path: path.join(evidenceDir, "commit-failure.png"), fullPage: true });
+    throw new Error(
+      `Canonical commit did not complete. BODY=${(await page.locator("body").innerText()).slice(-2_200)} SERVER=${serverLogs}`,
+    );
+  });
   await page.screenshot({ path: path.join(evidenceDir, "imports-desktop.png"), fullPage: true });
+
+  await page.goto("/app/imports", { waitUntil: "networkidle" });
+  await page.getByLabel("Jobs file").setInputFiles(jobsPath);
+  await page.getByLabel("Invoices file").setInputFiles(invoicesPath);
+  await page.getByLabel("Change orders file").setInputFiles(changesPath);
+  await page.getByLabel("Costs file").setInputFiles(costsPath);
+  await page.getByRole("button", { name: "Profile files and review mapping" }).click();
+  await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 });
+  await page.getByLabel(/I reviewed each mapping/).check();
+  await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
+  await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 });
+
+  await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
+  if (!(await page.getByText("Reconcile only what explicit source evidence can support.").isVisible())) {
+    throw new Error("Revenue Realization reconciliation headline missing.");
+  }
+  if (!(await page.getByText("$50,000.00").first().isVisible())) {
+    throw new Error("Reconstructable calculated billing difference missing.");
+  }
+  if (!(await page.getByText("Every explicit link resolves to exactly one record.").isVisible())) {
+    throw new Error("Explicit matching review did not resolve fixture links.");
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "reconciliation-desktop.png"), fullPage: true });
 
   await page.goto("/app/dashboard", { waitUntil: "networkidle" });
   if (!(await page.getByText("See what may still be recoverable").isVisible())) {
@@ -198,13 +254,22 @@ try {
     throw new Error("Mobile dashboard headline missing.");
   }
   await page.screenshot({ path: path.join(evidenceDir, "dashboard-mobile.png"), fullPage: true });
+  await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
+  if (!(await page.getByText("Reconcile only what explicit source evidence can support.").isVisible())) {
+    throw new Error("Mobile Revenue Realization headline missing.");
+  }
+  const horizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  if (horizontalOverflow > 1) throw new Error(`Revenue Realization mobile overflow: ${horizontalOverflow}px`);
+  await page.screenshot({ path: path.join(evidenceDir, "reconciliation-mobile.png"), fullPage: true });
   if (await page.locator("[data-nextjs-dialog],.vite-error-overlay").count()) {
     throw new Error("Framework error overlay detected.");
   }
   if (errors.length) throw new Error(`Browser console errors: ${errors.join(" | ")}`);
   await context.close();
   console.log(
-    "Sprint 4 authenticated browser: credentials login, assisted import, Data Quality, dashboard, evidence, disposition, export and mobile: PASS",
+    "Sprint 4 plus Sprints 7-8 authenticated browser: login, assisted imports, Data Quality, dashboard, evidence, disposition, export, explicit reconciliation and mobile: PASS",
   );
 } finally {
   if (browser) await browser.close().catch(() => {});

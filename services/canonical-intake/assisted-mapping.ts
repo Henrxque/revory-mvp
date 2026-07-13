@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 
-import type { CanonicalEntityType } from "@/domain/revory/contracts";
+import { canonicalEntityTypes, type CanonicalEntityType } from "@/domain/revory/contracts";
 import { canonicalFields } from "@/services/canonical-intake/definitions";
 import { parseCanonicalCsv, type SafeCsvDelimiter } from "@/services/canonical-intake/csv-profile";
 
@@ -31,7 +31,7 @@ export type CanonicalMappingReview = {
   rowCount: number;
 };
 
-const ACTIVE_ENTITY_TYPES = ["CUSTOMER", "LEAD", "ESTIMATE", "ACTIVITY"] as const;
+const ACTIVE_ENTITY_TYPES = canonicalEntityTypes;
 
 const aliases: Record<CanonicalEntityType, Record<string, readonly string[]>> = {
   CUSTOMER: {
@@ -76,10 +76,48 @@ const aliases: Record<CanonicalEntityType, Record<string, readonly string[]>> = 
     outcome: ["outcome", "result", "status"],
     nextStep: ["next step", "next action"],
   },
-  JOB: {},
-  INVOICE: {},
-  CHANGE_ORDER: {},
-  COST: {},
+  JOB: {
+    externalId: ["external id", "job id", "project id", "work order id", "id"],
+    customerExternalId: ["customer id", "client id", "customer external id"],
+    estimateExternalId: ["estimate id", "quote id", "proposal id", "estimate external id"],
+    status: ["job status", "project status", "status"],
+    contractValueCents: ["contract value", "job value", "project value", "contract amount", "job total", "amount"],
+    contractValueIncludesApprovedChanges: ["contract includes changes", "includes approved changes", "revised contract value", "change orders included"],
+    currency: ["currency", "currency code"],
+    startedAt: ["started at", "start date", "job start", "project start"],
+    completedAt: ["completed at", "completion date", "job completed", "project completed"],
+  },
+  INVOICE: {
+    externalId: ["external id", "invoice id", "invoice number", "bill id", "id"],
+    customerExternalId: ["customer id", "client id", "customer external id"],
+    jobExternalId: ["job id", "project id", "work order id", "job external id"],
+    estimateExternalId: ["estimate id", "quote id", "proposal id", "estimate external id"],
+    status: ["invoice status", "billing status", "status"],
+    amountCents: ["invoice amount", "invoice total", "billed amount", "bill amount", "amount", "total"],
+    currency: ["currency", "currency code"],
+    issuedAt: ["issued at", "invoice date", "issued date", "bill date"],
+    paidAt: ["paid at", "paid date", "payment date"],
+    dueAt: ["due at", "due date", "payment due"],
+  },
+  CHANGE_ORDER: {
+    externalId: ["external id", "change order id", "change order number", "co id", "id"],
+    jobExternalId: ["job id", "project id", "work order id", "job external id"],
+    estimateExternalId: ["estimate id", "quote id", "proposal id", "estimate external id"],
+    invoiceExternalId: ["invoice id", "invoice number", "invoice external id"],
+    status: ["change order status", "approval status", "status"],
+    approvedAmountCents: ["approved amount", "change order amount", "approved value", "co amount", "amount"],
+    currency: ["currency", "currency code"],
+    approvedAt: ["approved at", "approval date", "approved date"],
+  },
+  COST: {
+    externalId: ["external id", "cost id", "expense id", "transaction id", "id"],
+    jobExternalId: ["job id", "project id", "work order id", "job external id"],
+    invoiceExternalId: ["invoice id", "invoice number", "invoice external id"],
+    amountCents: ["cost amount", "expense amount", "actual cost", "amount", "total"],
+    currency: ["currency", "currency code"],
+    incurredAt: ["incurred at", "cost date", "expense date", "transaction date", "date"],
+    category: ["cost category", "expense category", "category", "type"],
+  },
 };
 
 function normalizeHeader(value: string) {

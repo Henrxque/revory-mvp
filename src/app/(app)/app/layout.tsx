@@ -49,19 +49,27 @@ export default async function PrivateAppLayout({
     redirect("/start");
   }
 
-  const canonicalRecordCount = await prisma.canonicalRecord.count({
-    where: { workspaceId: workspace.id },
-  });
+  const [quoteRecoveryRecordCount, realizationRecordCount] = await Promise.all([
+    prisma.canonicalRecord.count({
+      where: { entityType: { in: ["CUSTOMER", "LEAD", "ESTIMATE", "ACTIVITY"] }, workspaceId: workspace.id },
+    }),
+    prisma.canonicalRecord.count({
+      where: { entityType: { in: ["JOB", "INVOICE", "CHANGE_ORDER", "COST"] }, workspaceId: workspace.id },
+    }),
+  ]);
+  const canonicalRecordCount = quoteRecoveryRecordCount + realizationRecordCount;
   const hasCanonicalData = canonicalRecordCount > 0;
   const bookingInputsStatus = hasCanonicalData
     ? "Data visible"
     : "Data needed";
-  const currentStepTitle = hasCanonicalData
-    ? "Quote Recovery ready"
-    : "Import evidence";
+  const currentStepTitle = realizationRecordCount > 0
+    ? "Reconciliation preview"
+    : hasCanonicalData
+      ? "Quote Recovery ready"
+      : "Import evidence";
   const activationStatus = hasCanonicalData ? "Read ready" : "Import needed";
   const workspaceSubtitle = hasCanonicalData
-    ? `${canonicalRecordCount} canonical records support the current Quote Recovery read.`
+    ? `${quoteRecoveryRecordCount} Quote Recovery records · ${realizationRecordCount} reconciliation records visible.`
     : "Add customer, estimate and activity exports to prepare the first Quote Recovery read.";
   const currentPlanSignal =
     billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";

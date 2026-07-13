@@ -101,7 +101,7 @@ const faq = [
   ],
   [
     "What about invoices, change orders, underbilling and margin?",
-    "Those belong to the Revenue Realization roadmap. They remain gated until ingestion, matching and reconciliation pass their own release tests.",
+    "Jobs, invoices, change orders and costs can now be ingested and reconciled in the internal product. Premium findings, Full Revenue Leak Audit claims and pricing remain gated until Sprint 9 rule and report tests pass.",
   ],
   [
     "Is the US$799 audit available now?",
@@ -271,7 +271,7 @@ export default async function HomePage() {
             />
             <RoadmapCard
               gated
-              text="Invoice reconciliation, approved change orders, deterministic underbilling and margin-risk findings require Sprints 7–11."
+              text="Canonical ingestion and explicit reconciliation are implemented locally. Change-order, underbilling and margin findings still require Sprints 9–11 and their commercial gates."
               title="Roadmap — not sold as current capability"
             />
           </div>

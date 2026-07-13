@@ -1,2 +1,2 @@
-externalId,customerExternalId,estimateExternalId,status,contractValueCents,startedAt,completedAt
-JOB-001,CUST-001,EST-001,in_progress,1250000,2026-07-15T14:00:00Z,
+externalId,customerExternalId,estimateExternalId,status,contractValue,contractValueIncludesApprovedChanges,currency,startedAt,completedAt
+JOB-001,CUST-001,EST-001,completed,12500.00,false,USD,2026-07-15T14:00:00Z,2026-08-15T14:00:00Z

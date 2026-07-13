@@ -19,6 +19,7 @@ type SidebarIconKey =
   | "dashboard"
   | "signals"
   | "imports"
+  | "reconciliation"
   | "billing"
   | "history"
   | "settings";
@@ -64,6 +65,11 @@ const navGroups = (
           icon: "imports",
           label: "Data Imports",
           status: bookingInputsStatus,
+        },
+        {
+          href: demoMode ? "#demo-data" : "/app/revenue-realization",
+          icon: "reconciliation",
+          label: "Revenue Realization",
         },
         { href: demoMode ? "#demo-history" : "/app/history", icon: "history", label: "Analysis history" },
       ],
@@ -118,6 +124,15 @@ function SidebarIcon({ icon }: Readonly<{ icon: SidebarIconKey }>) {
           <path d="M12 16V5" />
           <path d="M17 16v-4" />
           <path d="m8.5 8.5 3-3 3 4 3-2.5" />
+        </svg>
+      );
+    case "reconciliation":
+      return (
+        <svg {...sharedProps}>
+          <path d="M4 7h12" />
+          <path d="m13 4 3 3-3 3" />
+          <path d="M20 17H8" />
+          <path d="m11 14-3 3 3 3" />
         </svg>
       );
     case "settings":
@@ -199,14 +214,15 @@ export function AppSidebar({
       <div className="border-b border-[color:var(--border)] px-4 py-3 lg:px-5 lg:py-5">
         <RevoryLogo compact />
         <p className="mt-3 hidden text-[10px] font-semibold uppercase leading-5 tracking-[0.18em] text-[color:var(--text-subtle)] lg:block">
-          Quote Recovery evidence and next review
+          Evidence and reconciliation review
         </p>
       </div>
 
-      <nav aria-label="Mobile workspace navigation" className="grid grid-cols-4 gap-1 p-2 lg:hidden">
+      <nav aria-label="Mobile workspace navigation" className="grid grid-cols-5 gap-1 p-2 lg:hidden">
         {[
           [demoMode ? "#demo-dashboard" : "/app/dashboard", "dashboard", "Read"],
           [demoMode ? "#demo-leaks" : "/app/revenue-leaks", "signals", "Findings"],
+          [demoMode ? "#demo-data" : "/app/revenue-realization", "reconciliation", "Realize"],
           [demoMode ? "#demo-data" : "/app/imports", "imports", "Imports"],
           [demoMode ? "#demo-settings" : "/app/settings", "settings", "Settings"],
         ].map(([href, icon, label]) => (

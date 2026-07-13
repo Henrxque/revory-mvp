@@ -42,7 +42,7 @@ const offers = [
   },
   {
     description:
-      "Estimate-to-realized-revenue reconciliation after jobs, invoices and change-order gates pass.",
+      "Local reconciliation substrate exists; Full Audit access remains gated until Tier 2 rule and report gates pass.",
     features: [
       "Explicit record matching",
       "Unmatched and conflict review",

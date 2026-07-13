@@ -12,16 +12,24 @@ import {
 } from "@/src/app/(app)/app/imports/canonical-actions";
 
 const activeDatasets = [
-  ["CUSTOMER", "Customers", "Customer identity and contact context"],
-  ["LEAD", "Leads", "Optional source, owner and lead-stage context"],
-  ["ESTIMATE", "Estimates", "Required for the current Quote Recovery read"],
-  ["ACTIVITY", "Activities", "Follow-up and recent-action evidence"],
-] as const satisfies ReadonlyArray<readonly [CanonicalEntityType, string, string]>;
+  ["CUSTOMER", "Customers", "Customer identity and contact context", "QUOTE_RECOVERY"],
+  ["LEAD", "Leads", "Optional source, owner and lead-stage context", "QUOTE_RECOVERY"],
+  ["ESTIMATE", "Estimates", "Required for the current Quote Recovery read", "QUOTE_RECOVERY"],
+  ["ACTIVITY", "Activities", "Follow-up and recent-action evidence", "QUOTE_RECOVERY"],
+  ["JOB", "Jobs", "Contract status, value and explicit estimate links", "REVENUE_REALIZATION"],
+  ["INVOICE", "Invoices", "Observed billing tied explicitly to jobs", "REVENUE_REALIZATION"],
+  ["CHANGE_ORDER", "Change orders", "Observed approval evidence and job links", "REVENUE_REALIZATION"],
+  ["COST", "Costs", "Observed job costs; never inferred margin", "REVENUE_REALIZATION"],
+] as const satisfies ReadonlyArray<readonly [CanonicalEntityType, string, string, "QUOTE_RECOVERY" | "REVENUE_REALIZATION"]>;
 
 const templateNames: Record<(typeof activeDatasets)[number][0], string> = {
   ACTIVITY: "activities",
+  CHANGE_ORDER: "change-orders",
+  COST: "costs",
   CUSTOMER: "customers",
   ESTIMATE: "estimates",
+  INVOICE: "invoices",
+  JOB: "jobs",
   LEAD: "leads",
 };
 
@@ -31,8 +39,8 @@ const initialCanonicalImportActionState: CanonicalImportActionState = {
 };
 
 export function CanonicalImportPanel() {
-  const fileInputs = useRef<Partial<Record<CanonicalEntityType, HTMLInputElement | null>>>({});
   const [sourceSystem, setSourceSystem] = useState("manual-export");
+  const selectedFiles = useRef<Partial<Record<CanonicalEntityType, File>>>({});
   const [review, setReview] = useState<CanonicalReviewActionState | null>(null);
   const [mappingConfirmed, setMappingConfirmed] = useState(false);
   const [importState, setImportState] = useState<CanonicalImportActionState>(
@@ -40,14 +48,33 @@ export function CanonicalImportPanel() {
   );
   const [pending, startTransition] = useTransition();
 
-  function buildCurrentFilesFormData() {
-    const formData = new FormData();
-    formData.set("sourceSystem", sourceSystem);
-    for (const [entityType] of activeDatasets) {
-      const file = fileInputs.current[entityType]?.files?.[0];
-      if (file) formData.set(`file_${entityType}`, file);
+  function submitReview(formData: FormData) {
+    startTransition(async () => {
+      setImportState(initialCanonicalImportActionState);
+      setReview(await reviewCanonicalFiles(formData));
+    });
+  }
+
+  function submitImport() {
+    if (!mappingConfirmed) {
+      setImportState({
+        message: "Check the explicit mapping confirmation before import.",
+        status: "error",
+      });
+      return;
     }
-    return formData;
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("sourceSystem", sourceSystem);
+      formData.set("mappingConfirmed", "yes");
+      for (const [entityType, file] of Object.entries(selectedFiles.current)) {
+        if (file) formData.set(`file_${entityType}`, file);
+      }
+      for (const file of review?.files ?? []) {
+        formData.set(`mapping_${file.entityType}`, JSON.stringify(file.mapping));
+      }
+      setImportState(await importCanonicalFiles(initialCanonicalImportActionState, formData));
+    });
   }
 
   function updateMapping(entityType: CanonicalEntityType, sourceHeader: string, target: string) {
@@ -74,7 +101,7 @@ export function CanonicalImportPanel() {
   return (
     <section className="rev-shell-panel rounded-[28px] p-6 md:p-7">
       <div className="max-w-3xl space-y-3">
-        <p className="rev-kicker">Canonical secure intake</p>
+        <p className="rev-kicker">Canonical secure intake · Sprints 7–8 local preview</p>
         <h2 className="rev-display-section">Profile, review, then commit the evidence.</h2>
         <p className="text-sm leading-6 text-[color:var(--text-muted)]">
           REVORY profiles structure and headers deterministically. Optional AI may suggest
@@ -96,66 +123,72 @@ export function CanonicalImportPanel() {
         ))}
       </div>
 
-      <label className="mt-5 block max-w-md text-sm font-semibold">
-        Source system
-        <input
-          className="rev-input-field mt-2 w-full"
-          maxLength={80}
-          onChange={(event) => {
-            setSourceSystem(event.target.value);
-            setReview(null);
-          }}
-          value={sourceSystem}
-        />
-      </label>
+      <form action={submitReview} className="mt-5 space-y-5" id="canonical-intake-form">
+        <label className="block max-w-md text-sm font-semibold">
+          Source system
+          <input
+            className="rev-input-field mt-2 w-full"
+            maxLength={80}
+            name="sourceSystem"
+            onChange={(event) => {
+              setSourceSystem(event.target.value);
+              setReview(null);
+            }}
+            value={sourceSystem}
+          />
+        </label>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {activeDatasets.map(([key, label, description]) => (
-          <label
-            className="rev-card-hover rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4 text-sm font-bold"
-            key={key}
-          >
-            {label}
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {activeDatasets.map(([key, label, description, layer]) => (
+            <label
+              className="rev-card-hover rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4 text-sm font-bold"
+              key={key}
+            >
+            <span className="flex items-center justify-between gap-2">
+              {label}
+              {layer === "REVENUE_REALIZATION" ? (
+                <span className="rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
+                  Reconciliation
+                </span>
+              ) : null}
+            </span>
             <span className="mt-1 block min-h-10 text-xs font-normal leading-5 text-[color:var(--text-muted)]">
               {description}
             </span>
-          <input
+            <input
               aria-label={`${label} file`}
               accept=".csv,.xlsx"
               className="mt-3 block w-full text-xs font-normal text-[color:var(--text-muted)]"
-              onChange={() => {
+              name={`file_${key}`}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) selectedFiles.current[key] = file;
+                else delete selectedFiles.current[key];
                 setReview(null);
                 setMappingConfirmed(false);
                 setImportState(initialCanonicalImportActionState);
               }}
-              ref={(element) => {
-                fileInputs.current[key] = element;
-              }}
               type="file"
             />
-          </label>
-        ))}
-      </div>
+            </label>
+          ))}
+        </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           className="rev-button-primary"
           disabled={pending}
-          onClick={() =>
-            startTransition(async () => {
-              setImportState(initialCanonicalImportActionState);
-              setReview(await reviewCanonicalFiles(buildCurrentFilesFormData()));
-            })
-          }
-          type="button"
+          type="submit"
         >
           {pending ? "Profiling…" : "Profile files and review mapping"}
         </button>
         <p className="max-w-xl text-xs leading-5 text-[color:var(--text-subtle)]">
-          Jobs, invoices, change orders and costs remain prepared contracts only. They do
-          not unlock Revenue Realization claims in the current product.
+          Jobs, invoices, change orders and costs now support local ingestion and
+          deterministic reconciliation review. They do not create premium findings or
+          unlock Revenue Realization pricing before Sprint 9.
         </p>
       </div>
+      </form>
 
       {review ? (
         <div className="mt-6 space-y-4">
@@ -249,25 +282,7 @@ export function CanonicalImportPanel() {
           <button
             className="rev-button-primary"
             disabled={pending || review.status !== "ready"}
-            onClick={() => {
-              if (!mappingConfirmed) {
-                setImportState({
-                  message: "Check the explicit mapping confirmation before import.",
-                  status: "error",
-                });
-                return;
-              }
-              startTransition(async () => {
-                const formData = buildCurrentFilesFormData();
-                formData.set("mappingConfirmed", "yes");
-                for (const file of review.files) {
-                  formData.set(`mapping_${file.entityType}`, JSON.stringify(file.mapping));
-                }
-                setImportState(
-                  await importCanonicalFiles(initialCanonicalImportActionState, formData),
-                );
-              });
-            }}
+            onClick={submitImport}
             type="button"
           >
             {pending ? "Validating and committing…" : "Confirm mapping and import atomically"}
