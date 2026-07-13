@@ -98,7 +98,7 @@ export async function ensureStripeCustomerForWorkspace(input: {
       workspaceId: input.workspaceId,
     },
     name: input.workspaceName,
-  });
+  }, { idempotencyKey: `revory-workspace-customer:${input.workspaceId}` });
 
   await prisma.workspace.update({
     where: {
@@ -191,7 +191,7 @@ export async function syncWorkspaceBillingFromInvoice(invoice: Stripe.Invoice) {
       id: workspace.id,
     },
     data: {
-      billingStatus: "PAST_DUE",
+      billingStatus: invoice.status === "paid" || invoice.amount_remaining === 0 ? "ACTIVE" : "PAST_DUE",
       stripeCustomerId: stripeCustomerId ?? workspace.stripeCustomerId,
       stripeSubscriptionId: stripeSubscriptionId ?? workspace.stripeSubscriptionId,
     },

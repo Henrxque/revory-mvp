@@ -13,12 +13,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const settings = await prisma.workspaceDataSettings.findMany({
-    select: { workspaceId: true },
-  });
+  const settings = await prisma.workspace.findMany({ select: { id: true } });
   const results = [];
-  for (const setting of settings) {
-    results.push(await enforceWorkspaceRetention(setting.workspaceId));
+  for (const workspace of settings) {
+    results.push(await enforceWorkspaceRetention(workspace.id));
   }
   const totals = results.reduce(
     (sum, result) => ({

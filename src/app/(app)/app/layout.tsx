@@ -9,7 +9,7 @@ import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
-import { hasCurrentRevoryAccess } from "@/services/billing/entitlements";
+import { getCapabilityAccess } from "@/services/billing/capabilities";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -43,18 +43,18 @@ export default async function PrivateAppLayout({
   const { user, workspace } = appContext;
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();
-  const hasRevoryEntitlement = await hasCurrentRevoryAccess(workspace.id);
+  const appAccess = await getCapabilityAccess(workspace.id, "APP");
 
-  if (!billingSummary.hasActiveAccess && !hasRevoryEntitlement && !internalPreview) {
+  if (!appAccess.allowed) {
     redirect("/start");
   }
 
   const [quoteRecoveryRecordCount, realizationRecordCount] = await Promise.all([
     prisma.canonicalRecord.count({
-      where: { entityType: { in: ["CUSTOMER", "LEAD", "ESTIMATE", "ACTIVITY"] }, workspaceId: workspace.id },
+      where: { entityType: { in: ["CUSTOMER", "LEAD", "ESTIMATE", "ACTIVITY"] }, workspaceId: workspace.id, isActive: true },
     }),
     prisma.canonicalRecord.count({
-      where: { entityType: { in: ["JOB", "INVOICE", "CHANGE_ORDER", "COST"] }, workspaceId: workspace.id },
+      where: { entityType: { in: ["JOB", "INVOICE", "CHANGE_ORDER", "COST"] }, workspaceId: workspace.id, isActive: true },
     }),
   ]);
   const canonicalRecordCount = quoteRecoveryRecordCount + realizationRecordCount;

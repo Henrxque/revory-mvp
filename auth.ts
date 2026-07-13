@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { prisma } from "@/db/prisma";
 import { verifyPassword } from "@/services/auth/password-crypto";
+import { checkDurableAuthRateLimit, recordAuthAttempt } from "@/services/security/auth-rate-limit";
 
 const isGoogleConfigured = Boolean(
   process.env.AUTH_GOOGLE_CLIENT_ID && process.env.AUTH_GOOGLE_CLIENT_SECRET,
@@ -17,8 +18,8 @@ function getAuthSecret() {
     return secret;
   }
 
-  if (process.env.VERCEL_ENV === "production") {
-    throw new Error("AUTH_SECRET is required in production.");
+  if (process.env.NODE_ENV !== "development") {
+    throw new Error("AUTH_SECRET is required outside local development.");
   }
 
   return "revory-local-auth-secret";
@@ -39,7 +40,7 @@ const providers = [
       password: { label: "Password", type: "password" },
     },
     name: "Email and password",
-    async authorize(credentials) {
+    async authorize(credentials, request) {
       const email = credentials?.email?.trim().toLowerCase() ?? "";
       const password = credentials?.password ?? "";
 
@@ -47,19 +48,28 @@ const providers = [
         return null;
       }
 
+      const forwarded = String(request.headers?.["x-forwarded-for"] ?? request.headers?.["x-real-ip"] ?? "unknown");
+      const ipAddress = forwarded.split(",")[0]?.trim().slice(0, 80) || "unknown";
+      const rateLimit = await checkDurableAuthRateLimit(email, ipAddress);
+      if (rateLimit.blocked) return null;
+
       const user = await prisma.user.findUnique({
         where: { email },
       });
 
       if (!user?.passwordHash || user.status !== "ACTIVE") {
+        await recordAuthAttempt(rateLimit.key, false);
         return null;
       }
 
       const passwordMatches = await verifyPassword(password, user.passwordHash);
 
       if (!passwordMatches) {
+        await recordAuthAttempt(rateLimit.key, false);
         return null;
       }
+
+      await recordAuthAttempt(rateLimit.key, true);
 
       return {
         email: user.email,
@@ -80,18 +90,34 @@ export const authOptions: NextAuthOptions = {
   },
   providers,
   callbacks: {
-    jwt({ account, token }) {
+    async jwt({ account, token }) {
       if (account?.provider) {
         token.authProvider = account.provider;
+      }
+
+      const subject = token.sub ?? "";
+      const email = typeof token.email === "string" ? token.email.trim().toLowerCase() : "";
+      const localUser = subject || email ? await prisma.user.findFirst({
+        select: { sessionVersion: true, status: true },
+        where: { OR: [...(subject ? [{ id: subject }, { authSubject: subject }] : []), ...(email ? [{ email }] : [])] },
+      }) : null;
+      if (localUser) {
+        if (localUser.status !== "ACTIVE") token.sessionRevoked = true;
+        else if (typeof token.sessionVersion === "number" && token.sessionVersion !== localUser.sessionVersion) token.sessionRevoked = true;
+        else {
+          token.sessionRevoked = false;
+          token.sessionVersion = localUser.sessionVersion;
+        }
       }
 
       return token;
     },
     session({ session, token }) {
+      session.sessionRevoked = token.sessionRevoked === true;
       if (session.user) {
         session.user.authProvider =
           typeof token.authProvider === "string" ? token.authProvider : undefined;
-        session.user.id = token.sub ?? "";
+        session.user.id = token.sessionRevoked === true ? "" : token.sub ?? "";
         session.user.email =
           typeof token.email === "string"
             ? token.email

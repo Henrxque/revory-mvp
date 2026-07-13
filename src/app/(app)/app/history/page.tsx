@@ -7,6 +7,7 @@ import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getGrowthAccess, getCanonicalVolumePolicy } from "@/services/billing/growth-access";
 import { getGrowthIntelligenceHistory } from "@/services/growth-intelligence/snapshots";
 import { getQuoteRecoveryMovement } from "@/services/quote-recovery/movement";
+import { recordWeeklyDecisionFeedback } from "./actions";
 
 function money(cents: number | null, currency = "USD") {
   if (cents === null) return "Suppressed";
@@ -16,8 +17,20 @@ function money(cents: number | null, currency = "USD") {
 export default async function HistoryPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/history"));
-  const [growthAccess, volumePolicy, movement, history] = await Promise.all([
-    getGrowthAccess(context.workspace.id),
+  const growthAccess = await getGrowthAccess(context.workspace.id);
+  if (!growthAccess.enabled) {
+    return (
+      <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
+        <p className="rev-kicker">Growth intelligence</p>
+        <h1 className="rev-display-hero mt-3">Recurring history remains gated.</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
+          Twelve-month movement, guarded segmentation and the weekly management decision require a Growth or Pro entitlement. No financial snapshot is queried or disclosed on the Audit or Starter paths.
+        </p>
+        <Link className="rev-button-secondary mt-5 inline-flex" href="/app/dashboard">Return to dashboard</Link>
+      </section>
+    );
+  }
+  const [volumePolicy, movement, history] = await Promise.all([
     getCanonicalVolumePolicy(context.workspace.id),
     getQuoteRecoveryMovement(context.workspace.id),
     getGrowthIntelligenceHistory(context.workspace.id),
@@ -43,6 +56,7 @@ export default async function HistoryPage() {
             <p className="rev-label">This week&apos;s management decision</p>
             <h2 className="mt-2 text-xl font-bold">{history.current.decision.headline}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--text-muted)]">{history.current.decision.rationale}</p>
+            {history.current.decision.available ? <div className="mt-4 flex flex-wrap items-center gap-2"><span className="text-xs text-[color:var(--text-subtle)]">Was this decision useful for this week?</span>{["yes", "no"].map((value) => <form action={recordWeeklyDecisionFeedback} key={value}><input name="stateFingerprint" type="hidden" value={history.current.stateFingerprint}/><input name="useful" type="hidden" value={value}/><button className="rev-button-secondary min-h-8 px-3 py-1 text-xs" type="submit">{value === "yes" ? "Yes" : "No"}</button></form>)}</div> : null}
           </div>
         ) : <div className="mt-6 rounded-[22px] border border-dashed border-[color:var(--border)] p-5 text-sm text-[color:var(--text-muted)]">Growth intelligence remains gated. This is not a public checkout prompt; commercial release still requires the documented gate evidence.</div>}
       </section>
@@ -106,5 +120,5 @@ function Metric({ label, value }: { label: string; value: number | string }) {
 
 function SegmentCard({ segment }: { segment: GuardedSegment }) {
   const basis = segment.layer === "REVENUE_REALIZATION" ? "Calculated billing gap" : "Estimated quote opportunity";
-  return <article className="rev-card-premium rev-card-hover rounded-[22px] p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="rev-label">{segment.dimension.replace("_", " ")} · {segment.layer.replace("_", " ")}</p><h3 className="mt-2 text-lg font-bold">{segment.label}</h3></div><strong>{money(segment.financialValueCents, segment.currency ?? "USD")}</strong></div><p className="mt-3 text-sm text-[color:var(--text-muted)]">{segment.findingRecordCount} of {segment.recordCount} comparable records have active findings.</p><p className="mt-2 text-xs text-[color:var(--text-subtle)]">{basis}. Review concentration only; not a rep or source performance verdict.</p></article>;
+  return <article className="rev-card-premium rev-card-hover rounded-[22px] p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="rev-label">{segment.dimension.replace("_", " ")} · {segment.layer.replace("_", " ")}</p><h3 className="mt-2 text-lg font-bold">{segment.label}</h3></div><strong>{money(segment.financialValueCents, segment.currency ?? "USD")}</strong></div><p className="mt-3 text-sm text-[color:var(--text-muted)]">{segment.findingRecordCount} of {segment.recordCount} comparable records ({Math.round(segment.findingRateBps / 100)}%) have active findings.</p><p className="mt-2 text-xs text-[color:var(--text-subtle)]">{basis}. Review concentration only; not a rep or source performance verdict.</p></article>;
 }

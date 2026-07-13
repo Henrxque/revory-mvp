@@ -8,6 +8,10 @@ import type {
   RevenueRealizationFindingSummary,
   RevenueRealizationRead,
 } from "@/domain/revory/revenue-realization";
+import {
+  revenueRealizationReadIntegrityFingerprint,
+  revenueRealizationStateFingerprint,
+} from "@/services/revenue-realization/reconciliation-engine";
 
 const completedJobStatuses = new Set(["closed", "complete", "completed", "finished"]);
 const approvedChangeStatuses = new Set(["accepted", "approved"]);
@@ -23,11 +27,25 @@ const explicitlyUnbilledStatuses = new Set([
 ]);
 const scopeTextPatterns = [
   /\badditional work\b/i,
-  /\bcustomer requested\b/i,
+  /\badded scope\b/i,
+  /\bclient approved (?:an )?extra\b/i,
+  /\b(?:customer|client) requested (?:an? )?(?:extra|additional) work\b/i,
+  /\b(?:customer|client) requested (?:an? )?change to (?:add|include|install|upgrade|expand)\b/i,
+  /\b(?:customer|client) requested (?:an? )?(?:addition|change order)\b/i,
   /\bextra work\b/i,
-  /\bout of scope\b/i,
+  /\bwork (?:performed|completed) (?:outside|beyond) (?:the )?(?:original )?scope\b/i,
   /\bscope change\b/i,
+  /\bscope creep\b/i,
 ];
+const negatedScopePatterns = [
+  /\bno (?:additional|extra|out[- ]of[- ]scope) work\b/i,
+  /\bno (?:added scope|scope creep)\b/i,
+  /\bno scope change\b/i,
+  /\bwithout (?:a )?scope change\b/i,
+  /\b(?:customer|client) declined (?:the )?(?:added scope|additional work|extra work|scope change)\b/i,
+  /\b(?:potential )?(?:additional|extra) work (?:was )?not (?:approved|authorized|performed|completed)\b/i,
+];
+const eligibleInvoiceStatuses = new Set(["issued", "sent", "open", "paid", "partial", "overdue", "unpaid"]);
 
 function normalizedString(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -70,25 +88,23 @@ function evidence(
     }));
 }
 
-function matchedToJob(
-  read: RevenueRealizationRead,
-  record: CanonicalRecordContract,
-  job: CanonicalRecordContract,
-) {
-  const match = read.matches.find(
-    (candidate) =>
-      candidate.sourceRecordKey === recordKey(record) &&
-      candidate.relationField === "jobExternalId",
-  );
-  return match?.state === "MATCHED" && match.candidateRecordKeys[0] === recordKey(job);
-}
-
-function invoiceMatchState(read: RevenueRealizationRead, record: CanonicalRecordContract) {
-  return read.matches.find(
-    (candidate) =>
-      candidate.sourceRecordKey === recordKey(record) &&
-      candidate.relationField === "invoiceExternalId",
-  )?.state ?? null;
+function hasEligibleInvoiceMatch(input: {
+  invoiceByKey: ReadonlyMap<string, CanonicalRecordContract>;
+  job: CanonicalRecordContract;
+  matchIndex: ReadonlyMap<string, RevenueRealizationRead["matches"][number]>;
+  record: CanonicalRecordContract;
+  rowCurrency: string;
+}) {
+  const match = input.matchIndex.get(`${recordKey(input.record)}:invoiceExternalId`);
+  if (match?.state !== "MATCHED" || !match.candidateRecordKeys[0]) return false;
+  const invoice = input.invoiceByKey.get(match.candidateRecordKeys[0]);
+  const jobMatch = invoice ? input.matchIndex.get(`${recordKey(invoice)}:jobExternalId`) : null;
+  if (!invoice || jobMatch?.state !== "MATCHED" || jobMatch.candidateRecordKeys[0] !== recordKey(input.job)) return false;
+  return eligibleInvoiceStatuses.has(normalizedString(invoice.payload.status)) &&
+    typeof invoice.payload.amountCents === "number" &&
+    Number.isSafeInteger(invoice.payload.amountCents) &&
+    invoice.payload.amountCents > 0 &&
+    normalizedString(invoice.payload.currency).toUpperCase() === input.rowCurrency;
 }
 
 function underbillingFinding(
@@ -104,7 +120,7 @@ function underbillingFinding(
   return {
     additiveToExecutiveGap: true,
     calculationInputs: {
-      approvedChangeOrderCents: row.approvedChangeOrderCents ?? 0,
+      ...(row.contractValueIncludesApprovedChanges === false ? { approvedChangeOrderCents: row.approvedChangeOrderCents ?? 0 } : {}),
       expectedBillingCents: row.expectedBillingCents ?? 0,
       invoicedCents: row.invoicedCents ?? 0,
     },
@@ -113,7 +129,7 @@ function underbillingFinding(
     confidence: "HIGH",
     currency: row.currency,
     evidence: [
-      ...evidence(job, ["status", "contractValueCents", "contractValueIncludesApprovedChanges", "currency"]),
+      ...evidence(job, ["status", "contractValueCents", "contractValueIncludesApprovedChanges", "invoiceExportComplete", "changeOrderExportComplete", "currency"]),
       ...linkedRecords.flatMap((record) =>
         evidence(record, record.entityType === "CHANGE_ORDER"
           ? ["status", "approvedAmountCents", "approvedAt", "currency"]
@@ -147,26 +163,50 @@ export function runRevenueRealizationFindingEngine(input: {
   ) {
     throw new Error("Cross-workspace records are not eligible for Revenue Realization findings.");
   }
+  if (input.reconciliation.stateFingerprint !== revenueRealizationStateFingerprint(input.records)) {
+    throw new Error("Revenue Realization records do not match the supplied reconciliation state.");
+  }
+  const { integrityFingerprint, ...readWithoutIntegrity } = input.reconciliation;
+  if (integrityFingerprint !== revenueRealizationReadIntegrityFingerprint(readWithoutIntegrity)) {
+    throw new Error("Revenue Realization reconciliation integrity check failed.");
+  }
 
   const findings: RevenueRealizationFindingContract[] = [];
   const jobs = input.records.filter((record) => record.entityType === "JOB");
   const invoices = input.records.filter((record) => record.entityType === "INVOICE");
   const changeOrders = input.records.filter((record) => record.entityType === "CHANGE_ORDER");
   const costs = input.records.filter((record) => record.entityType === "COST");
+  const matchIndex = new Map(input.reconciliation.matches.map((match) => [`${match.sourceRecordKey}:${match.relationField}`, match]));
+  const jobByExternalId = jobs.reduce((index, job) => { const current = index.get(job.externalId) ?? []; current.push(job); index.set(job.externalId, current); return index; }, new Map<string, CanonicalRecordContract[]>());
+  const invoiceByKey = new Map(invoices.map((invoice) => [recordKey(invoice), invoice]));
+  const groupByJob = (source: readonly CanonicalRecordContract[]) => source.reduce((groups, record) => {
+    const match = matchIndex.get(`${recordKey(record)}:jobExternalId`);
+    if (match?.state !== "MATCHED" || !match.candidateRecordKeys[0]) return groups;
+    const current = groups.get(match.candidateRecordKeys[0]) ?? [];
+    current.push(record);
+    groups.set(match.candidateRecordKeys[0], current);
+    return groups;
+  }, new Map<string, CanonicalRecordContract[]>());
+  const invoicesByJob = groupByJob(invoices);
+  const changesByJob = groupByJob(changeOrders);
+  const costsByJob = groupByJob(costs);
 
   for (const row of input.reconciliation.reconciliations) {
-    const jobCandidates = jobs.filter((job) => job.externalId === row.jobExternalId);
+    const jobCandidates = jobByExternalId.get(row.jobExternalId) ?? [];
     if (jobCandidates.length !== 1) continue;
     const job = jobCandidates[0];
-    const jobInvoices = invoices.filter((record) => matchedToJob(input.reconciliation, record, job));
-    const jobChanges = changeOrders.filter((record) => matchedToJob(input.reconciliation, record, job));
-    const jobCosts = costs.filter((record) => matchedToJob(input.reconciliation, record, job));
+    const jobInvoices = invoicesByJob.get(recordKey(job)) ?? [];
+    const jobChanges = changesByJob.get(recordKey(job)) ?? [];
+    const jobCosts = costsByJob.get(recordKey(job)) ?? [];
 
     const gapFinding = underbillingFinding(
       input.workspaceId,
       row,
       job,
-      [...jobInvoices, ...jobChanges],
+      [
+        ...jobInvoices.filter((record) => row.invoiceIds.includes(record.externalId)),
+        ...jobChanges.filter((record) => row.contractValueIncludesApprovedChanges === false && row.approvedChangeOrderIds.includes(record.externalId)),
+      ],
     );
     if (gapFinding) findings.push(gapFinding);
 
@@ -174,7 +214,7 @@ export function runRevenueRealizationFindingEngine(input: {
       const amount = changeOrder.payload.approvedAmountCents;
       const approved = approvedChangeStatuses.has(normalizedString(changeOrder.payload.status));
       const explicitlyUnbilled = explicitlyUnbilledStatuses.has(normalizedString(changeOrder.payload.billingStatus));
-      const invoiceState = invoiceMatchState(input.reconciliation, changeOrder);
+      const hasEligibleInvoice = row.currency ? hasEligibleInvoiceMatch({ invoiceByKey, job, matchIndex, record: changeOrder, rowCurrency: row.currency }) : false;
       const hasObservedBasis =
         approved &&
         changeOrder.payload.approvedAt &&
@@ -183,7 +223,15 @@ export function runRevenueRealizationFindingEngine(input: {
         amount > 0 &&
         normalizedString(changeOrder.payload.currency).toUpperCase() === row.currency;
 
-      if (hasObservedBasis && explicitlyUnbilled && invoiceState === null && row.state === "ELIGIBLE" && row.currency) {
+      if (
+        hasObservedBasis &&
+        explicitlyUnbilled &&
+        !hasEligibleInvoice &&
+        job.payload.invoiceExportComplete === true &&
+        job.payload.changeOrderExportComplete === true &&
+        row.state === "ELIGIBLE" &&
+        row.currency
+      ) {
         findings.push({
           additiveToExecutiveGap: false,
           calculationInputs: { approvedAmountCents: amount },
@@ -198,7 +246,7 @@ export function runRevenueRealizationFindingEngine(input: {
             "approvedAt",
             "currency",
             "description",
-          ]),
+          ]).concat(evidence(job, ["invoiceExportComplete", "changeOrderExportComplete"])),
           family: "REVENUE_REALIZATION",
           fingerprint: fingerprint(
             input.workspaceId,
@@ -209,7 +257,7 @@ export function runRevenueRealizationFindingEngine(input: {
           formula: "observed approved change-order amount with explicit unbilled status",
           jobExternalId: row.jobExternalId,
           priority: amount >= 25_000_00 ? 92 : 82,
-          reason: "The source marks this approved change order as unbilled and provides no invoice link.",
+          reason: "The source marks this approved change order as unbilled and provides no eligible positive-value invoice match for the same job and currency.",
           recommendedAction: "Confirm the billing status in the source system before issuing or correcting an invoice.",
           severity: severityForAmount(amount),
           status: "OPEN",
@@ -224,6 +272,7 @@ export function runRevenueRealizationFindingEngine(input: {
     const targetGrossMarginBps = job.payload.targetGrossMarginBps;
     if (
       row.state === "ELIGIBLE" &&
+      row.marginEligible &&
       row.currency &&
       typeof targetGrossMarginBps === "number" &&
       Number.isSafeInteger(targetGrossMarginBps) &&
@@ -251,9 +300,9 @@ export function runRevenueRealizationFindingEngine(input: {
           confidence: "HIGH",
           currency: row.currency,
           evidence: [
-            ...evidence(job, ["targetGrossMarginBps", "currency"]),
-            ...jobInvoices.flatMap((record) => evidence(record, ["status", "amountCents", "currency"])),
-            ...jobCosts.flatMap((record) => evidence(record, ["amountCents", "currency", "category"])),
+            ...evidence(job, ["targetGrossMarginBps", "invoiceExportComplete", "costExportComplete", "currency"]),
+            ...jobInvoices.filter((record) => row.invoiceIds.includes(record.externalId)).flatMap((record) => evidence(record, ["status", "amountCents", "currency"])),
+            ...jobCosts.filter((record) => row.costIds.includes(record.externalId)).flatMap((record) => evidence(record, ["amountCents", "currency", "category"])),
           ],
           family: "REVENUE_REALIZATION",
           fingerprint: fingerprint(input.workspaceId, "MARGIN_AT_RISK", row.jobExternalId),
@@ -275,8 +324,9 @@ export function runRevenueRealizationFindingEngine(input: {
     const completed = completedJobStatuses.has(normalizedString(job.payload.status));
     const hasScopeText =
       typeof job.payload.notes === "string" &&
+      !negatedScopePatterns.some((pattern) => pattern.test(job.payload.notes as string)) &&
       scopeTextPatterns.some((pattern) => pattern.test(job.payload.notes as string));
-    if (completed && changeOrders.length > 0 && jobChanges.length === 0 && job.payload.scopeChangeFlag === true) {
+    if (completed && job.payload.changeOrderExportComplete === true && jobChanges.length === 0 && job.payload.scopeChangeFlag === true) {
       findings.push({
         additiveToExecutiveGap: false,
         calculationInputs: {},
@@ -299,7 +349,7 @@ export function runRevenueRealizationFindingEngine(input: {
         valueBasis: "OPERATIONAL",
         valueCents: null,
       });
-    } else if (completed && changeOrders.length > 0 && jobChanges.length === 0 && hasScopeText) {
+    } else if (completed && job.payload.changeOrderExportComplete === true && jobChanges.length === 0 && hasScopeText) {
       findings.push({
         additiveToExecutiveGap: false,
         calculationInputs: {},

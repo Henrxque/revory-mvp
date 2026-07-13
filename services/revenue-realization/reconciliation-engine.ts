@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type { CanonicalEntityType, CanonicalRecordContract } from "@/domain/revory/contracts";
 import type {
   ExplicitRecordMatch,
@@ -48,8 +50,38 @@ function unique(values: readonly string[]) {
   return [...new Set(values)];
 }
 
+function stableObject(value: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)));
+}
+
+export function revenueRealizationStateFingerprint(records: readonly CanonicalRecordContract[]) {
+  const state = records.map((record) => ({
+    entityType: record.entityType,
+    externalId: record.externalId,
+    occurredAt: record.occurredAt,
+    payload: stableObject(record.payload),
+    relations: stableObject(record.relationExternalIds),
+    sourceSystem: record.sourceSystem,
+    workspaceId: record.workspaceId,
+  })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  return createHash("sha256").update(JSON.stringify(state)).digest("hex");
+}
+
+export function revenueRealizationReadIntegrityFingerprint(
+  read: Omit<RevenueRealizationRead, "integrityFingerprint">,
+) {
+  return createHash("sha256").update(JSON.stringify(read)).digest("hex");
+}
+
+function isFutureDate(value: unknown, asOf: Date) {
+  if (typeof value !== "string") return false;
+  const date = new Date(value);
+  return !Number.isNaN(date.valueOf()) && date.valueOf() > asOf.valueOf();
+}
+
 export function buildRevenueRealizationRead(
   records: readonly CanonicalRecordContract[],
+  asOf = new Date(),
 ): RevenueRealizationRead {
   const workspaceIds = unique(records.map((record) => record.workspaceId));
   if (workspaceIds.length !== 1 || !workspaceIds[0]) {
@@ -97,23 +129,39 @@ export function buildRevenueRealizationRead(
   const invoices = recordsOf("INVOICE");
   const changeOrders = recordsOf("CHANGE_ORDER");
   const costs = recordsOf("COST");
-  const hasInvoiceDataset = invoices.length > 0;
-  const hasChangeOrderDataset = changeOrders.length > 0;
+  const duplicateEntityIds = new Set(
+    [...records.reduce((counts, record) => {
+      const key = `${record.entityType}:${record.externalId}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+      return counts;
+    }, new Map<string, number>()).entries()].filter(([, count]) => count > 1).map(([key]) => key),
+  );
 
-  const matchesJob = (record: CanonicalRecordContract, job: CanonicalRecordContract) => {
+  const byMatchedJob = (source: readonly CanonicalRecordContract[]) => source.reduce((groups, record) => {
     const match = matchBySourceAndField.get(`${recordKey(record)}:jobExternalId`);
-    return match?.state === "MATCHED" && match.candidateRecordKeys[0] === recordKey(job);
-  };
+    if (match?.state !== "MATCHED" || !match.candidateRecordKeys[0]) return groups;
+    const current = groups.get(match.candidateRecordKeys[0]) ?? [];
+    current.push(record);
+    groups.set(match.candidateRecordKeys[0], current);
+    return groups;
+  }, new Map<string, CanonicalRecordContract[]>());
+  const invoicesByJob = byMatchedJob(invoices);
+  const changesByJob = byMatchedJob(changeOrders);
+  const costsByJob = byMatchedJob(costs);
 
   const reconciliations: JobBillingReconciliation[] = jobs.map((job) => {
-    const jobInvoices = invoices.filter((record) => matchesJob(record, job));
-    const jobChanges = changeOrders.filter((record) => matchesJob(record, job));
-    const jobCosts = costs.filter((record) => matchesJob(record, job));
+    const jobInvoices = invoicesByJob.get(recordKey(job)) ?? [];
+    const jobChanges = changesByJob.get(recordKey(job)) ?? [];
+    const jobCosts = costsByJob.get(recordKey(job)) ?? [];
     const issues: string[] = [];
+    const marginIssues: string[] = [];
     const inputEvidence: ReconciliationInput[] = [];
     const jobCurrency = currency(job);
     const contractValueCents = money(job, "contractValueCents");
     const includesApprovedChanges = job.payload.contractValueIncludesApprovedChanges;
+    const invoiceExportComplete = job.payload.invoiceExportComplete === true;
+    const changeOrderExportComplete = job.payload.changeOrderExportComplete === true;
+    const costExportComplete = job.payload.costExportComplete === true;
 
     if (!completedJobStatuses.has(normalizedString(job.payload.status))) {
       issues.push("Job status does not prove completion; billing-gap calculation is suppressed.");
@@ -123,10 +171,12 @@ export function buildRevenueRealizationRead(
     if (typeof includesApprovedChanges !== "boolean") {
       issues.push("Job must state whether contract value includes approved changes.");
     }
-    if (!hasInvoiceDataset) issues.push("Invoice dataset is missing for this workspace.");
-    if (includesApprovedChanges === false && !hasChangeOrderDataset) {
-      issues.push("Change-order dataset is required when contract value excludes approved changes.");
+    if (!invoiceExportComplete) issues.push("Job-level invoice export completeness is not explicitly confirmed.");
+    if (includesApprovedChanges === false && !changeOrderExportComplete) {
+      issues.push("Job-level change-order export completeness is required when contract value excludes approved changes.");
     }
+    if (isFutureDate(job.payload.completedAt, asOf)) issues.push("Job completion date is in the future.");
+    if (duplicateEntityIds.has(`JOB:${job.externalId}`)) issues.push("Job external ID appears in more than one source system.");
 
     const invoiceValues: Array<{ record: CanonicalRecordContract; value: number }> = [];
     for (const invoice of jobInvoices) {
@@ -145,6 +195,14 @@ export function buildRevenueRealizationRead(
         issues.push(`Invoice ${invoice.externalId} has missing or conflicting currency.`);
         continue;
       }
+      if (isFutureDate(invoice.payload.issuedAt, asOf)) {
+        issues.push(`Invoice ${invoice.externalId} is dated in the future.`);
+        continue;
+      }
+      if (duplicateEntityIds.has(`INVOICE:${invoice.externalId}`)) {
+        issues.push(`Invoice ${invoice.externalId} appears in more than one source system.`);
+        continue;
+      }
       invoiceValues.push({ record: invoice, value });
     }
 
@@ -159,6 +217,14 @@ export function buildRevenueRealizationRead(
       const value = money(changeOrder, "approvedAmountCents");
       if (value === null || !changeOrder.payload.approvedAt) {
         issues.push(`Change order ${changeOrder.externalId} lacks observed approval evidence.`);
+        continue;
+      }
+      if (isFutureDate(changeOrder.payload.approvedAt, asOf)) {
+        issues.push(`Change order ${changeOrder.externalId} is approved in the future.`);
+        continue;
+      }
+      if (duplicateEntityIds.has(`CHANGE_ORDER:${changeOrder.externalId}`)) {
+        issues.push(`Change order ${changeOrder.externalId} appears in more than one source system.`);
         continue;
       }
       if (!currency(changeOrder) || currency(changeOrder) !== jobCurrency) {
@@ -180,10 +246,13 @@ export function buildRevenueRealizationRead(
     }
 
     const observedCostValues: Array<{ record: CanonicalRecordContract; value: number }> = [];
+    if (!costExportComplete) marginIssues.push("Job-level cost export completeness is not explicitly confirmed.");
     for (const cost of jobCosts) {
       const value = money(cost, "amountCents");
-      if (value === null) continue;
-      if (!currency(cost) || currency(cost) !== jobCurrency) continue;
+      if (value === null) { marginIssues.push(`Cost ${cost.externalId} has no valid observed amount.`); continue; }
+      if (!currency(cost) || currency(cost) !== jobCurrency) { marginIssues.push(`Cost ${cost.externalId} has missing or conflicting currency.`); continue; }
+      if (isFutureDate(cost.payload.incurredAt, asOf)) { marginIssues.push(`Cost ${cost.externalId} is dated in the future.`); continue; }
+      if (duplicateEntityIds.has(`COST:${cost.externalId}`)) { marginIssues.push(`Cost ${cost.externalId} appears in more than one source system.`); continue; }
       observedCostValues.push({ record: cost, value });
     }
 
@@ -194,16 +263,17 @@ export function buildRevenueRealizationRead(
 
     const uniqueIssues = unique(issues);
     const eligible = uniqueIssues.length === 0 && contractValueCents !== null;
-    const invoicedCents = hasInvoiceDataset
+    const invoicedCents = invoiceExportComplete
       ? invoiceValues.reduce((sum, item) => sum + item.value, 0)
       : null;
-    const approvedChangeOrderCents = hasChangeOrderDataset
+    const approvedChangeOrderCents = changeOrderExportComplete
       ? approvedChanges.reduce((sum, item) => sum + item.value, 0)
       : null;
     const expectedBillingCents = eligible
       ? contractValueCents + (includesApprovedChanges === false ? approvedChangeOrderCents ?? 0 : 0)
       : null;
-    const observedCostCents = observedCostValues.length
+    const uniqueMarginIssues = unique(marginIssues);
+    const observedCostCents = uniqueMarginIssues.length === 0
       ? observedCostValues.reduce((sum, item) => sum + item.value, 0)
       : null;
 
@@ -216,7 +286,9 @@ export function buildRevenueRealizationRead(
         expectedBillingCents !== null && invoicedCents !== null
           ? Math.max(expectedBillingCents - invoicedCents, 0)
           : null,
+      contractValueIncludesApprovedChanges: typeof includesApprovedChanges === "boolean" ? includesApprovedChanges : null,
       currency: jobCurrency,
+      costIds: observedCostValues.map((item) => item.record.externalId),
       expectedBillingCents,
       formula: eligible
         ? includesApprovedChanges
@@ -228,6 +300,8 @@ export function buildRevenueRealizationRead(
       invoicedCents,
       issues: uniqueIssues,
       jobExternalId: job.externalId,
+      marginEligible: eligible && uniqueMarginIssues.length === 0,
+      marginIssues: uniqueMarginIssues,
       observedCostCents,
       state: eligible ? "ELIGIBLE" : "SUPPRESSED",
       valueBasis: eligible ? "CALCULATED" : "DATA_QUALITY",
@@ -258,7 +332,7 @@ export function buildRevenueRealizationRead(
     ),
   ) as Record<CanonicalEntityType, number>;
 
-  return {
+  const read: Omit<RevenueRealizationRead, "integrityFingerprint"> = {
     eligibility,
     matches,
     reconciliations,
@@ -270,6 +344,8 @@ export function buildRevenueRealizationRead(
       suppressedJobs: reconciliations.length - eligibleJobs,
       unmatchedLinks: matches.filter((match) => match.state === "UNMATCHED").length,
     },
+    stateFingerprint: revenueRealizationStateFingerprint(records),
     workspaceId: workspaceIds[0],
   };
+  return { ...read, integrityFingerprint: revenueRealizationReadIntegrityFingerprint(read) };
 }

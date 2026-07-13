@@ -86,7 +86,9 @@ export type JobBillingReconciliation = {
   approvedChangeOrderIds: string[];
   billedLessObservedCostCents: number | null;
   calculatedGapCents: number | null;
+  contractValueIncludesApprovedChanges: boolean | null;
   currency: string | null;
+  costIds: string[];
   expectedBillingCents: number | null;
   formula: string | null;
   inputEvidence: ReconciliationInput[];
@@ -94,6 +96,8 @@ export type JobBillingReconciliation = {
   invoicedCents: number | null;
   issues: string[];
   jobExternalId: string;
+  marginEligible: boolean;
+  marginIssues: string[];
   observedCostCents: number | null;
   state: "ELIGIBLE" | "SUPPRESSED";
   valueBasis: "CALCULATED" | "DATA_QUALITY";
@@ -111,5 +115,7 @@ export type RevenueRealizationRead = {
     suppressedJobs: number;
     unmatchedLinks: number;
   };
+  integrityFingerprint: string;
+  stateFingerprint: string;
   workspaceId: string;
 };

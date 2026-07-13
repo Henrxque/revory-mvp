@@ -5,6 +5,7 @@ import type { CanonicalEntityType, CanonicalRecordContract } from "@/domain/revo
 import { assertWorkspaceScopedRecord } from "@/domain/revory/contracts";
 import { parseCanonicalCsv } from "@/services/canonical-intake/csv-profile";
 import { canonicalFields, quoteRecoveryEligibility } from "@/services/canonical-intake/definitions";
+import { assertCanonicalFileContent } from "@/services/canonical-intake/file-security";
 import { buildRevenueRealizationRead } from "@/services/revenue-realization/reconciliation-engine";
 
 export const CANONICAL_MAX_FILES = 8;
@@ -15,11 +16,15 @@ export type IntakeVolumeLimits = {
   maxFileBytes: number;
   maxFiles: number;
   maxRowsPerFile: number;
+  maxTotalBytes: number;
+  maxTotalRows: number;
 };
 export const DEFAULT_CANONICAL_VOLUME_LIMITS: IntakeVolumeLimits = {
   maxFileBytes: CANONICAL_MAX_FILE_BYTES,
   maxFiles: CANONICAL_MAX_FILES,
   maxRowsPerFile: CANONICAL_MAX_ROWS_PER_FILE,
+  maxTotalBytes: 24 * 1024 * 1024,
+  maxTotalRows: 75_000,
 };
 
 export type IntakeFile = { bytes: Uint8Array; entityType: CanonicalEntityType; fileName: string; mimeType?: string; sourceSystem: string; mapping: Record<string, string> };
@@ -56,7 +61,11 @@ function normalize(value: unknown, type: string): string | number | boolean | nu
   if (type === "money") { const number = Number(raw.replace(/[$,\s]/g, "")); return Number.isFinite(number) ? Math.round(number * 100) : null; }
   if (type === "percentage") { const number = Number(raw.replace(/[%,\s]/g, "")); return Number.isFinite(number) && number >= 0 && number <= 100 ? Math.round(number * 100) : null; }
   if (type === "integer") { const number = Number.parseInt(raw, 10); return Number.isFinite(number) ? number : null; }
-  if (type === "boolean") return ["true", "yes", "1"].includes(raw.toLowerCase());
+  if (type === "boolean") {
+    if (["true", "yes", "1"].includes(raw.toLowerCase())) return true;
+    if (["false", "no", "0"].includes(raw.toLowerCase())) return false;
+    return null;
+  }
   if (type === "date") { const date = new Date(raw); return Number.isNaN(date.valueOf()) ? null : date.toISOString(); }
   return raw;
 }
@@ -66,11 +75,23 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
   const limits = input.limits ?? DEFAULT_CANONICAL_VOLUME_LIMITS;
   if (!input.workspaceId.trim()) throw new Error("Workspace authorization is required.");
   if (input.files.length === 0 || input.files.length > limits.maxFiles) throw new Error(`Upload between 1 and ${limits.maxFiles} files for the current plan.`);
+  const totalBytes = input.files.reduce((total, file) => total + file.bytes.byteLength, 0);
+  if (totalBytes > limits.maxTotalBytes) throw new Error("Combined upload size exceeds the current plan limit.");
+  let totalRows = 0;
   const signatures: string[] = [];
   for (const file of input.files) {
     if (file.bytes.byteLength > limits.maxFileBytes) { issues.push({ code: "FILE_TOO_LARGE", fileName: file.fileName, message: `File exceeds the ${Math.round(limits.maxFileBytes / 1024 / 1024)} MB limit for the current plan.` }); continue; }
     signatures.push(createHash("sha256").update(file.bytes).digest("hex"));
+    if (!file.sourceSystem.trim()) { issues.push({ code: "MISSING_SOURCE_SYSTEM", fileName: file.fileName, message: "Source system is required for provenance and idempotency." }); continue; }
+    try {
+      await assertCanonicalFileContent({ bytes: file.bytes, fileName: file.fileName, maxFileBytes: limits.maxFileBytes });
+    } catch (error) {
+      issues.push({ code: "UNSAFE_FILE", fileName: file.fileName, message: error instanceof Error ? error.message : "File content failed safety validation." });
+      continue;
+    }
     const { headers, rows, formulaRows } = await readRows(file);
+    totalRows += rows.length;
+    if (totalRows > limits.maxTotalRows) { issues.push({ code: "BATCH_TOO_LARGE", fileName: file.fileName, message: `Combined rows exceed the ${limits.maxTotalRows.toLocaleString("en-US")} row limit for the current plan.` }); continue; }
     if (!headers.length || headers.length > CANONICAL_MAX_COLUMNS || rows.length > limits.maxRowsPerFile) { issues.push({ code: "INVALID_DIMENSIONS", fileName: file.fileName, message: `File dimensions exceed the current plan limit of ${limits.maxRowsPerFile.toLocaleString("en-US")} rows per file.` }); continue; }
     if (new Set(headers.map((h) => h.toLowerCase())).size !== headers.length) { issues.push({ code: "DUPLICATE_HEADERS", fileName: file.fileName, message: "Duplicate headers must be resolved before import." }); continue; }
     if (formulaRows.length) { issues.push({ code: "FORMULA_REJECTED", fileName: file.fileName, message: "Formula cells are not accepted; export observed values only.", rowNumber: formulaRows[0] }); continue; }
@@ -79,9 +100,20 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
     if (new Set(targets).size !== targets.length || targets.some((field) => !definitions[field])) { issues.push({ code: "INVALID_MAPPING", fileName: file.fileName, message: "Mapping contains duplicate or unsupported target fields." }); continue; }
     for (const [index, row] of rows.entries()) {
       const payload: Record<string, string | number | boolean | null> = {};
+      let invalidValue = false;
       for (const [source, target] of Object.entries(file.mapping)) {
-        const column = headers.indexOf(source); if (column >= 0 && definitions[target]) payload[target] = normalize(row[column], definitions[target].type);
+        const column = headers.indexOf(source);
+        if (column >= 0 && definitions[target]) {
+          const original = row[column];
+          const normalized = normalize(original, definitions[target].type);
+          payload[target] = normalized;
+          if (normalized === null && original !== null && original !== undefined && String(original).trim() !== "") {
+            issues.push({ code: "INVALID_VALUE", fileName: file.fileName, rowNumber: index + 2, message: `${source} contains an invalid ${definitions[target].type} value.` });
+            invalidValue = true;
+          }
+        }
       }
+      if (invalidValue) continue;
       const missing = Object.entries(definitions).filter(([, d]) => d.required).map(([field]) => field).filter((field) => payload[field] === null || payload[field] === undefined || payload[field] === "");
       if (missing.length) { issues.push({ code: "MISSING_REQUIRED", fileName: file.fileName, rowNumber: index + 2, message: `Missing required fields: ${missing.join(", ")}.` }); continue; }
       const relationExternalIds = Object.fromEntries(Object.entries(definitions).filter(([field, d]) => d.relation && typeof payload[field] === "string" && payload[field]).map(([field]) => [field, payload[field] as string]));
@@ -95,10 +127,27 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
     ? buildRevenueRealizationRead(records).eligibility
     : {};
   const eligibility = { ...quoteEligibility, ...realizationEligibility };
-  const knownIds = new Set(records.map((r) => `${r.entityType}:${r.externalId}`)); let linked = 0, unmatched = 0;
-  for (const record of records) for (const [field, id] of Object.entries(record.relationExternalIds)) { const type = field.replace("ExternalId", "").replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase(); if (knownIds.has(`${type}:${id}`)) linked += 1; else unmatched += 1; }
-  const duplicates = records.length - new Set(records.map((r) => `${r.entityType}:${r.sourceSystem}:${r.externalId}`)).size;
-  if (duplicates) issues.push({ code: "DUPLICATE_EXTERNAL_ID", fileName: "batch", message: `${duplicates} duplicate external ID record(s) must be resolved.` });
-  const idempotencyKey = createHash("sha256").update([input.workspaceId, ...signatures.sort(), JSON.stringify(mappings)].join("|")).digest("hex");
-  return { accepted: issues.every((issue) => !["FILE_TOO_LARGE", "INVALID_DIMENSIONS", "DUPLICATE_HEADERS", "FORMULA_REJECTED", "INVALID_MAPPING", "MISSING_REQUIRED", "DUPLICATE_EXTERNAL_ID"].includes(issue.code)) && records.length > 0, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting: duplicates } };
+  const idCounts = records.reduce((counts, record) => {
+    const key = `${record.entityType}:${record.externalId}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>());
+  let linked = 0, unmatched = 0, conflicting = 0;
+  for (const record of records) for (const [field, id] of Object.entries(record.relationExternalIds)) {
+    const type = field.replace("ExternalId", "").replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase();
+    const count = idCounts.get(`${type}:${id}`) ?? 0;
+    if (count === 1) linked += 1; else if (count === 0) unmatched += 1; else conflicting += 1;
+  }
+  const exactDuplicates = records.length - new Set(records.map((r) => `${r.entityType}:${r.sourceSystem}:${r.externalId}`)).size;
+  const ambiguousExternalIds = [...idCounts.values()].filter((count) => count > 1).reduce((total, count) => total + count, 0);
+  if (exactDuplicates || ambiguousExternalIds) issues.push({ code: "DUPLICATE_EXTERNAL_ID", fileName: "batch", message: `${Math.max(exactDuplicates, ambiguousExternalIds)} duplicate or cross-source external ID record(s) must be resolved.` });
+  conflicting += ambiguousExternalIds;
+  const mappingSignature = Object.entries(mappings).sort(([left], [right]) => left.localeCompare(right)).map(([fileName, mapping]) => [
+    fileName,
+    Object.entries(mapping).sort(([left], [right]) => left.localeCompare(right)),
+  ]);
+  const fileSemantics = input.files.map((file) => `${file.entityType}:${file.sourceSystem.trim()}:${file.fileName}`).sort();
+  const idempotencyKey = createHash("sha256").update([input.workspaceId, ...signatures.sort(), ...fileSemantics, JSON.stringify(mappingSignature)].join("|")).digest("hex");
+  const blockingCodes = new Set(["BATCH_TOO_LARGE", "DUPLICATE_EXTERNAL_ID", "DUPLICATE_HEADERS", "FILE_TOO_LARGE", "FORMULA_REJECTED", "INVALID_DIMENSIONS", "INVALID_MAPPING", "INVALID_VALUE", "MISSING_REQUIRED", "MISSING_SOURCE_SYSTEM", "UNSAFE_FILE"]);
+  return { accepted: issues.every((issue) => !blockingCodes.has(issue.code)) && records.length > 0, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting } };
 }

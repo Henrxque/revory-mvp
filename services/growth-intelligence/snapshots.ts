@@ -66,6 +66,11 @@ export async function buildCurrentGrowthIntelligence(workspaceId: string) {
     byEstimate.set(finding.estimateExternalId, Math.max(current, finding.valueCents ?? 0));
     return byEstimate;
   }, new Map<string, number>()).values()].reduce((total, value) => total + value, 0);
+  const stateFingerprint = stableFingerprint({
+    importSessionId: latestImport?.id ?? null,
+    quote: quoteFindings.map((finding) => [finding.fingerprint, finding.severity, finding.valueCents, finding.status]),
+    realization: realizationFindings.map((finding) => [finding.fingerprint, finding.priority, finding.valueCents, finding.status]),
+  });
   return {
     decision: buildWeeklyManagementDecision(segmentation),
     latestImport,
@@ -74,16 +79,13 @@ export async function buildCurrentGrowthIntelligence(workspaceId: string) {
     realizationFindings,
     realizationSummary,
     segmentation,
+    stateFingerprint,
   };
 }
 
 export async function captureGrowthIntelligenceSnapshot(workspaceId: string) {
   const current = await buildCurrentGrowthIntelligence(workspaceId);
-  const stateFingerprint = stableFingerprint({
-    importSessionId: current.latestImport?.id ?? null,
-    quote: current.quoteFindings.map((finding) => [finding.fingerprint, finding.severity, finding.valueCents, finding.status]),
-    realization: current.realizationFindings.map((finding) => [finding.fingerprint, finding.priority, finding.valueCents, finding.status]),
-  });
+  const stateFingerprint = current.stateFingerprint;
   return prisma.revenueIntelligenceSnapshot.upsert({
     create: {
       approvedChangeReviewCents: current.realizationSummary.approvedChangeOrderReviewCents,

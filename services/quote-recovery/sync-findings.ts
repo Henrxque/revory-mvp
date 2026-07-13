@@ -14,7 +14,7 @@ export async function syncQuoteRecoveryFindings(input: { workspaceId: string; re
       await tx.quoteRecoveryFinding.upsert({
         where: { workspaceId_fingerprint: { workspaceId: input.workspaceId, fingerprint: finding.fingerprint } },
         create: { workspaceId: input.workspaceId, findingType: finding.type, severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, currency: finding.currency, estimateExternalId: finding.estimateExternalId, fingerprint: finding.fingerprint, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date() },
-        update: { severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date(), ...(existing?.status === "RESOLVED" || existing?.status === "DISMISSED" ? {} : { status: "OPEN" }) },
+        update: { severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date(), resolvedAt: existing?.status === "DISMISSED" ? existing.resolvedAt : null, ...(existing?.status === "DISMISSED" ? {} : { status: "OPEN" }) },
       });
     }
     await tx.quoteRecoveryFinding.updateMany({ where: { workspaceId: input.workspaceId, status: { in: ["OPEN", "ACKNOWLEDGED"] }, ...(fingerprints.length ? { fingerprint: { notIn: fingerprints } } : {}) }, data: { status: "RESOLVED", resolvedAt: input.now ?? new Date() } });
@@ -23,7 +23,7 @@ export async function syncQuoteRecoveryFindings(input: { workspaceId: string; re
 }
 
 export async function syncQuoteRecoveryFindingsForWorkspace(workspaceId: string, now?: Date) {
-  const rows = await prisma.canonicalRecord.findMany({ where: { workspaceId } });
+  const rows = await prisma.canonicalRecord.findMany({ where: { workspaceId, isActive: true } });
   const records: CanonicalRecordContract[] = rows.map((row) => ({
     workspaceId: row.workspaceId,
     entityType: row.entityType,

@@ -22,8 +22,12 @@ export default function PrivacyPage() {
             When AI-assisted intake is enabled, it must receive only a bounded and sanitized profile sufficient for mapping or explanation, require human confirmation where appropriate, and preserve a deterministic fallback.
           </p>
           <p>
-            Billing, when enabled and explicitly offered, is handled through Stripe. Production retention, deletion/export and vendor terms must be verified before a contractor paid beta opens.
+            Billing, when enabled and explicitly offered, is handled through Stripe. Workspace users can export current stored data and delete analysis data from settings. Configured retention removes expired analysis data; backup deletion and production restore behavior must still be verified in the deployment environment.
           </p>
+          <p>
+            REVORY uses data only to provide, secure and measure the product, process authorized billing, and meet legal obligations. It does not sell workspace exports. Requests for access, correction or deletion require a verified public privacy contact before paid launch.
+          </p>
+          <p className="text-xs text-[color:var(--text-subtle)]">Operational draft · updated July 13, 2026 · final legal entity, jurisdiction and privacy contact pending qualified review.</p>
         </div>
         <Link className="rev-action-button mt-8 inline-flex" href="/">
           Back to REVORY

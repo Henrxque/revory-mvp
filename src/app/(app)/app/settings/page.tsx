@@ -6,6 +6,7 @@ import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getGrowthAccess } from "@/services/billing/growth-access";
 import { getTransactionalEmailConfig } from "@/services/email/transactional-email";
+import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { deleteAnalysisDataAction, updateDigestAction, updateRetentionAction } from "./actions";
 
 export default async function SettingsPage() {
@@ -24,6 +25,7 @@ export default async function SettingsPage() {
         <h1 className="rev-display-hero mt-3">Keep the recurring read under your control.</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Manage retention, weekly digest, data portability and billing without a support call.</p>
       </section>
+      {isInternalMigrationPreviewEnabled() ? <Link className="rev-button-secondary" href="/app/launch-evidence">Review Sprint 12 launch evidence</Link> : null}
       <section className="grid gap-5 lg:grid-cols-2">
         <Card body="Download a workspace-scoped JSON package with canonical imports, mappings, findings, history, entitlements and audit events." title="Data export">
           <a className="rev-button-primary" href="/app/settings/data-export">Export workspace data</a>
@@ -54,7 +56,7 @@ export default async function SettingsPage() {
         </Card>
         <Card body="Dedicated offer entitlements remain separate from historical plan IDs. Growth checkout is not public while its release gate is incomplete." title="Plans and billing">
           {context.workspace.stripeCustomerId
-            ? <a className="rev-button-secondary" href="/api/billing/portal">Open billing portal</a>
+            ? <form action="/api/billing/portal" method="post"><button className="rev-button-secondary" type="submit">Open billing portal</button></form>
             : <Link className="rev-button-secondary" href="/start">Review gated plans</Link>}
         </Card>
       </section>

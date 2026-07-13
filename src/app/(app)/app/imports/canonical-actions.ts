@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
+import { prisma } from "@/db/prisma";
 import { canonicalEntityTypes } from "@/domain/revory/contracts";
 import { getAppContext } from "@/services/app/get-app-context";
 import { getCanonicalVolumePolicy } from "@/services/billing/growth-access";
+import type { CanonicalVolumePolicy } from "@/services/billing/growth-access";
+import { getCapabilityAccess } from "@/services/billing/capabilities";
 import {
   buildCanonicalMappingReview,
   calculateReviewedMappingConfidence,
@@ -15,7 +18,12 @@ import {
 import { requestCanonicalMappingAssistance } from "@/services/canonical-intake/ai-assisted-mapping";
 import { persistSecureIntakePlan } from "@/services/canonical-intake/persist-intake";
 import { buildSecureIntakePlan, type IntakeFile } from "@/services/canonical-intake/secure-intake";
-import { createQuoteRecoveryAnalysisRun } from "@/services/quote-recovery/analysis-runs";
+import { assertCanonicalFileContent, assertCanonicalUploadMetadata } from "@/services/canonical-intake/file-security";
+import {
+  createQuoteRecoveryAnalysisRun,
+  releaseQuoteRecoveryAnalysisRunCapacity,
+  reserveQuoteRecoveryAnalysisRunCapacity,
+} from "@/services/quote-recovery/analysis-runs";
 import { syncQuoteRecoveryFindingsForWorkspace } from "@/services/quote-recovery/sync-findings";
 import { syncRevenueRealizationFindingsForWorkspace } from "@/services/revenue-realization/sync-findings";
 import { checkRateLimit } from "@/services/security/rate-limit";
@@ -42,13 +50,15 @@ export type CanonicalImportActionState = {
   unmatchedCount?: number;
 };
 
-async function readSubmittedFiles(formData: FormData) {
+async function readSubmittedFiles(formData: FormData, policy: CanonicalVolumePolicy) {
   const files: Array<{
     bytes: Uint8Array;
     entityType: CanonicalEntityType;
     fileName: string;
     mimeType: string;
   }> = [];
+  let totalBytes = 0;
+  let totalExpandedBytes = 0;
   for (const entityType of canonicalEntityTypes) {
     const value = formData.get(`file_${entityType}`);
     if (
@@ -60,8 +70,15 @@ async function readSubmittedFiles(formData: FormData) {
     const fileName = typeof value.name === "string" && value.name.trim()
       ? value.name
       : `${entityType.toLowerCase()}.csv`;
+    assertCanonicalUploadMetadata({ fileName, mimeType: value.type, size: value.size, maxFileBytes: policy.maxFileBytes });
+    totalBytes += value.size;
+    if (totalBytes > policy.maxTotalBytes) throw new Error("Combined upload size exceeds the current plan limit.");
+    const bytes = new Uint8Array(await value.arrayBuffer());
+    const content = await assertCanonicalFileContent({ bytes, fileName, maxFileBytes: policy.maxFileBytes });
+    totalExpandedBytes += content.uncompressedBytes;
+    if (totalExpandedBytes > 128 * 1024 * 1024) throw new Error("Combined workbook expansion exceeds the safe processing limit.");
     files.push({
-      bytes: new Uint8Array(await value.arrayBuffer()),
+      bytes,
       entityType,
       fileName,
       mimeType: value.type,
@@ -75,6 +92,7 @@ export async function reviewCanonicalFiles(
 ): Promise<CanonicalReviewActionState> {
   const context = await getAppContext();
   if (!context) return { files: [], message: "Sign in again before reviewing data.", status: "error" };
+  if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { files: [], message: "An active REVORY entitlement is required.", status: "error" };
   if (
     checkRateLimit({
       key: `canonical-review:${context.workspace.id}`,
@@ -85,8 +103,12 @@ export async function reviewCanonicalFiles(
     return { files: [], message: "Too many review attempts. Wait a few minutes and retry.", status: "error" };
   }
 
-  const submitted = await readSubmittedFiles(formData);
+  const volumePolicy = await getCanonicalVolumePolicy(context.workspace.id);
+  const submitted = await readSubmittedFiles(formData, volumePolicy);
   if (!submitted.length) return { files: [], message: "Choose at least one CSV or XLSX file.", status: "error" };
+  if (submitted.some((file) => ["JOB", "INVOICE", "CHANGE_ORDER", "COST"].includes(file.entityType)) && !(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) {
+    return { files: [], message: "Revenue Realization requires Pro access or an authorized internal preview.", status: "error" };
+  }
 
   try {
     const files: CanonicalReviewFile[] = [];
@@ -141,8 +163,12 @@ export async function importCanonicalFiles(
 ): Promise<CanonicalImportActionState> {
   const context = await getAppContext();
   if (!context) return { status: "error", message: "Sign in again before importing data." };
+  if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { status: "error", message: "An active REVORY entitlement is required." };
   if (formData.get("mappingConfirmed") !== "yes") {
     return { status: "error", message: "Explicitly confirm the reviewed mapping before import." };
+  }
+  if (formData.get("snapshotMode") !== "FULL_REPLACEMENT") {
+    return { status: "error", message: "Confirm that each selected entity/source file is a complete replacement snapshot." };
   }
   if (
     checkRateLimit({
@@ -157,8 +183,12 @@ export async function importCanonicalFiles(
   const sourceSystem =
     String(formData.get("sourceSystem") ?? "manual-export").trim().slice(0, 80) ||
     "manual-export";
-  const submitted = await readSubmittedFiles(formData);
+  const volumePolicy = await getCanonicalVolumePolicy(context.workspace.id);
+  const submitted = await readSubmittedFiles(formData, volumePolicy);
   if (!submitted.length) return { status: "error", message: "Choose at least one reviewed file." };
+  if (submitted.some((file) => ["JOB", "INVOICE", "CHANGE_ORDER", "COST"].includes(file.entityType)) && !(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) {
+    return { status: "error", message: "Revenue Realization requires Pro access or an authorized internal preview." };
+  }
 
   try {
     const files: IntakeFile[] = [];
@@ -195,7 +225,6 @@ export async function importCanonicalFiles(
       files.push({ ...file, mapping, sourceSystem });
     }
 
-    const volumePolicy = await getCanonicalVolumePolicy(context.workspace.id);
     const plan = await buildSecureIntakePlan({ workspaceId: context.workspace.id, files, limits: volumePolicy });
     if (!plan.accepted) {
       return {
@@ -207,30 +236,54 @@ export async function importCanonicalFiles(
         ),
       };
     }
-    const result = await persistSecureIntakePlan({ workspaceId: context.workspace.id, plan });
-    const findingSync = await syncQuoteRecoveryFindingsForWorkspace(context.workspace.id);
-    await syncRevenueRealizationFindingsForWorkspace(context.workspace.id);
-    if (result.created) {
-      await createQuoteRecoveryAnalysisRun(context.workspace.id);
+    const existingSession = await prisma.canonicalImportSession.findUnique({
+      where: { workspaceId_idempotencyKey: { workspaceId: context.workspace.id, idempotencyKey: plan.idempotencyKey } },
+      select: { id: true, status: true },
+    });
+    const existingRun = existingSession?.status === "COMMITTED"
+      ? await prisma.quoteRecoveryAnalysisRun.findUnique({ where: { importSessionId: existingSession.id } })
+      : null;
+    const reservation = existingSession?.status === "COMMITTED"
+      ? null
+      : await reserveQuoteRecoveryAnalysisRunCapacity(context.workspace.id);
+    let capacitySettled = false;
+    let canonicalCommitted = existingSession?.status === "COMMITTED";
+    let result;
+    try {
+      result = await persistSecureIntakePlan({ workspaceId: context.workspace.id, plan, snapshotMode: "FULL_REPLACEMENT" });
+      canonicalCommitted = canonicalCommitted || result.created;
+      if (!result.created) {
+        await releaseQuoteRecoveryAnalysisRunCapacity(reservation);
+        capacitySettled = true;
+      }
+      const findingSync = await syncQuoteRecoveryFindingsForWorkspace(context.workspace.id);
+      await syncRevenueRealizationFindingsForWorkspace(context.workspace.id);
+      if (result.created || !existingRun) {
+        await createQuoteRecoveryAnalysisRun(context.workspace.id, result.created ? reservation : null, result.session.id);
+        capacitySettled = true;
+      }
       await captureGrowthIntelligenceSnapshot(context.workspace.id);
+      revalidatePath("/app/imports");
+      revalidatePath("/app/dashboard");
+      revalidatePath("/app/revenue-realization");
+      revalidatePath("/app/revenue-realization/report");
+      revalidatePath("/app/history");
+      return {
+        status: "committed",
+        message: result.created
+          ? "Canonical import committed atomically. Each selected entity/source scope replaced its prior active snapshot."
+          : "This unchanged import was already committed; no records were duplicated.",
+        acceptedCount: result.session.acceptedCount,
+        findingCount: findingSync.activeCount,
+        unmatchedCount: plan.linkCoverage.unmatched,
+        eligibleRules: Object.entries(plan.eligibility)
+          .filter(([, state]) => state.eligible)
+          .map(([rule]) => rule),
+      };
+    } catch (error) {
+      if (!capacitySettled && !canonicalCommitted) await releaseQuoteRecoveryAnalysisRunCapacity(reservation);
+      throw error;
     }
-    revalidatePath("/app/imports");
-    revalidatePath("/app/dashboard");
-    revalidatePath("/app/revenue-realization");
-    revalidatePath("/app/revenue-realization/report");
-    revalidatePath("/app/history");
-    return {
-      status: "committed",
-      message: result.created
-        ? "Canonical import committed atomically."
-        : "This unchanged import was already committed; no records were duplicated.",
-      acceptedCount: result.session.acceptedCount,
-      findingCount: findingSync.activeCount,
-      unmatchedCount: plan.linkCoverage.unmatched,
-      eligibleRules: Object.entries(plan.eligibility)
-        .filter(([, state]) => state.eligible)
-        .map(([rule]) => rule),
-    };
   } catch (error) {
     console.error("Canonical REVORY import failed.", error);
     return {

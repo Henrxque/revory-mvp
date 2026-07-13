@@ -110,6 +110,7 @@ export async function resetPasswordWithToken(input: {
       passwordResetExpiresAt: null,
       passwordResetTokenHash: null,
       passwordUpdatedAt: new Date(),
+      sessionVersion: { increment: 1 },
     },
     where: {
       id: user.id,

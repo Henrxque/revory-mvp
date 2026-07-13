@@ -38,6 +38,7 @@ export function CanonicalImportPanel() {
   const selectedFiles = useRef<Partial<Record<CanonicalEntityType, File>>>({});
   const [review, setReview] = useState<CanonicalReviewActionState | null>(null);
   const [mappingConfirmed, setMappingConfirmed] = useState(false);
+  const [snapshotConfirmed, setSnapshotConfirmed] = useState(false);
   const [importState, setImportState] = useState<CanonicalImportActionState>(
     initialCanonicalImportActionState,
   );
@@ -58,9 +59,9 @@ export function CanonicalImportPanel() {
   }
 
   function submitImport() {
-    if (!mappingConfirmed) {
+    if (!mappingConfirmed || !snapshotConfirmed) {
       setImportState({
-        message: "Check the explicit mapping confirmation before import.",
+        message: "Confirm both the reviewed mapping and the full replacement snapshot boundary before import.",
         status: "error",
       });
       return;
@@ -69,6 +70,7 @@ export function CanonicalImportPanel() {
       const formData = new FormData();
       formData.set("sourceSystem", sourceSystem);
       formData.set("mappingConfirmed", "yes");
+      formData.set("snapshotMode", "FULL_REPLACEMENT");
       for (const [entityType, file] of Object.entries(selectedFiles.current)) {
         if (file) formData.set(`file_${entityType}`, file);
       }
@@ -169,6 +171,7 @@ export function CanonicalImportPanel() {
                 else delete selectedFiles.current[key];
                 setReview(null);
                 setMappingConfirmed(false);
+                setSnapshotConfirmed(false);
                 setImportState(initialCanonicalImportActionState);
               }}
               type="file"
@@ -282,9 +285,21 @@ export function CanonicalImportPanel() {
               and incompatible datasets.
             </span>
           </label>
+          <label className="flex items-start gap-3 text-sm text-[color:var(--text-muted)]">
+            <input
+              checked={snapshotConfirmed}
+              className="mt-1"
+              id="snapshot-confirmation"
+              onChange={(event) => setSnapshotConfirmed(event.target.checked)}
+              type="checkbox"
+            />
+            <span>
+              I confirm that every selected file is the complete current snapshot for that entity and source system. Omitted records will leave the active read but remain preserved as inactive history.
+            </span>
+          </label>
           <button
             className="rev-button-primary"
-            disabled={pending || review.status !== "ready"}
+            disabled={pending || review.status !== "ready" || !mappingConfirmed || !snapshotConfirmed}
             onClick={submitImport}
             type="button"
           >

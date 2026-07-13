@@ -144,12 +144,12 @@ try {
   fs.writeFileSync(
     jobsPath,
     [
-      "Project ID,Project Status,Contract Amount,Includes Approved Changes,Currency,Owner,Lead Source,Service Type,Target Margin Percent,Scope Change Flag,Project Notes,Completion Date",
-      "JOB-QA-1,completed,100000,false,USD,Alex,Referral,Roofing,40,false,Final scope documented,2026-06-30",
-      "JOB-QA-2,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
-      "JOB-QA-3,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
-      "JOB-QA-4,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
-      "JOB-QA-5,completed,20000,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "Project ID,Project Status,Contract Amount,Includes Approved Changes,invoiceExportComplete,changeOrderExportComplete,costExportComplete,Currency,Owner,Lead Source,Service Type,Target Margin Percent,Scope Change Flag,Project Notes,Completion Date",
+      "JOB-QA-1,completed,100000,false,true,true,true,USD,Alex,Referral,Roofing,40,false,Final scope documented,2026-06-30",
+      "JOB-QA-2,completed,20000,true,true,true,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-3,completed,20000,true,true,true,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-4,completed,20000,true,true,true,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
+      "JOB-QA-5,completed,20000,true,true,true,true,USD,Alex,Referral,Roofing,35,false,Final scope documented,2026-06-30",
     ].join("\n"),
   );
   fs.writeFileSync(
@@ -206,6 +206,7 @@ try {
     );
   });
   await page.getByLabel(/I reviewed each mapping/).check();
+  await page.getByLabel(/complete current snapshot/).check();
   await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
   await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "commit-failure.png"), fullPage: true });
@@ -224,6 +225,7 @@ try {
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 });
   await page.getByLabel(/I reviewed each mapping/).check();
+  await page.getByLabel(/complete current snapshot/).check();
   await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
   await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 });
 
@@ -326,7 +328,7 @@ try {
   const growthOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   if (growthOverflow > 1) throw new Error(`Growth intelligence mobile overflow: ${growthOverflow}px`);
   await page.screenshot({ path: path.join(evidenceDir, "sprint-10-growth-mobile.png"), fullPage: true });
-  if (await page.locator("[data-nextjs-dialog],.vite-error-overlay").count()) {
+  if (await page.locator("[data-nextjs-dialog]:visible,.vite-error-overlay:visible").count()) {
     throw new Error("Framework error overlay detected.");
   }
   if (errors.length) throw new Error(`Browser console errors: ${errors.join(" | ")}`);

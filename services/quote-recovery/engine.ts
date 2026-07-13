@@ -15,13 +15,21 @@ export function runQuoteRecoveryEngine(input: { workspaceId: string; records: Ca
   const now = input.now ?? new Date(), policy = input.policy ?? defaultQuoteRecoveryPolicy;
   const estimates = input.records.filter((record) => record.entityType === "ESTIMATE");
   const activities = input.records.filter((record) => record.entityType === "ACTIVITY");
+  const activitiesByEstimate = activities.reduce((index, activity) => {
+    const estimateExternalId = activity.relationExternalIds.estimateExternalId;
+    if (!estimateExternalId) return index;
+    const current = index.get(estimateExternalId) ?? [];
+    current.push(activity);
+    index.set(estimateExternalId, current);
+    return index;
+  }, new Map<string, CanonicalRecordContract[]>());
   const findings: QuoteRecoveryFindingContract[] = [];
   const add = (record: CanonicalRecordContract, partial: Omit<QuoteRecoveryFindingContract, "family" | "fingerprint" | "estimateExternalId" | "currency">) => findings.push({ family: "QUOTE_RECOVERY", estimateExternalId: record.externalId, currency: String(record.payload.currency ?? "USD"), fingerprint: fingerprint(input.workspaceId, partial.type, record.externalId), ...partial });
   for (const estimate of estimates) {
     const createdAt = typeof estimate.payload.createdAt === "string" ? estimate.payload.createdAt : null;
     const amountCents = typeof estimate.payload.amountCents === "number" ? estimate.payload.amountCents : null;
     const status = estimate.payload.status;
-    const estimateActivities = activities.filter((activity) => activity.relationExternalIds.estimateExternalId === estimate.externalId);
+    const estimateActivities = activitiesByEstimate.get(estimate.externalId) ?? [];
     const latestActivity = [typeof estimate.payload.lastActivityAt === "string" ? estimate.payload.lastActivityAt : null, ...estimateActivities.map((activity) => activity.occurredAt)].filter((value): value is string => Boolean(value)).sort().at(-1) ?? null;
     if (!openStatus(status)) {
       const lostAt = typeof estimate.payload.lostAt === "string" ? estimate.payload.lostAt : null;

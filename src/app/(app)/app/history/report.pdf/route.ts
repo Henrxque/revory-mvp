@@ -4,6 +4,7 @@ import { getAppContext } from "@/services/app/get-app-context";
 import { getGrowthAccess } from "@/services/billing/growth-access";
 import { getGrowthIntelligenceHistory } from "@/services/growth-intelligence/snapshots";
 import { generateGrowthExecutivePdf } from "@/services/reports/growth-executive-pdf";
+import { prisma } from "@/db/prisma";
 
 export async function GET() {
   const context = await getAppContext();
@@ -18,6 +19,7 @@ export async function GET() {
     snapshots: history.snapshots,
     workspaceName: context.workspace.name,
   });
+  await prisma.workspaceAuditEvent.create({ data: { workspaceId: context.workspace.id, actorUserId: context.user.id, action: "GROWTH_PDF_EXPORTED", metadataJson: { snapshotCount: history.snapshots.length, decisionAvailable: history.current.decision.available } } });
   return new NextResponse(Buffer.from(pdf), {
     headers: {
       "Cache-Control": "private, no-store",

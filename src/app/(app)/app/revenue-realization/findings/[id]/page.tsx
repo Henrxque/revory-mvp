@@ -5,6 +5,7 @@ import { RevenueRealizationFindingIcon } from "@/components/revenue-realization/
 import type { RevenueRealizationEvidence, RevenueRealizationFindingType } from "@/domain/revory/revenue-realization";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getCapabilityAccess } from "@/services/billing/capabilities";
 import { getRevenueRealizationFindingDetail } from "@/services/revenue-realization/get-revenue-realization-read";
 
 function money(valueCents: number | null, currency: string) {
@@ -25,6 +26,7 @@ function evidenceValue(row: RevenueRealizationEvidence, currency: string) {
 export default async function RevenueRealizationFindingPage({ params }: { params: Promise<{ id: string }> }) {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/revenue-realization"));
+  if (!(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) redirect("/app/dashboard");
   const { id } = await params;
   const finding = await getRevenueRealizationFindingDetail(context.workspace.id, id);
   if (!finding) notFound();

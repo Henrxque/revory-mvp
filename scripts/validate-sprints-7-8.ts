@@ -9,7 +9,7 @@ import { buildRevenueRealizationRead } from "../services/revenue-realization/rec
 const encoder = new TextEncoder();
 const files: IntakeFile[] = [
   {
-    bytes: encoder.encode("Project ID;Project Status;Contract Amount;Includes Approved Changes;Currency;Completion Date\nJ-1;completed;100000;false;USD;2026-07-01"),
+    bytes: encoder.encode("Project ID;Project Status;Contract Amount;Includes Approved Changes;Invoice Export Complete;Change Order Export Complete;Cost Export Complete;Currency;Completion Date\nJ-1;completed;100000;false;true;true;true;USD;2026-07-01"),
     entityType: "JOB" as const,
     fileName: "jobs.csv",
     mapping: {
@@ -17,6 +17,9 @@ const files: IntakeFile[] = [
       "Contract Amount": "contractValueCents",
       Currency: "currency",
       "Includes Approved Changes": "contractValueIncludesApprovedChanges",
+      "Invoice Export Complete": "invoiceExportComplete",
+      "Change Order Export Complete": "changeOrderExportComplete",
+      "Cost Export Complete": "costExportComplete",
       "Project ID": "externalId",
       "Project Status": "status",
     },
@@ -90,8 +93,8 @@ assert.deepEqual(buildRevenueRealizationRead(plan.records), read, "unchanged rer
 
 const jobOnly = plan.records.filter((record) => record.entityType === "JOB");
 const partialRead = buildRevenueRealizationRead(jobOnly);
-assert.equal(partialRead.reconciliations[0].state, "SUPPRESSED");
-assert.ok(partialRead.reconciliations[0].issues.some((issue) => issue.includes("Invoice dataset")));
+assert.equal(partialRead.reconciliations[0].state, "ELIGIBLE");
+assert.equal(partialRead.reconciliations[0].invoicedCents, 0, "explicitly complete empty invoice export is a supported zero");
 
 const conflictingJob: CanonicalRecordContract = {
   ...jobOnly[0],
@@ -117,7 +120,7 @@ const unmatchedInvoice: CanonicalRecordContract = {
 };
 const unmatchedRead = buildRevenueRealizationRead([jobOnly[0], unmatchedInvoice]);
 assert.ok(unmatchedRead.matches.some((match) => match.state === "UNMATCHED"));
-assert.equal(unmatchedRead.reconciliations[0].state, "SUPPRESSED");
+assert.equal(unmatchedRead.reconciliations[0].state, "ELIGIBLE", "an unrelated unmatched invoice does not invalidate an explicitly complete job invoice snapshot");
 
 assert.throws(
   () => buildRevenueRealizationRead([jobOnly[0], { ...invoice, workspaceId: "workspace-b" }]),

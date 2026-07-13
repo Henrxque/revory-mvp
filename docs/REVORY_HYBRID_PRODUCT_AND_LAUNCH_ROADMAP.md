@@ -236,6 +236,14 @@ Measure audit conversion, first-value time, useful-finding rate, customer-confir
 
 **Exit:** retain, repackage or delay each price independently. Do not reduce price merely because broad FSM/CRM platforms have more features.
 
+### Sprint 12.1 — Precision and launch-evidence remediation
+
+**Outcome:** resolve independent Sprint 9/11 findings without converting missing external evidence into a pass.
+
+Deliver per-job export-completeness gates, active full-snapshot boundaries, strict boolean/temporal/currency/identity guards, finding reactivation, reconciliation state integrity, adversarial regression tests, tracked-artifact redaction, legal/security status surfaces and an explicit external launch-dependency register.
+
+**Exit:** corrected local logic passes a fresh independent challenge; no tracked QA session artifact remains in the current tree; every external security/legal/production dependency has an owner and reproducible evidence requirement. Customer-data validation may remain pending only when explicitly owned outside the sprint, and then no commercial gate may be called passed.
+
 ## 9. Launch sequence
 
 1. internal and design-partner Quote Recovery reads;

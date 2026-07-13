@@ -5,6 +5,7 @@ import { RevenueRealizationFindingIcon } from "@/components/revenue-realization/
 import type { JobBillingReconciliation, RevenueRealizationFindingType } from "@/domain/revory/revenue-realization";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getCapabilityAccess } from "@/services/billing/capabilities";
 import {
   getRevenueRealizationFindingRead,
   getRevenueRealizationRead,
@@ -63,6 +64,8 @@ function ReconciliationCard({ row }: { row: JobBillingReconciliation }) {
 export default async function RevenueRealizationPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/revenue-realization"));
+  const access = await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION");
+  if (!access.allowed) return <section className="rev-shell-hero rounded-[30px] p-6 md:p-7"><p className="rev-kicker">Pro capability gate</p><h1 className="rev-display-hero mt-3">Revenue Realization is not enabled for this workspace.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Change-order, underbilling and margin intelligence remain unavailable until the Pro release and entitlement gates pass.</p></section>;
   const [read, findingRead] = await Promise.all([
     getRevenueRealizationRead(context.workspace.id),
     getRevenueRealizationFindingRead(context.workspace.id),

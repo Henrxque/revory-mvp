@@ -1,2 +1,2 @@
-externalId,customerExternalId,estimateExternalId,status,contractValue,contractValueIncludesApprovedChanges,currency,owner,source,serviceType,targetGrossMarginPercent,scopeChangeFlag,notes,startedAt,completedAt
-JOB-001,CUST-001,EST-001,completed,12500.00,false,USD,Example Owner,Referral,Kitchen remodel,35,true,Customer requested additional built-in shelving,2026-07-15T14:00:00Z,2026-08-15T14:00:00Z
+externalId,customerExternalId,estimateExternalId,status,contractValue,contractValueIncludesApprovedChanges,invoiceExportComplete,changeOrderExportComplete,costExportComplete,currency,owner,source,serviceType,targetGrossMarginPercent,scopeChangeFlag,notes,startedAt,completedAt
+JOB-001,CUST-001,EST-001,completed,12500.00,false,true,true,true,USD,Example Owner,Referral,Kitchen remodel,35,true,Customer requested additional built-in shelving,2026-05-15T14:00:00Z,2026-06-15T14:00:00Z

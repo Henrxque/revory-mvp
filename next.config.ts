@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+const scriptSource = process.env.NODE_ENV === "development"
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+  : "script-src 'self' 'unsafe-inline'";
+
 const nextConfig: NextConfig = {
   distDir: process.env.REVORY_QA_DIST_DIR || ".next",
   async headers() {
@@ -9,7 +13,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://accounts.google.com; upgrade-insecure-requests",
+              `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; ${scriptSource}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; media-src 'none'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests`,
           },
           {
             key: "Cross-Origin-Opener-Policy",

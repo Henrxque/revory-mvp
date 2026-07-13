@@ -108,7 +108,7 @@ try {
   assert.equal(planA.idempotencyKey, planB.idempotencyKey);
   assert(planA.records.every((record) => record.workspaceId === "workspace-a"));
   await assert.rejects(
-    persistSecureIntakePlan({ workspaceId: "workspace-b", plan: planA }),
+    persistSecureIntakePlan({ workspaceId: "workspace-b", plan: planA, snapshotMode: "FULL_REPLACEMENT" }),
     /workspace-scoped/,
   );
 

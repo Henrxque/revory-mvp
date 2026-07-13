@@ -17,7 +17,7 @@ export async function getRevenueRealizationRecords(workspaceId: string) {
   if (!workspaceId.trim()) throw new Error("Workspace authorization is required.");
   const rows = await prisma.canonicalRecord.findMany({
     orderBy: [{ entityType: "asc" }, { externalId: "asc" }],
-    where: { workspaceId },
+    where: { workspaceId, isActive: true },
   });
   return rows.map((row): CanonicalRecordContract => ({
     entityType: row.entityType,

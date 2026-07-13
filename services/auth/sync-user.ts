@@ -38,11 +38,12 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
   });
 
   if (existingByAuthSubject) {
+    if (existingByAuthSubject.status === UserStatus.DISABLED) return null;
     const shouldUpdate =
       existingByAuthSubject.authProvider !== authProvider ||
       existingByAuthSubject.email !== email ||
       existingByAuthSubject.fullName !== fullName ||
-      existingByAuthSubject.status !== UserStatus.ACTIVE;
+      existingByAuthSubject.status === UserStatus.PENDING_VERIFICATION;
 
     if (!shouldUpdate) {
       return existingByAuthSubject;
@@ -69,11 +70,12 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
   });
 
   if (existingByEmail) {
+    if (existingByEmail.status === UserStatus.DISABLED) return null;
     const shouldUpdate =
       existingByEmail.authProvider !== authProvider ||
       existingByEmail.authSubject !== authSubject ||
       existingByEmail.fullName !== fullName ||
-      existingByEmail.status !== UserStatus.ACTIVE;
+      existingByEmail.status === UserStatus.PENDING_VERIFICATION;
 
     if (!shouldUpdate) {
       return existingByEmail;

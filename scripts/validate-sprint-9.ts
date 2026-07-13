@@ -15,16 +15,16 @@ const record = (
 ): CanonicalRecordContract => ({ entityType, externalId, occurredAt: null, payload: { externalId, ...payload }, provenance: provenance(`${entityType.toLowerCase()}.csv`, 2), relationExternalIds, sourceSystem: "fixture", workspaceId });
 
 const records: CanonicalRecordContract[] = [
-  record("JOB", "J-1", { status: "completed", contractValueCents: 10_000_000, contractValueIncludesApprovedChanges: false, currency: "USD", targetGrossMarginBps: 4000 }),
+  record("JOB", "J-1", { status: "completed", contractValueCents: 10_000_000, contractValueIncludesApprovedChanges: false, invoiceExportComplete: true, changeOrderExportComplete: true, costExportComplete: true, currency: "USD", targetGrossMarginBps: 4000 }),
   record("INVOICE", "I-1", { status: "issued", amountCents: 4_000_000, currency: "USD" }, { jobExternalId: "J-1" }),
   record("INVOICE", "I-2", { status: "paid", amountCents: 3_000_000, currency: "USD" }, { jobExternalId: "J-1" }),
   record("CHANGE_ORDER", "CO-1", { status: "approved", billingStatus: "unbilled", approvedAmountCents: 1_500_000, approvedAt: "2026-06-10T00:00:00.000Z", currency: "USD", description: "Approved cabinetry change" }, { jobExternalId: "J-1" }),
   record("COST", "C-1", { amountCents: 6_000_000, currency: "USD", category: "materials" }, { jobExternalId: "J-1" }),
-  record("JOB", "J-2", { status: "completed", contractValueCents: 5_000_000, contractValueIncludesApprovedChanges: true, currency: "USD", scopeChangeFlag: true, notes: "Scope changed on site" }),
+  record("JOB", "J-2", { status: "completed", contractValueCents: 5_000_000, contractValueIncludesApprovedChanges: true, invoiceExportComplete: true, changeOrderExportComplete: true, costExportComplete: false, currency: "USD", scopeChangeFlag: true, notes: "Scope changed on site" }),
   record("INVOICE", "I-3", { status: "paid", amountCents: 5_000_000, currency: "USD" }, { jobExternalId: "J-2" }),
-  record("JOB", "J-3", { status: "completed", contractValueCents: 4_000_000, contractValueIncludesApprovedChanges: true, currency: "USD", scopeChangeFlag: false, notes: "Customer requested additional work at the entry" }),
+  record("JOB", "J-3", { status: "completed", contractValueCents: 4_000_000, contractValueIncludesApprovedChanges: true, invoiceExportComplete: true, changeOrderExportComplete: true, costExportComplete: false, currency: "USD", scopeChangeFlag: false, notes: "Customer requested additional work at the entry" }),
   record("INVOICE", "I-4", { status: "paid", amountCents: 4_000_000, currency: "USD" }, { jobExternalId: "J-3" }),
-  record("JOB", "J-4", { status: "completed", contractValueCents: 3_000_000, contractValueIncludesApprovedChanges: true, currency: "USD", scopeChangeFlag: false, notes: "Extra care was taken during cleanup" }),
+  record("JOB", "J-4", { status: "completed", contractValueCents: 3_000_000, contractValueIncludesApprovedChanges: true, invoiceExportComplete: true, changeOrderExportComplete: true, costExportComplete: false, currency: "USD", scopeChangeFlag: false, notes: "Extra care was taken during cleanup" }),
   record("INVOICE", "I-5", { status: "paid", amountCents: 3_000_000, currency: "USD" }, { jobExternalId: "J-4" }),
 ];
 
@@ -75,7 +75,7 @@ const ambiguousRead = buildRevenueRealizationRead(ambiguousRecords);
 assert.ok(!runRevenueRealizationFindingEngine({ records: ambiguousRecords, reconciliation: ambiguousRead, workspaceId: "workspace-a" }).some((finding) => finding.jobExternalId === "J-1" && finding.category === "FINANCIAL"), "ambiguous job links must suppress financial findings");
 
 const eurRecords = [
-  record("JOB", "J-EUR", { status: "completed", contractValueCents: 2_000_000, contractValueIncludesApprovedChanges: true, currency: "EUR" }),
+  record("JOB", "J-EUR", { status: "completed", contractValueCents: 2_000_000, contractValueIncludesApprovedChanges: true, invoiceExportComplete: true, changeOrderExportComplete: true, costExportComplete: false, currency: "EUR" }),
   record("INVOICE", "I-EUR", { status: "issued", amountCents: 1_000_000, currency: "EUR" }, { jobExternalId: "J-EUR" }),
 ];
 const mixedRecords = [...records, ...eurRecords];

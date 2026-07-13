@@ -74,14 +74,12 @@ export async function syncRevenueRealizationFindings(input: {
           priority: finding.priority,
           reason: finding.reason,
           recommendedAction: finding.recommendedAction,
-          resolvedAt: existing?.status === "RESOLVED" ? existing.resolvedAt : null,
+          resolvedAt: null,
           severity: finding.severity,
           urgency: finding.urgency,
           valueBasis: finding.valueBasis,
           valueCents: finding.valueCents,
-          ...(existing?.status === "RESOLVED" || existing?.status === "DISMISSED"
-            ? {}
-            : { status: "OPEN" }),
+          ...(existing?.status === "DISMISSED" ? {} : { status: "OPEN" }),
         },
       });
     }

@@ -26,12 +26,11 @@ export function isStripeCheckoutConfiguredForPlan(planKey: RevoryBillingPlan) {
 }
 
 export function isStripeBillingConfigured() {
-  // Growth remains the primary complete self-service checkout path.
-  return isStripeCheckoutConfiguredForPlan("GROWTH");
+  return Boolean(stripeSecretKey);
 }
 
 export function isStripeWebhookConfigured() {
-  return Boolean(isStripeBillingConfigured() && stripeWebhookSecret);
+  return Boolean(stripeSecretKey && stripeWebhookSecret);
 }
 
 export function getStripeAppUrl() {

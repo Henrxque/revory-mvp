@@ -1,7 +1,10 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import { createHash } from "node:crypto";
+import { Prisma } from "@prisma/client";
 
+import { prisma } from "@/db/prisma";
 import {
   getStripeServerClient,
   getStripeWebhookSecret,
@@ -12,7 +15,7 @@ import {
   syncWorkspaceBillingFromInvoice,
   syncWorkspaceBillingFromStripeSubscription,
 } from "@/services/billing/stripe-sync";
-import { fulfillRevoryCheckoutSession } from "@/services/billing/entitlements";
+import { fulfillRevoryCheckoutSession, syncRevoryEntitlementFromSubscription } from "@/services/billing/entitlements";
 
 const handledStripeEvents = new Set<Stripe.Event.Type>([
   "checkout.session.completed",
@@ -20,7 +23,38 @@ const handledStripeEvents = new Set<Stripe.Event.Type>([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.payment_failed",
+  "invoice.paid",
 ]);
+
+async function claimExistingWebhookEvent(id: string, payloadHash: string) {
+  const existing = await prisma.stripeWebhookEvent.findUnique({ where: { id } });
+  if (!existing) return { response: NextResponse.json({ error: "Webhook claim was not found." }, { status: 409 }) };
+  if (existing.payloadHash !== payloadHash) return { response: NextResponse.json({ error: "Webhook event payload mismatch." }, { status: 400 }) };
+  if (existing.status === "PROCESSED") return { response: NextResponse.json({ received: true, replay: true }) };
+  const staleBefore = new Date(Date.now() - 5 * 60 * 1000);
+  if (existing.status === "PROCESSING" && existing.updatedAt > staleBefore) {
+    return { response: NextResponse.json({ received: true, processing: true }, { status: 202 }) };
+  }
+  const claimed = await prisma.stripeWebhookEvent.updateMany({
+    where: {
+      id,
+      payloadHash,
+      OR: [
+        { status: "FAILED" },
+        { status: "PROCESSING", updatedAt: { lte: staleBefore } },
+      ],
+    },
+    data: { status: "PROCESSING", attemptCount: { increment: 1 }, lastError: null },
+  });
+  return claimed.count === 1
+    ? { response: null }
+    : { response: NextResponse.json({ received: true, processing: true }, { status: 202 }) };
+}
+
+function invoiceSubscriptionId(invoice: Stripe.Invoice) {
+  const parent = invoice.parent?.subscription_details?.subscription ?? null;
+  return typeof parent === "string" ? parent : parent?.id ?? null;
+}
 
 export async function POST(request: Request) {
   if (!isStripeWebhookConfigured()) {
@@ -51,7 +85,7 @@ export async function POST(request: Request) {
       getStripeWebhookSecret(),
     );
   } catch (error) {
-    console.error("[revory-billing] webhook signature verification failed", error);
+    console.error("[revory-billing] webhook signature verification failed", error instanceof Error ? error.message : "unknown error");
 
     return NextResponse.json(
       { error: "Invalid webhook signature." },
@@ -63,11 +97,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, skipped: true });
   }
 
+  const payloadHash = createHash("sha256").update(payload).digest("hex");
+  try {
+    await prisma.stripeWebhookEvent.create({ data: { id: event.id, type: event.type, payloadHash } });
+  } catch (error) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")) throw error;
+    const claim = await claimExistingWebhookEvent(event.id, payloadHash);
+    if (claim.response) return claim.response;
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed":
         if ((event.data.object as Stripe.Checkout.Session).metadata?.offerKey) {
-          await fulfillRevoryCheckoutSession(event.data.object as Stripe.Checkout.Session);
+          const expanded = await stripe.checkout.sessions.retrieve((event.data.object as Stripe.Checkout.Session).id, { expand: ["line_items", "subscription"] });
+          const observedAt = new Date();
+          await fulfillRevoryCheckoutSession(expanded, observedAt);
         } else {
           await syncWorkspaceBillingFromCheckoutSession((event.data.object as Stripe.Checkout.Session).id);
         }
@@ -75,19 +120,47 @@ export async function POST(request: Request) {
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
-        await syncWorkspaceBillingFromStripeSubscription(
-          event.data.object as Stripe.Subscription,
-        );
+        {
+          const eventSubscription = event.data.object as Stripe.Subscription;
+          const currentSubscription = await stripe.subscriptions.retrieve(eventSubscription.id);
+          const observedAt = new Date();
+        await Promise.all([
+          syncWorkspaceBillingFromStripeSubscription(currentSubscription),
+          syncRevoryEntitlementFromSubscription(currentSubscription, observedAt),
+        ]);
+        }
         break;
       case "invoice.payment_failed":
         await syncWorkspaceBillingFromInvoice(event.data.object as Stripe.Invoice);
+        {
+          const invoice = event.data.object as Stripe.Invoice;
+          const subscriptionId = invoiceSubscriptionId(invoice);
+          if (subscriptionId) {
+            const currentSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+            const observedAt = new Date();
+            await syncRevoryEntitlementFromSubscription(currentSubscription, observedAt);
+          }
+        }
+        break;
+      case "invoice.paid":
+        await syncWorkspaceBillingFromInvoice(event.data.object as Stripe.Invoice);
+        {
+          const subscriptionId = invoiceSubscriptionId(event.data.object as Stripe.Invoice);
+          if (subscriptionId) {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            const observedAt = new Date();
+            await syncRevoryEntitlementFromSubscription(subscription, observedAt);
+          }
+        }
         break;
       default:
         break;
     }
+    await prisma.stripeWebhookEvent.update({ where: { id: event.id }, data: { status: "PROCESSED", processedAt: new Date(), lastError: null } });
   } catch (error) {
+    await prisma.stripeWebhookEvent.update({ where: { id: event.id }, data: { status: "FAILED", lastError: error instanceof Error ? error.message.slice(0, 500) : "Webhook processing failed" } });
     console.error("[revory-billing] webhook handling failed", {
-      error,
+      message: error instanceof Error ? error.message : "unknown error",
       type: event.type,
     });
 

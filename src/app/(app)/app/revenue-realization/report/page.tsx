@@ -5,6 +5,7 @@ import { RevenueRealizationFindingIcon } from "@/components/revenue-realization/
 import type { RevenueRealizationFindingType } from "@/domain/revory/revenue-realization";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getCapabilityAccess } from "@/services/billing/capabilities";
 import {
   getRevenueRealizationFindingRead,
   getRevenueRealizationRead,
@@ -18,6 +19,7 @@ function money(valueCents: number | null, currency: string | null) {
 export default async function FullRevenueLeakReportPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/revenue-realization/report"));
+  if (!(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) redirect("/app/revenue-realization");
   const [read, findingRead] = await Promise.all([
     getRevenueRealizationRead(context.workspace.id),
     getRevenueRealizationFindingRead(context.workspace.id),

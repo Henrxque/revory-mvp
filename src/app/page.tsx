@@ -364,6 +364,9 @@ export default async function HomePage() {
           <div className="flex gap-5 text-xs text-[color:var(--text-muted)]">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
+            <Link href="/security">Security</Link>
+            <Link href="/subprocessors">Subprocessors</Link>
+            <Link href="/limitations">Limitations</Link>
             <Link href="/sign-in">Sign in</Link>
           </div>
         </div>

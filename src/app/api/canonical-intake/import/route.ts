@@ -1,12 +1,24 @@
 import { NextResponse } from "next/server";
 
 import { importCanonicalFiles } from "@/src/app/(app)/app/imports/canonical-actions";
+import { getAppContext } from "@/services/app/get-app-context";
+import { getCanonicalVolumePolicy } from "@/services/billing/growth-access";
+import { readBoundedMultipartFormData } from "@/services/security/bounded-form-data";
 
 export async function POST(request: Request) {
   try {
-    const result = await importCanonicalFiles({ message: "", status: "idle" }, await request.formData());
+    const context = await getAppContext();
+    if (!context) return NextResponse.json({ message: "Unauthorized", status: "error" }, { status: 401 });
+    const origin = request.headers.get("origin");
+    if (origin && new URL(origin).host !== new URL(request.url).host) return NextResponse.json({ message: "Invalid request origin", status: "error" }, { status: 403 });
+    const policy = await getCanonicalVolumePolicy(context.workspace.id);
+    const formData = await readBoundedMultipartFormData(request, policy.maxTotalBytes + 1024 * 1024);
+    const result = await importCanonicalFiles({ message: "", status: "idle" }, formData);
     return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Unable to import the uploaded files.", status: "error" }, { status: 400 });
+    const code = error instanceof Error ? error.message : "";
+    const status = code === "CONTENT_LENGTH_REQUIRED" ? 411 : code === "UPLOAD_BODY_TOO_LARGE" ? 413 : 400;
+    console.warn(JSON.stringify({ level: "warn", message: "canonical_import_rejected", code }));
+    return NextResponse.json({ message: status === 413 ? "Upload body exceeds the current plan limit." : "Unable to import the uploaded files safely.", status: "error" }, { status });
   }
 }

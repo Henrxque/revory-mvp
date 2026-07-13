@@ -161,9 +161,11 @@ export default async function StartPage() {
 
               <div className="mt-auto pt-5">
                 {offer.offerKey && isRevoryOfferConfigured(offer.offerKey) ? (
-                  <Link className="rev-button-primary w-full justify-center" href={`/api/billing/checkout?offer=${offer.offerKey}`}>
-                    {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the $799 audit" : "Start Starter at $399/month"}
-                  </Link>
+                  <form action={`/api/billing/checkout?offer=${offer.offerKey}`} method="post">
+                    <button className="rev-button-primary w-full justify-center" type="submit">
+                      {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the $799 audit" : "Start Starter at $399/month"}
+                    </button>
+                  </form>
                 ) : internalPreview && offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? (
                   <Link className="rev-button-secondary w-full justify-center" href="/app/dashboard">Open internal workspace</Link>
                 ) : (

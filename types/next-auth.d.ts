@@ -4,6 +4,7 @@ import "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
+    sessionRevoked?: boolean;
     user: {
       authProvider?: string;
       id: string;
@@ -14,5 +15,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     authProvider?: string;
+    sessionRevoked?: boolean;
+    sessionVersion?: number;
   }
 }

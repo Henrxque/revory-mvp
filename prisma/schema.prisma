@@ -198,6 +198,35 @@ enum RevoryOfferKey {
   QUOTE_RECOVERY_AUDIT
   STARTER
   GROWTH
+  PRO
+}
+
+enum RevoryEvidenceMetric {
+  AUDIT_CONVERSION
+  FIRST_VALUE_SECONDS
+  USEFUL_FINDING
+  CONFIRMED_RECOVERED_VALUE
+  SECOND_READ
+  AUDIT_TO_SUBSCRIPTION_CONVERSION
+  SUPPORT_MINUTES
+  RETENTION_INTENT_30_DAY
+  RETENTION_INTENT_60_DAY
+  FALSE_POSITIVE_DISPUTE
+  PLAN_UPGRADE_INTEREST
+  WEEKLY_DECISION_USEFUL
+}
+
+enum RevoryEvidenceSource {
+  SYSTEM
+  CUSTOMER
+  FOUNDER
+  BILLING
+}
+
+enum StripeWebhookProcessingStatus {
+  PROCESSING
+  PROCESSED
+  FAILED
 }
 
 enum EntitlementStatus {
@@ -233,6 +262,7 @@ model User {
   emailVerificationTokenHash String?         @unique
   emailVerificationExpiresAt DateTime?
   status                     UserStatus      @default(ACTIVE)
+  sessionVersion             Int             @default(1)
   createdAt                  DateTime        @default(now())
   updatedAt                  DateTime        @updatedAt
   ownedWorkspaces            Workspace[]
@@ -282,6 +312,7 @@ model Workspace {
   digestPreference           QuoteRecoveryDigestPreference?
   intelligenceSnapshots      RevenueIntelligenceSnapshot[]
   auditEvents                WorkspaceAuditEvent[]
+  evidenceEvents             RevoryEvidenceEvent[]
 
   @@map("workspaces")
 }
@@ -293,22 +324,24 @@ model WorkspaceEntitlement {
   status                  EntitlementStatus @default(ACTIVE)
   stripeCheckoutSessionId String?           @unique
   stripePaymentIntentId   String?
-  stripeSubscriptionId    String?
+  stripeSubscriptionId    String?           @unique
   startsAt                DateTime          @default(now())
   endsAt                  DateTime?
+  maxAnalysisRuns         Int?
+  analysisRunsUsed        Int               @default(0)
+  stripeEventCreatedAt    DateTime?
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
   workspace               Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, offerKey, status])
-  @@index([stripeSubscriptionId])
   @@map("workspace_entitlements")
 }
 
 model QuoteRecoveryAnalysisRun {
   id                  String            @id @default(cuid())
   workspaceId         String
-  importSessionId     String?
+  importSessionId     String?           @unique
   status              AnalysisRunStatus @default(READY)
   findingSnapshotJson Json
   activeCount         Int               @default(0)
@@ -324,22 +357,24 @@ model QuoteRecoveryAnalysisRun {
 }
 
 model CanonicalImportSession {
-  id                  String                @id @default(cuid())
-  workspaceId         String
-  idempotencyKey      String
-  status              CanonicalImportStatus @default(PENDING_REVIEW)
-  sourceFileNamesJson Json
-  mappingJson         Json
-  dataQualityJson     Json
-  eligibilityJson     Json
-  rowCount            Int                   @default(0)
-  acceptedCount       Int                   @default(0)
-  rejectedCount       Int                   @default(0)
-  committedAt         DateTime?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  workspace           Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  records             CanonicalRecord[]
+  id                                   String                @id @default(cuid())
+  workspaceId                          String
+  idempotencyKey                       String
+  status                               CanonicalImportStatus @default(PENDING_REVIEW)
+  sourceFileNamesJson                  Json
+  mappingJson                          Json
+  dataQualityJson                      Json
+  eligibilityJson                      Json
+  quoteRecoverySnapshotJson            Json?
+  quoteRecoveryDataQualitySnapshotJson Json?
+  rowCount                             Int                   @default(0)
+  acceptedCount                        Int                   @default(0)
+  rejectedCount                        Int                   @default(0)
+  committedAt                          DateTime?
+  createdAt                            DateTime              @default(now())
+  updatedAt                            DateTime              @updatedAt
+  workspace                            Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  records                              CanonicalRecord[]
 
   @@unique([workspaceId, idempotencyKey])
   @@index([workspaceId, status, createdAt])
@@ -357,13 +392,15 @@ model CanonicalRecord {
   provenanceJson          Json
   payloadJson             Json
   occurredAt              DateTime?
+  isActive                Boolean                @default(true)
+  supersededAt            DateTime?
   createdAt               DateTime               @default(now())
   updatedAt               DateTime               @updatedAt
   workspace               Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   importSession           CanonicalImportSession @relation(fields: [importSessionId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, entityType, sourceSystem, externalId])
-  @@index([workspaceId, entityType, occurredAt])
+  @@index([workspaceId, entityType, isActive, occurredAt])
   @@index([workspaceId, importSessionId])
   @@map("canonical_records")
 }
@@ -450,21 +487,21 @@ model RevenueRealizationFinding {
 }
 
 model RevenueIntelligenceSnapshot {
-  id                            String    @id @default(cuid())
-  workspaceId                   String
-  importSessionId               String?
-  stateFingerprint              String
-  quoteFindingSnapshotJson      Json
+  id                             String    @id @default(cuid())
+  workspaceId                    String
+  importSessionId                String?
+  stateFingerprint               String
+  quoteFindingSnapshotJson       Json
   realizationFindingSnapshotJson Json
-  segmentSnapshotJson           Json
-  quoteEstimatedValueCents      Int       @default(0)
-  calculatedBillingGapCents     Int?
-  approvedChangeReviewCents     Int?
-  marginAtRiskCents             Int?
-  operationalCount              Int       @default(0)
-  currency                      String?
-  createdAt                     DateTime  @default(now())
-  workspace                     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  segmentSnapshotJson            Json
+  quoteEstimatedValueCents       Int       @default(0)
+  calculatedBillingGapCents      Int?
+  approvedChangeReviewCents      Int?
+  marginAtRiskCents              Int?
+  operationalCount               Int       @default(0)
+  currency                       String?
+  createdAt                      DateTime  @default(now())
+  workspace                      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, stateFingerprint])
   @@index([workspaceId, createdAt])
@@ -508,6 +545,54 @@ model WorkspaceAuditEvent {
 
   @@index([workspaceId, createdAt])
   @@map("workspace_audit_events")
+}
+
+model RevoryEvidenceEvent {
+  id              String               @id @default(cuid())
+  workspaceId     String
+  metric          RevoryEvidenceMetric
+  source          RevoryEvidenceSource
+  offerKey        RevoryOfferKey?
+  booleanValue    Boolean?
+  integerValue    Int?
+  amountCents     Int?
+  currency        String?
+  relatedEntityId String?
+  idempotencyKey  String
+  notes           String?
+  observedAt      DateTime             @default(now())
+  createdAt       DateTime             @default(now())
+  workspace       Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, metric, observedAt])
+  @@map("revory_evidence_events")
+}
+
+model StripeWebhookEvent {
+  id           String                        @id
+  type         String
+  payloadHash  String
+  status       StripeWebhookProcessingStatus @default(PROCESSING)
+  attemptCount Int                           @default(1)
+  lastError    String?
+  processedAt  DateTime?
+  createdAt    DateTime                      @default(now())
+  updatedAt    DateTime                      @updatedAt
+
+  @@index([status, updatedAt])
+  @@map("stripe_webhook_events")
+}
+
+model AuthRateLimitBucket {
+  key             String    @id
+  attemptCount    Int       @default(0)
+  windowStartedAt DateTime  @default(now())
+  blockedUntil    DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([blockedUntil])
+  @@map("auth_rate_limit_buckets")
 }
 
 model MedSpaProfile {

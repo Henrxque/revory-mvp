@@ -19,7 +19,7 @@ export async function getQuoteRecoveryRead(workspaceId: string, filter: QuoteRec
       orderBy: [{ severity: "desc" }, { valueCents: "desc" }, { detectedAt: "desc" }],
     }),
     prisma.canonicalImportSession.findFirst({ where: { workspaceId, status: "COMMITTED" }, orderBy: { committedAt: "desc" } }),
-    prisma.canonicalRecord.count({ where: { workspaceId } }),
+    prisma.canonicalRecord.count({ where: { workspaceId, isActive: true } }),
   ]);
   const allCounts = await prisma.quoteRecoveryFinding.groupBy({ by: ["status"], where: { workspaceId }, _count: { _all: true } });
   const activeFindings = findings.filter((finding) => finding.status === "OPEN" || finding.status === "ACKNOWLEDGED");

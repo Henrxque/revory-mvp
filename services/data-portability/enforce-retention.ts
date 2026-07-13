@@ -6,15 +6,10 @@ export async function enforceWorkspaceRetention(
   workspaceId: string,
   now = new Date(),
 ) {
-  const settings = await prisma.workspaceDataSettings.findUnique({
-    where: { workspaceId },
-  });
-  if (!settings) {
-    return { deletedFindings: 0, deletedImportSessions: 0, deletedRealizationFindings: 0, deletedRuns: 0, deletedSnapshots: 0, skipped: true };
-  }
+  const settings = await prisma.workspaceDataSettings.upsert({ where: { workspaceId }, create: { workspaceId, retentionDays: 365 }, update: {} });
   const cutoff = new Date(now.getTime() - settings.retentionDays * 24 * 60 * 60 * 1000);
   return prisma.$transaction(async (tx) => {
-    const [findings, realizationFindings, runs, snapshots, sessions] = await Promise.all([
+    const [findings, realizationFindings, runs, snapshots, sessions, evidenceEvents] = await Promise.all([
       tx.quoteRecoveryFinding.deleteMany({
         where: { workspaceId, updatedAt: { lt: cutoff } },
       }),
@@ -30,8 +25,9 @@ export async function enforceWorkspaceRetention(
       tx.canonicalImportSession.deleteMany({
         where: { workspaceId, createdAt: { lt: cutoff } },
       }),
+      tx.revoryEvidenceEvent.deleteMany({ where: { workspaceId, observedAt: { lt: cutoff } } }),
     ]);
-    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count;
+    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count;
     if (deletedCount > 0) {
       await tx.workspaceAuditEvent.create({
         data: {
@@ -43,6 +39,7 @@ export async function enforceWorkspaceRetention(
             deletedRealizationFindings: realizationFindings.count,
             deletedRuns: runs.count,
             deletedSnapshots: snapshots.count,
+            deletedEvidenceEvents: evidenceEvents.count,
             retentionDays: settings.retentionDays,
           },
           workspaceId,
@@ -55,6 +52,7 @@ export async function enforceWorkspaceRetention(
       deletedRealizationFindings: realizationFindings.count,
       deletedRuns: runs.count,
       deletedSnapshots: snapshots.count,
+      deletedEvidenceEvents: evidenceEvents.count,
       skipped: false,
     };
   });
