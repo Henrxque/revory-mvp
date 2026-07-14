@@ -1,0 +1,7 @@
+Quote ID,Client ID,Quote Status,Quote Total,Quote Date,Lost Date,Last Activity,Next Follow Up,Assigned Rep,Next Action,Job Type,Currency
+JOBBER-EST-001,JOBBER-CUS-001,open,28500,2026-03-10,,2026-06-01,2026-06-15,Alex Morgan,Call decision maker,Roof replacement,USD
+JOBBER-EST-002,JOBBER-CUS-002,sent,12800,2026-04-15,,,,,,HVAC replacement,USD
+JOBBER-EST-003,JOBBER-CUS-003,open,9600,2026-06-20,,,,,,Kitchen remodel,USD
+JOBBER-EST-004,JOBBER-CUS-001,lost,18000,2026-05-15,2026-07-01,2026-06-28,,Jordan Lee,Rebid after scope review,Pool renovation,USD
+JOBBER-EST-005,JOBBER-CUS-002,won,22000,2026-06-01,,2026-06-10,,Taylor Reed,Schedule job,Bathroom remodel,USD
+JOBBER-EST-006,JOBBER-CUS-003,open,42000,2026-07-05,,2026-07-12,2026-07-20,Taylor Reed,Present financing options,Whole-home remodel,USD

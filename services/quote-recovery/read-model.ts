@@ -6,7 +6,7 @@ import { getCanonicalDataQualityDetail } from "@/services/canonical-intake/data-
 export type QuoteRecoveryReadFilter = "ACTIVE" | "FINANCIAL" | "OPERATIONAL" | "HIGH_PRIORITY" | "RESOLVED" | "DISMISSED";
 
 export async function getQuoteRecoveryRead(workspaceId: string, filter: QuoteRecoveryReadFilter = "ACTIVE") {
-  const [findings, latestImport, dataQualityDetail] = await Promise.all([
+  const [findings, latestImport, dataQualityDetail, workspace] = await Promise.all([
     prisma.quoteRecoveryFinding.findMany({
       where: {
         workspaceId,
@@ -21,16 +21,26 @@ export async function getQuoteRecoveryRead(workspaceId: string, filter: QuoteRec
     }),
     prisma.canonicalImportSession.findFirst({ where: { workspaceId, status: "COMMITTED" }, orderBy: { committedAt: "desc" } }),
     getCanonicalDataQualityDetail(workspaceId),
+    prisma.workspace.findUnique({ where: { id: workspaceId }, select: { defaultCurrency: true } }),
   ]);
   const allCounts = await prisma.quoteRecoveryFinding.groupBy({ by: ["status"], where: { workspaceId }, _count: { _all: true } });
   const activeFindings = findings.filter((finding) => finding.status === "OPEN" || finding.status === "ACKNOWLEDGED");
-  const estimatedValueCents = activeFindings.reduce((sum, finding) => sum + (finding.valueBasis === "ESTIMATED" ? finding.valueCents ?? 0 : 0), 0);
+  const financialCurrencies = new Set(
+    activeFindings
+      .filter((finding) => finding.valueBasis === "ESTIMATED" && finding.valueCents !== null)
+      .map((finding) => finding.currency),
+  );
+  const hasMixedCurrencies = financialCurrencies.size > 1;
+  const reportingCurrency = [...financialCurrencies][0] ?? workspace?.defaultCurrency ?? "USD";
+  const estimatedValueCents = hasMixedCurrencies
+    ? null
+    : activeFindings.reduce((sum, finding) => sum + (finding.valueBasis === "ESTIMATED" ? finding.valueCents ?? 0 : 0), 0);
   const financialCount = activeFindings.filter((finding) => finding.valueCents !== null && finding.valueBasis === "ESTIMATED").length;
   const operationalCount = activeFindings.filter((finding) => finding.valueBasis === "OPERATIONAL").length;
   const counts = Object.fromEntries(allCounts.map((row) => [row.status, row._count._all]));
   return {
     findings,
-    summary: { activeCount: (counts.OPEN ?? 0) + (counts.ACKNOWLEDGED ?? 0), resolvedCount: counts.RESOLVED ?? 0, dismissedCount: counts.DISMISSED ?? 0, estimatedValueCents, financialCount, operationalCount },
+    summary: { activeCount: (counts.OPEN ?? 0) + (counts.ACKNOWLEDGED ?? 0), resolvedCount: counts.RESOLVED ?? 0, dismissedCount: counts.DISMISSED ?? 0, estimatedValueCents, financialCount, operationalCount, hasMixedCurrencies, reportingCurrency },
     dataQuality: {
       eligibility: dataQualityDetail.eligibility,
       hasImport: Boolean(latestImport),

@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+JT-ACT-001,JT-CUS-001,JT-EST-001,2026-06-01,phone,voicemail,Call decision maker
+JT-ACT-004,JT-CUS-001,JT-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+JT-ACT-006,JT-CUS-003,JT-EST-006,2026-07-12,meeting,financing requested,Present financing options

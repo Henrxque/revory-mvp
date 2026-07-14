@@ -1,8 +1,10 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
+import { detectSourceSystem, revorySourceSystems, type SourceSystemDetection } from "@/domain/revory/source-systems";
 import { prisma } from "@/db/prisma";
 import { canonicalEntityTypes } from "@/domain/revory/contracts";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -17,6 +19,7 @@ import {
   validateReviewedCanonicalMapping,
 } from "@/services/canonical-intake/assisted-mapping";
 import { requestCanonicalMappingAssistance } from "@/services/canonical-intake/ai-assisted-mapping";
+import { canonicalFields } from "@/services/canonical-intake/definitions";
 import { persistSecureIntakePlan } from "@/services/canonical-intake/persist-intake";
 import { buildSecureIntakePlan, type IntakeFile } from "@/services/canonical-intake/secure-intake";
 import { assertCanonicalFileContent, assertCanonicalUploadMetadata } from "@/services/canonical-intake/file-security";
@@ -33,12 +36,21 @@ import { captureGrowthIntelligenceSnapshot } from "@/services/growth-intelligenc
 export type CanonicalReviewFile = CanonicalMappingReview & {
   aiProviderUsed: boolean;
   aiWarnings: string[];
+  savedMappingUsed: boolean;
 };
 
 export type CanonicalReviewActionState = {
   files: CanonicalReviewFile[];
   message: string;
+  sourceDetection: SourceSystemDetection;
   status: "error" | "ready";
+};
+
+const emptySourceDetection: SourceSystemDetection = {
+  confidence: "LOW",
+  label: "Source not identified",
+  matchedSignals: [],
+  sourceSystem: null,
 };
 
 export type CanonicalImportActionState = {
@@ -92,8 +104,8 @@ export async function reviewCanonicalFiles(
   formData: FormData,
 ): Promise<CanonicalReviewActionState> {
   const context = await getAppContext();
-  if (!context) return { files: [], message: "Sign in again before reviewing data.", status: "error" };
-  if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { files: [], message: "An active REVORY entitlement is required.", status: "error" };
+  if (!context) return { files: [], message: "Sign in again before reviewing data.", sourceDetection: emptySourceDetection, status: "error" };
+  if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { files: [], message: "An active REVORY entitlement is required.", sourceDetection: emptySourceDetection, status: "error" };
   if (
     (await checkRateLimit({
       key: `canonical-review:${context.workspace.id}`,
@@ -101,26 +113,67 @@ export async function reviewCanonicalFiles(
       windowMs: 10 * 60 * 1000,
     })).limited
   ) {
-    return { files: [], message: "Too many review attempts. Wait a few minutes and retry.", status: "error" };
+    return { files: [], message: "Too many review attempts. Wait a few minutes and retry.", sourceDetection: emptySourceDetection, status: "error" };
   }
 
   const volumePolicy = await getCanonicalVolumePolicy(context.workspace.id);
   const submitted = await readSubmittedFiles(formData, volumePolicy);
-  if (!submitted.length) return { files: [], message: "Choose at least one CSV or XLSX file.", status: "error" };
+  if (!submitted.length) return { files: [], message: "Choose at least one CSV or XLSX file.", sourceDetection: emptySourceDetection, status: "error" };
   if (submitted.some((file) => ["JOB", "INVOICE", "CHANGE_ORDER", "COST"].includes(file.entityType)) && !(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) {
-    return { files: [], message: "Revenue Realization requires Pro access or an authorized internal preview.", status: "error" };
+    return { files: [], message: "Revenue Realization requires Pro access or an authorized internal preview.", sourceDetection: emptySourceDetection, status: "error" };
   }
 
   try {
     const files: CanonicalReviewFile[] = [];
+    const rememberedSourceSystems = new Set<NonNullable<SourceSystemDetection["sourceSystem"]>>();
     for (const file of submitted) {
       const deterministic = await buildCanonicalMappingReview(file);
+      const sourceSignature = createHash("sha256")
+        .update(Object.keys(deterministic.mapping).sort().join("|"))
+        .digest("hex");
+      const saved = await prisma.savedCanonicalMapping.findUnique({
+        where: {
+          workspaceId_entityType_sourceSignature: {
+            workspaceId: context.workspace.id,
+            entityType: file.entityType,
+            sourceSignature,
+          },
+        },
+      });
+      const savedMapping = saved?.mappingJson && typeof saved.mappingJson === "object" && !Array.isArray(saved.mappingJson)
+        ? Object.fromEntries(
+            Object.entries(saved.mappingJson as Record<string, unknown>).filter(
+              (entry): entry is [string, string] =>
+                deterministic.headers.includes(entry[0]) &&
+                typeof entry[1] === "string" &&
+                Boolean(canonicalFields[file.entityType][entry[1]]),
+            ),
+          )
+        : null;
+      const mappingForReview = savedMapping && Object.keys(savedMapping).length
+        ? savedMapping
+        : deterministic.mapping;
+      const savedMappingUsed = mappingForReview === savedMapping;
+      if (
+        savedMappingUsed &&
+        saved?.sourceSystem &&
+        saved.sourceSystem !== "manual-export" &&
+        saved.sourceSystem !== "other-system-export" &&
+        revorySourceSystems.some(([sourceSystem]) => sourceSystem === saved.sourceSystem)
+      ) {
+        rememberedSourceSystems.add(saved.sourceSystem as NonNullable<SourceSystemDetection["sourceSystem"]>);
+      }
+      const baseConfidence = calculateReviewedMappingConfidence({
+        entityType: file.entityType,
+        headers: deterministic.headers,
+        mapping: mappingForReview,
+      });
       const needsAssistance =
-        deterministic.confidence < 0.95 ||
-        deterministic.headers.some((header) => !deterministic.mapping[header]);
+        baseConfidence < 0.95 ||
+        deterministic.headers.some((header) => !mappingForReview[header]);
       const assistance = needsAssistance
-        ? await requestCanonicalMappingAssistance(deterministic)
-        : { mapping: deterministic.mapping, providerUsed: false, warnings: [] };
+        ? await requestCanonicalMappingAssistance({ ...deterministic, confidence: baseConfidence, mapping: mappingForReview })
+        : { mapping: mappingForReview, providerUsed: false, warnings: [] };
       const confidence = calculateReviewedMappingConfidence({
         entityType: file.entityType,
         headers: deterministic.headers,
@@ -140,19 +193,36 @@ export async function reviewCanonicalFiles(
         confidence,
         issues,
         mapping: assistance.mapping,
+        savedMappingUsed,
       });
     }
+    const rememberedSourceSystem = rememberedSourceSystems.size === 1
+      ? [...rememberedSourceSystems][0]
+      : null;
+    const rememberedSourceLabel = rememberedSourceSystem
+      ? revorySourceSystems.find(([sourceSystem]) => sourceSystem === rememberedSourceSystem)?.[1]
+      : null;
+    const sourceDetection: SourceSystemDetection = rememberedSourceSystem && rememberedSourceLabel
+      ? {
+          confidence: "HIGH",
+          label: rememberedSourceLabel,
+          matchedSignals: ["workspace-confirmed column pattern"],
+          sourceSystem: rememberedSourceSystem,
+        }
+      : detectSourceSystem(files.map((file) => ({ fileName: file.fileName, headers: file.headers })));
     return {
       files,
       message: files.every((file) => file.acceptedForReview)
-        ? "Review every suggested mapping, then explicitly confirm the import."
-        : "Data Quality blocked one or more files. Resolve the listed issues before import.",
+        ? "Check the column matches below, then confirm the import."
+        : "One or more files need attention. Fix the highlighted problems before importing.",
+      sourceDetection,
       status: files.every((file) => file.acceptedForReview) ? "ready" : "error",
     };
   } catch (error) {
     return {
       files: [],
       message: error instanceof Error ? error.message : "REVORY could not profile these files safely.",
+      sourceDetection: emptySourceDetection,
       status: "error",
     };
   }
@@ -245,7 +315,7 @@ export async function importCanonicalFiles(
       files.push({ ...file, mapping, sourceSystem });
     }
 
-    const plan = await buildSecureIntakePlan({ workspaceId: context.workspace.id, files, limits: volumePolicy });
+    const plan = await buildSecureIntakePlan({ workspaceId: context.workspace.id, files, limits: volumePolicy, defaultCurrency: context.workspace.defaultCurrency });
     if (!plan.accepted) {
       return {
         status: "error",
@@ -283,6 +353,23 @@ export async function importCanonicalFiles(
         capacitySettled = true;
       }
       await captureGrowthIntelligenceSnapshot(context.workspace.id);
+      if (
+        result.created &&
+        formData.get("sourceDetectionConfirmed") === "yes" &&
+        String(formData.get("detectedSourceSystem") ?? "") === sourceSystem
+      ) {
+        await prisma.workspaceAuditEvent.create({
+          data: {
+            workspaceId: context.workspace.id,
+            actorUserId: context.user.id,
+            action: "SOURCE_SYSTEM_SUGGESTION_CONFIRMED",
+            metadataJson: {
+              confidence: String(formData.get("sourceDetectionConfidence") ?? "UNKNOWN"),
+              sourceSystem,
+            },
+          },
+        });
+      }
       revalidatePath("/app/imports");
       revalidatePath("/app/dashboard");
       revalidatePath("/app/revenue-realization");
@@ -291,7 +378,7 @@ export async function importCanonicalFiles(
       return {
         status: "committed",
         message: result.created
-          ? "Canonical import committed atomically. Each selected entity/source scope replaced its prior active snapshot."
+          ? "Your files were imported and the latest REVORY read is ready. Each selected dataset replaced its prior active snapshot while preserving history."
           : "This unchanged import was already committed; no records were duplicated.",
         acceptedCount: result.session.acceptedCount,
         findingCount: findingSync.activeCount,

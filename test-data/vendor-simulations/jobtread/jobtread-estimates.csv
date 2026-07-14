@@ -1,0 +1,7 @@
+Bid ID,Customer ID,Bid Status,Bid Total,Created Date,Lost Date,Last Activity Date,Next Contact Date,Estimator,Next Action,Project Type,Currency
+JT-EST-001,JT-CUS-001,open,28500,2026-03-10,,2026-06-01,2026-06-15,Alex Morgan,Call decision maker,Roof replacement,USD
+JT-EST-002,JT-CUS-002,sent,12800,2026-04-15,,,,,,HVAC replacement,USD
+JT-EST-003,JT-CUS-003,open,9600,2026-06-20,,,,,,Kitchen remodel,USD
+JT-EST-004,JT-CUS-001,lost,18000,2026-05-15,2026-07-01,2026-06-28,,Jordan Lee,Rebid after scope review,Pool renovation,USD
+JT-EST-005,JT-CUS-002,won,22000,2026-06-01,,2026-06-10,,Taylor Reed,Schedule job,Bathroom remodel,USD
+JT-EST-006,JT-CUS-003,open,42000,2026-07-05,,2026-07-12,2026-07-20,Taylor Reed,Present financing options,Whole-home remodel,USD

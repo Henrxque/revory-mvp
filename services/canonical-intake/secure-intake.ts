@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import ExcelJS from "exceljs";
 
 import type { CanonicalEntityType, CanonicalRecordContract } from "@/domain/revory/contracts";
+import { normalizeWorkspaceCurrency, type WorkspaceCurrency } from "@/domain/revory/currency";
 import { assertWorkspaceScopedRecord } from "@/domain/revory/contracts";
 import { parseCanonicalCsv } from "@/services/canonical-intake/csv-profile";
 import { canonicalFields, quoteRecoveryEligibility } from "@/services/canonical-intake/definitions";
@@ -29,7 +30,7 @@ export const DEFAULT_CANONICAL_VOLUME_LIMITS: IntakeVolumeLimits = {
 
 export type IntakeFile = { bytes: Uint8Array; entityType: CanonicalEntityType; fileName: string; mimeType?: string; sourceSystem: string; mapping: Record<string, string> };
 export type IntakeIssue = { code: string; fileName: string; message: string; rowNumber?: number };
-export type IntakePlan = { accepted: boolean; idempotencyKey: string; records: CanonicalRecordContract[]; issues: IntakeIssue[]; mappings: Record<string, Record<string, string>>; eligibility: Record<string, { eligible: boolean; missingFields: string[] }>; linkCoverage: { linked: number; unmatched: number; conflicting: number } };
+export type IntakePlan = { accepted: boolean; defaultCurrency?: WorkspaceCurrency; idempotencyKey: string; records: CanonicalRecordContract[]; issues: IntakeIssue[]; mappings: Record<string, Record<string, string>>; eligibility: Record<string, { eligible: boolean; missingFields: string[] }>; linkCoverage: { linked: number; unmatched: number; conflicting: number } };
 
 async function readRows(file: IntakeFile): Promise<{ headers: string[]; rows: unknown[][]; formulaRows: number[] }> {
   if (file.fileName.toLowerCase().endsWith(".csv")) {
@@ -70,9 +71,10 @@ function normalize(value: unknown, type: string): string | number | boolean | nu
   return raw;
 }
 
-export async function buildSecureIntakePlan(input: { workspaceId: string; files: IntakeFile[]; limits?: IntakeVolumeLimits }): Promise<IntakePlan> {
+export async function buildSecureIntakePlan(input: { workspaceId: string; files: IntakeFile[]; limits?: IntakeVolumeLimits; defaultCurrency?: string }): Promise<IntakePlan> {
   const issues: IntakeIssue[] = [], records: CanonicalRecordContract[] = [], mappings: Record<string, Record<string, string>> = {};
   const limits = input.limits ?? DEFAULT_CANONICAL_VOLUME_LIMITS;
+  const defaultCurrency = normalizeWorkspaceCurrency(input.defaultCurrency);
   if (!input.workspaceId.trim()) throw new Error("Workspace authorization is required.");
   if (input.files.length === 0 || input.files.length > limits.maxFiles) throw new Error(`Upload between 1 and ${limits.maxFiles} files for the current plan.`);
   const totalBytes = input.files.reduce((total, file) => total + file.bytes.byteLength, 0);
@@ -114,6 +116,9 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
         }
       }
       if (invalidValue) continue;
+      if (definitions.currency && (payload.currency === null || payload.currency === undefined || payload.currency === "")) {
+        payload.currency = defaultCurrency;
+      }
       const missing = Object.entries(definitions).filter(([, d]) => d.required).map(([field]) => field).filter((field) => payload[field] === null || payload[field] === undefined || payload[field] === "");
       if (missing.length) { issues.push({ code: "MISSING_REQUIRED", fileName: file.fileName, rowNumber: index + 2, message: `Missing required fields: ${missing.join(", ")}.` }); continue; }
       const relationExternalIds = Object.fromEntries(Object.entries(definitions).filter(([field, d]) => d.relation && typeof payload[field] === "string" && payload[field]).map(([field]) => [field, payload[field] as string]));
@@ -147,7 +152,7 @@ export async function buildSecureIntakePlan(input: { workspaceId: string; files:
     Object.entries(mapping).sort(([left], [right]) => left.localeCompare(right)),
   ]);
   const fileSemantics = input.files.map((file) => `${file.entityType}:${file.sourceSystem.trim()}:${file.fileName}`).sort();
-  const idempotencyKey = createHash("sha256").update([input.workspaceId, ...signatures.sort(), ...fileSemantics, JSON.stringify(mappingSignature)].join("|")).digest("hex");
+  const idempotencyKey = createHash("sha256").update([input.workspaceId, defaultCurrency, ...signatures.sort(), ...fileSemantics, JSON.stringify(mappingSignature)].join("|")).digest("hex");
   const blockingCodes = new Set(["BATCH_TOO_LARGE", "DUPLICATE_EXTERNAL_ID", "DUPLICATE_HEADERS", "FILE_TOO_LARGE", "FORMULA_REJECTED", "INVALID_DIMENSIONS", "INVALID_MAPPING", "INVALID_VALUE", "MISSING_REQUIRED", "MISSING_SOURCE_SYSTEM", "UNSAFE_FILE"]);
-  return { accepted: issues.every((issue) => !blockingCodes.has(issue.code)) && records.length > 0, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting } };
+  return { accepted: issues.every((issue) => !blockingCodes.has(issue.code)) && records.length > 0, defaultCurrency, idempotencyKey, records, issues, mappings, eligibility, linkCoverage: { linked, unmatched, conflicting } };
 }

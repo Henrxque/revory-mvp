@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+HCP-ACT-001,HCP-CUS-001,HCP-EST-001,2026-06-01,phone,voicemail,Call decision maker
+HCP-ACT-004,HCP-CUS-001,HCP-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+HCP-ACT-006,HCP-CUS-003,HCP-EST-006,2026-07-12,meeting,financing requested,Present financing options

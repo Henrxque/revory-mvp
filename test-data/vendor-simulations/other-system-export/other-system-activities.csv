@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+OTH-ACT-001,OTH-CUS-001,OTH-EST-001,2026-06-01,phone,voicemail,Call decision maker
+OTH-ACT-004,OTH-CUS-001,OTH-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+OTH-ACT-006,OTH-CUS-003,OTH-EST-006,2026-07-12,meeting,financing requested,Present financing options

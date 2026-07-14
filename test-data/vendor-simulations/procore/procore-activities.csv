@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+PC-ACT-001,PC-CUS-001,PC-EST-001,2026-06-01,phone,voicemail,Call decision maker
+PC-ACT-004,PC-CUS-001,PC-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+PC-ACT-006,PC-CUS-003,PC-EST-006,2026-07-12,meeting,financing requested,Present financing options

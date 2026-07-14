@@ -1,0 +1,2 @@
+Job ID,Customer ID,Estimate ID,Job Status,Contract Value,Contract Includes Changes,Invoice Export Complete,Change Order Export Complete,Cost Export Complete,Currency,Target Gross Margin
+PC-JOB-100,PC-CUS-001,PC-EST-001,in progress,50000,true,true,true,true,USD,25

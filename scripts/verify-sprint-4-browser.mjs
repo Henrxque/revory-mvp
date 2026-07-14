@@ -202,6 +202,23 @@ try {
     );
   });
 
+  await page.goto("/app/settings", { waitUntil: "networkidle" });
+  await page.getByLabel("Default currency").selectOption("CAD");
+  await page.getByRole("button", { name: "Save currency" }).click();
+  await page.waitForLoadState("networkidle");
+  let currencyWorkspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspace.id } });
+  for (let attempt = 0; attempt < 30 && currencyWorkspace.defaultCurrency !== "CAD"; attempt += 1) {
+    await page.waitForTimeout(100);
+    currencyWorkspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspace.id } });
+  }
+  if (currencyWorkspace.defaultCurrency !== "CAD") {
+    throw new Error(`Workspace currency setting did not persist; found ${currencyWorkspace.defaultCurrency}.`);
+  }
+  await page.goto("/app/imports", { waitUntil: "networkidle" });
+  if (!(await page.getByText(/Currency fallback:\s*CAD/).isVisible())) {
+    throw new Error("Import currency fallback explanation is missing.");
+  }
+
   const sourceSystem = page.getByLabel("Where did these exports come from?");
   if ((await sourceSystem.evaluate((element) => element.tagName)) !== "SELECT") {
     throw new Error("Source system must be a standardized select, not a free-text field.");
@@ -212,20 +229,20 @@ try {
   await page.getByLabel("Activities file").setInputFiles(activitiesPath);
   const selectedQuoteFiles = await page.locator('#canonical-intake-form input[type="file"]').evaluateAll((inputs) => inputs.map((input) => input.files?.[0]?.name).filter(Boolean));
   if (selectedQuoteFiles.length !== 3) throw new Error(`Expected 3 selected quote files, found ${selectedQuoteFiles.join(", ") || "none"}.`);
-  await page.getByText("3 files attached and ready to profile.").waitFor();
+  await page.getByText("3 files attached and ready to review.").waitFor();
   for (const selectedFile of ["customers.csv", "estimates.csv", "activities.csv"]) {
     if (!(await page.getByText(selectedFile, { exact: true }).isVisible())) {
       throw new Error(`Selected file confirmation missing for ${selectedFile}.`);
     }
   }
-  const profileButton = page.getByRole("button", { name: "Profile files and review mapping" });
+  const profileButton = page.getByRole("button", { name: "Review files and column matches" });
   const attentionAnimation = await profileButton.evaluate((element) => getComputedStyle(element).animationName);
   if (attentionAnimation !== "rev-button-attention-pulse") {
     throw new Error(`Profile action should pulse after file selection; animation=${attentionAnimation}.`);
   }
   await page.waitForTimeout(250);
   await profileButton.click();
-  await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
+  await page.getByText("Check the column matches below, then confirm the import.").waitFor({ timeout: 15_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "mapping-failure.png"), fullPage: true });
     throw new Error(
       `Mapping review did not become ready. BODY=${(await page.locator("body").innerText()).slice(-1_800)} SERVER=${serverLogs}`,
@@ -238,9 +255,9 @@ try {
   if (animationAfterReview !== "none") {
     throw new Error(`Profile action should stop pulsing after review opens; animation=${animationAfterReview}.`);
   }
-  await page.getByLabel(/I reviewed each mapping/).check();
-  await page.getByLabel(/complete current snapshot/).check();
-  await page.getByRole("button", { name: "Confirm mapping and use one-time Audit" }).click();
+  await page.getByLabel(/I reviewed the column matches/).check();
+  await page.getByLabel(/complete current export/).check();
+  await page.getByRole("button", { name: "Use one-time Audit and create read" }).click();
   await page.getByRole("dialog", { name: "Use this import for your one-time Quote Recovery Audit?" }).waitFor();
   const unusedAudit = await prisma.workspaceEntitlement.findUniqueOrThrow({
     where: { id: auditEntitlement.id },
@@ -249,7 +266,7 @@ try {
     throw new Error("Opening the one-time Audit confirmation must not consume the analysis run.");
   }
   await page.getByRole("button", { name: "Use Audit and create read" }).click();
-  await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 }).catch(async () => {
+  await page.getByText(/Your files were imported and the latest REVORY read is ready/).waitFor({ timeout: 20_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "commit-failure.png"), fullPage: true });
     throw new Error(
       `Canonical commit did not complete. BODY=${(await page.locator("body").innerText()).slice(-2_200)} SERVER=${serverLogs}`,
@@ -261,7 +278,24 @@ try {
   if (consumedAudit.analysisRunsUsed !== 1) {
     throw new Error(`Successful one-time Audit commit must consume exactly one run; found ${consumedAudit.analysisRunsUsed}.`);
   }
+  const rememberedMappings = await prisma.savedCanonicalMapping.findMany({
+    where: { workspaceId: workspace.id },
+    select: { sourceSystem: true },
+  });
+  if (!rememberedMappings.length || rememberedMappings.some((mapping) => mapping.sourceSystem !== "manual-export")) {
+    throw new Error("Approved column mappings did not retain their workspace-scoped source system.");
+  }
   await page.screenshot({ path: path.join(evidenceDir, "imports-desktop.png"), fullPage: true });
+
+  await page.goto("/app/imports", { waitUntil: "networkidle" });
+  await page.getByLabel("Customers file").setInputFiles(customersPath);
+  await page.getByLabel("Estimates file").setInputFiles(estimatesPath);
+  await page.getByLabel("Activities file").setInputFiles(activitiesPath);
+  await page.getByRole("button", { name: "Review files and column matches" }).click();
+  await page.getByText("Check the column matches below, then confirm the import.").waitFor({ timeout: 15_000 });
+  if (await page.getByText("Saved workspace match", { exact: true }).count() < 3) {
+    throw new Error("Approved workspace mappings were not reused for the same source columns.");
+  }
 
   await prisma.workspaceEntitlement.create({
     data: {
@@ -276,12 +310,12 @@ try {
   await page.getByLabel("Change orders file").setInputFiles(changesPath);
   await page.getByLabel("Costs file").setInputFiles(costsPath);
   await page.waitForTimeout(250);
-  await page.getByRole("button", { name: "Profile files and review mapping" }).click();
-  await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 });
-  await page.getByLabel(/I reviewed each mapping/).check();
-  await page.getByLabel(/complete current snapshot/).check();
-  await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
-  await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Review files and column matches" }).click();
+  await page.getByText("Check the column matches below, then confirm the import.").waitFor({ timeout: 15_000 });
+  await page.getByLabel(/I reviewed the column matches/).check();
+  await page.getByLabel(/complete current export/).check();
+  await page.getByRole("button", { name: "Import approved files and create read" }).click();
+  await page.getByText(/Your files were imported and the latest REVORY read is ready/).waitFor({ timeout: 20_000 });
 
   await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
   if (!(await page.getByText("Turn defensible reconciliation into review-ready findings.").isVisible())) {
@@ -322,8 +356,18 @@ try {
   if (!(await page.getByText("See what may still be recoverable").isVisible())) {
     throw new Error("Contractor dashboard headline missing.");
   }
-  if (!(await page.getByText("$18,000").first().isVisible())) {
+  if (!(await page.getByText("CA$18,000").first().isVisible())) {
     throw new Error("Estimated opportunity value missing from dashboard.");
+  }
+  const dashboardHeadingBox = await page.getByRole("heading", { name: "See what may still be recoverable - and why." }).boundingBox();
+  const executiveActionsBox = await page.locator('[data-testid="executive-actions"]').boundingBox();
+  if (
+    !dashboardHeadingBox ||
+    !executiveActionsBox ||
+    executiveActionsBox.x <= dashboardHeadingBox.x ||
+    executiveActionsBox.y > dashboardHeadingBox.y + 80
+  ) {
+    throw new Error(`Executive actions are not anchored in the upper-right hero area: ${JSON.stringify({ dashboardHeadingBox, executiveActionsBox })}`);
   }
   const executiveMetric = page.locator('[data-testid="executive-metric"]').first();
   const metricShadowBefore = await executiveMetric.evaluate((element) => getComputedStyle(element).boxShadow);
@@ -340,6 +384,24 @@ try {
   const opportunityShadowAfter = await priorityOpportunity.evaluate((element) => getComputedStyle(element).boxShadow);
   if (opportunityShadowAfter === opportunityShadowBefore || opportunityShadowAfter === "none") {
     throw new Error("Priority opportunity hover glow is missing.");
+  }
+  for (const [metricName, expectedFilter, filterLabel] of [
+    ["Opportunities to review", "ACTIVE", "To review"],
+    ["Opportunities with value", "FINANCIAL", "With value"],
+    ["Process gaps", "OPERATIONAL", "Process gaps"],
+  ]) {
+    await page.goto("/app/dashboard", { waitUntil: "networkidle" });
+    await page.getByRole("link", { name: new RegExp(metricName) }).click();
+    await page.waitForURL(`**/app/revenue-leaks?filter=${expectedFilter}`);
+    await page.waitForLoadState("networkidle");
+    const activeFilter = page.getByRole("link", { name: filterLabel, exact: true });
+    await activeFilter.waitFor({ state: "visible" });
+  }
+  await page.goto("/app/dashboard", { waitUntil: "networkidle" });
+  for (const qualityLabel of ["Records imported", "Records matched", "Records needing attention", "Checks REVORY can run"]) {
+    if (!(await page.getByRole("link", { name: new RegExp(qualityLabel) }).isVisible())) {
+      throw new Error(`Natural-language import health label missing: ${qualityLabel}.`);
+    }
   }
   const quoteRecoveryPdfResponse = await context.request.get("/app/dashboard/report.pdf");
   const quoteRecoveryPdfBytes = await quoteRecoveryPdfResponse.body();
@@ -359,7 +421,7 @@ try {
   if (!(await page.getByText("See what is ready, incomplete or blocking.").isVisible())) {
     throw new Error("Data Quality drill-down headline missing.");
   }
-  if (!(await page.getByText("Records that need a link decision").isVisible())) {
+  if (!(await page.getByText("Records that need an exact ID match").isVisible())) {
     throw new Error("Data Quality relation detail is missing.");
   }
   await page.screenshot({ path: path.join(evidenceDir, "data-quality-detail-desktop.png"), fullPage: true });
@@ -378,7 +440,7 @@ try {
   });
   if (!finding) throw new Error("Canonical import did not create a Quote Recovery finding.");
   await page.goto(`/app/revenue-leaks/${finding.id}`, { waitUntil: "networkidle" });
-  if (!(await page.getByText("Source lineage").isVisible())) throw new Error("Evidence detail missing.");
+  if (!(await page.getByText("Source evidence").isVisible())) throw new Error("Evidence detail missing.");
   await page.getByRole("button", { name: "Mark reviewed" }).click();
   await page.getByText("Resolved", { exact: true }).waitFor({ timeout: 10_000 });
 

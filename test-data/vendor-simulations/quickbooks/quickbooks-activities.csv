@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+QB-ACT-001,QB-CUS-001,QB-EST-001,2026-06-01,phone,voicemail,Call decision maker
+QB-ACT-004,QB-CUS-001,QB-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+QB-ACT-006,QB-CUS-003,QB-EST-006,2026-07-12,meeting,financing requested,Present financing options

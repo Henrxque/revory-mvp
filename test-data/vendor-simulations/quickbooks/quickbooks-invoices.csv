@@ -1,0 +1,2 @@
+Invoice ID,Customer ID,Job ID,Estimate ID,Invoice Status,Invoice Total,Currency,Invoice Date,Due Date
+QB-INV-100,QB-CUS-001,QB-JOB-100,QB-EST-001,sent,42000,USD,2026-06-30,2026-07-30

@@ -3,20 +3,21 @@
 import { type FormEvent, useEffect, useRef, useState, useTransition } from "react";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
+import { revorySourceSystems } from "@/domain/revory/source-systems";
 import { canonicalFields } from "@/services/canonical-intake/definitions";
 import type { CanonicalColumnProfile } from "@/services/canonical-intake/assisted-mapping";
 import type { CanonicalImportAccessNotice } from "@/services/billing/canonical-import-access";
 import type { CanonicalImportActionState, CanonicalReviewActionState } from "@/src/app/(app)/app/imports/canonical-actions";
 
 const activeDatasets = [
-  ["CUSTOMER", "Customers", "Customer identity and contact context", "QUOTE_RECOVERY"],
-  ["LEAD", "Leads", "Optional source, owner and lead-stage context", "QUOTE_RECOVERY"],
-  ["ESTIMATE", "Estimates", "Required for the current Quote Recovery read", "QUOTE_RECOVERY"],
-  ["ACTIVITY", "Activities", "Follow-up and recent-action evidence", "QUOTE_RECOVERY"],
-  ["JOB", "Jobs", "Contract status, value and explicit estimate links", "REVENUE_REALIZATION"],
-  ["INVOICE", "Invoices", "Observed billing tied explicitly to jobs", "REVENUE_REALIZATION"],
-  ["CHANGE_ORDER", "Change orders", "Observed approval evidence and job links", "REVENUE_REALIZATION"],
-  ["COST", "Costs", "Observed job costs; never inferred margin", "REVENUE_REALIZATION"],
+  ["CUSTOMER", "Customers", "Customer identity and contact details", "QUOTE_RECOVERY"],
+  ["LEAD", "Leads", "Optional lead source, owner and sales-stage context", "QUOTE_RECOVERY"],
+  ["ESTIMATE", "Estimates", "Required to create the current Quote Recovery read", "QUOTE_RECOVERY"],
+  ["ACTIVITY", "Activities", "Follow-up dates and recent customer activity", "QUOTE_RECOVERY"],
+  ["JOB", "Jobs", "Job status, contract value and estimate reference", "REVENUE_REALIZATION"],
+  ["INVOICE", "Invoices", "Observed billing connected to a job", "REVENUE_REALIZATION"],
+  ["CHANGE_ORDER", "Change orders", "Approved changes connected to a job", "REVENUE_REALIZATION"],
+  ["COST", "Costs", "Observed job costs; REVORY never guesses margin", "REVENUE_REALIZATION"],
 ] as const satisfies ReadonlyArray<readonly [CanonicalEntityType, string, string, "QUOTE_RECOVERY" | "REVENUE_REALIZATION"]>;
 
 const templateNames: Record<(typeof activeDatasets)[number][0], string> = {
@@ -29,19 +30,6 @@ const templateNames: Record<(typeof activeDatasets)[number][0], string> = {
   JOB: "jobs",
   LEAD: "leads",
 };
-
-const sourceSystemOptions = [
-  ["manual-export", "Spreadsheet / manual export"],
-  ["buildertrend", "Buildertrend"],
-  ["jobber", "Jobber"],
-  ["servicetitan", "ServiceTitan"],
-  ["housecall-pro", "Housecall Pro"],
-  ["jobtread", "JobTread"],
-  ["acculynx", "AccuLynx"],
-  ["procore", "Procore"],
-  ["quickbooks", "QuickBooks"],
-  ["other-system-export", "Other system export"],
-] as const;
 
 type SelectedFileMeta = {
   name: string;
@@ -67,6 +55,17 @@ function CheckIcon() {
     <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" viewBox="0 0 24 24">
       <path d="m5 12 4 4L19 6" />
     </svg>
+  );
+}
+
+function QualityGlyph({ tone }: { tone: QualityTone }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-black shadow-[0_0_12px_currentColor] ${qualityToneClasses[tone]}`}
+    >
+      {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
+    </span>
   );
 }
 
@@ -96,15 +95,15 @@ function getColumnQuality(
   if (column.fillRate === 0) {
     return {
       detail: required
-        ? "Required field has no populated values. Data Quality will block the commit."
-        : "Mapped field is empty in the profiled rows.",
+        ? "This required field is empty. REVORY will block the import."
+        : "This matched field is empty in the reviewed rows.",
       label: required ? "Problem" : "Empty",
       tone: required ? "danger" as const : "warning" as const,
     };
   }
   if (column.fillRate < 80) {
     return {
-      detail: `${100 - column.fillRate}% of profiled rows are blank. Review whether that is expected.`,
+      detail: `${100 - column.fillRate}% of reviewed rows are blank. Check whether that is expected.`,
       label: "Review",
       tone: "warning" as const,
     };
@@ -119,7 +118,7 @@ function getColumnQuality(
 function QualitySignal({ detail, label, tone }: { detail: string; label: string; tone: QualityTone }) {
   return (
     <span className="inline-flex items-center gap-2" title={detail}>
-      <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full shadow-[0_0_12px_currentColor] ${qualityToneClasses[tone]}`} />
+      <QualityGlyph tone={tone} />
       <span className={`rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${qualityToneClasses[tone]}`}>
         {label}
       </span>
@@ -132,12 +131,13 @@ const initialCanonicalImportActionState: CanonicalImportActionState = {
   status: "idle",
 };
 
-export function CanonicalImportPanel({ accessNotice }: { accessNotice: CanonicalImportAccessNotice }) {
+export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { accessNotice: CanonicalImportAccessNotice; defaultCurrency: string }) {
   const auditConfirmButtonRef = useRef<HTMLButtonElement>(null);
   const [sourceSystem, setSourceSystem] = useState("manual-export");
   const selectedFiles = useRef<Partial<Record<CanonicalEntityType, File>>>({});
   const [selectedFileMeta, setSelectedFileMeta] = useState<Partial<Record<CanonicalEntityType, SelectedFileMeta>>>({});
   const [review, setReview] = useState<CanonicalReviewActionState | null>(null);
+  const [sourceDetectionAccepted, setSourceDetectionAccepted] = useState(false);
   const [mappingConfirmed, setMappingConfirmed] = useState(false);
   const [snapshotConfirmed, setSnapshotConfirmed] = useState(false);
   const [auditDialogOpen, setAuditDialogOpen] = useState(false);
@@ -172,6 +172,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
 
     startTransition(async () => {
       setImportState(initialCanonicalImportActionState);
+      setSourceDetectionAccepted(false);
       try {
         const response = await fetch("/api/canonical-intake/review", {
           body: reviewFormData,
@@ -184,6 +185,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
         setReview({
           files: [],
           message: "The mapping review could not be reached. Check the connection and retry.",
+          sourceDetection: { confidence: "LOW", label: "Source not identified", matchedSignals: [], sourceSystem: null },
           status: "error",
         });
       }
@@ -202,6 +204,11 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
       try {
         const formData = new FormData();
         formData.set("sourceSystem", sourceSystem);
+        if (sourceDetectionAccepted && review?.sourceDetection.sourceSystem === sourceSystem) {
+          formData.set("sourceDetectionConfirmed", "yes");
+          formData.set("detectedSourceSystem", sourceSystem);
+          formData.set("sourceDetectionConfidence", review.sourceDetection.confidence);
+        }
         formData.set("mappingConfirmed", "yes");
         formData.set("snapshotMode", "FULL_REPLACEMENT");
         if (auditConsumptionConfirmed) formData.set("auditConsumptionConfirmed", "yes");
@@ -220,7 +227,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
         setAuditDialogOpen(false);
       } catch {
         setImportState({
-          message: "The import could not be reached. No snapshot was committed; check the connection and retry.",
+          message: "The import could not be reached. No data was saved; check the connection and retry.",
           status: "error",
         });
       }
@@ -256,20 +263,20 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
   return (
     <section className="rev-shell-panel rounded-[28px] p-6 md:p-7">
       <div className="max-w-3xl space-y-3">
-        <p className="rev-kicker">Canonical secure intake</p>
-        <h2 className="rev-display-section">Profile, review, then commit the evidence.</h2>
+        <p className="rev-kicker">Secure data import</p>
+        <h2 className="rev-display-section">Upload your files, check the matches, then create your read.</h2>
         <p className="text-sm leading-6 text-[color:var(--text-muted)]">
-          REVORY matches known export headers without AI. When a column is unclear,
-          optional AI can suggest a field from sanitized header metadata only. You always
-          review the mapping before Data Quality can commit anything.
+          REVORY first matches familiar column names on its own. If a column is unclear,
+          optional AI can suggest a match from sanitized column labels only. You review and
+          approve every match before any file becomes part of your report.
         </p>
       </div>
 
       <div className="mt-5 grid gap-2 md:grid-cols-3">
         {[
-          ["01", "Deterministic first", "Known headers are matched locally."],
-          ["02", "AI only when needed", "Only sanitized column metadata is shared."],
-          ["03", "You approve", "No suggestion imports data by itself."],
+          ["01", "Common columns match first", "Known export labels are matched locally."],
+          ["02", "AI helps only when needed", "Only sanitized column labels may be shared."],
+          ["03", "You stay in control", "Nothing is imported until you approve it."],
         ].map(([step, title, description]) => (
           <div
             className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3"
@@ -307,12 +314,12 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
         </div>
         <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
           {auditBlocked
-            ? "This one-time Audit has already produced its committed read. A new read requires ongoing access or an authorized reset."
+            ? "This one-time Audit has already produced its read. A new read requires ongoing access or an authorized reset."
             : accessNotice.mode === "AUDIT"
-              ? "Profiling and mapping review are free to repeat. Only the final successful commit creates and consumes this one-time Audit read."
+              ? "File and column review is free to repeat. Only the first successful import creates and uses this one-time Audit read."
               : accessNotice.mode === "ADMIN"
                 ? "Authorized testing imports do not consume paid Audit capacity."
-                : "Your current recurring or preview access supports committed reads within its active limits."}
+                : "Your current recurring or preview access supports new reads within its active limits."}
         </p>
       </div>
 
@@ -329,6 +336,10 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
         ))}
       </div>
 
+      <p className="mt-4 text-xs leading-5 text-[color:var(--text-subtle)]">
+        Currency fallback: <strong className="text-[color:var(--text-primary)]">{defaultCurrency}</strong>. REVORY uses it only when a record has no currency; an uploaded currency always takes priority. Change it in Data &amp; settings.
+      </p>
+
       <form className="mt-5 space-y-5" id="canonical-intake-form" onSubmit={submitReview}>
         <label className="block max-w-md text-sm font-semibold">
           Where did these exports come from?
@@ -337,6 +348,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
             name="sourceSystem"
             onChange={(event) => {
               setSourceSystem(event.target.value);
+              setSourceDetectionAccepted(false);
               setReview(null);
               setMappingConfirmed(false);
               setSnapshotConfirmed(false);
@@ -344,16 +356,16 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
             }}
             value={sourceSystem}
           >
-            {sourceSystemOptions.map(([value, label]) => (
+            {revorySourceSystems.map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
           </select>
           <span className="mt-2 block text-xs font-normal leading-5 text-[color:var(--text-subtle)]">
-            Select the system that produced the files. Keep the same source on future
-            refreshes so REVORY can replace the correct snapshot safely. This selection
-            records provenance; it does not claim a certified native connector or vendor-specific export format.
+            Select the system that produced these files. REVORY may suggest a likely source
+            after reading the file name and column labels, but you always confirm it. This
+            records where the data came from; it is not a certified native connector.
           </span>
         </label>
 
@@ -411,6 +423,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
                       });
                     }
                     setReview(null);
+                    setSourceDetectionAccepted(false);
                     setMappingConfirmed(false);
                     setSnapshotConfirmed(false);
                     setImportState(initialCanonicalImportActionState);
@@ -438,7 +451,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
                         {selected.name}
                       </span>
                       <span className="mt-0.5 block text-[10px] font-normal text-[color:var(--text-muted)]">
-                        {formatFileSize(selected.size)} · ready to profile
+                        {formatFileSize(selected.size)} · ready to review
                       </span>
                     </span>
                   </div>
@@ -460,18 +473,17 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
           disabled={pending || selectedFileCount === 0}
           type="submit"
         >
-          {pending ? "Profiling…" : "Profile files and review mapping"}
+          {pending ? "Reviewing files…" : "Review files and column matches"}
         </button>
         <div className="max-w-xl text-xs leading-5 text-[color:var(--text-subtle)]">
           <p className={selectedFileCount > 0 ? "font-bold text-[color:var(--accent-light)]" : ""}>
             {selectedFileCount > 0
-              ? `${selectedFileCount} ${selectedFileCount === 1 ? "file" : "files"} attached and ready to profile.`
+              ? `${selectedFileCount} ${selectedFileCount === 1 ? "file" : "files"} attached and ready to review.`
               : "Attach at least one CSV or XLSX file to continue."}
           </p>
           <p className="mt-1">
-            Jobs, invoices, change orders and costs support deterministic Tier 2 findings
-            after explicit matching. Imports do not unlock Revenue Realization pricing or
-            certify accounting loss.
+            Jobs, invoices, change orders and costs support Revenue Realization only after
+            IDs match exactly. Importing them does not unlock a plan or certify accounting loss.
           </p>
         </div>
       </div>
@@ -489,6 +501,46 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
             <p className="font-bold">{review.message}</p>
           </div>
 
+          {review.sourceDetection.sourceSystem ? (
+            <div className="rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.055)] p-4 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-[color:var(--accent-light)]">
+                    Likely source: {review.sourceDetection.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
+                    {review.sourceDetection.confidence.toLowerCase()} confidence from file names and column labels
+                    {review.sourceDetection.matchedSignals.length ? ` · ${review.sourceDetection.matchedSignals.join(", ")}` : ""}.
+                  </p>
+                </div>
+                {sourceSystem === review.sourceDetection.sourceSystem ? (
+                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[color:var(--success)]">
+                    <CheckIcon /> Source selected
+                  </span>
+                ) : (
+                  <button
+                    className="rev-button-secondary !min-h-9 !px-4 !py-2"
+                    onClick={() => {
+                      setSourceSystem(review.sourceDetection.sourceSystem ?? sourceSystem);
+                      setSourceDetectionAccepted(true);
+                      setImportState(initialCanonicalImportActionState);
+                    }}
+                    type="button"
+                  >
+                    Use {review.sourceDetection.label}
+                  </button>
+                )}
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-[color:var(--text-subtle)]">
+                REVORY does not learn from raw customer rows. A confirmed source can improve this workspace&apos;s future matching without sharing tenant data.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-[color:var(--border)] p-4 text-xs leading-5 text-[color:var(--text-muted)]">
+              REVORY could not identify the source with enough confidence. Keep your manual selection and confirm it before import.
+            </div>
+          )}
+
           {review.files.map((file) => (
             <article className="rounded-[24px] border border-[color:var(--border)] p-5" key={file.entityType}>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -496,11 +548,11 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
                   <p className="rev-label">{file.entityType.replaceAll("_", " ")}</p>
                   <h3 className="mt-2 font-bold">{file.fileName}</h3>
                   <p className="mt-1 text-xs text-[color:var(--text-muted)]">
-                    {file.rowCount} rows · {file.delimiter === "\t" ? "tab" : file.delimiter} delimiter · {Math.round(file.confidence * 100)}% mapping confidence
+                    {file.rowCount} rows · {file.delimiter === "\t" ? "tab" : file.delimiter} delimiter · {Math.round(file.confidence * 100)}% match confidence
                   </p>
                 </div>
                 <span className="rounded-full border border-[color:var(--border-accent)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--accent-light)]">
-                  {file.aiProviderUsed ? "AI suggestion reviewed" : "Deterministic profile"}
+                  {file.savedMappingUsed ? "Saved workspace match" : file.aiProviderUsed ? "AI suggestion ready to review" : "Matched locally"}
                 </span>
               </div>
 
@@ -514,17 +566,17 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
 
               <div className="mt-4 overflow-x-auto">
                 <div className="mb-3 flex flex-wrap items-center gap-3 text-[10px] text-[color:var(--text-muted)]">
-                  <span className="font-bold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">Coverage guide</span>
+                  <span className="font-bold uppercase tracking-[0.14em] text-[color:var(--text-subtle)]">Column guide</span>
                   <QualitySignal detail="Mapped with strong source coverage." label="Ready" tone="success" />
                   <QualitySignal detail="Partial, empty or intentionally skipped data deserves review." label="Review" tone="warning" />
-                  <QualitySignal detail="Required evidence is missing and will block the commit." label="Problem" tone="danger" />
+                  <QualitySignal detail="Required data is missing and will block the import." label="Problem" tone="danger" />
                 </div>
                 <table className="w-full min-w-[620px] text-left text-sm">
                   <thead className="text-xs uppercase tracking-wider text-[color:var(--text-subtle)]">
                     <tr>
-                      <th className="px-3 py-2">Source header</th>
-                      <th className="px-3 py-2">Profile</th>
-                      <th className="px-3 py-2">REVORY field</th>
+                      <th className="px-3 py-2">Column in your file</th>
+                      <th className="px-3 py-2">Data found</th>
+                      <th className="px-3 py-2">Match in REVORY</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -580,9 +632,9 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
               type="checkbox"
             />
             <span>
-              I reviewed each mapping and confirm that these values are source-system
-              evidence. REVORY must still reject missing required fields, duplicate targets
-              and incompatible datasets.
+              I reviewed the column matches and confirm that they represent the data in the
+              selected source files. REVORY will still block missing required fields, duplicate
+              matches and incompatible datasets.
             </span>
           </label>
           <label className="flex items-start gap-3 text-sm text-[color:var(--text-muted)]">
@@ -594,7 +646,7 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
               type="checkbox"
             />
             <span>
-              I confirm that every selected file is the complete current snapshot for that entity and source system. Omitted records will leave the active read but remain preserved as inactive history.
+              I confirm each selected file is the complete current export for that data type and source. Omitted records will leave the active read but stay in history.
             </span>
           </label>
           <button
@@ -607,12 +659,12 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
             type="button"
           >
             {pending
-              ? "Validating and committing…"
+              ? "Validating and importing…"
               : auditBlocked
                 ? "One-time Audit already used"
                 : requiresAuditConfirmation
-                  ? "Confirm mapping and use one-time Audit"
-                  : "Confirm mapping and import atomically"}
+                  ? "Use one-time Audit and create read"
+                  : "Import approved files and create read"}
           </button>
         </div>
       ) : null}
@@ -628,9 +680,8 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
           <p className="font-bold">{importState.message}</p>
           {importState.acceptedCount !== undefined ? (
             <p className="mt-2 text-[color:var(--text-muted)]">
-              {importState.acceptedCount} records · {importState.unmatchedCount} unmatched
-              links · {importState.eligibleRules?.length ?? 0} eligible rules ·{" "}
-              {importState.findingCount ?? 0} active Quote Recovery findings
+              {importState.acceptedCount} records imported · {importState.unmatchedCount} records need a link · {importState.eligibleRules?.length ?? 0} checks available ·{" "}
+              {importState.findingCount ?? 0} opportunities ready to review
             </p>
           ) : null}
           {importState.issues?.length ? (
@@ -666,12 +717,12 @@ export function CanonicalImportPanel({ accessNotice }: { accessNotice: Canonical
               Use this import for your one-time Quote Recovery Audit?
             </h2>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
-              A successful commit creates the Audit read from these complete snapshots and uses the single analysis included in this purchase.
+              A successful import creates the Audit read from these complete exports and uses the single analysis included in this purchase.
             </p>
             <div className="mt-5 space-y-2 text-xs leading-5 text-[color:var(--text-muted)]">
-              <p className="flex gap-2"><span className="text-[color:var(--success)]">●</span> Profiling and mapping review do not consume the Audit.</p>
-              <p className="flex gap-2"><span className="text-[color:var(--success)]">●</span> A blocked or failed import does not consume the Audit.</p>
-              <p className="flex gap-2"><span className="text-[color:var(--warning)]">●</span> The first successful new committed snapshot creates and consumes the read.</p>
+              <p className="flex gap-2"><span className="text-[color:var(--success)]">✓</span> Reviewing files and column matches does not use the Audit.</p>
+              <p className="flex gap-2"><span className="text-[color:var(--success)]">✓</span> A blocked or failed import does not use the Audit.</p>
+              <p className="flex gap-2"><span className="text-[color:var(--warning)]">!</span> The first successful import creates the read and uses the Audit.</p>
             </div>
             <div className="mt-6 flex flex-wrap justify-end gap-2">
               <button

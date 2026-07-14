@@ -2,17 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { formatWorkspaceMoney } from "@/domain/revory/currency";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getQuoteRecoveryRead } from "@/services/quote-recovery/read-model";
-
-function money(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    currency: "USD",
-    maximumFractionDigits: 0,
-    style: "currency",
-  }).format(cents / 100);
-}
 
 function title(type: string) {
   return type
@@ -31,8 +24,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-5">
-          <div className="max-w-3xl">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,470px)]">
+          <div className="max-w-2xl">
             <p className="rev-kicker">Executive Quote Recovery read</p>
             <h1 className="rev-display-hero mt-3">See what may still be recoverable - and why.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
@@ -40,7 +33,7 @@ export default async function DashboardPage() {
               Every finding is traceable to imported evidence.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 lg:justify-end" data-testid="executive-actions">
             <a className="rev-button-secondary" href="/app/quote-recovery/export">
               Export CSV
             </a>
@@ -55,12 +48,13 @@ export default async function DashboardPage() {
         <div className="mt-7 grid gap-3 md:grid-cols-4">
           <Metric
             label="Estimated recoverable"
-            note="Modeled opportunity, not guaranteed revenue"
-            value={money(read.summary.estimatedValueCents)}
+            note={read.summary.hasMixedCurrencies ? "Shown separately because more than one currency is present" : "Modeled opportunity, not guaranteed revenue"}
+            value={read.summary.estimatedValueCents === null ? "Multiple currencies" : formatWorkspaceMoney(read.summary.estimatedValueCents, read.summary.reportingCurrency)}
+            href="/app/revenue-leaks?filter=FINANCIAL"
           />
-          <Metric label="Active findings" note="Open and acknowledged" value={String(read.summary.activeCount)} />
-          <Metric label="Financial findings" note="Estimate value available" value={String(read.summary.financialCount)} />
-          <Metric label="Operational risks" note="Never counted as financial loss" value={String(read.summary.operationalCount)} />
+          <Metric href="/app/revenue-leaks?filter=ACTIVE" label="Opportunities to review" note="Open and acknowledged records" value={String(read.summary.activeCount)} />
+          <Metric href="/app/revenue-leaks?filter=FINANCIAL" label="Opportunities with value" note="Estimate amount is available" value={String(read.summary.financialCount)} />
+          <Metric href="/app/revenue-leaks?filter=OPERATIONAL" label="Process gaps" note="Never counted as financial loss" value={String(read.summary.operationalCount)} />
         </div>
       </section>
 
@@ -94,7 +88,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold">
-                        {finding.valueCents === null ? "Operational" : money(finding.valueCents)}
+                        {finding.valueCents === null ? "Process gap" : formatWorkspaceMoney(finding.valueCents, finding.currency)}
                       </p>
                       <p className="text-xs text-[color:var(--text-muted)]">
                         {finding.valueBasis.toLowerCase()} · {finding.confidence.toLowerCase()} confidence
@@ -112,13 +106,14 @@ export default async function DashboardPage() {
   );
 }
 
-function Metric({ label, note, value }: { label: string; note: string; value: string }) {
+function Metric({ href, label, note, value }: { href: string; label: string; note: string; value: string }) {
   return (
-    <div className="rev-card-hover rounded-[22px] border border-[color:var(--border)] bg-[rgba(20,21,22,.76)] p-4" data-testid="executive-metric">
+    <Link className="rev-card-hover group rounded-[22px] border border-[color:var(--border)] bg-[rgba(20,21,22,.76)] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]" data-testid="executive-metric" href={href}>
       <p className="rev-label">{label}</p>
       <p className="mt-2 text-2xl font-bold">{value}</p>
       <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">{note}</p>
-    </div>
+      <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--accent-light)] opacity-70 transition group-hover:opacity-100">View records →</p>
+    </Link>
   );
 }
 
@@ -127,7 +122,7 @@ function Empty() {
     <section className="rounded-[26px] border border-dashed border-[color:var(--border-accent)] p-8 text-center">
       <h2 className="text-xl font-bold">Import estimate evidence to create the first read.</h2>
       <p className="mx-auto mt-2 max-w-xl text-sm text-[color:var(--text-muted)]">
-        REVORY will not display synthetic metrics or financial claims before Data Quality accepts a canonical import.
+        REVORY will not display synthetic metrics or financial claims before it validates an approved import.
       </p>
       <Link className="rev-button-primary mt-5" href="/app/imports">
         Open secure imports
@@ -143,30 +138,30 @@ function DataQuality({ read }: { read: Awaited<ReturnType<typeof getQuoteRecover
   const hasConflicts = read.linkCoverage.conflicting > 0 || read.issues.length > 0;
   return (
     <aside className="rev-shell-panel rounded-[26px] p-5">
-      <p className="rev-label">Data Quality</p>
+      <p className="rev-label">Import health</p>
       <div className="mt-2 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold">Evidence coverage</h2>
+        <h2 className="text-lg font-bold">Review readiness</h2>
         <Link className="text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--accent-light)] hover:underline" href="/app/data-quality">
-          Inspect
+          View issues
         </Link>
       </div>
       <div className="mt-4 space-y-3 text-sm">
-        <QualityRow href="/app/data-quality#records" label="Canonical records" tone={read.recordCount > 0 ? "success" : "danger"} value={String(read.recordCount)} />
-        <QualityRow href="/app/data-quality#links" label="Explicit links" tone={read.linkCoverage.linked > 0 ? "success" : "warning"} value={String(read.linkCoverage.linked)} />
-        <QualityRow href="/app/data-quality#links" label="Unmatched links" tone={read.linkCoverage.unmatched > 0 ? "warning" : "success"} value={String(read.linkCoverage.unmatched)} />
-        <QualityRow href="/app/data-quality#eligibility" label="Eligible rules" tone={eligible > 0 ? "success" : "danger"} value={String(eligible)} />
+        <QualityRow href="/app/data-quality#records" label="Records imported" tone={read.recordCount > 0 ? "success" : "danger"} value={String(read.recordCount)} />
+        <QualityRow href="/app/data-quality#links" label="Records matched" tone={read.linkCoverage.linked > 0 ? "success" : "warning"} value={String(read.linkCoverage.linked)} />
+        <QualityRow href="/app/data-quality#links" label="Records needing attention" tone={read.linkCoverage.unmatched > 0 ? "warning" : "success"} value={String(read.linkCoverage.unmatched)} />
+        <QualityRow href="/app/data-quality#eligibility" label="Checks REVORY can run" tone={eligible > 0 ? "success" : "danger"} value={String(eligible)} />
       </div>
       {hasConflicts ? (
         <Link className="mt-4 block text-xs leading-5 text-[color:var(--danger)] hover:underline" href="/app/data-quality#issues">
-          {read.issues.length + read.linkCoverage.conflicting} blocking or conflicting issue(s) need inspection.
+          {read.issues.length + read.linkCoverage.conflicting} problem(s) must be resolved before the read is fully defensible.
         </Link>
       ) : read.linkCoverage.unmatched > 0 ? (
         <Link className="mt-4 block text-xs leading-5 text-[color:var(--warning)] hover:underline" href="/app/data-quality#links">
-          Unmatched evidence remains visible. Click to inspect which records need an explicit link.
+          Some records could not be matched by ID. Click to see exactly which ones need attention.
         </Link>
       ) : (
         <p className="mt-4 text-xs leading-5 text-[color:var(--success)]">
-          No blocking import issues in the latest committed batch.
+          The latest import has no blocking problems.
         </p>
       )}
     </aside>
@@ -186,7 +181,9 @@ function QualityRow({ href, label, tone, value }: { href: string; label: string;
       href={href}
     >
       <span className="flex items-center gap-2">
-        <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-current shadow-[0_0_12px_currentColor]" />
+        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black shadow-[0_0_12px_currentColor]">
+          {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
+        </span>
         <span className="text-[color:var(--foreground)]">{label}</span>
       </span>
       <strong>{value}</strong>

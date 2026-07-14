@@ -45,6 +45,7 @@
     "qa:sprint-12-1": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-sprint-12-1.ts",
     "qa:sprint-13": "node scripts/validate-sprint-13-commercial-packaging.mjs",
     "qa:sprint-13:browser": "node scripts/verify-sprint-13-browser.mjs",
+    "qa:source-import-pack": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-source-system-and-currency.ts",
     "smoke:ai-csv-provider": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/smoke-ai-csv-provider.ts",
     "llm:env": "node scripts/check-llm-env.mjs",
     "llm:smoke": "node scripts/smoke-llm-bounded-runtime.mjs",

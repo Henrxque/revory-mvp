@@ -5,7 +5,7 @@ import { prisma } from "@/db/prisma";
 import type { CanonicalRecordContract } from "@/domain/revory/contracts";
 import { runQuoteRecoveryEngine } from "@/services/quote-recovery/engine";
 
-export async function syncQuoteRecoveryFindings(input: { workspaceId: string; records: CanonicalRecordContract[]; now?: Date }) {
+export async function syncQuoteRecoveryFindings(input: { workspaceId: string; records: CanonicalRecordContract[]; now?: Date; defaultCurrency?: string }) {
   const findings = runQuoteRecoveryEngine(input);
   return prisma.$transaction(async (tx) => {
     const fingerprints = findings.map((finding) => finding.fingerprint);
@@ -14,7 +14,7 @@ export async function syncQuoteRecoveryFindings(input: { workspaceId: string; re
       await tx.quoteRecoveryFinding.upsert({
         where: { workspaceId_fingerprint: { workspaceId: input.workspaceId, fingerprint: finding.fingerprint } },
         create: { workspaceId: input.workspaceId, findingType: finding.type, severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, currency: finding.currency, estimateExternalId: finding.estimateExternalId, fingerprint: finding.fingerprint, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date() },
-        update: { severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date(), resolvedAt: existing?.status === "DISMISSED" ? existing.resolvedAt : null, ...(existing?.status === "DISMISSED" ? {} : { status: "OPEN" }) },
+        update: { severity: finding.severity, confidence: finding.confidence, valueBasis: finding.valueBasis, valueCents: finding.valueCents, currency: finding.currency, reason: finding.reason, recommendedAction: finding.recommendedAction, evidenceJson: finding.evidence as Prisma.InputJsonValue, lastSeenAt: input.now ?? new Date(), resolvedAt: existing?.status === "DISMISSED" ? existing.resolvedAt : null, ...(existing?.status === "DISMISSED" ? {} : { status: "OPEN" }) },
       });
     }
     await tx.quoteRecoveryFinding.updateMany({ where: { workspaceId: input.workspaceId, status: { in: ["OPEN", "ACKNOWLEDGED"] }, ...(fingerprints.length ? { fingerprint: { notIn: fingerprints } } : {}) }, data: { status: "RESOLVED", resolvedAt: input.now ?? new Date() } });
@@ -23,7 +23,10 @@ export async function syncQuoteRecoveryFindings(input: { workspaceId: string; re
 }
 
 export async function syncQuoteRecoveryFindingsForWorkspace(workspaceId: string, now?: Date) {
-  const rows = await prisma.canonicalRecord.findMany({ where: { workspaceId, isActive: true } });
+  const [rows, workspace] = await Promise.all([
+    prisma.canonicalRecord.findMany({ where: { workspaceId, isActive: true } }),
+    prisma.workspace.findUnique({ where: { id: workspaceId }, select: { defaultCurrency: true } }),
+  ]);
   const records: CanonicalRecordContract[] = rows.map((row) => ({
     workspaceId: row.workspaceId,
     entityType: row.entityType,
@@ -34,5 +37,5 @@ export async function syncQuoteRecoveryFindingsForWorkspace(workspaceId: string,
     payload: row.payloadJson as CanonicalRecordContract["payload"],
     occurredAt: row.occurredAt?.toISOString() ?? null,
   }));
-  return syncQuoteRecoveryFindings({ workspaceId, records, now });
+  return syncQuoteRecoveryFindings({ workspaceId, records, now, defaultCurrency: workspace?.defaultCurrency });
 }

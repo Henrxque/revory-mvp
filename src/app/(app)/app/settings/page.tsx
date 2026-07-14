@@ -2,12 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/db/prisma";
+import { supportedWorkspaceCurrencies } from "@/domain/revory/currency";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getGrowthAccess } from "@/services/billing/growth-access";
 import { getTransactionalEmailConfig } from "@/services/email/transactional-email";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
-import { deleteAnalysisDataAction, updateDigestAction, updateRetentionAction } from "./actions";
+import { deleteAnalysisDataAction, updateDigestAction, updateRetentionAction, updateWorkspaceCurrencyAction } from "./actions";
 
 export default async function SettingsPage() {
   const context = await getAppContext();
@@ -27,6 +28,18 @@ export default async function SettingsPage() {
       </section>
       {isInternalMigrationPreviewEnabled() ? <Link className="rev-button-secondary" href="/app/launch-evidence">Review Sprint 12 launch evidence</Link> : null}
       <section className="grid gap-5 lg:grid-cols-2">
+        <Card body="Choose the currency REVORY should use when an uploaded file does not include one. This changes display and reporting only; REVORY never performs currency conversion." title="Workspace currency">
+          <form action={updateWorkspaceCurrencyAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <label className="flex flex-1 flex-col gap-2 text-xs font-bold" htmlFor="workspace-currency">
+              Default currency
+              <select className="rev-select-field" defaultValue={context.workspace.defaultCurrency} id="workspace-currency" name="defaultCurrency">
+                {supportedWorkspaceCurrencies.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+              </select>
+            </label>
+            <button className="rev-button-secondary" type="submit">Save currency</button>
+          </form>
+          <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">A currency explicitly included in an uploaded record always takes priority.</p>
+        </Card>
         <Card body="Download a workspace-scoped JSON package with canonical imports, mappings, findings, history, entitlements and audit events." title="Data export">
           <a className="rev-button-primary" href="/app/settings/data-export">Export workspace data</a>
         </Card>

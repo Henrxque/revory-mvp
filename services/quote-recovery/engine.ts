@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import type { CanonicalRecordContract, QuoteRecoveryFindingContract } from "@/domain/revory/contracts";
+import { normalizeWorkspaceCurrency } from "@/domain/revory/currency";
 
 export type QuoteRecoveryPolicy = { agingDays: number; followUpGraceDays: number; highValueCents: number; lostRecoveryDays: number; staleDays: number };
 export const defaultQuoteRecoveryPolicy: QuoteRecoveryPolicy = { agingDays: 30, followUpGraceDays: 1, highValueCents: 10_000_00, lostRecoveryDays: 30, staleDays: 14 };
@@ -10,7 +11,7 @@ function openStatus(value: unknown) { return ["open", "sent", "pending", "quoted
 function evidence(record: CanonicalRecordContract, fields: string[]) { return fields.filter((field) => record.payload[field] !== undefined).map((field) => ({ field, value: record.payload[field] as string | number | null, provenance: record.provenance })); }
 function fingerprint(workspaceId: string, type: string, estimateExternalId: string) { return createHash("sha256").update(`${workspaceId}|QUOTE_RECOVERY|${type}|${estimateExternalId}`).digest("hex"); }
 
-export function runQuoteRecoveryEngine(input: { workspaceId: string; records: CanonicalRecordContract[]; now?: Date; policy?: QuoteRecoveryPolicy }) {
+export function runQuoteRecoveryEngine(input: { workspaceId: string; records: CanonicalRecordContract[]; now?: Date; policy?: QuoteRecoveryPolicy; defaultCurrency?: string }) {
   if (input.records.some((record) => record.workspaceId !== input.workspaceId)) throw new Error("Cross-workspace records are not eligible for analysis.");
   const now = input.now ?? new Date(), policy = input.policy ?? defaultQuoteRecoveryPolicy;
   const estimates = input.records.filter((record) => record.entityType === "ESTIMATE");
@@ -24,7 +25,7 @@ export function runQuoteRecoveryEngine(input: { workspaceId: string; records: Ca
     return index;
   }, new Map<string, CanonicalRecordContract[]>());
   const findings: QuoteRecoveryFindingContract[] = [];
-  const add = (record: CanonicalRecordContract, partial: Omit<QuoteRecoveryFindingContract, "family" | "fingerprint" | "estimateExternalId" | "currency">) => findings.push({ family: "QUOTE_RECOVERY", estimateExternalId: record.externalId, currency: String(record.payload.currency ?? "USD"), fingerprint: fingerprint(input.workspaceId, partial.type, record.externalId), ...partial });
+  const add = (record: CanonicalRecordContract, partial: Omit<QuoteRecoveryFindingContract, "family" | "fingerprint" | "estimateExternalId" | "currency">) => findings.push({ family: "QUOTE_RECOVERY", estimateExternalId: record.externalId, currency: normalizeWorkspaceCurrency(record.payload.currency ?? input.defaultCurrency), fingerprint: fingerprint(input.workspaceId, partial.type, record.externalId), ...partial });
   for (const estimate of estimates) {
     const createdAt = typeof estimate.payload.createdAt === "string" ? estimate.payload.createdAt : null;
     const amountCents = typeof estimate.payload.amountCents === "number" ? estimate.payload.amountCents : null;

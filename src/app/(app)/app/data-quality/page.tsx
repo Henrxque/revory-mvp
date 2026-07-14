@@ -13,6 +13,26 @@ const toneStyles: Record<QualityTone, string> = {
   warning: "border-[color:var(--warning)] bg-[color:var(--warning-soft)] text-[color:var(--warning)]",
 };
 
+const ruleLabels: Record<string, string> = {
+  APPROVED_CHANGE_ORDER_BASIS: "Approved change orders can be reviewed",
+  COST_REVENUE_BASIS: "Job cost and revenue can be compared",
+  ESTIMATE_AGING_RISK: "Aging estimates can be flagged",
+  HIGH_VALUE_STALE_QUOTE: "High-value stale estimates can be flagged",
+  JOB_BILLING_RECONCILIATION: "Jobs and invoices can be reconciled",
+  MISSING_OWNER_OR_NEXT_STEP: "Missing owners or next steps can be flagged",
+  OPEN_ESTIMATE_NO_ACTIVITY: "Open estimates with no activity can be flagged",
+  OVERDUE_FOLLOW_UP: "Overdue follow-ups can be flagged",
+  RECOVERABLE_LOST_QUOTE: "Recently lost estimates can be reviewed",
+};
+
+function readable(value: string) {
+  return value
+    .replaceAll("ExternalId", " ID")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replaceAll("_", " ")
+    .toLowerCase();
+}
+
 export default async function DataQualityPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/data-quality"));
@@ -23,31 +43,29 @@ export default async function DataQualityPage() {
   return (
     <div className="space-y-5">
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-8">
-        <p className="rev-kicker">Data Quality drill-down</p>
+        <p className="rev-kicker">Import health</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-3xl">
             <h1 className="rev-display-hero">See what is ready, incomplete or blocking.</h1>
             <p className="mt-4 text-sm leading-7 text-[color:var(--text-muted)]">
-              Green evidence is ready, yellow evidence deserves review, and red evidence blocks or conflicts with a defensible read.
+              Green is ready, yellow needs your attention, and red blocks a reliable read until the problem is fixed.
             </p>
           </div>
-          <Link className="rev-button-secondary" href="/app/imports">
-            Review imports
-          </Link>
+          <Link className="rev-button-secondary" href="/app/imports">Review imports</Link>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Canonical records" tone={detail.recordCount ? "success" : "danger"} value={detail.recordCount} />
-          <Metric label="Explicit links" tone={detail.linkCoverage.linked ? "success" : "warning"} value={detail.linkCoverage.linked} />
-          <Metric label="Unmatched links" tone={detail.linkCoverage.unmatched ? "warning" : "success"} value={detail.linkCoverage.unmatched} />
-          <Metric label="Eligible rules" tone={eligibleCount ? "success" : "danger"} value={eligibleCount} />
+          <Metric id="records" label="Records imported" tone={detail.recordCount ? "success" : "danger"} value={detail.recordCount} />
+          <Metric label="Records matched" tone={detail.linkCoverage.linked ? "success" : "warning"} value={detail.linkCoverage.linked} />
+          <Metric label="Records needing attention" tone={detail.linkCoverage.unmatched ? "warning" : "success"} value={detail.linkCoverage.unmatched} />
+          <Metric label="Checks REVORY can run" tone={eligibleCount ? "success" : "danger"} value={eligibleCount} />
         </div>
       </section>
 
       <section className="rev-shell-panel rounded-[26px] p-5" id="links">
-        <p className="rev-label">Explicit matching</p>
-        <h2 className="mt-2 text-xl font-bold">Records that need a link decision</h2>
+        <p className="rev-label">Record matching</p>
+        <h2 className="mt-2 text-xl font-bold">Records that need an exact ID match</h2>
         <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-          REVORY never links records by approximate name or amount. Missing and conflicting IDs stay visible and suppress unsupported financial claims.
+          REVORY never joins records by a similar name or amount. Missing and conflicting IDs stay visible, and unsupported financial totals stay suppressed.
         </p>
         {detail.linkIssues.length ? (
           <div className="mt-5 overflow-x-auto">
@@ -56,8 +74,8 @@ export default async function DataQualityPage() {
                 <tr>
                   <th className="px-3 py-2">Status</th>
                   <th className="px-3 py-2">Source record</th>
-                  <th className="px-3 py-2">Relation</th>
-                  <th className="px-3 py-2">Missing target</th>
+                  <th className="px-3 py-2">Field that should connect</th>
+                  <th className="px-3 py-2">Record REVORY expected</th>
                   <th className="px-3 py-2">Source system</th>
                 </tr>
               </thead>
@@ -66,11 +84,11 @@ export default async function DataQualityPage() {
                   <tr className="border-t border-[color:var(--border)]" key={`${issue.sourceEntityType}:${issue.sourceExternalId}:${issue.relationField}:${issue.targetExternalId}`}>
                     <td className="px-3 py-3">
                       <Status tone={issue.status === "CONFLICTING" ? "danger" : "warning"}>
-                        {issue.status === "CONFLICTING" ? "Conflict" : "Unmatched"}
+                        {issue.status === "CONFLICTING" ? "Conflicting IDs" : "Needs match"}
                       </Status>
                     </td>
                     <td className="px-3 py-3 font-bold">{issue.sourceEntityType} · {issue.sourceExternalId}</td>
-                    <td className="px-3 py-3 text-[color:var(--text-muted)]">{issue.relationField}</td>
+                    <td className="px-3 py-3 text-[color:var(--text-muted)]">{readable(issue.relationField)}</td>
                     <td className="px-3 py-3">{issue.targetEntityType} · {issue.targetExternalId}</td>
                     <td className="px-3 py-3 text-[color:var(--text-muted)]">{issue.sourceSystem}</td>
                   </tr>
@@ -79,41 +97,41 @@ export default async function DataQualityPage() {
             </table>
           </div>
         ) : (
-          <ReadyMessage>All imported relation IDs resolve to one explicit target.</ReadyMessage>
+          <ReadyMessage>Every imported reference points to exactly one matching record.</ReadyMessage>
         )}
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rev-shell-panel rounded-[26px] p-5" id="issues">
-          <p className="rev-label">Committed batch</p>
-          <h2 className="mt-2 text-xl font-bold">Import issues</h2>
+          <p className="rev-label">Latest import</p>
+          <h2 className="mt-2 text-xl font-bold">Problems found in the files</h2>
           {detail.issues.length ? (
             <div className="mt-4 space-y-3">
               {detail.issues.map((issue, index) => (
                 <article className={`rounded-2xl border p-4 ${toneStyles.danger}`} key={`${issue.code}:${index}`}>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em]">{issue.code}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em]">{issue.code.replaceAll("_", " ")}</p>
                   <p className="mt-2 text-sm text-[color:var(--foreground)]">{issue.message}</p>
                   {issue.fileName ? <p className="mt-1 text-xs text-[color:var(--text-muted)]">{issue.fileName}{issue.rowNumber ? ` · row ${issue.rowNumber}` : ""}</p> : null}
                 </article>
               ))}
             </div>
           ) : (
-            <ReadyMessage>No blocking import issue exists in the latest committed batch.</ReadyMessage>
+            <ReadyMessage>The latest import has no blocking problems.</ReadyMessage>
           )}
         </div>
 
         <div className="rev-shell-panel rounded-[26px] p-5" id="eligibility">
-          <p className="rev-label">Rule eligibility</p>
-          <h2 className="mt-2 text-xl font-bold">What the evidence can support</h2>
+          <p className="rev-label">Available checks</p>
+          <h2 className="mt-2 text-xl font-bold">What REVORY can verify with these files</h2>
           <div className="mt-4 space-y-3">
             {eligibility.map(([rule, state]) => (
               <article className={`rounded-2xl border p-4 ${toneStyles[state.eligible ? "success" : "warning"]}`} key={rule}>
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold text-[color:var(--foreground)]">{rule.replaceAll("_", " ")}</p>
-                  <Status tone={state.eligible ? "success" : "warning"}>{state.eligible ? "Eligible" : "Needs data"}</Status>
+                  <p className="text-sm font-bold text-[color:var(--foreground)]">{ruleLabels[rule] ?? readable(rule)}</p>
+                  <Status tone={state.eligible ? "success" : "warning"}>{state.eligible ? "Ready" : "Needs data"}</Status>
                 </div>
                 {!state.eligible ? (
-                  <p className="mt-2 text-xs text-[color:var(--text-muted)]">Missing: {state.missingFields.join(", ")}</p>
+                  <p className="mt-2 text-xs text-[color:var(--text-muted)]">Still needed: {state.missingFields.map(readable).join(", ")}</p>
                 ) : null}
               </article>
             ))}
@@ -124,11 +142,13 @@ export default async function DataQualityPage() {
   );
 }
 
-function Metric({ label, tone, value }: { label: string; tone: QualityTone; value: number }) {
+function Metric({ id, label, tone, value }: { id?: string; label: string; tone: QualityTone; value: number }) {
   return (
-    <div className={`rev-card-hover rounded-[20px] border p-4 ${toneStyles[tone]}`} id={label === "Canonical records" ? "records" : undefined}>
+    <div className={`rev-card-hover rounded-[20px] border p-4 ${toneStyles[tone]}`} id={id}>
       <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-current shadow-[0_0_14px_currentColor]" />
+        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black shadow-[0_0_14px_currentColor]">
+          {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
+        </span>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em]">{label}</p>
       </div>
       <p className="mt-3 text-3xl font-bold text-[color:var(--foreground)]">{value}</p>

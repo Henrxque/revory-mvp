@@ -48,10 +48,10 @@ function wrap(text: string, font: PDFFont, size: number, maxWidth: number) {
   return lines;
 }
 
-function money(cents: number | null) {
-  if (cents === null) return "Operational";
+function money(cents: number | null, currency: string) {
+  if (cents === null) return "Multiple currencies";
   return new Intl.NumberFormat("en-US", {
-    currency: "USD",
+    currency,
     maximumFractionDigits: 0,
     style: "currency",
   }).format(cents / 100);
@@ -79,7 +79,7 @@ export async function generateQuoteRecoveryExecutivePdf(input: PdfInput) {
     cover.drawText(line, { color: foreground, font: bold, size: 34, x: margin, y: 580 - index * 39 });
   }
   cover.drawText(ascii(input.workspaceName), { color: muted, font: regular, size: 12, x: margin, y: 470 });
-  cover.drawText(`Generated ${input.generatedAt.toISOString().slice(0, 10)} from committed workspace evidence.`, { color: muted, font: regular, size: 9, x: margin, y: 450 });
+  cover.drawText(`Generated ${input.generatedAt.toISOString().slice(0, 10)} from approved imported evidence.`, { color: muted, font: regular, size: 9, x: margin, y: 450 });
 
   const panelWidth = (pageWidth - margin * 2 - 12) / 2;
   const drawMetric = (x: number, y: number, label: string, value: string, note: string) => {
@@ -90,10 +90,10 @@ export async function generateQuoteRecoveryExecutivePdf(input: PdfInput) {
       cover.drawText(line, { color: muted, font: regular, size: 8, x: x + 15, y: y + 25 - index * 11 });
     }
   };
-  drawMetric(margin, 310, "Estimated recoverable", money(input.read.summary.estimatedValueCents), "Modeled opportunity, not guaranteed revenue.");
-  drawMetric(margin + panelWidth + 12, 310, "Active findings", String(input.read.summary.activeCount), "Open and acknowledged findings.");
-  drawMetric(margin, 194, "Financial findings", String(input.read.summary.financialCount), "Estimate value is available as an estimated basis.");
-  drawMetric(margin + panelWidth + 12, 194, "Operational risks", String(input.read.summary.operationalCount), "Never counted as confirmed financial loss.");
+  drawMetric(margin, 310, "Estimated recoverable", money(input.read.summary.estimatedValueCents, input.read.summary.reportingCurrency), input.read.summary.hasMixedCurrencies ? "Currencies remain separate; no conversion was applied." : "Modeled opportunity, not guaranteed revenue.");
+  drawMetric(margin + panelWidth + 12, 310, "Opportunities to review", String(input.read.summary.activeCount), "Open and acknowledged records.");
+  drawMetric(margin, 194, "Opportunities with value", String(input.read.summary.financialCount), "An estimate amount is available.");
+  drawMetric(margin + panelWidth + 12, 194, "Process gaps", String(input.read.summary.operationalCount), "Never counted as confirmed financial loss.");
   cover.drawLine({ color: border, end: { x: pageWidth - margin, y: 118 }, start: { x: margin, y: 118 }, thickness: 1 });
   for (const [index, line] of wrap("REVORY prioritizes review candidates from imported evidence. It does not guarantee recovery or certify accounting loss.", regular, 9, pageWidth - margin * 2).entries()) {
     cover.drawText(line, { color: muted, font: regular, size: 9, x: margin, y: 94 - index * 13 });
@@ -131,21 +131,21 @@ export async function generateQuoteRecoveryExecutivePdf(input: PdfInput) {
     page.drawRectangle({ borderColor: border, borderWidth: 1, color: surface, height: panelHeight, width: pageWidth - margin * 2, x: margin, y: y - panelHeight });
     page.drawText(`${String(index + 1).padStart(2, "0")}  ${ascii(finding.findingType.replaceAll("_", " "))}`, { color: accent, font: bold, size: 8, x: margin + 14, y: y - 20 });
     page.drawText(`Estimate ${ascii(finding.estimateExternalId)}`, { color: foreground, font: bold, size: 12, x: margin + 14, y: y - 40 });
-    const value = money(finding.valueCents);
+    const value = money(finding.valueCents, finding.currency);
     page.drawText(value, { color: foreground, font: bold, size: 12, x: pageWidth - margin - 14 - bold.widthOfTextAtSize(value, 12), y: y - 40 });
     reasonLines.forEach((line, lineIndex) => page.drawText(line, { color: muted, font: regular, size: 9, x: margin + 14, y: y - 60 - lineIndex * 11 }));
     y -= panelHeight + 12;
   }
 
   ensure(200);
-  text("DATA QUALITY", { color: accent, font: bold, size: 8, gap: 8 });
-  text("Evidence coverage", { font: bold, size: 22, gap: 12 });
+  text("IMPORT HEALTH", { color: accent, font: bold, size: 8, gap: 8 });
+  text("Review readiness", { font: bold, size: 22, gap: 12 });
   const eligible = Object.values(input.read.dataQuality.eligibility).filter((item) => item.eligible).length;
   const metrics = [
-    ["Canonical records", input.read.dataQuality.recordCount, input.read.dataQuality.recordCount ? accent : danger],
-    ["Explicit links", input.read.dataQuality.linkCoverage.linked, input.read.dataQuality.linkCoverage.linked ? accent : warning],
-    ["Unmatched links", input.read.dataQuality.linkCoverage.unmatched, input.read.dataQuality.linkCoverage.unmatched ? warning : accent],
-    ["Eligible rules", eligible, eligible ? accent : danger],
+    ["Records imported", input.read.dataQuality.recordCount, input.read.dataQuality.recordCount ? accent : danger],
+    ["Records matched", input.read.dataQuality.linkCoverage.linked, input.read.dataQuality.linkCoverage.linked ? accent : warning],
+    ["Records needing attention", input.read.dataQuality.linkCoverage.unmatched, input.read.dataQuality.linkCoverage.unmatched ? warning : accent],
+    ["Checks REVORY can run", eligible, eligible ? accent : danger],
   ] as const;
   metrics.forEach(([label, value, color], index) => {
     const rowY = y - index * 34;
@@ -157,10 +157,10 @@ export async function generateQuoteRecoveryExecutivePdf(input: PdfInput) {
   y -= metrics.length * 34 + 18;
   text(
     input.read.dataQuality.issues.length
-      ? `${input.read.dataQuality.issues.length} import issue(s) remain visible for review.`
+      ? `${input.read.dataQuality.issues.length} import problem(s) remain visible for review.`
       : input.read.dataQuality.linkCoverage.unmatched
-        ? "Unmatched records remain visible and suppress unsupported links."
-        : "No blocking issue exists in the latest committed batch.",
+        ? "Records without an exact ID match remain visible and suppress unsupported totals."
+        : "The latest import has no blocking problems.",
     { color: input.read.dataQuality.issues.length ? danger : input.read.dataQuality.linkCoverage.unmatched ? warning : accent, size: 9 },
   );
 

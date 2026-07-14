@@ -64,7 +64,7 @@ export async function persistSecureIntakePlan(input: { workspaceId: string; plan
         .map(toCanonicalContract),
       ...input.plan.records,
     ];
-    const engineFindings = runQuoteRecoveryEngine({ workspaceId: input.workspaceId, records: prospectiveRecords, now: committedAt });
+    const engineFindings = runQuoteRecoveryEngine({ workspaceId: input.workspaceId, records: prospectiveRecords, now: committedAt, defaultCurrency: input.plan.defaultCurrency });
     const dismissed = engineFindings.length
       ? await tx.quoteRecoveryFinding.findMany({
           where: { workspaceId: input.workspaceId, status: "DISMISSED", fingerprint: { in: engineFindings.map((finding) => finding.fingerprint) } },
@@ -112,13 +112,14 @@ export async function persistSecureIntakePlan(input: { workspaceId: string; plan
     }
 
     for (const [fileName, mapping] of Object.entries(input.plan.mappings)) {
-      const entityType = input.plan.records.find((record) => record.provenance.fileName === fileName)?.entityType;
-      if (!entityType) continue;
+      const sourceRecord = input.plan.records.find((record) => record.provenance.fileName === fileName);
+      const entityType = sourceRecord?.entityType;
+      if (!entityType || !sourceRecord) continue;
       const sourceSignature = createHash("sha256").update(Object.keys(mapping).sort().join("|")).digest("hex");
       await tx.savedCanonicalMapping.upsert({
         where: { workspaceId_entityType_sourceSignature: { workspaceId: input.workspaceId, entityType, sourceSignature } },
-        create: { workspaceId: input.workspaceId, entityType, sourceSignature, mappingJson: mapping },
-        update: { mappingJson: mapping },
+        create: { workspaceId: input.workspaceId, entityType, sourceSignature, sourceSystem: sourceRecord.sourceSystem, mappingJson: mapping },
+        update: { sourceSystem: sourceRecord.sourceSystem, mappingJson: mapping },
       });
     }
 

@@ -1,0 +1,94 @@
+{
+  "generated": [
+    "test-data/vendor-simulations/manual-export/manual-customers.csv",
+    "test-data/vendor-simulations/manual-export/manual-estimates.csv",
+    "test-data/vendor-simulations/manual-export/manual-estimates.xlsx",
+    "test-data/vendor-simulations/manual-export/manual-activities.csv",
+    "test-data/vendor-simulations/buildertrend/buildertrend-customers.csv",
+    "test-data/vendor-simulations/buildertrend/buildertrend-estimates.csv",
+    "test-data/vendor-simulations/buildertrend/buildertrend-estimates.xlsx",
+    "test-data/vendor-simulations/buildertrend/buildertrend-activities.csv",
+    "test-data/vendor-simulations/jobber/jobber-customers.csv",
+    "test-data/vendor-simulations/jobber/jobber-estimates.csv",
+    "test-data/vendor-simulations/jobber/jobber-estimates.xlsx",
+    "test-data/vendor-simulations/jobber/jobber-activities.csv",
+    "test-data/vendor-simulations/servicetitan/servicetitan-customers.csv",
+    "test-data/vendor-simulations/servicetitan/servicetitan-estimates.csv",
+    "test-data/vendor-simulations/servicetitan/servicetitan-estimates.xlsx",
+    "test-data/vendor-simulations/servicetitan/servicetitan-activities.csv",
+    "test-data/vendor-simulations/housecall-pro/housecall-pro-customers.csv",
+    "test-data/vendor-simulations/housecall-pro/housecall-pro-estimates.csv",
+    "test-data/vendor-simulations/housecall-pro/housecall-pro-estimates.xlsx",
+    "test-data/vendor-simulations/housecall-pro/housecall-pro-activities.csv",
+    "test-data/vendor-simulations/jobtread/jobtread-customers.csv",
+    "test-data/vendor-simulations/jobtread/jobtread-estimates.csv",
+    "test-data/vendor-simulations/jobtread/jobtread-estimates.xlsx",
+    "test-data/vendor-simulations/jobtread/jobtread-activities.csv",
+    "test-data/vendor-simulations/acculynx/acculynx-customers.csv",
+    "test-data/vendor-simulations/acculynx/acculynx-estimates.csv",
+    "test-data/vendor-simulations/acculynx/acculynx-estimates.xlsx",
+    "test-data/vendor-simulations/acculynx/acculynx-activities.csv",
+    "test-data/vendor-simulations/procore/procore-customers.csv",
+    "test-data/vendor-simulations/procore/procore-estimates.csv",
+    "test-data/vendor-simulations/procore/procore-estimates.xlsx",
+    "test-data/vendor-simulations/procore/procore-activities.csv",
+    "test-data/vendor-simulations/procore/procore-jobs.csv",
+    "test-data/vendor-simulations/procore/procore-invoices.csv",
+    "test-data/vendor-simulations/procore/procore-change-orders.csv",
+    "test-data/vendor-simulations/procore/procore-costs.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-customers.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-estimates.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-estimates.xlsx",
+    "test-data/vendor-simulations/quickbooks/quickbooks-activities.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-jobs.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-invoices.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-change-orders.csv",
+    "test-data/vendor-simulations/quickbooks/quickbooks-costs.csv",
+    "test-data/vendor-simulations/other-system-export/other-system-customers.csv",
+    "test-data/vendor-simulations/other-system-export/other-system-estimates.csv",
+    "test-data/vendor-simulations/other-system-export/other-system-estimates.xlsx",
+    "test-data/vendor-simulations/other-system-export/other-system-activities.csv"
+  ],
+  "vendors": [
+    {
+      "key": "manual-export",
+      "label": "Spreadsheet / manual export"
+    },
+    {
+      "key": "buildertrend",
+      "label": "Buildertrend"
+    },
+    {
+      "key": "jobber",
+      "label": "Jobber"
+    },
+    {
+      "key": "servicetitan",
+      "label": "ServiceTitan"
+    },
+    {
+      "key": "housecall-pro",
+      "label": "Housecall Pro"
+    },
+    {
+      "key": "jobtread",
+      "label": "JobTread"
+    },
+    {
+      "key": "acculynx",
+      "label": "AccuLynx"
+    },
+    {
+      "key": "procore",
+      "label": "Procore"
+    },
+    {
+      "key": "quickbooks",
+      "label": "QuickBooks"
+    },
+    {
+      "key": "other-system-export",
+      "label": "Other system export"
+    }
+  ]
+}

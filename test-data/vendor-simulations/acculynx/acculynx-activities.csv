@@ -1,0 +1,4 @@
+Activity ID,Customer ID,Estimate ID,Activity Date,Activity Type,Outcome,Next Step
+AL-ACT-001,AL-CUS-001,AL-EST-001,2026-06-01,phone,voicemail,Call decision maker
+AL-ACT-004,AL-CUS-001,AL-EST-004,2026-06-28,email,scope changed,Rebid after scope review
+AL-ACT-006,AL-CUS-003,AL-EST-006,2026-07-12,meeting,financing requested,Present financing options

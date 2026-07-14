@@ -8,9 +8,9 @@ import { readBoundedMultipartFormData } from "@/services/security/bounded-form-d
 export async function POST(request: Request) {
   try {
     const context = await getAppContext();
-    if (!context) return NextResponse.json({ files: [], message: "Unauthorized", status: "error" }, { status: 401 });
+    if (!context) return NextResponse.json({ files: [], message: "Unauthorized", sourceDetection: { confidence: "LOW", label: "Source not identified", matchedSignals: [], sourceSystem: null }, status: "error" }, { status: 401 });
     const origin = request.headers.get("origin");
-    if (origin && new URL(origin).host !== new URL(request.url).host) return NextResponse.json({ files: [], message: "Invalid request origin", status: "error" }, { status: 403 });
+    if (origin && new URL(origin).host !== new URL(request.url).host) return NextResponse.json({ files: [], message: "Invalid request origin", sourceDetection: { confidence: "LOW", label: "Source not identified", matchedSignals: [], sourceSystem: null }, status: "error" }, { status: 403 });
     const policy = await getCanonicalVolumePolicy(context.workspace.id);
     const formData = await readBoundedMultipartFormData(request, policy.maxTotalBytes + 1024 * 1024);
     const result = await reviewCanonicalFiles(formData);
@@ -19,6 +19,6 @@ export async function POST(request: Request) {
     const code = error instanceof Error ? error.message : "";
     const status = code === "CONTENT_LENGTH_REQUIRED" ? 411 : code === "UPLOAD_BODY_TOO_LARGE" ? 413 : 400;
     console.warn(JSON.stringify({ level: "warn", message: "canonical_review_rejected", code }));
-    return NextResponse.json({ files: [], message: status === 413 ? "Upload body exceeds the current plan limit." : "Unable to read the uploaded files safely.", status: "error" }, { status });
+    return NextResponse.json({ files: [], message: status === 413 ? "Upload body exceeds the current plan limit." : "Unable to read the uploaded files safely.", sourceDetection: { confidence: "LOW", label: "Source not identified", matchedSignals: [], sourceSystem: null }, status: "error" }, { status });
   }
 }

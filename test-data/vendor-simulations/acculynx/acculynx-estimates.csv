@@ -1,0 +1,7 @@
+Estimate ID,Contact ID,Estimate Status,Estimate Amount,Created Date,Lost Date,Last Contact,Follow Up Date,Assigned Rep,Next Step,Trade,Currency
+AL-EST-001,AL-CUS-001,open,28500,2026-03-10,,2026-06-01,2026-06-15,Alex Morgan,Call decision maker,Roof replacement,USD
+AL-EST-002,AL-CUS-002,sent,12800,2026-04-15,,,,,,HVAC replacement,USD
+AL-EST-003,AL-CUS-003,open,9600,2026-06-20,,,,,,Kitchen remodel,USD
+AL-EST-004,AL-CUS-001,lost,18000,2026-05-15,2026-07-01,2026-06-28,,Jordan Lee,Rebid after scope review,Pool renovation,USD
+AL-EST-005,AL-CUS-002,won,22000,2026-06-01,,2026-06-10,,Taylor Reed,Schedule job,Bathroom remodel,USD
+AL-EST-006,AL-CUS-003,open,42000,2026-07-05,,2026-07-12,2026-07-20,Taylor Reed,Present financing options,Whole-home remodel,USD
