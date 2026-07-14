@@ -1,0 +1,3 @@
+externalId,customerExternalId,estimateExternalId,status,contractValue,contractValueIncludesApprovedChanges,invoiceExportComplete,changeOrderExportComplete,costExportComplete,currency,owner,source,serviceType,targetGrossMarginPercent,scopeChangeFlag,notes,startedAt,completedAt
+JOB-QA-001,CUST-QA-006,EST-QA-006,completed,64000.00,false,true,true,true,USD,Ana Torres,Partner,Primary suite addition,35,true,Approved cabinetry change completed,2026-05-16T14:00:00Z,2026-07-01T14:00:00Z
+JOB-QA-002,CUST-QA-002,,completed,30000.00,true,true,true,true,USD,Bruno Costa,Website,Roof replacement,32,false,Standard contracted roof replacement,2026-05-20T14:00:00Z,2026-06-30T14:00:00Z

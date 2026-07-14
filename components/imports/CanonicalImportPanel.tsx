@@ -28,6 +28,46 @@ const templateNames: Record<(typeof activeDatasets)[number][0], string> = {
   LEAD: "leads",
 };
 
+const sourceSystemOptions = [
+  ["manual-export", "Spreadsheet / manual export"],
+  ["buildertrend", "Buildertrend"],
+  ["jobber", "Jobber"],
+  ["servicetitan", "ServiceTitan"],
+  ["housecall-pro", "Housecall Pro"],
+  ["jobtread", "JobTread"],
+  ["acculynx", "AccuLynx"],
+  ["procore", "Procore"],
+  ["quickbooks", "QuickBooks"],
+  ["other-system-export", "Other system export"],
+] as const;
+
+type SelectedFileMeta = {
+  name: string;
+  size: number;
+};
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function AttachmentIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
+      <path d="m20.5 11.5-8.7 8.7a5.25 5.25 0 0 1-7.4-7.4l9.2-9.2a3.75 3.75 0 1 1 5.3 5.3l-9.2 9.2a2.25 2.25 0 0 1-3.2-3.2l8.7-8.7" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" viewBox="0 0 24 24">
+      <path d="m5 12 4 4L19 6" />
+    </svg>
+  );
+}
+
 const initialCanonicalImportActionState: CanonicalImportActionState = {
   message: "",
   status: "idle",
@@ -36,6 +76,7 @@ const initialCanonicalImportActionState: CanonicalImportActionState = {
 export function CanonicalImportPanel() {
   const [sourceSystem, setSourceSystem] = useState("manual-export");
   const selectedFiles = useRef<Partial<Record<CanonicalEntityType, File>>>({});
+  const [selectedFileMeta, setSelectedFileMeta] = useState<Partial<Record<CanonicalEntityType, SelectedFileMeta>>>({});
   const [review, setReview] = useState<CanonicalReviewActionState | null>(null);
   const [mappingConfirmed, setMappingConfirmed] = useState(false);
   const [snapshotConfirmed, setSnapshotConfirmed] = useState(false);
@@ -47,15 +88,13 @@ export function CanonicalImportPanel() {
   function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const submittedFormData = new FormData(event.currentTarget);
     const reviewFormData = new FormData();
     reviewFormData.set("sourceSystem", sourceSystem);
 
     for (const [entityType] of activeDatasets) {
-      const submitted = submittedFormData.get(`file_${entityType}`);
-      if (submitted && typeof submitted !== "string" && submitted.size > 0) {
-        selectedFiles.current[entityType] = submitted;
-        reviewFormData.set(`file_${entityType}`, submitted, submitted.name);
+      const selected = selectedFiles.current[entityType];
+      if (selected?.size) {
+        reviewFormData.set(`file_${entityType}`, selected, selected.name);
       }
     }
 
@@ -131,16 +170,39 @@ export function CanonicalImportPanel() {
     setImportState(initialCanonicalImportActionState);
   }
 
+  const selectedFileCount = Object.keys(selectedFileMeta).length;
+
   return (
     <section className="rev-shell-panel rounded-[28px] p-6 md:p-7">
       <div className="max-w-3xl space-y-3">
-        <p className="rev-kicker">Canonical secure intake · Sprint 10 local product gate</p>
+        <p className="rev-kicker">Canonical secure intake</p>
         <h2 className="rev-display-section">Profile, review, then commit the evidence.</h2>
         <p className="text-sm leading-6 text-[color:var(--text-muted)]">
-          REVORY profiles structure and headers deterministically. Optional AI may suggest
-          uncertain header mappings from sanitized metadata only; Data Quality and your
-          explicit confirmation remain mandatory before one atomic commit.
+          REVORY matches known export headers without AI. When a column is unclear,
+          optional AI can suggest a field from sanitized header metadata only. You always
+          review the mapping before Data Quality can commit anything.
         </p>
+      </div>
+
+      <div className="mt-5 grid gap-2 md:grid-cols-3">
+        {[
+          ["01", "Deterministic first", "Known headers are matched locally."],
+          ["02", "AI only when needed", "Only sanitized column metadata is shared."],
+          ["03", "You approve", "No suggestion imports data by itself."],
+        ].map(([step, title, description]) => (
+          <div
+            className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3"
+            key={step}
+          >
+            <span className="text-[10px] font-bold tracking-[0.18em] text-[color:var(--accent-light)]">
+              {step}
+            </span>
+            <p className="mt-1 text-xs font-bold text-[color:var(--text-primary)]">{title}</p>
+            <p className="mt-1 text-[11px] leading-4 text-[color:var(--text-subtle)]">
+              {description}
+            </p>
+          </div>
+        ))}
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs">
@@ -158,10 +220,9 @@ export function CanonicalImportPanel() {
 
       <form className="mt-5 space-y-5" id="canonical-intake-form" onSubmit={submitReview}>
         <label className="block max-w-md text-sm font-semibold">
-          Source system
-          <input
-            className="rev-input-field mt-2 w-full"
-            maxLength={80}
+          Where did these exports come from?
+          <select
+            className="rev-select-field mt-2 w-full"
             name="sourceSystem"
             onChange={(event) => {
               setSourceSystem(event.target.value);
@@ -171,59 +232,134 @@ export function CanonicalImportPanel() {
               setImportState(initialCanonicalImportActionState);
             }}
             value={sourceSystem}
-          />
+          >
+            {sourceSystemOptions.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <span className="mt-2 block text-xs font-normal leading-5 text-[color:var(--text-subtle)]">
+            Select the system that produced the files. Keep the same source on future
+            refreshes so REVORY can replace the correct snapshot safely.
+          </span>
         </label>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {activeDatasets.map(([key, label, description, layer]) => (
-            <label
-              className="rev-card-hover rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.02)] p-4 text-sm font-bold"
-              key={key}
-            >
-            <span className="flex items-center justify-between gap-2">
-              {label}
-              {layer === "REVENUE_REALIZATION" ? (
-                <span className="rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
-                  Reconciliation
+          {activeDatasets.map(([key, label, description, layer]) => {
+            const selected = selectedFileMeta[key];
+
+            return (
+              <article
+                className={`rev-card-hover rounded-2xl border p-4 text-sm font-bold transition ${
+                  selected
+                    ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)]"
+                    : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
+                }`}
+                key={key}
+              >
+                <span className="flex items-start justify-between gap-2">
+                  {label}
+                  <span className="flex flex-wrap justify-end gap-1">
+                    {selected ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
+                        <CheckIcon /> Attached
+                      </span>
+                    ) : null}
+                    {layer === "REVENUE_REALIZATION" ? (
+                      <span className="rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
+                        Reconciliation
+                      </span>
+                    ) : null}
+                  </span>
                 </span>
-              ) : null}
-            </span>
-            <span className="mt-1 block min-h-10 text-xs font-normal leading-5 text-[color:var(--text-muted)]">
-              {description}
-            </span>
-            <input
-              aria-label={`${label} file`}
-              accept=".csv,.xlsx"
-              className="mt-3 block w-full text-xs font-normal text-[color:var(--text-muted)]"
-              name={`file_${key}`}
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                if (file) selectedFiles.current[key] = file;
-                else delete selectedFiles.current[key];
-                setReview(null);
-                setMappingConfirmed(false);
-                setSnapshotConfirmed(false);
-                setImportState(initialCanonicalImportActionState);
-              }}
-              type="file"
-            />
-            </label>
-          ))}
+                <span className="mt-1 block min-h-10 text-xs font-normal leading-5 text-[color:var(--text-muted)]">
+                  {description}
+                </span>
+                <input
+                  accept=".csv,.xlsx"
+                  aria-label={`${label} file`}
+                  className="sr-only"
+                  id={`canonical-file-${key}`}
+                  name={`file_${key}`}
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    if (file) {
+                      selectedFiles.current[key] = file;
+                      setSelectedFileMeta((current) => ({
+                        ...current,
+                        [key]: { name: file.name, size: file.size },
+                      }));
+                    } else {
+                      delete selectedFiles.current[key];
+                      setSelectedFileMeta((current) => {
+                        const next = { ...current };
+                        delete next[key];
+                        return next;
+                      });
+                    }
+                    setReview(null);
+                    setMappingConfirmed(false);
+                    setSnapshotConfirmed(false);
+                    setImportState(initialCanonicalImportActionState);
+                  }}
+                  type="file"
+                />
+                <label
+                  className="mt-3 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[color:var(--border)] bg-[rgba(20,21,22,0.5)] px-3 py-2 text-xs font-bold text-[color:var(--text-primary)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(67,179,155,0.06)]"
+                  htmlFor={`canonical-file-${key}`}
+                >
+                  <AttachmentIcon />
+                  {selected ? "Replace file" : "Attach CSV or XLSX"}
+                </label>
+                {selected ? (
+                  <div
+                    aria-live="polite"
+                    className="mt-3 flex min-w-0 items-center gap-2 rounded-xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-2"
+                    role="status"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[#141516]">
+                      <CheckIcon />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-bold" title={selected.name}>
+                        {selected.name}
+                      </span>
+                      <span className="mt-0.5 block text-[10px] font-normal text-[color:var(--text-muted)]">
+                        {formatFileSize(selected.size)} · ready to profile
+                      </span>
+                    </span>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[10px] font-normal text-[color:var(--text-subtle)]">
+                    No file attached yet.
+                  </p>
+                )}
+              </article>
+            );
+          })}
         </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <button
           className="rev-button-primary"
-          disabled={pending}
+          disabled={pending || selectedFileCount === 0}
           type="submit"
         >
           {pending ? "Profiling…" : "Profile files and review mapping"}
         </button>
-        <p className="max-w-xl text-xs leading-5 text-[color:var(--text-subtle)]">
-          Jobs, invoices, change orders and costs support deterministic Tier 2 findings
-          after explicit matching. Imports do not unlock Revenue Realization pricing or
-          certify accounting loss.
-        </p>
+        <div className="max-w-xl text-xs leading-5 text-[color:var(--text-subtle)]">
+          <p className={selectedFileCount > 0 ? "font-bold text-[color:var(--accent-light)]" : ""}>
+            {selectedFileCount > 0
+              ? `${selectedFileCount} ${selectedFileCount === 1 ? "file" : "files"} attached and ready to profile.`
+              : "Attach at least one CSV or XLSX file to continue."}
+          </p>
+          <p className="mt-1">
+            Jobs, invoices, change orders and costs support deterministic Tier 2 findings
+            after explicit matching. Imports do not unlock Revenue Realization pricing or
+            certify accounting loss.
+          </p>
+        </div>
       </div>
       </form>
 

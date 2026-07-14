@@ -1,0 +1,2 @@
+externalId,jobExternalId,estimateExternalId,invoiceExternalId,status,billingStatus,approvedAmount,currency,approvedAt,description
+CO-QA-001,JOB-QA-001,EST-QA-006,,approved,unbilled,8500.00,USD,2026-06-10T14:00:00Z,Approved custom cabinetry scope

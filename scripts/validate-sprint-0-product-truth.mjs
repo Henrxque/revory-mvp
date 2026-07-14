@@ -43,22 +43,22 @@ check(
   "Public audit CTAs remove the historical Growth query parameter.",
 );
 check(
-  "audit-primary",
-  /featured:\s*true,[\s\S]*?label:\s*"Quote Recovery Audit"/.test(start),
-  "The US$799 Quote Recovery Audit is the primary checkout card.",
+  "audit-required-baseline",
+  /const audits:[\s\S]*?featured:\s*true,[\s\S]*?label:\s*"Quote Recovery Audit"/.test(start),
+  "The US$799 Quote Recovery Audit remains the highlighted required baseline inside the Audit group.",
 );
 check(
-  "audit-centered-with-honest-sequence",
-  start.includes('layoutClass: "order-1 lg:order-2"') &&
-    start.includes('layoutClass: "order-2 lg:order-1"') &&
-    start.includes("$799 one-time Quote Recovery Audit") &&
-    start.includes("$399/month only when recurring reads make sense"),
-  "The primary Audit renders first on mobile, centered on desktop, and precedes the recurring Starter path.",
+  "sprint-13-commercial-hierarchy",
+  start.indexOf("Ongoing plans") < start.indexOf("Start with an Audit") &&
+    start.includes("Every ongoing plan starts with the matching one-time Audit") &&
+    start.includes('priceNote: "paid once"') &&
+    start.includes('priceNote: "per month"'),
+  "The pricing screen separates ongoing subscriptions from the one-time Audit baseline and states billing cadence.",
 );
 check(
   "starter-is-recurring-continuation",
-  start.includes('stage: "Recurring continuation"') &&
-    start.includes('priceNote: "per month · continuity after the audit"') &&
+  start.includes('entryCondition: "Requires a completed Quote Recovery Audit."') &&
+    start.includes('priceNote: "per month"') &&
     !start.includes("Everything in the audit flow"),
   "Starter is described as recurring continuity after the Audit, not a cheaper replacement for it.",
 );

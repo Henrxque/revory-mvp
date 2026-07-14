@@ -1,0 +1,7 @@
+externalId,customerExternalId,leadExternalId,jobExternalId,status,estimateAmount,createdAt,sentAt,closedAt,lostAt,lastActivityAt,nextFollowUpAt,owner,source,serviceType,nextStep,currency
+EST-QA-001,CUST-QA-001,LEAD-QA-001,,open,28500.00,2026-04-01T14:00:00Z,2026-04-02T14:00:00Z,,,2026-06-20T14:00:00Z,2026-07-05T14:00:00Z,Ana Torres,Referral,Whole-home remodel,Call customer,USD
+EST-QA-002,CUST-QA-002,LEAD-QA-002,,sent,14500.00,2026-06-01T14:00:00Z,2026-06-02T14:00:00Z,,,,,Bruno Costa,Website,Roof replacement,,USD
+EST-QA-003,CUST-QA-003,LEAD-QA-003,,open,7500.00,2026-07-08T14:00:00Z,2026-07-09T14:00:00Z,,,2026-07-10T14:00:00Z,2026-07-20T14:00:00Z,Ana Torres,Paid Search,Pool equipment upgrade,Send revised scope,USD
+EST-QA-004,CUST-QA-004,LEAD-QA-004,,lost,22000.00,2026-06-10T14:00:00Z,2026-06-11T14:00:00Z,,2026-07-03T14:00:00Z,2026-07-02T14:00:00Z,,Bruno Costa,Referral,Premium HVAC replacement,Review loss reason,USD
+EST-QA-005,CUST-QA-005,LEAD-QA-005,,open,9200.00,2026-05-20T14:00:00Z,2026-05-21T14:00:00Z,,,2026-07-05T14:00:00Z,2026-07-09T14:00:00Z,,Home Show,Kitchen refacing,,USD
+EST-QA-006,CUST-QA-006,LEAD-QA-006,,won,64000.00,2026-05-01T14:00:00Z,2026-05-02T14:00:00Z,2026-05-15T14:00:00Z,,2026-05-15T14:00:00Z,,Ana Torres,Partner,Primary suite addition,Contract signed,USD

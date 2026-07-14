@@ -244,6 +244,14 @@ Deliver per-job export-completeness gates, active full-snapshot boundaries, stri
 
 **Exit:** corrected local logic passes a fresh independent challenge; no tracked QA session artifact remains in the current tree; every external security/legal/production dependency has an owner and reproducible evidence requirement. Customer-data validation may remain pending only when explicitly owned outside the sprint, and then no commercial gate may be called passed.
 
+### Sprint 13 — Commercial packaging and pricing clarity
+
+**Outcome:** explain the audit-to-subscription business model without presenting one-time audits and recurring plans as a false tier ladder.
+
+Deliver a recurring-plan-first visual group, a separate one-time Audit baseline group, explicit billing cadence on every card, server-side Starter baseline enforcement, honest closed states for Growth/Pro/Full Audit and no annual control before dedicated Stripe and renewal evidence exists.
+
+**Exit:** a buyer can distinguish what is paid once, what recurs, which Audit is required first and which paths remain closed; no gated offer can be purchased and no legacy Stripe price can grant hybrid access.
+
 ## 9. Launch sequence
 
 1. internal and design-partner Quote Recovery reads;

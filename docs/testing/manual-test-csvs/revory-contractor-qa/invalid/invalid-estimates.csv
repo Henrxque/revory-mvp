@@ -1,0 +1,3 @@
+externalId,customerExternalId,leadExternalId,jobExternalId,status,estimateAmount,createdAt,sentAt,closedAt,lostAt,lastActivityAt,nextFollowUpAt,owner,source,serviceType,nextStep,currency
+,CUST-QA-001,LEAD-QA-001,,open,12500.00,2026-06-01T14:00:00Z,2026-06-02T14:00:00Z,,,2026-06-20T14:00:00Z,2026-07-01T14:00:00Z,Ana Torres,Manual QA,Remodel,Call customer,USD
+EST-QA-BAD-002,CUST-QA-002,LEAD-QA-002,,open,not-a-number,not-a-date,,,,,,Bruno Costa,Manual QA,Roofing,Review quote,USD

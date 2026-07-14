@@ -1,0 +1,4 @@
+externalId,customerExternalId,leadExternalId,estimateExternalId,jobExternalId,occurredAt,activityType,outcome,nextStep
+ACT-QA-001,CUST-QA-001,LEAD-QA-001,EST-QA-001,,2026-06-20T14:00:00Z,email,sent,Call customer
+ACT-QA-003,CUST-QA-003,LEAD-QA-003,EST-QA-003,,2026-07-10T14:00:00Z,call,connected,Send revised scope
+ACT-QA-005,CUST-QA-005,LEAD-QA-005,EST-QA-005,,2026-07-05T14:00:00Z,email,opened,

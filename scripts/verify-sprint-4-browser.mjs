@@ -192,11 +192,22 @@ try {
     );
   });
 
+  const sourceSystem = page.getByLabel("Where did these exports come from?");
+  if ((await sourceSystem.evaluate((element) => element.tagName)) !== "SELECT") {
+    throw new Error("Source system must be a standardized select, not a free-text field.");
+  }
+  await sourceSystem.selectOption("manual-export");
   await page.getByLabel("Customers file").setInputFiles(customersPath);
   await page.getByLabel("Estimates file").setInputFiles(estimatesPath);
   await page.getByLabel("Activities file").setInputFiles(activitiesPath);
   const selectedQuoteFiles = await page.locator('#canonical-intake-form input[type="file"]').evaluateAll((inputs) => inputs.map((input) => input.files?.[0]?.name).filter(Boolean));
   if (selectedQuoteFiles.length !== 3) throw new Error(`Expected 3 selected quote files, found ${selectedQuoteFiles.join(", ") || "none"}.`);
+  await page.getByText("3 files attached and ready to profile.").waitFor();
+  for (const selectedFile of ["customers.csv", "estimates.csv", "activities.csv"]) {
+    if (!(await page.getByText(selectedFile, { exact: true }).isVisible())) {
+      throw new Error(`Selected file confirmation missing for ${selectedFile}.`);
+    }
+  }
   await page.waitForTimeout(250);
   await page.getByRole("button", { name: "Profile files and review mapping" }).click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
@@ -273,6 +284,14 @@ try {
   }
   await page.screenshot({ path: path.join(evidenceDir, "dashboard-desktop.png"), fullPage: true });
 
+  await page.goto("/app/revenue-leaks", { waitUntil: "networkidle" });
+  const exportFindingsButton = page.getByRole("link", { name: "Export current findings" });
+  const exportFindingsBox = await exportFindingsButton.boundingBox();
+  if (!exportFindingsBox || exportFindingsBox.height > 56 || exportFindingsBox.width > 240) {
+    throw new Error(`Quote Recovery export CTA is disproportionate: ${JSON.stringify(exportFindingsBox)}`);
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "quote-recovery-opportunities-desktop.png"), fullPage: true });
+
   const finding = await prisma.quoteRecoveryFinding.findFirst({
     where: { estimateExternalId: "EST-QA-1", workspaceId: workspace.id },
     orderBy: { severity: "desc" },
@@ -312,6 +331,14 @@ try {
     throw new Error("Mobile dashboard headline missing.");
   }
   await page.screenshot({ path: path.join(evidenceDir, "dashboard-mobile.png"), fullPage: true });
+  await page.goto("/app/revenue-leaks", { waitUntil: "networkidle" });
+  const mobileExportFindingsBox = await page.getByRole("link", { name: "Export current findings" }).boundingBox();
+  if (!mobileExportFindingsBox || mobileExportFindingsBox.height > 56 || mobileExportFindingsBox.width > 240) {
+    throw new Error(`Mobile Quote Recovery export CTA is disproportionate: ${JSON.stringify(mobileExportFindingsBox)}`);
+  }
+  const quoteRecoveryOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  if (quoteRecoveryOverflow > 1) throw new Error(`Quote Recovery mobile overflow: ${quoteRecoveryOverflow}px`);
+  await page.screenshot({ path: path.join(evidenceDir, "quote-recovery-opportunities-mobile.png"), fullPage: true });
   await page.goto("/app/revenue-realization", { waitUntil: "networkidle" });
   if (!(await page.getByText("Turn defensible reconciliation into review-ready findings.").isVisible())) {
     throw new Error("Mobile Revenue Realization headline missing.");

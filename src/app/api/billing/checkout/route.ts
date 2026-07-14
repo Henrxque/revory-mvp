@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuthSession } from "@/auth";
+import { hasCompletedQuoteRecoveryBaseline } from "@/services/billing/commercial-readiness";
 import { ensureStripeCustomerForWorkspace } from "@/services/billing/stripe-sync";
 import { getStripeAppUrl, getStripeServerClient } from "@/services/billing/stripe-runtime";
 import { getRevoryOffer, getRevoryOfferPriceId, isRevoryOfferConfigured, parseRevoryOffer } from "@/services/billing/revory-offers";
@@ -19,6 +20,9 @@ export async function POST(request: NextRequest) {
   const user = await syncAuthenticatedUser(); if (!user) return NextResponse.redirect(new URL("/sign-in?redirect_url=%2Fstart", request.url), { status: 303 });
   const workspace = await getOrCreateWorkspace(user); const existing = await getWorkspaceEntitlements(workspace.id);
   if (existing.some((entitlement) => entitlement.offerKey === offerKey)) return NextResponse.redirect(new URL("/app/dashboard", request.url), { status: 303 });
+  if (offerKey === "STARTER" && !(await hasCompletedQuoteRecoveryBaseline(workspace.id))) {
+    return NextResponse.redirect(new URL("/start?billing=baseline-required&offer=STARTER", request.url), { status: 303 });
+  }
   try {
     const customer = await ensureStripeCustomerForWorkspace({ existingStripeCustomerId: workspace.stripeCustomerId, userEmail: user.email, userName: user.fullName, workspaceId: workspace.id, workspaceName: workspace.name });
     const offer = getRevoryOffer(offerKey); const stripe = getStripeServerClient();

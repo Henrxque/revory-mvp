@@ -46,6 +46,7 @@ As of the local implementation on 2026-07-13:
 - the Sprint 6 recurring loop, second-read movement, recovered-value separation, digest boundary and workspace data controls are implemented locally;
 - protected idempotent retention enforcement is implemented and locally tested; the daily retention and weekly digest schedules are deployed and visible in Vercel, while the first observed production executions remain pending;
 - dedicated Audit/Starter entitlement and checkout code exists, but Stripe sandbox configuration and end-to-end payment evidence are missing;
+- Sprint 13 now separates the commercial screen into recurring subscriptions first and one-time baseline audits second, states billing cadence on every card, keeps annual billing hidden, and enforces a completed Quote Recovery Audit before Starter checkout; Growth, Pro and Full Revenue Leak Audit remain visibly release-gated;
 - the Starter paid-beta gate remains closed until Stripe, email delivery and production operational checks pass;
 - jobs, invoices, change orders and costs now have canonical assisted ingestion, explicit matching and a locally verified deterministic reconciliation ledger;
 - ambiguous links, incomplete bases and currency conflicts suppress financial output; no fuzzy name/amount matching is used;
@@ -185,6 +186,8 @@ Treat these as target hypotheses, not published entitlements:
 - Multi-location: US$2,499+/month in the future.
 
 The commercial sequence is not a three-tier price ladder. The US$799 Quote Recovery Audit is the primary one-time entry offer and first complete read. Starter at US$399/month is the recurring continuation after that audit for refreshed imports and second-read movement; it is not a cheaper substitute for the initial audit. The US$1,499 Full Revenue Leak Audit is a separate advanced one-time audit for customers whose evidence supports jobs, invoices, change orders and cost reconciliation.
+
+The commercial screen may visually prioritize recurring subscriptions because they are the durable business model, but it must state that each subscription begins only after its matching paid one-time Audit establishes the baseline. Visual priority never bypasses the Audit prerequisite or a release gate.
 
 No price or plan is eligible until the specific release gate passes with paid or production-like evidence. Existing MedSpa Stripe plan keys and price IDs are protected migration inputs, not proof that the new packages are configured.
 

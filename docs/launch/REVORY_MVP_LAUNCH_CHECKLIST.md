@@ -10,6 +10,7 @@ Status: **BLOCKED**. This is the canonical pre-launch checklist for the hybrid R
 - [x] Authenticated desktop/mobile Quote Recovery flow passes locally: import, Data Quality, dashboard, evidence, disposition and export.
 - [x] Public read-only sample workspace uses synthetic contractor data and performs no upload or persistence.
 - [x] Public and active authenticated copy sweep blocks MedSpa/QuoteSignal-era vocabulary.
+- [x] Sprint 13 separates ongoing subscriptions from paid-once Audit baselines, labels cadence explicitly and enforces the Starter prerequisite server-side.
 - [x] Protected retention endpoint and idempotent local enforcement test exist.
 
 ## External and production gates

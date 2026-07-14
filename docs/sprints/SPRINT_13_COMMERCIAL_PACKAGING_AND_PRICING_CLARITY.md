@@ -2,7 +2,7 @@
 
 ## Status
 
-**Product decision documented; UI, Stripe and public-sale implementation remain pending.**
+**Pricing hierarchy and server-side prerequisite implemented locally on 2026-07-14; Stripe and public-sale gates remain pending.**
 
 This sprint clarifies packaging after the local implementation of Sprints 0–12. It does not make an offer sellable, enable a checkout, create Stripe products, or override any release gate.
 
@@ -98,3 +98,16 @@ Do not imply that a customer receives Growth or Pro merely by purchasing an audi
 ## Product decision
 
 The product should visually prioritize recurring subscriptions because they are the durable business model. The audit remains the first paid trust-building step, not the commercial center of the page. Annual billing should be offered only once a recurring plan is commercially open and has the required Stripe, renewal, support and paid-evidence gates.
+
+## Local implementation evidence — 2026-07-14
+
+- `/start` now renders **Ongoing plans** first with Starter, Growth and Pro, followed by **Start with an Audit** with the two one-time baselines.
+- Every price states `per month` or `paid once`; no annual switch or annual target price is exposed.
+- Starter is explicitly conditional on a completed Quote Recovery Audit in both the UI and the server-side checkout route.
+- Growth, Pro and Full Revenue Leak Audit remain educational, disabled and labeled `Closed until the release gate passes`.
+- Existing premium billing cards, background, hover treatment, typography and canonical brand tokens remain intact.
+- An already entitled workspace receives a direct workspace CTA instead of a misleading checkout-disabled state.
+- `qa:sprint-13` enforces hierarchy, cadence labels, prerequisite enforcement, gated plans, absence of legacy language and preservation of the billing visual contract.
+- `qa:sprint-13:browser` passes the real desktop/mobile layout, no horizontal overflow, five-card grouping, disabled gate states and preserved premium card hover.
+
+This implementation does not create Stripe products, annual prices, portal behavior or public-sale authority. Those remain separate external gates.

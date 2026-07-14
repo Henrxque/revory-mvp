@@ -1,0 +1,7 @@
+externalId,customerExternalId,createdAt,status,owner,source
+LEAD-QA-001,CUST-QA-001,2026-04-01T13:00:00Z,qualified,Ana Torres,Referral
+LEAD-QA-002,CUST-QA-002,2026-06-01T13:00:00Z,qualified,Bruno Costa,Website
+LEAD-QA-003,CUST-QA-003,2026-07-08T13:00:00Z,proposal,Ana Torres,Paid Search
+LEAD-QA-004,CUST-QA-004,2026-06-10T13:00:00Z,lost,Bruno Costa,Referral
+LEAD-QA-005,CUST-QA-005,2026-05-20T13:00:00Z,proposal,,Home Show
+LEAD-QA-006,CUST-QA-006,2026-05-01T13:00:00Z,won,Ana Torres,Partner

@@ -1,0 +1,5 @@
+externalId,customerExternalId,leadExternalId,estimateExternalId,jobExternalId,occurredAt,activityType,outcome,nextStep
+ACT-QA-001B,CUST-QA-001,LEAD-QA-001,EST-QA-001,,2026-07-13T14:00:00Z,call,connected,Await customer decision
+ACT-QA-002B,CUST-QA-002,LEAD-QA-002,EST-QA-002,,2026-07-13T14:00:00Z,email,sent,Review revised proposal
+ACT-QA-003,CUST-QA-003,LEAD-QA-003,EST-QA-003,,2026-07-10T14:00:00Z,call,connected,Call customer
+ACT-QA-005B,CUST-QA-005,LEAD-QA-005,EST-QA-005,,2026-06-25T14:00:00Z,email,opened,

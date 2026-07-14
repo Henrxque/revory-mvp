@@ -18,9 +18,11 @@ const checks = [
   "qa:sprint-11",
   "qa:sprint-12",
   "qa:sprint-12-1",
+  "qa:sprint-13",
   "qa:retention",
   "qa:canonical-assisted-intake",
   "qa:sprint-10:browser",
+  "qa:sprint-13:browser",
   "build",
 ] as const;
 
