@@ -184,6 +184,8 @@ Treat these as target hypotheses, not published entitlements:
 - Pro: US$1,499/month;
 - Multi-location: US$2,499+/month in the future.
 
+The commercial sequence is not a three-tier price ladder. The US$799 Quote Recovery Audit is the primary one-time entry offer and first complete read. Starter at US$399/month is the recurring continuation after that audit for refreshed imports and second-read movement; it is not a cheaper substitute for the initial audit. The US$1,499 Full Revenue Leak Audit is a separate advanced one-time audit for customers whose evidence supports jobs, invoices, change orders and cost reconciliation.
+
 No price or plan is eligible until the specific release gate passes with paid or production-like evidence. Existing MedSpa Stripe plan keys and price IDs are protected migration inputs, not proof that the new packages are configured.
 
 ## Bounded AI policy

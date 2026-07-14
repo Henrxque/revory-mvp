@@ -5,7 +5,9 @@ import { getAuthSession } from "@/auth";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { getAppContext } from "@/services/app/get-app-context";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
+import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 import { isRevoryOfferConfigured } from "@/services/billing/revory-offers";
 
 const offers = [
@@ -19,30 +21,32 @@ const offers = [
       "Executive result export",
     ],
     featured: true,
+    layoutClass: "order-1 lg:order-2",
     offerKey: "QUOTE_RECOVERY_AUDIT" as const,
     label: "Quote Recovery Audit",
     price: "$799",
-    priceNote: "one-time target",
-    stage: "Earliest eligible offer",
+    priceNote: "paid once · first complete read",
+    stage: "Start here",
   },
   {
     description:
-      "A recurring Quote Recovery control loop after the audit workflow and second-read gate pass.",
+      "Ongoing Quote Recovery for teams that want to refresh the evidence after their first audit as new exports arrive.",
     features: [
-      "Everything in the audit flow",
+      "Recurring export refreshes",
       "Saved mapping refresh",
-      "New and persistent finding movement",
-      "Billing portal and recurring access",
+      "New, persistent, worsening and resolved movement",
+      "Recurring access and billing portal",
     ],
+    layoutClass: "order-2 lg:order-1",
     label: "Starter",
     offerKey: "STARTER" as const,
     price: "$399",
-    priceNote: "monthly target",
-    stage: "Recurring beta target",
+    priceNote: "per month · continuity after the audit",
+    stage: "Recurring continuation",
   },
   {
     description:
-      "Tier 2 findings and the executive report pass the local product gate; controlled access remains gated by independent review and commercial configuration.",
+      "A separate one-time audit for businesses whose data can support estimate-to-job, invoice and change-order reconciliation.",
     features: [
       "Explicit record matching",
       "Unmatched and conflict review",
@@ -50,11 +54,12 @@ const offers = [
       "Evidence-first Tier 2 findings",
       "Full Revenue Leak executive report",
     ],
+    layoutClass: "order-3",
     label: "Full Revenue Leak Audit",
     offerKey: null,
     price: "$1,499",
-    priceNote: "one-time future target",
-    stage: "Commercial gate pending",
+    priceNote: "paid once · advanced audit",
+    stage: "Advanced one-time audit",
   },
 ] as const;
 
@@ -83,6 +88,13 @@ export default async function StartPage() {
     redirect("/sign-in?redirect_url=%2Fstart");
   }
 
+  const appContext = session?.user?.id ? await getAppContext() : null;
+  const activeOfferKeys = new Set(
+    appContext
+      ? (await getWorkspaceEntitlements(appContext.workspace.id)).map((entitlement) => entitlement.offerKey)
+      : [],
+  );
+
   return (
     <main className="rev-checkout-page min-h-screen px-4 py-3 font-[family:var(--font-app)] md:px-7 md:py-4">
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-[1240px] flex-col">
@@ -107,7 +119,7 @@ export default async function StartPage() {
             Choose the revenue leak read your data can support.
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-[13px] leading-6 text-[color:var(--text-muted)] md:text-sm">
-            Quote Recovery is implemented as a self-service flow. Checkout activates only when the matching Stripe sandbox price is configured.
+            Start with the $799 one-time Quote Recovery Audit. Continue at $399/month only when recurring reads make sense. The $1,499 Full Revenue Leak Audit is a separate advanced one-time read.
           </p>
         </section>
 
@@ -115,7 +127,7 @@ export default async function StartPage() {
           {offers.map((offer) => (
             <article
               key={offer.label}
-              className={`rev-checkout-card flex min-h-[390px] flex-col rounded-[26px] border p-5 md:p-6 ${
+              className={`rev-checkout-card ${offer.layoutClass} flex min-h-[390px] flex-col rounded-[26px] border p-5 md:p-6 ${
                 "featured" in offer && offer.featured
                   ? "rev-checkout-card-primary border-[rgba(67,179,155,0.4)]"
                   : "border-[color:var(--border)]"
@@ -160,10 +172,14 @@ export default async function StartPage() {
               </ul>
 
               <div className="mt-auto pt-5">
-                {offer.offerKey && isRevoryOfferConfigured(offer.offerKey) ? (
+                {offer.offerKey && activeOfferKeys.has(offer.offerKey) ? (
+                  <Link className="rev-button-primary w-full justify-center" href="/app/dashboard">
+                    Open your REVORY workspace
+                  </Link>
+                ) : offer.offerKey && isRevoryOfferConfigured(offer.offerKey) ? (
                   <form action={`/api/billing/checkout?offer=${offer.offerKey}`} method="post">
                     <button className="rev-button-primary w-full justify-center" type="submit">
-                      {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the $799 audit" : "Start Starter at $399/month"}
+                      {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the $799 audit once" : "Continue at $399/month"}
                     </button>
                   </form>
                 ) : internalPreview && offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? (
@@ -184,7 +200,7 @@ export default async function StartPage() {
 
         <section className="mx-auto mt-3 max-w-4xl rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-5 py-2 text-center">
           <p className="text-[12px] leading-6 text-[color:var(--text-muted)]">
-            New audit and Starter entitlements use dedicated Stripe price IDs. Existing legacy prices are never reused for these offers.
+            Billing model: $799 once for the first audit, $399/month for recurring Quote Recovery after it, and $1,499 once for the advanced Full Revenue Leak Audit. Each offer keeps a separate entitlement and release gate.
           </p>
         </section>
       </div>

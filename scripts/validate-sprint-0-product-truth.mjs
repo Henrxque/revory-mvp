@@ -48,6 +48,21 @@ check(
   "The US$799 Quote Recovery Audit is the primary checkout card.",
 );
 check(
+  "audit-centered-with-honest-sequence",
+  start.includes('layoutClass: "order-1 lg:order-2"') &&
+    start.includes('layoutClass: "order-2 lg:order-1"') &&
+    start.includes("$799 one-time Quote Recovery Audit") &&
+    start.includes("$399/month only when recurring reads make sense"),
+  "The primary Audit renders first on mobile, centered on desktop, and precedes the recurring Starter path.",
+);
+check(
+  "starter-is-recurring-continuation",
+  start.includes('stage: "Recurring continuation"') &&
+    start.includes('priceNote: "per month · continuity after the audit"') &&
+    !start.includes("Everything in the audit flow"),
+  "Starter is described as recurring continuity after the Audit, not a cheaper replacement for it.",
+);
+check(
   "no-live-checkout-link",
   !start.includes('href="/api/billing/checkout"'),
   "The checkout presentation does not start a charge before Sprint 5.",
