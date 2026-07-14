@@ -9,6 +9,7 @@ import { getAppContext } from "@/services/app/get-app-context";
 import { getCanonicalVolumePolicy } from "@/services/billing/growth-access";
 import type { CanonicalVolumePolicy } from "@/services/billing/growth-access";
 import { getCapabilityAccess } from "@/services/billing/capabilities";
+import { getCanonicalImportAccessNotice } from "@/services/billing/canonical-import-access";
 import {
   buildCanonicalMappingReview,
   calculateReviewedMappingConfidence,
@@ -169,6 +170,25 @@ export async function importCanonicalFiles(
   }
   if (formData.get("snapshotMode") !== "FULL_REPLACEMENT") {
     return { status: "error", message: "Confirm that each selected entity/source file is a complete replacement snapshot." };
+  }
+  const importAccess = await getCanonicalImportAccessNotice(context.workspace.id);
+  if (importAccess.blocked) {
+    return {
+      status: "error",
+      message:
+        importAccess.mode === "AUDIT"
+          ? "This one-time Audit has already been used. Choose an ongoing plan or contact support before creating another read."
+          : "An active REVORY entitlement is required.",
+    };
+  }
+  if (
+    importAccess.requiresConsumptionConfirmation &&
+    formData.get("auditConsumptionConfirmed") !== "yes"
+  ) {
+    return {
+      status: "error",
+      message: "Confirm that this committed snapshot should consume the one-time Quote Recovery Audit.",
+    };
   }
   if (
     (await checkRateLimit({

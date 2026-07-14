@@ -24,9 +24,12 @@
   --accent-strong: var(--brand-accent);
   --text-muted: color-mix(in srgb, var(--foreground) 70%, var(--background));
   --text-subtle: color-mix(in srgb, var(--foreground) 48%, var(--background));
-  --success: #2ecc86;
-  --warning: #f5a623;
-  --danger: #ff728d;
+  --success: #43b39b;
+  --success-soft: rgba(67, 179, 155, 0.09);
+  --warning: #d9ad57;
+  --warning-soft: rgba(217, 173, 87, 0.09);
+  --danger: #df6c72;
+  --danger-soft: rgba(223, 108, 114, 0.09);
   --shadow-soft: 0 18px 54px rgba(0, 0, 0, 0.22);
   --shadow-panel: 0 26px 74px rgba(0, 0, 0, 0.28);
   --shadow-accent: 0 18px 38px rgba(67,179,155, 0.18);
@@ -392,6 +395,7 @@ body::before {
 
 @media (prefers-reduced-motion: reduce) {
   .rev-marketing-card,
+  .rev-card-hover,
   .rev-signal-icon,
   .rev-step-card,
   .rev-nav-link::after {
@@ -399,6 +403,7 @@ body::before {
   }
 
   .rev-marketing-card:hover,
+  .rev-card-hover:hover,
   .rev-step-card:hover {
     transform: none;
   }
@@ -506,12 +511,17 @@ body::before {
   transition:
     border-color 0.18s ease,
     background-color 0.18s ease,
+    box-shadow 0.18s ease,
     transform 0.18s ease;
 }
 
 .rev-card-hover:hover {
   border-color: var(--border-accent);
   background: var(--background-card-hover);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(67, 179, 155, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
   transform: translateY(-1px);
 }
 

@@ -2,6 +2,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { isWorkspaceProductAdmin } from "@/services/app/product-admin";
 import { getQuoteRecoveryRead } from "@/services/quote-recovery/read-model";
 
 export type AnalysisRunCapacityReservation = {
@@ -10,6 +11,7 @@ export type AnalysisRunCapacityReservation = {
 };
 
 export async function reserveQuoteRecoveryAnalysisRunCapacity(workspaceId: string): Promise<AnalysisRunCapacityReservation | null> {
+  if (await isWorkspaceProductAdmin(workspaceId)) return null;
   const entitlements = await prisma.workspaceEntitlement.findMany({
     where: { workspaceId, status: "ACTIVE", OR: [{ endsAt: null }, { endsAt: { gte: new Date() } }] },
   });

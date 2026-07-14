@@ -9,6 +9,7 @@ import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
+import { isProductAdminEmail } from "@/services/app/product-admin";
 import { getCapabilityAccess } from "@/services/billing/capabilities";
 
 type PrivateAppLayoutProps = Readonly<{
@@ -43,6 +44,7 @@ export default async function PrivateAppLayout({
   const { user, workspace } = appContext;
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();
+  const productAdmin = isProductAdminEmail(user.email);
   const appAccess = await getCapabilityAccess(workspace.id, "APP");
 
   if (!appAccess.allowed) {
@@ -71,8 +73,9 @@ export default async function PrivateAppLayout({
   const workspaceSubtitle = hasCanonicalData
     ? `${quoteRecoveryRecordCount} Quote Recovery records · ${realizationRecordCount} reconciliation records visible.`
     : "Add customer, estimate and activity exports to prepare the first Quote Recovery read.";
-  const currentPlanSignal =
-    billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
+  const currentPlanSignal = productAdmin
+    ? "Admin testing access · paid Audit capacity is preserved."
+    : billingSummary.plan?.inAppSignal ?? "Plan keeps REVORY active.";
   const accountInitial = getAccountInitial(user.email);
 
   return (
@@ -111,7 +114,14 @@ export default async function PrivateAppLayout({
                       {user.email}
                     </p>
                     <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
-                      {billingSummary.plan ? (
+                      {productAdmin ? (
+                        <RevoryStatusBadge
+                          className="min-h-6 rounded-full border-[rgba(67,179,155,0.16)] bg-[rgba(67,179,155,0.1)] px-2.5 py-[0.28rem] text-[9px] tracking-[0.12em] text-[color:var(--accent-light)]"
+                          tone="accent"
+                        >
+                          Product admin
+                        </RevoryStatusBadge>
+                      ) : billingSummary.plan ? (
                         <RevoryStatusBadge
                           className="min-h-6 rounded-full border-[rgba(67,179,155,0.12)] bg-[rgba(67,179,155,0.08)] px-2.5 py-[0.28rem] text-[9px] tracking-[0.12em] text-[color:var(--accent-light)]"
                           tone={getPlanBadgeTone(billingSummary.planKey)}

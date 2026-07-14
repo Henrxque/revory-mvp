@@ -110,6 +110,15 @@ try {
       status: "ACTIVE",
     },
   });
+  const auditEntitlement = await prisma.workspaceEntitlement.create({
+    data: {
+      analysisRunsUsed: 0,
+      maxAnalysisRuns: 1,
+      offerKey: "QUOTE_RECOVERY_AUDIT",
+      status: "ACTIVE",
+      workspaceId: workspace.id,
+    },
+  });
 
   const customersPath = path.join(fixtureDir, "customers.csv");
   const estimatesPath = path.join(fixtureDir, "estimates.csv");
@@ -125,13 +134,13 @@ try {
   fs.writeFileSync(
     estimatesPath,
     [
-      "Quote ID,Customer ID,Quote Status,Quote Amount,Quote Date,Last Contact Date,Next Follow Up,Owner,Lead Source,Service Type,Next Step",
-      "EST-QA-1,CUS-QA-1,open,18000,2026-01-02,2026-01-10,2026-02-01,Alex,Referral,Roofing,Review evidence",
-      "EST-QA-2,CUS-QA-1,open,9500,2026-02-02,2026-02-04,2026-03-01,Alex,Referral,Roofing,Follow up",
-      "EST-QA-3,CUS-QA-1,open,12000,2026-02-03,2026-02-05,2026-03-02,Alex,Referral,Roofing,Follow up",
-      "EST-QA-4,CUS-QA-1,open,14000,2026-02-04,2026-02-06,2026-03-03,Alex,Referral,Roofing,Follow up",
-      "EST-QA-5,CUS-QA-1,open,16000,2026-02-05,2026-02-07,2026-03-04,Alex,Referral,Roofing,Follow up",
-      "EST-QA-6,CUS-QA-1,open,17000,2026-02-06,2026-02-08,2026-03-05,Alex,Referral,Roofing,Follow up",
+      "Quote ID,Customer ID,Quote Status,Quote Amount,Quote Date,Last Contact Date,Next Follow Up,Owner,Lead Source,Service Type,Next Step,Job ID",
+      "EST-QA-1,CUS-QA-1,open,18000,2026-01-02,2026-01-10,2026-02-01,Alex,Referral,Roofing,Review evidence,",
+      "EST-QA-2,CUS-QA-1,open,9500,2026-02-02,2026-02-04,2026-03-01,Alex,Referral,Roofing,Follow up,",
+      "EST-QA-3,CUS-QA-1,open,12000,2026-02-03,2026-02-05,2026-03-02,Alex,Referral,Roofing,Follow up,",
+      "EST-QA-4,CUS-QA-1,open,14000,2026-02-04,2026-02-06,2026-03-03,Alex,Referral,Roofing,Follow up,",
+      "EST-QA-5,CUS-QA-1,open,16000,2026-02-05,2026-02-07,2026-03-04,Alex,Referral,Roofing,Follow up,",
+      "EST-QA-6,CUS-QA-1,open,17000,2026-02-06,2026-02-08,2026-03-05,Alex,Referral,Roofing,Follow up,",
     ].join("\n"),
   );
   fs.writeFileSync(
@@ -222,21 +231,45 @@ try {
       `Mapping review did not become ready. BODY=${(await page.locator("body").innerText()).slice(-1_800)} SERVER=${serverLogs}`,
     );
   });
+  if (!(await page.getByText("Empty", { exact: true }).first().isVisible())) {
+    throw new Error("Traffic-light mapping review did not flag an empty mapped column for review.");
+  }
   const animationAfterReview = await profileButton.evaluate((element) => getComputedStyle(element).animationName);
   if (animationAfterReview !== "none") {
     throw new Error(`Profile action should stop pulsing after review opens; animation=${animationAfterReview}.`);
   }
   await page.getByLabel(/I reviewed each mapping/).check();
   await page.getByLabel(/complete current snapshot/).check();
-  await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();
+  await page.getByRole("button", { name: "Confirm mapping and use one-time Audit" }).click();
+  await page.getByRole("dialog", { name: "Use this import for your one-time Quote Recovery Audit?" }).waitFor();
+  const unusedAudit = await prisma.workspaceEntitlement.findUniqueOrThrow({
+    where: { id: auditEntitlement.id },
+  });
+  if (unusedAudit.analysisRunsUsed !== 0) {
+    throw new Error("Opening the one-time Audit confirmation must not consume the analysis run.");
+  }
+  await page.getByRole("button", { name: "Use Audit and create read" }).click();
   await page.getByText("Canonical import committed atomically.").waitFor({ timeout: 20_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "commit-failure.png"), fullPage: true });
     throw new Error(
       `Canonical commit did not complete. BODY=${(await page.locator("body").innerText()).slice(-2_200)} SERVER=${serverLogs}`,
     );
   });
+  const consumedAudit = await prisma.workspaceEntitlement.findUniqueOrThrow({
+    where: { id: auditEntitlement.id },
+  });
+  if (consumedAudit.analysisRunsUsed !== 1) {
+    throw new Error(`Successful one-time Audit commit must consume exactly one run; found ${consumedAudit.analysisRunsUsed}.`);
+  }
   await page.screenshot({ path: path.join(evidenceDir, "imports-desktop.png"), fullPage: true });
 
+  await prisma.workspaceEntitlement.create({
+    data: {
+      offerKey: "PRO",
+      status: "ACTIVE",
+      workspaceId: workspace.id,
+    },
+  });
   await page.goto("/app/imports", { waitUntil: "networkidle" });
   await page.getByLabel("Jobs file").setInputFiles(jobsPath);
   await page.getByLabel("Invoices file").setInputFiles(invoicesPath);
@@ -292,7 +325,44 @@ try {
   if (!(await page.getByText("$18,000").first().isVisible())) {
     throw new Error("Estimated opportunity value missing from dashboard.");
   }
+  const executiveMetric = page.locator('[data-testid="executive-metric"]').first();
+  const metricShadowBefore = await executiveMetric.evaluate((element) => getComputedStyle(element).boxShadow);
+  await executiveMetric.hover();
+  await page.waitForTimeout(260);
+  const metricShadowAfter = await executiveMetric.evaluate((element) => getComputedStyle(element).boxShadow);
+  if (metricShadowAfter === metricShadowBefore || metricShadowAfter === "none") {
+    throw new Error("Executive metric hover glow is missing.");
+  }
+  const priorityOpportunity = page.locator('[data-testid="priority-opportunity"]').first();
+  const opportunityShadowBefore = await priorityOpportunity.evaluate((element) => getComputedStyle(element).boxShadow);
+  await priorityOpportunity.hover();
+  await page.waitForTimeout(260);
+  const opportunityShadowAfter = await priorityOpportunity.evaluate((element) => getComputedStyle(element).boxShadow);
+  if (opportunityShadowAfter === opportunityShadowBefore || opportunityShadowAfter === "none") {
+    throw new Error("Priority opportunity hover glow is missing.");
+  }
+  const quoteRecoveryPdfResponse = await context.request.get("/app/dashboard/report.pdf");
+  const quoteRecoveryPdfBytes = await quoteRecoveryPdfResponse.body();
+  if (
+    quoteRecoveryPdfResponse.status() !== 200
+    || quoteRecoveryPdfResponse.headers()["content-type"] !== "application/pdf"
+    || quoteRecoveryPdfBytes.subarray(0, 4).toString() !== "%PDF"
+  ) {
+    throw new Error(
+      `Quote Recovery executive PDF failed. status=${quoteRecoveryPdfResponse.status()} content-type=${quoteRecoveryPdfResponse.headers()["content-type"]}`,
+    );
+  }
+  fs.writeFileSync(path.join(evidenceDir, "quote-recovery-executive-report.pdf"), quoteRecoveryPdfBytes);
   await page.screenshot({ path: path.join(evidenceDir, "dashboard-desktop.png"), fullPage: true });
+
+  await page.goto("/app/data-quality", { waitUntil: "networkidle" });
+  if (!(await page.getByText("See what is ready, incomplete or blocking.").isVisible())) {
+    throw new Error("Data Quality drill-down headline missing.");
+  }
+  if (!(await page.getByText("Records that need a link decision").isVisible())) {
+    throw new Error("Data Quality relation detail is missing.");
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "data-quality-detail-desktop.png"), fullPage: true });
 
   await page.goto("/app/revenue-leaks", { waitUntil: "networkidle" });
   const exportFindingsButton = page.getByRole("link", { name: "Export current findings" });
@@ -371,7 +441,7 @@ try {
   if (errors.length) throw new Error(`Browser console errors: ${errors.join(" | ")}`);
   await context.close();
   console.log(
-    "Sprint 4 plus Sprints 7-10 authenticated browser: login, assisted imports, Data Quality, dashboard, Tier 2 findings, guarded Growth decision, PDF, idempotent snapshots and mobile: PASS",
+    "Authenticated browser: one-time Audit confirmation, assisted imports, traffic-light Data Quality drill-down, dashboard hover states, Quote Recovery and Growth PDFs, Tier 2 findings, idempotent snapshots and mobile: PASS",
   );
 } finally {
   if (browser) await browser.close().catch(() => {});

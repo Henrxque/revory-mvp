@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { CanonicalImportPanel } from "@/components/imports/CanonicalImportPanel";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { getCanonicalImportAccessNotice } from "@/services/billing/canonical-import-access";
 
 export default async function ImportsPage() {
   const appContext = await getAppContext();
   if (!appContext) redirect(buildSignInRedirectPath("/app/imports"));
+  const accessNotice = await getCanonicalImportAccessNotice(appContext.workspace.id);
 
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
@@ -24,7 +26,7 @@ export default async function ImportsPage() {
           <p className="max-w-[42rem] text-xs leading-6 text-[color:var(--text-subtle)]">Each entity type and source system is treated as a complete current snapshot. A later import replaces the active scope while preserving omitted records as inactive history; use a new source-system label only for a genuinely different system.</p>
         </div>
       </section>
-      <CanonicalImportPanel />
+      <CanonicalImportPanel accessNotice={accessNotice} />
     </div>
   );
 }
