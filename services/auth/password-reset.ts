@@ -66,7 +66,7 @@ export async function resetPasswordWithToken(input: {
 }) {
   const normalizedToken = input.token.trim();
   const tokenHash = hashResetToken(normalizedToken);
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: `password-reset-token:${tokenHash}`,
     limit: 10,
     windowMs: RESET_TOKEN_ATTEMPT_WINDOW_MS,

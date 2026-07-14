@@ -1,5 +1,7 @@
 import { DM_Sans, Instrument_Serif, Sora } from "next/font/google";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { AuthJsProvider } from "@/components/auth/AuthJsProvider";
 
@@ -8,6 +10,7 @@ import "./globals.css";
 const dmSans = DM_Sans({ display: "swap", subsets: ["latin"], variable: "--font-dm-sans" });
 const instrumentSerif = Instrument_Serif({ display: "swap", subsets: ["latin"], variable: "--font-instrument-serif", weight: "400" });
 const sora = Sora({ display: "swap", subsets: ["latin"], variable: "--font-sora" });
+const vercelObservabilityEnabled = process.env.VERCEL === "1";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
@@ -23,5 +26,17 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html className={`${dmSans.variable} ${instrumentSerif.variable} ${sora.variable}`} lang="en"><body><AuthJsProvider>{children}</AuthJsProvider></body></html>;
+  return (
+    <html className={`${dmSans.variable} ${instrumentSerif.variable} ${sora.variable}`} lang="en">
+      <body>
+        <AuthJsProvider>{children}</AuthJsProvider>
+        {vercelObservabilityEnabled ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
+      </body>
+    </html>
+  );
 }

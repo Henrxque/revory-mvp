@@ -42,7 +42,7 @@ export async function syncDashboardRevenueLeaks(): Promise<SyncDashboardRevenueL
     };
   }
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: `leak-sync:${appContext.workspace.id}`,
     limit: 10,
     windowMs: 1000 * 60 * 10,

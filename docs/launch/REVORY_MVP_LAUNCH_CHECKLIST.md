@@ -14,18 +14,18 @@ Status: **BLOCKED**. This is the canonical pre-launch checklist for the hybrid R
 
 ## External and production gates
 
-Every item below remains **BLOCKED** until evidence is attached to the Sprint 6.1 report.
+An unchecked row remains blocked even when part of its infrastructure is already configured.
 
 - [ ] Stripe test-mode products/prices exist for the US$799 Quote Recovery Audit and US$399 Starter.
 - [ ] Test checkout, signed webhook fulfillment, duplicate-event handling and customer portal pass end to end.
-- [ ] Resend sender domain is verified and a synthetic transactional delivery passes.
-- [ ] Authentication callbacks and Google OAuth are verified on the final domain.
+- [ ] Resend sender domain is verified and the signed webhook is configured; a synthetic transactional delivery and received delivery event still need evidence.
+- [x] Authentication callbacks and Google OAuth passed a real round-trip on `https://revory.app` on 2026-07-13.
 - [ ] Production database migration is reviewed, backed up and applied through the approved deployment path.
-- [ ] Protected cron is configured with a rotated secret; digest and retention schedules produce observable runs.
+- [ ] Protected cron is deployed with a production secret and both schedules are visible in Vercel; one observed digest and retention run remain required.
 - [ ] Retention policy choices are approved and automated enforcement is verified in the deployment environment.
 - [ ] Backup and restore exercise succeeds with documented RPO/RTO decisions.
-- [ ] Error monitoring, uptime monitoring and alert ownership are active.
-- [ ] Production-oriented dependency, secret, authorization and tenant-isolation security scan is reviewed.
+- [ ] Web Analytics, Speed Insights and Vercel's default error rule are enabled; an external uptime check and named primary/backup alert owners remain required.
+- [ ] Durable throttling, security headers and a live WAF rule are active; independent DAST/pentest and final review of the five moderate dependency findings remain required.
 - [ ] Bounded AI provider smoke test passes using synthetic, redacted profile data only.
 - [ ] Privacy, Terms, refund/cancellation, tax and data-processing language receive final legal review.
 

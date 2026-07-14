@@ -1,9 +1,9 @@
 import "server-only";
 
-type RateLimitBucket = {
-  count: number;
-  resetAt: number;
-};
+import { createHash } from "node:crypto";
+import { Prisma } from "@prisma/client";
+
+import { prisma } from "@/db/prisma";
 
 type RateLimitInput = Readonly<{
   key: string;
@@ -11,53 +11,63 @@ type RateLimitInput = Readonly<{
   windowMs: number;
 }>;
 
-const buckets = new Map<string, RateLimitBucket>();
+const SERIALIZATION_RETRIES = 3;
 
-function cleanupExpiredBuckets(now: number) {
-  if (buckets.size < 500) {
-    return;
-  }
-
-  for (const [key, bucket] of buckets.entries()) {
-    if (bucket.resetAt <= now) {
-      buckets.delete(key);
-    }
-  }
+function durableKey(value: string) {
+  return createHash("sha256")
+    .update(`revory-rate-limit:${value.trim().toLowerCase()}`)
+    .digest("hex");
 }
 
-export function checkRateLimit({ key, limit, windowMs }: RateLimitInput) {
-  const now = Date.now();
-  const normalizedKey = key.trim().toLowerCase();
-  const bucket = buckets.get(normalizedKey);
+export async function checkRateLimit({ key, limit, windowMs }: RateLimitInput) {
+  const normalizedLimit = Math.max(1, Math.floor(limit));
+  const normalizedWindowMs = Math.max(1_000, Math.floor(windowMs));
+  const bucketKey = durableKey(key);
 
-  cleanupExpiredBuckets(now);
+  for (let attempt = 1; attempt <= SERIALIZATION_RETRIES; attempt += 1) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const now = new Date();
+        const current = await tx.authRateLimitBucket.findUnique({
+          where: { key: bucketKey },
+        });
+        const expired =
+          !current ||
+          now.valueOf() - current.windowStartedAt.valueOf() >= normalizedWindowMs;
+        const attemptCount = expired ? 1 : current.attemptCount + 1;
+        const windowStartedAt = expired ? now : current.windowStartedAt;
 
-  if (!bucket || bucket.resetAt <= now) {
-    buckets.set(normalizedKey, {
-      count: 1,
-      resetAt: now + windowMs,
-    });
+        await tx.authRateLimitBucket.upsert({
+          where: { key: bucketKey },
+          create: {
+            attemptCount,
+            key: bucketKey,
+            windowStartedAt,
+          },
+          update: {
+            attemptCount,
+            blockedUntil: null,
+            windowStartedAt,
+          },
+        });
 
-    return {
-      limited: false,
-      remaining: Math.max(0, limit - 1),
-      resetAt: now + windowMs,
-    };
+        return {
+          limited: attemptCount > normalizedLimit,
+          remaining: Math.max(0, normalizedLimit - attemptCount),
+          resetAt: windowStartedAt.valueOf() + normalizedWindowMs,
+        };
+      }, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      });
+    } catch (error) {
+      const retryable =
+        error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+
+      if (!retryable || attempt === SERIALIZATION_RETRIES) {
+        throw error;
+      }
+    }
   }
 
-  if (bucket.count >= limit) {
-    return {
-      limited: true,
-      remaining: 0,
-      resetAt: bucket.resetAt,
-    };
-  }
-
-  bucket.count += 1;
-
-  return {
-    limited: false,
-    remaining: Math.max(0, limit - bucket.count),
-    resetAt: bucket.resetAt,
-  };
+  throw new Error("Rate limit state could not be persisted.");
 }

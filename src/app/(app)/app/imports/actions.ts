@@ -276,7 +276,7 @@ export async function triageCsvFileAction(
       };
     }
 
-    const rateLimit = checkRateLimit({
+    const rateLimit = await checkRateLimit({
       key: `csv-triage:${appContext.workspace.id}`,
       limit: 20,
       windowMs: CSV_TRIAGE_WINDOW_MS,

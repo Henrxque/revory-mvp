@@ -12,11 +12,11 @@ export async function refreshRevenueRealizationFindings() {
   const context = await getAppContext();
   if (!context) return;
   if (!(await getCapabilityAccess(context.workspace.id, "REVENUE_REALIZATION")).allowed) return;
-  if (checkRateLimit({
+  if ((await checkRateLimit({
     key: `revenue-realization-sync:${context.workspace.id}`,
     limit: 8,
     windowMs: 10 * 60 * 1000,
-  }).limited) return;
+  })).limited) return;
   await syncRevenueRealizationFindingsForWorkspace(context.workspace.id);
   await captureGrowthIntelligenceSnapshot(context.workspace.id);
   revalidatePath("/app/revenue-realization");

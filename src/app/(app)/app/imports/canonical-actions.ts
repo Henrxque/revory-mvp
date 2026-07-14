@@ -94,11 +94,11 @@ export async function reviewCanonicalFiles(
   if (!context) return { files: [], message: "Sign in again before reviewing data.", status: "error" };
   if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { files: [], message: "An active REVORY entitlement is required.", status: "error" };
   if (
-    checkRateLimit({
+    (await checkRateLimit({
       key: `canonical-review:${context.workspace.id}`,
       limit: 12,
       windowMs: 10 * 60 * 1000,
-    }).limited
+    })).limited
   ) {
     return { files: [], message: "Too many review attempts. Wait a few minutes and retry.", status: "error" };
   }
@@ -171,11 +171,11 @@ export async function importCanonicalFiles(
     return { status: "error", message: "Confirm that each selected entity/source file is a complete replacement snapshot." };
   }
   if (
-    checkRateLimit({
+    (await checkRateLimit({
       key: `canonical-import:${context.workspace.id}`,
       limit: 8,
       windowMs: 10 * 60 * 1000,
-    }).limited
+    })).limited
   ) {
     return { status: "error", message: "Too many import attempts. Wait a few minutes and retry." };
   }

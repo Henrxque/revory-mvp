@@ -40,7 +40,7 @@ export async function createEmailPasswordAccount(input: {
     };
   }
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: `signup:${email}`,
     limit: AUTH_EMAIL_ATTEMPT_LIMIT,
     windowMs: AUTH_EMAIL_WINDOW_MS,
@@ -124,7 +124,7 @@ export async function createEmailPasswordAccount(input: {
 
 export async function requestPasswordResetAction(input: { email: string }) {
   const email = normalizeEmail(input.email);
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: `password-reset:${email || "unknown"}`,
     limit: AUTH_EMAIL_ATTEMPT_LIMIT,
     windowMs: AUTH_EMAIL_WINDOW_MS,

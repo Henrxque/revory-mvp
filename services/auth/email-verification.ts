@@ -69,7 +69,7 @@ export async function requestEmailVerification(input: {
 export async function verifyEmailWithToken(token: string) {
   const normalizedToken = token.trim();
   const tokenHash = hashVerificationToken(normalizedToken);
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: `email-verify:${tokenHash}`,
     limit: 10,
     windowMs: EMAIL_VERIFICATION_TOKEN_ATTEMPT_WINDOW_MS,

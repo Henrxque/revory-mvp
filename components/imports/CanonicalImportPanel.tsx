@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { type FormEvent, useRef, useState, useTransition } from "react";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
 import { canonicalFields } from "@/services/canonical-intake/definitions";
@@ -44,17 +44,38 @@ export function CanonicalImportPanel() {
   );
   const [pending, startTransition] = useTransition();
 
-  function submitReview(submittedFormData: FormData) {
+  function submitReview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const submittedFormData = new FormData(event.currentTarget);
+    const reviewFormData = new FormData();
+    reviewFormData.set("sourceSystem", sourceSystem);
+
     for (const [entityType] of activeDatasets) {
       const submitted = submittedFormData.get(`file_${entityType}`);
       if (submitted && typeof submitted !== "string" && submitted.size > 0) {
         selectedFiles.current[entityType] = submitted;
+        reviewFormData.set(`file_${entityType}`, submitted, submitted.name);
       }
     }
+
     startTransition(async () => {
       setImportState(initialCanonicalImportActionState);
-      const response = await fetch("/api/canonical-intake/review", { body: submittedFormData, method: "POST" });
-      setReview(await response.json() as CanonicalReviewActionState);
+      try {
+        const response = await fetch("/api/canonical-intake/review", {
+          body: reviewFormData,
+          method: "POST",
+        });
+        setMappingConfirmed(false);
+        setSnapshotConfirmed(false);
+        setReview(await response.json() as CanonicalReviewActionState);
+      } catch {
+        setReview({
+          files: [],
+          message: "The mapping review could not be reached. Check the connection and retry.",
+          status: "error",
+        });
+      }
     });
   }
 
@@ -67,18 +88,25 @@ export function CanonicalImportPanel() {
       return;
     }
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("sourceSystem", sourceSystem);
-      formData.set("mappingConfirmed", "yes");
-      formData.set("snapshotMode", "FULL_REPLACEMENT");
-      for (const [entityType, file] of Object.entries(selectedFiles.current)) {
-        if (file) formData.set(`file_${entityType}`, file);
+      try {
+        const formData = new FormData();
+        formData.set("sourceSystem", sourceSystem);
+        formData.set("mappingConfirmed", "yes");
+        formData.set("snapshotMode", "FULL_REPLACEMENT");
+        for (const [entityType, file] of Object.entries(selectedFiles.current)) {
+          if (file) formData.set(`file_${entityType}`, file);
+        }
+        for (const file of review?.files ?? []) {
+          formData.set(`mapping_${file.entityType}`, JSON.stringify(file.mapping));
+        }
+        const response = await fetch("/api/canonical-intake/import", { body: formData, method: "POST" });
+        setImportState(await response.json() as CanonicalImportActionState);
+      } catch {
+        setImportState({
+          message: "The import could not be reached. No snapshot was committed; check the connection and retry.",
+          status: "error",
+        });
       }
-      for (const file of review?.files ?? []) {
-        formData.set(`mapping_${file.entityType}`, JSON.stringify(file.mapping));
-      }
-      const response = await fetch("/api/canonical-intake/import", { body: formData, method: "POST" });
-      setImportState(await response.json() as CanonicalImportActionState);
     });
   }
 
@@ -128,7 +156,7 @@ export function CanonicalImportPanel() {
         ))}
       </div>
 
-      <form action={submitReview} className="mt-5 space-y-5" id="canonical-intake-form">
+      <form className="mt-5 space-y-5" id="canonical-intake-form" onSubmit={submitReview}>
         <label className="block max-w-md text-sm font-semibold">
           Source system
           <input
@@ -138,6 +166,9 @@ export function CanonicalImportPanel() {
             onChange={(event) => {
               setSourceSystem(event.target.value);
               setReview(null);
+              setMappingConfirmed(false);
+              setSnapshotConfirmed(false);
+              setImportState(initialCanonicalImportActionState);
             }}
             value={sourceSystem}
           />
