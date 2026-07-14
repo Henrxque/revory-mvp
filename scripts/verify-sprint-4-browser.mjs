@@ -17,7 +17,8 @@ const runId = `s4-${Date.now()}`;
 const authSubject = `qa|${runId}`;
 const email = `${runId}@example.invalid`;
 const password = "Sprint4-QA-Password";
-let baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3001";
+const qaPort = 3100 + Math.floor(Math.random() * 400);
+let baseURL = process.env.REVORY_QA_BASE_URL ?? `http://localhost:${qaPort}`;
 const evidenceDir = path.join(os.tmpdir(), "revory-sprint-4");
 const fixtureDir = path.join(evidenceDir, "fixtures");
 const qaDistDir = path.join(process.cwd(), ".next-qa");
@@ -54,7 +55,7 @@ async function ensureLocalQaServer() {
     throw new Error(`Sprint 4 QA refuses a non-local database host: ${databaseHost}`);
   }
   const nextBin = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
-  serverProcess = spawn(process.execPath, [nextBin, "dev", "--port", "3001"], {
+  serverProcess = spawn(process.execPath, [nextBin, "dev", "--port", String(qaPort)], {
     cwd: process.cwd(),
     env: {
       ...process.env,
@@ -208,14 +209,23 @@ try {
       throw new Error(`Selected file confirmation missing for ${selectedFile}.`);
     }
   }
+  const profileButton = page.getByRole("button", { name: "Profile files and review mapping" });
+  const attentionAnimation = await profileButton.evaluate((element) => getComputedStyle(element).animationName);
+  if (attentionAnimation !== "rev-button-attention-pulse") {
+    throw new Error(`Profile action should pulse after file selection; animation=${attentionAnimation}.`);
+  }
   await page.waitForTimeout(250);
-  await page.getByRole("button", { name: "Profile files and review mapping" }).click();
+  await profileButton.click();
   await page.getByText("Review every suggested mapping").waitFor({ timeout: 15_000 }).catch(async () => {
     await page.screenshot({ path: path.join(evidenceDir, "mapping-failure.png"), fullPage: true });
     throw new Error(
       `Mapping review did not become ready. BODY=${(await page.locator("body").innerText()).slice(-1_800)} SERVER=${serverLogs}`,
     );
   });
+  const animationAfterReview = await profileButton.evaluate((element) => getComputedStyle(element).animationName);
+  if (animationAfterReview !== "none") {
+    throw new Error(`Profile action should stop pulsing after review opens; animation=${animationAfterReview}.`);
+  }
   await page.getByLabel(/I reviewed each mapping/).check();
   await page.getByLabel(/complete current snapshot/).check();
   await page.getByRole("button", { name: "Confirm mapping and import atomically" }).click();

@@ -591,6 +591,33 @@ body::before {
   transform: translateY(-1px);
 }
 
+@keyframes rev-button-attention-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(67, 179, 155, 0.26),
+      var(--shadow-accent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  65% {
+    box-shadow:
+      0 0 0 8px rgba(67, 179, 155, 0),
+      0 20px 42px rgba(67, 179, 155, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+.rev-button-attention {
+  animation: rev-button-attention-pulse 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rev-button-attention {
+    animation: none;
+  }
+}
+
 .rev-button-secondary {
   border: 1px solid var(--border);
   background:

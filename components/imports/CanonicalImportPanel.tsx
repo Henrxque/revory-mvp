@@ -342,7 +342,9 @@ export function CanonicalImportPanel() {
 
       <div className="flex flex-wrap items-center gap-3">
         <button
-          className="rev-button-primary"
+          className={`rev-button-primary ${
+            selectedFileCount > 0 && !pending && !review ? "rev-button-attention" : ""
+          }`}
           disabled={pending || selectedFileCount === 0}
           type="submit"
         >
