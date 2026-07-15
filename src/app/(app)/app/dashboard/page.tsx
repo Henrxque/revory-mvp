@@ -174,17 +174,15 @@ const qualityStyles: Record<QualityTone, string> = {
 };
 
 function QualityRow({ href, label, tone, value }: { href: string; label: string; tone: QualityTone; value: string }) {
+  const accessibleStatus = tone === "success" ? "ready" : tone === "warning" ? "needs attention" : "blocked";
+
   return (
     <Link
+      aria-label={`${label}: ${value}. Status: ${accessibleStatus}.`}
       className={`rev-card-hover flex items-center justify-between rounded-xl border px-3 py-2 ${qualityStyles[tone]}`}
       href={href}
     >
-      <span className="flex items-center gap-2">
-        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black">
-          {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
-        </span>
-        <span className="text-[color:var(--foreground)]">{label}</span>
-      </span>
+      <span className="text-[color:var(--foreground)]">{label}</span>
       <strong>{value}</strong>
     </Link>
   );
