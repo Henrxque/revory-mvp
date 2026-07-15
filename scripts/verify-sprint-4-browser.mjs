@@ -359,6 +359,9 @@ try {
   if (!(await page.getByText("CA$18,000").first().isVisible())) {
     throw new Error("Estimated opportunity value missing from dashboard.");
   }
+  if (!(await page.locator('[data-testid="executive-metric"]').first().getByText("CA$86,500", { exact: true }).isVisible())) {
+    throw new Error("Executive total must count each estimate exposure once.");
+  }
   const dashboardHeadingBox = await page.getByRole("heading", { name: "See what may still be recoverable - and why." }).boundingBox();
   const executiveActionsBox = await page.locator('[data-testid="executive-actions"]').boundingBox();
   if (
@@ -393,7 +396,7 @@ try {
   }
   for (const [metricName, expectedFilter, filterLabel] of [
     ["Opportunities to review", "ACTIVE", "To review"],
-    ["Opportunities with value", "FINANCIAL", "With value"],
+    ["Estimates with value", "FINANCIAL", "With value"],
     ["Process gaps", "OPERATIONAL", "Process gaps"],
   ]) {
     await page.goto("/app/dashboard", { waitUntil: "networkidle" });
@@ -454,7 +457,13 @@ try {
   await page.getByText("Resolved", { exact: true }).waitFor({ timeout: 10_000 });
 
   const exportResponse = await context.request.get("/app/quote-recovery/export");
-  if (exportResponse.status() !== 200 || !(await exportResponse.text()).includes("EST-QA-1")) {
+  const exportText = await exportResponse.text();
+  if (
+    exportResponse.status() !== 200
+    || !exportText.includes("EST-QA-1")
+    || !exportText.includes("counted_in_estimated_total")
+    || !exportText.includes("estimated_total_contribution_cents")
+  ) {
     throw new Error("Workspace-scoped CSV export failed.");
   }
 

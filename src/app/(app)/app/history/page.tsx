@@ -37,7 +37,7 @@ export default async function HistoryPage() {
   ]);
   const eligible = history.current.segmentation.segments.filter((segment) => segment.eligibleForRanking);
   const suppressed = history.current.segmentation.segments.filter((segment) => !segment.eligibleForRanking);
-  const maxQuote = Math.max(1, ...history.snapshots.map((snapshot) => snapshot.quoteEstimatedValueCents));
+  const maxQuote = Math.max(1, ...history.snapshots.map((snapshot) => snapshot.quoteEstimatedValueCents ?? 0));
   const maxGap = Math.max(1, ...history.snapshots.map((snapshot) => snapshot.calculatedBillingGapCents ?? 0));
 
   return (
@@ -81,7 +81,7 @@ export default async function HistoryPage() {
               {history.snapshots.slice(-24).map((snapshot) => (
                 <div className="min-w-[92px] flex-1" key={snapshot.id}>
                   <div className="flex h-36 items-end justify-center gap-1 rounded-2xl border border-[color:var(--border)] bg-[rgba(20,21,22,.55)] px-3 py-3">
-                    <div aria-label={`Estimated quote opportunity ${money(snapshot.quoteEstimatedValueCents)}`} className="w-4 rounded-t bg-[rgba(67,179,155,.38)]" role="img" style={{ height: `${Math.max(4, snapshot.quoteEstimatedValueCents / maxQuote * 100)}%` }} />
+                    <div aria-label={`Estimated quote opportunity ${money(snapshot.quoteEstimatedValueCents)}`} className="w-4 rounded-t bg-[rgba(67,179,155,.38)]" role="img" style={{ height: `${snapshot.quoteEstimatedValueCents === null ? 0 : Math.max(4, snapshot.quoteEstimatedValueCents / maxQuote * 100)}%` }} />
                     <div aria-label={`Calculated billing gap ${money(snapshot.calculatedBillingGapCents)}`} className="w-4 rounded-t bg-[color:var(--accent)]" role="img" style={{ height: `${Math.max(snapshot.calculatedBillingGapCents ? 4 : 0, (snapshot.calculatedBillingGapCents ?? 0) / maxGap * 100)}%` }} />
                   </div>
                   <p className="mt-2 text-center text-[10px] text-[color:var(--text-subtle)]">{snapshot.createdAt.toLocaleDateString("en-US", { day: "numeric", month: "short" })}</p>

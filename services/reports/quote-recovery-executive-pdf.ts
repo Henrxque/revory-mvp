@@ -49,7 +49,7 @@ function wrap(text: string, font: PDFFont, size: number, maxWidth: number) {
 }
 
 function money(cents: number | null, currency: string) {
-  if (cents === null) return "Multiple currencies";
+  if (cents === null) return "Suppressed";
   return new Intl.NumberFormat("en-US", {
     currency,
     maximumFractionDigits: 0,
@@ -90,9 +90,14 @@ export async function generateQuoteRecoveryExecutivePdf(input: PdfInput) {
       cover.drawText(line, { color: muted, font: regular, size: 8, x: x + 15, y: y + 25 - index * 11 });
     }
   };
-  drawMetric(margin, 310, "Estimated recoverable", money(input.read.summary.estimatedValueCents, input.read.summary.reportingCurrency), input.read.summary.hasMixedCurrencies ? "Currencies remain separate; no conversion was applied." : "Modeled opportunity, not guaranteed revenue.");
+  const estimatedValueNote = input.read.summary.hasConflictingEstimateValues
+    ? "Conflicting values for the same estimate require review."
+    : input.read.summary.hasMixedCurrencies
+      ? "Currencies remain separate; no conversion was applied."
+      : "Each estimate is counted once; modeled opportunity only.";
+  drawMetric(margin, 310, "Estimated recoverable", money(input.read.summary.estimatedValueCents, input.read.summary.reportingCurrency), estimatedValueNote);
   drawMetric(margin + panelWidth + 12, 310, "Opportunities to review", String(input.read.summary.activeCount), "Open and acknowledged records.");
-  drawMetric(margin, 194, "Opportunities with value", String(input.read.summary.financialCount), "An estimate amount is available.");
+  drawMetric(margin, 194, "Estimates with value", String(input.read.summary.financialCount), "Unique estimates with an imported amount.");
   drawMetric(margin + panelWidth + 12, 194, "Process gaps", String(input.read.summary.operationalCount), "Never counted as confirmed financial loss.");
   cover.drawLine({ color: border, end: { x: pageWidth - margin, y: 118 }, start: { x: margin, y: 118 }, thickness: 1 });
   for (const [index, line] of wrap("REVORY prioritizes review candidates from imported evidence. It does not guarantee recovery or certify accounting loss.", regular, 9, pageWidth - margin * 2).entries()) {

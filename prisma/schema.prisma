@@ -346,7 +346,7 @@ model QuoteRecoveryAnalysisRun {
   status              AnalysisRunStatus @default(READY)
   findingSnapshotJson Json
   activeCount         Int               @default(0)
-  estimatedValueCents Int               @default(0)
+  estimatedValueCents Int?
   dataQualityJson     Json
   completedAt         DateTime?
   createdAt           DateTime          @default(now())
@@ -496,7 +496,7 @@ model RevenueIntelligenceSnapshot {
   quoteFindingSnapshotJson       Json
   realizationFindingSnapshotJson Json
   segmentSnapshotJson            Json
-  quoteEstimatedValueCents       Int       @default(0)
+  quoteEstimatedValueCents       Int?
   calculatedBillingGapCents      Int?
   approvedChangeReviewCents      Int?
   marginAtRiskCents              Int?

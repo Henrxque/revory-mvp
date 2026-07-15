@@ -18,6 +18,8 @@ Resultado esperado em um workspace sem outro dado ativo:
 - zero links unmatched ou conflicting;
 - as seis regras de Quote Recovery elegiveis;
 - 11 findings ativos atribuidos aos estimates do kit;
+- 4 estimates com valor no resumo financeiro;
+- `Estimated recoverable` de **US$74,200**, contando cada estimate uma unica vez;
 - valores financeiros exibidos como oportunidades estimadas, nunca perda confirmada.
 
 Findings esperados por estimate:
@@ -34,14 +36,14 @@ Findings esperados por estimate:
 O total do dashboard pode ser maior caso o workspace ja possua outro
 `sourceSystem` ativo. Nesse caso, valide os IDs `EST-QA-*` individualmente.
 
-### Gap conhecido que este kit evidencia
+### Regressao financeira coberta por este kit
 
-O read model atual soma `valueCents` por finding. Como um mesmo estimate pode
-gerar mais de um finding financeiro, o card `Estimated recoverable` pode mostrar
-US$154,900 para este kit, embora a exposicao unica dos quatro estimates com valor
-seja US$74,200. Isso e dupla contagem de uma mesma base e nao deve ser interpretado
-como oportunidade agregada defensavel. Ate o resumo ser deduplicado por estimate,
-use os 11 findings individuais como criterio do teste.
+Os 11 findings repetem a base financeira quando mais de uma regra aponta para o
+mesmo estimate. A soma ingenua por finding seria US$154,900 e esta proibida. O
+resumo, os snapshots e os exports devem deduplicar por `estimateExternalId` e
+mostrar US$74,200. Se a mesma estimativa trouxer valores conflitantes ou se houver
+moedas incompativeis, o agregado deve ser suprimido para revisao em vez de escolher
+um valor ou fazer conversao implicita.
 
 ## Cenario 2 — rejeicao atomica
 

@@ -1,4 +1,5 @@
 import type { CanonicalRecordContract, ValueBasis } from "./contracts";
+import { summarizeQuoteRecoveryFinancialExposure } from "./quote-recovery-financial-summary";
 
 export const GROWTH_MINIMUM_RECORDS = 5;
 export const GROWTH_MINIMUM_FINDING_RECORDS = 2;
@@ -26,7 +27,7 @@ export type GuardedSegment = {
   operationalFindingCount: number;
   currency: string | null;
   eligibleForRanking: boolean;
-  suppressionReason: "THIN_RECORD_SAMPLE" | "THIN_FINDING_SAMPLE" | "MIXED_CURRENCY" | null;
+  suppressionReason: "THIN_RECORD_SAMPLE" | "THIN_FINDING_SAMPLE" | "MIXED_CURRENCY" | "VALUE_CONFLICT" | null;
 };
 
 export type GuardedSegmentation = {
@@ -93,18 +94,24 @@ function buildLayerSegments(input: {
           : finding.valueBasis === "CALCULATED" && finding.additive && finding.valueCents !== null,
       );
       const currencies = [...new Set(financial.map((finding) => finding.currency))];
-      const financialValueCents = input.layer === "QUOTE_RECOVERY"
-        ? [...financial.reduce((byRecord, finding) => {
-            const current = byRecord.get(finding.recordExternalId) ?? 0;
-            byRecord.set(finding.recordExternalId, Math.max(current, finding.valueCents ?? 0));
-            return byRecord;
-          }, new Map<string, number>()).values()].reduce((total, value) => total + value, 0)
+      const quoteFinancialSummary = input.layer === "QUOTE_RECOVERY"
+        ? summarizeQuoteRecoveryFinancialExposure(financial.map((finding) => ({
+            currency: finding.currency,
+            estimateExternalId: finding.recordExternalId,
+            valueBasis: finding.valueBasis,
+            valueCents: finding.valueCents,
+          })))
+        : null;
+      const financialValueCents = quoteFinancialSummary
+        ? quoteFinancialSummary.estimatedValueCents
         : financial.reduce((total, finding) => total + (finding.valueCents ?? 0), 0);
       const suppressionReason = records.length < input.minimumRecords
         ? "THIN_RECORD_SAMPLE"
         : findingRecordCount < input.minimumFindingRecords
           ? "THIN_FINDING_SAMPLE"
-          : currencies.length > 1
+          : quoteFinancialSummary?.hasConflictingEstimateValues
+            ? "VALUE_CONFLICT"
+            : currencies.length > 1
             ? "MIXED_CURRENCY"
             : null;
       segments.push({
@@ -112,7 +119,9 @@ function buildLayerSegments(input: {
         dimension,
         eligibleForRanking: suppressionReason === null,
         financialValueCents: currencies.length <= 1 ? financialValueCents : null,
-        financialValuePerFindingRecordCents: currencies.length <= 1 && findingRecordCount > 0 ? Math.round(financialValueCents / findingRecordCount) : null,
+        financialValuePerFindingRecordCents: currencies.length <= 1 && findingRecordCount > 0 && financialValueCents !== null
+          ? Math.round(financialValueCents / findingRecordCount)
+          : null,
         findingRecordCount,
         findingRateBps: records.length ? Math.round(findingRecordCount / records.length * 10_000) : 0,
         label,

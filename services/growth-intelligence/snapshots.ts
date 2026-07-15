@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { summarizeQuoteRecoveryFinancialExposure } from "@/domain/revory/quote-recovery-financial-summary";
 import {
   buildGuardedSegmentation,
   buildWeeklyManagementDecision,
@@ -60,12 +61,8 @@ export async function buildCurrentGrowthIntelligence(workspaceId: string) {
     type: finding.findingType,
     valueCents: finding.valueCents,
   })));
-  const quoteEstimatedValueCents = [...quoteFindings.reduce((byEstimate, finding) => {
-    if (finding.valueBasis !== "ESTIMATED") return byEstimate;
-    const current = byEstimate.get(finding.estimateExternalId) ?? 0;
-    byEstimate.set(finding.estimateExternalId, Math.max(current, finding.valueCents ?? 0));
-    return byEstimate;
-  }, new Map<string, number>()).values()].reduce((total, value) => total + value, 0);
+  const quoteFinancialSummary = summarizeQuoteRecoveryFinancialExposure(quoteFindings);
+  const quoteEstimatedValueCents = quoteFinancialSummary.estimatedValueCents;
   const stateFingerprint = stableFingerprint({
     importSessionId: latestImport?.id ?? null,
     quote: quoteFindings.map((finding) => [finding.fingerprint, finding.severity, finding.valueCents, finding.status]),

@@ -36,14 +36,14 @@ const records = [
   ...Array.from({ length: 5 }, (_, index) => record("JOB", `J-${index + 1}`, { owner: "Alex", serviceType: "Roofing", source: "Referral" })),
 ];
 const segmentation = buildGuardedSegmentation({
-  quoteFindings: [finding("E-1", 1_000_000, "ESTIMATED"), finding("E-1", 1_500_000, "ESTIMATED"), finding("E-2", 2_000_000, "ESTIMATED")],
+  quoteFindings: [finding("E-1", 1_000_000, "ESTIMATED"), finding("E-1", 1_000_000, "ESTIMATED"), finding("E-2", 2_000_000, "ESTIMATED")],
   realizationFindings: [finding("J-1", 500_000, "CALCULATED"), finding("J-2", 700_000, "CALCULATED")],
   records,
 });
 const eligible = segmentation.segments.filter((segment) => segment.eligibleForRanking);
 assert.ok(eligible.some((segment) => segment.layer === "QUOTE_RECOVERY" && segment.dimension === "SOURCE" && segment.label === "Referral"));
 assert.ok(eligible.some((segment) => segment.layer === "REVENUE_REALIZATION" && segment.dimension === "SERVICE_TYPE" && segment.label === "Roofing"));
-assert.equal(eligible.find((segment) => segment.layer === "QUOTE_RECOVERY" && segment.dimension === "SOURCE")?.financialValueCents, 3_500_000, "multiple rules on one estimate must not multiply its value");
+assert.equal(eligible.find((segment) => segment.layer === "QUOTE_RECOVERY" && segment.dimension === "SOURCE")?.financialValueCents, 3_000_000, "multiple rules on one estimate must not multiply its value");
 assert.equal(eligible.find((segment) => segment.layer === "REVENUE_REALIZATION" && segment.dimension === "SOURCE")?.financialValueCents, 1_200_000);
 const decision = buildWeeklyManagementDecision(segmentation);
 assert.equal(decision.available, true);
@@ -70,6 +70,13 @@ const mixedCurrency = buildGuardedSegmentation({
   records,
 });
 assert.ok(mixedCurrency.segments.filter((segment) => segment.layer === "QUOTE_RECOVERY").every((segment) => segment.suppressionReason === "MIXED_CURRENCY" && segment.financialValueCents === null));
+
+const conflictingEstimateValue = buildGuardedSegmentation({
+  quoteFindings: [finding("E-1", 1_000_000, "ESTIMATED"), finding("E-1", 1_500_000, "ESTIMATED"), finding("E-2", 2_000_000, "ESTIMATED")],
+  realizationFindings: [],
+  records,
+});
+assert.ok(conflictingEstimateValue.segments.filter((segment) => segment.layer === "QUOTE_RECOVERY").every((segment) => segment.suppressionReason === "VALUE_CONFLICT" && segment.financialValueCents === null));
 
 assert.throws(
   () => buildGuardedSegmentation({ quoteFindings: [], realizationFindings: [], records: [...records, record("JOB", "OTHER", {}, "workspace-b")] }),

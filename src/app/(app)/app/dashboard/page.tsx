@@ -48,12 +48,18 @@ export default async function DashboardPage() {
         <div className="mt-7 grid gap-3 md:grid-cols-4">
           <Metric
             label="Estimated recoverable"
-            note={read.summary.hasMixedCurrencies ? "Shown separately because more than one currency is present" : "Modeled opportunity, not guaranteed revenue"}
-            value={read.summary.estimatedValueCents === null ? "Multiple currencies" : formatWorkspaceMoney(read.summary.estimatedValueCents, read.summary.reportingCurrency)}
+            note={read.summary.hasConflictingEstimateValues
+              ? "Suppressed until conflicting values for the same estimate are reviewed"
+              : read.summary.hasMixedCurrencies
+                ? "Shown separately because more than one currency is present"
+                : "Each estimate is counted once; modeled opportunity, not guaranteed revenue"}
+            value={read.summary.estimatedValueCents === null
+              ? read.summary.hasConflictingEstimateValues ? "Review required" : "Multiple currencies"
+              : formatWorkspaceMoney(read.summary.estimatedValueCents, read.summary.reportingCurrency)}
             href="/app/revenue-leaks?filter=FINANCIAL"
           />
           <Metric href="/app/revenue-leaks?filter=ACTIVE" label="Opportunities to review" note="Open and acknowledged records" value={String(read.summary.activeCount)} />
-          <Metric href="/app/revenue-leaks?filter=FINANCIAL" label="Opportunities with value" note="Estimate amount is available" value={String(read.summary.financialCount)} />
+          <Metric href="/app/revenue-leaks?filter=FINANCIAL" label="Estimates with value" note="Unique estimates with an imported amount" value={String(read.summary.financialCount)} />
           <Metric href="/app/revenue-leaks?filter=OPERATIONAL" label="Process gaps" note="Never counted as financial loss" value={String(read.summary.operationalCount)} />
         </div>
       </section>

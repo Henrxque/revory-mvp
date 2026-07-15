@@ -36,9 +36,10 @@ REVORY does not operate the customer's business. It sits above exports from the 
 
 This repository still contains MedSpa-era schema, import services, engine rules, fixtures, tests and isolated compatibility UI. Those capabilities are migration substrate, not the active public or authenticated product.
 
-As of the local implementation on 2026-07-13:
+As of the local implementation on 2026-07-15:
 
 - canonical contractor records, secure intake and deterministic Quote Recovery rules are implemented locally;
+- Quote Recovery financial summaries count imported exposure once per estimate across the dashboard, immutable analysis snapshots, CSV annotations, executive PDFs and Growth summaries; conflicting values for one estimate or incompatible currencies suppress the aggregate instead of selecting or multiplying a value;
 - the canonical assisted importer, deterministic Data Quality, explicit mapping confirmation and atomic workspace-scoped persistence are implemented and locally verified;
 - the contractor-native dashboard, opportunity detail, dispositions and exports passed the isolated authenticated desktop/mobile browser gate;
 - the public landing passed the Sprint 4.1 contractor-copy, forbidden-term and desktop/mobile browser gates;

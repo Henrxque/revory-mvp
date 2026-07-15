@@ -2,6 +2,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
+import { summarizeQuoteRecoveryFinancialExposure } from "@/domain/revory/quote-recovery-financial-summary";
 import { isWorkspaceProductAdmin } from "@/services/app/product-admin";
 import { getQuoteRecoveryRead } from "@/services/quote-recovery/read-model";
 
@@ -62,13 +63,10 @@ export async function createQuoteRecoveryAnalysisRun(
     ? latest?.quoteRecoveryDataQualitySnapshotJson as Prisma.JsonObject
     : currentRead?.dataQuality ?? {};
   const activeCount = findings.length;
-  const estimatedValueCents = findings.reduce<number>((sum, finding) => {
-    if (!finding || typeof finding !== "object" || Array.isArray(finding)) return sum;
-    const candidate = finding as { valueBasis?: unknown; valueCents?: unknown };
-    return candidate.valueBasis === "ESTIMATED" && typeof candidate.valueCents === "number"
-      ? sum + candidate.valueCents
-      : sum;
-  }, 0);
+  const financialSummary = summarizeQuoteRecoveryFinancialExposure(
+    findings.filter((finding): finding is Record<string, unknown> => Boolean(finding && typeof finding === "object" && !Array.isArray(finding))),
+  );
+  const estimatedValueCents = financialSummary.estimatedValueCents;
   const rank = { PRO: 4, GROWTH: 3, STARTER: 2, QUOTE_RECOVERY_AUDIT: 1 } as const;
   const entitlement = entitlements.sort((left, right) => rank[right.offerKey] - rank[left.offerKey])[0] ?? null;
   const ownsReservation = reservedCapacity === undefined;

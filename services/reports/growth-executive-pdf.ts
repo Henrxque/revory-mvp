@@ -9,7 +9,7 @@ type SnapshotRow = {
   calculatedBillingGapCents: number | null;
   createdAt: Date;
   marginAtRiskCents: number | null;
-  quoteEstimatedValueCents: number;
+  quoteEstimatedValueCents: number | null;
 };
 
 type PdfInput = {
@@ -103,7 +103,7 @@ export async function generateGrowthExecutivePdf(input: PdfInput) {
   const latest = input.snapshots.at(-1);
   ensure(110);
   const panelWidth = (pageWidth - margin * 2 - 12) / 2;
-  panel("Estimated quote opportunity", money(latest?.quoteEstimatedValueCents ?? 0), "Modeled opportunity, not guaranteed revenue.", margin, panelWidth);
+  panel("Estimated quote opportunity", money(latest?.quoteEstimatedValueCents ?? null), "Each estimate is counted once; incompatible evidence is suppressed.", margin, panelWidth);
   panel("Calculated billing gap", money(latest?.calculatedBillingGapCents ?? null), "Deterministic additive reconciliation only.", margin + panelWidth + 12, panelWidth);
   y -= 112;
 
