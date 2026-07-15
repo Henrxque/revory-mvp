@@ -146,7 +146,7 @@ function Metric({ id, label, tone, value }: { id?: string; label: string; tone: 
   return (
     <div className={`rev-card-hover rounded-[20px] border p-4 ${toneStyles[tone]}`} id={id}>
       <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black shadow-[0_0_14px_currentColor]">
+        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black">
           {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
         </span>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em]">{label}</p>

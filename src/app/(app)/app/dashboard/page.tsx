@@ -149,11 +149,7 @@ function DataQuality({ read }: { read: Awaited<ReturnType<typeof getQuoteRecover
       : "View import details";
 
   return (
-    <aside className="rev-shell-panel relative self-start overflow-hidden rounded-[26px] p-5">
-      <span
-        aria-hidden="true"
-        className={`absolute inset-y-6 left-0 w-[2px] rounded-full ${needsAttention ? "bg-[color:var(--warning)]" : "bg-[color:var(--success)]"}`}
-      />
+    <aside className="rev-shell-panel flex h-full flex-col overflow-hidden rounded-[26px] p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="rev-label">Import review</p>
@@ -165,7 +161,7 @@ function DataQuality({ read }: { read: Awaited<ReturnType<typeof getQuoteRecover
       </div>
 
       <div className="mt-7">
-        <p className={`text-4xl font-bold tracking-[-0.04em] ${needsAttention ? "text-[color:var(--warning)]" : "text-[color:var(--success)]"}`}>
+        <p className="text-4xl font-bold tracking-[-0.04em] text-[color:var(--foreground)]">
           {needsAttention ? attentionCount : "Ready"}
         </p>
         <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
@@ -187,7 +183,7 @@ function DataQuality({ read }: { read: Awaited<ReturnType<typeof getQuoteRecover
       </div>
 
       <Link
-        className="rev-card-hover mt-5 flex items-center justify-between rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,.025)] px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+        className="rev-card-hover mt-5 flex items-center justify-between rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,.025)] px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] xl:mt-auto"
         href={reviewHref}
       >
         <span>{reviewActionLabel}</span>
