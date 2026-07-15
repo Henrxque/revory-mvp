@@ -398,10 +398,13 @@ try {
     await activeFilter.waitFor({ state: "visible" });
   }
   await page.goto("/app/dashboard", { waitUntil: "networkidle" });
-  for (const qualityLabel of ["Records imported", "Records matched", "Records needing attention", "Checks REVORY can run"]) {
-    if (!(await page.getByRole("link", { name: new RegExp(qualityLabel) }).isVisible())) {
+  for (const qualityLabel of ["Records imported", "Connections confirmed", "Checks available"]) {
+    if (!(await page.getByText(qualityLabel, { exact: true }).isVisible())) {
       throw new Error(`Natural-language import health label missing: ${qualityLabel}.`);
     }
+  }
+  if (!(await page.getByRole("link", { name: /Review import issues|Review data connections|View import details/ }).isVisible())) {
+    throw new Error("Import review action is missing.");
   }
   const quoteRecoveryPdfResponse = await context.request.get("/app/dashboard/report.pdf");
   const quoteRecoveryPdfBytes = await quoteRecoveryPdfResponse.body();

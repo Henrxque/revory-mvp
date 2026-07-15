@@ -12,7 +12,7 @@ These fixtures are synthetic. They are not official, certified or reverse-engine
 6. Review the green `✓`, yellow `!` and red `×` column states. Confirm both review checkboxes.
 7. If testing a one-time Audit, confirm the consumption dialog. Admin testing access must not consume paid capacity.
 8. Open **Executive Read**. Click **Opportunities to review**, **Opportunities with value** and **Process gaps**; each must open the corresponding filtered records.
-9. Open **View issues** in Import Health. Yellow/red states must reveal the exact record and missing target rather than only a count.
+9. Open **Review data connections** in Import Review. Attention states must reveal the exact record and missing target rather than only a count.
 10. Export CSV and the executive PDF; verify currency, values, evidence and REVORY branding.
 
 ## Currency runs

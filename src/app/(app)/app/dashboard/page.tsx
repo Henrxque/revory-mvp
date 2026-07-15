@@ -130,60 +130,82 @@ function Empty() {
   );
 }
 
-type QualityTone = "danger" | "success" | "warning";
-
 function DataQuality({ read }: { read: Awaited<ReturnType<typeof getQuoteRecoveryRead>>["dataQuality"] }) {
   const eligible = Object.values(read.eligibility).filter((rule) => rule.eligible).length;
-  const hasConflicts = read.linkCoverage.conflicting > 0 || read.issues.length > 0;
+  const blockingCount = read.linkCoverage.conflicting + read.issues.length;
+  const attentionCount = blockingCount + read.linkCoverage.unmatched;
+  const needsAttention = attentionCount > 0;
+  const hasBlockingProblems = blockingCount > 0;
+  const reviewHref = hasBlockingProblems
+    ? "/app/data-quality#issues"
+    : read.linkCoverage.unmatched > 0
+      ? "/app/data-quality#links"
+      : "/app/data-quality#eligibility";
+  const attentionLabel = hasBlockingProblems ? "items need review" : "connections need review";
+  const reviewActionLabel = hasBlockingProblems
+    ? "Review import issues"
+    : read.linkCoverage.unmatched > 0
+      ? "Review data connections"
+      : "View import details";
+
   return (
-    <aside className="rev-shell-panel rounded-[26px] p-5">
-      <p className="rev-label">Import health</p>
-      <div className="mt-2 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold">Review readiness</h2>
-        <Link className="text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--accent-light)] hover:underline" href="/app/data-quality">
-          View issues
-        </Link>
+    <aside className="rev-shell-panel relative self-start overflow-hidden rounded-[26px] p-5">
+      <span
+        aria-hidden="true"
+        className={`absolute inset-y-6 left-0 w-[2px] rounded-full ${needsAttention ? "bg-[color:var(--warning)]" : "bg-[color:var(--success)]"}`}
+      />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="rev-label">Import review</p>
+          <h2 className="mt-2 text-lg font-bold">Data readiness</h2>
+        </div>
+        <RevoryStatusBadge tone={needsAttention ? "future" : "real"}>
+          {needsAttention ? "Needs attention" : "Ready"}
+        </RevoryStatusBadge>
       </div>
-      <div className="mt-4 space-y-3 text-sm">
-        <QualityRow href="/app/data-quality#records" label="Records imported" tone={read.recordCount > 0 ? "success" : "danger"} value={String(read.recordCount)} />
-        <QualityRow href="/app/data-quality#links" label="Records matched" tone={read.linkCoverage.linked > 0 ? "success" : "warning"} value={String(read.linkCoverage.linked)} />
-        <QualityRow href="/app/data-quality#links" label="Records needing attention" tone={read.linkCoverage.unmatched > 0 ? "warning" : "success"} value={String(read.linkCoverage.unmatched)} />
-        <QualityRow href="/app/data-quality#eligibility" label="Checks REVORY can run" tone={eligible > 0 ? "success" : "danger"} value={String(eligible)} />
-      </div>
-      {hasConflicts ? (
-        <Link className="mt-4 block text-xs leading-5 text-[color:var(--danger)] hover:underline" href="/app/data-quality#issues">
-          {read.issues.length + read.linkCoverage.conflicting} problem(s) must be resolved before the read is fully defensible.
-        </Link>
-      ) : read.linkCoverage.unmatched > 0 ? (
-        <Link className="mt-4 block text-xs leading-5 text-[color:var(--warning)] hover:underline" href="/app/data-quality#links">
-          Some records could not be matched by ID. Click to see exactly which ones need attention.
-        </Link>
-      ) : (
-        <p className="mt-4 text-xs leading-5 text-[color:var(--success)]">
-          The latest import has no blocking problems.
+
+      <div className="mt-7">
+        <p className={`text-4xl font-bold tracking-[-0.04em] ${needsAttention ? "text-[color:var(--warning)]" : "text-[color:var(--success)]"}`}>
+          {needsAttention ? attentionCount : "Ready"}
         </p>
-      )}
+        <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)]">
+          {needsAttention ? attentionLabel : "The latest import is ready"}
+        </p>
+        <p className="mt-3 text-xs leading-5 text-[color:var(--text-muted)]">
+          {hasBlockingProblems
+            ? "Some import or matching problems may affect the reliability of this read."
+            : read.linkCoverage.unmatched > 0
+              ? "Some connections between imported records could not be confirmed by ID."
+              : "Imported records are connected well enough for REVORY to run the available checks."}
+        </p>
+      </div>
+
+      <div className="mt-6 grid grid-cols-3 divide-x divide-[color:var(--border)] overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[rgba(20,21,22,.58)]">
+        <QualitySummary label="Records imported" value={read.recordCount} />
+        <QualitySummary label="Connections confirmed" value={read.linkCoverage.linked} />
+        <QualitySummary label="Checks available" value={eligible} />
+      </div>
+
+      <Link
+        className="rev-card-hover mt-5 flex items-center justify-between rounded-[16px] border border-[color:var(--border)] bg-[rgba(255,255,255,.025)] px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]"
+        href={reviewHref}
+      >
+        <span>{reviewActionLabel}</span>
+        <span aria-hidden="true" className="text-[color:var(--accent-light)]">
+          →
+        </span>
+      </Link>
     </aside>
   );
 }
 
-const qualityStyles: Record<QualityTone, string> = {
-  danger: "border-[color:var(--danger)] bg-[color:var(--danger-soft)] text-[color:var(--danger)]",
-  success: "border-[color:var(--success)] bg-[color:var(--success-soft)] text-[color:var(--success)]",
-  warning: "border-[color:var(--warning)] bg-[color:var(--warning-soft)] text-[color:var(--warning)]",
-};
-
-function QualityRow({ href, label, tone, value }: { href: string; label: string; tone: QualityTone; value: string }) {
-  const accessibleStatus = tone === "success" ? "ready" : tone === "warning" ? "needs attention" : "blocked";
-
+function QualitySummary({ label, value }: { label: string; value: number }) {
   return (
-    <Link
-      aria-label={`${label}: ${value}. Status: ${accessibleStatus}.`}
-      className={`rev-card-hover flex items-center justify-between rounded-xl border px-3 py-2 ${qualityStyles[tone]}`}
-      href={href}
-    >
-      <span className="text-[color:var(--foreground)]">{label}</span>
-      <strong>{value}</strong>
-    </Link>
+    <div className="min-w-0 px-2.5 py-3 text-center">
+      <p className="text-lg font-bold text-[color:var(--foreground)]">{value}</p>
+      <p className="mt-1 text-[9px] font-semibold leading-4 tracking-[0.08em] text-[color:var(--text-muted)] uppercase">
+        {label}
+      </p>
+    </div>
   );
 }
