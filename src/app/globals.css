@@ -75,7 +75,8 @@ body::before {
 
 .rev-landing-page {
   position: relative;
-  overflow: clip;
+  overflow-x: clip;
+  overflow-y: visible;
   background:
     radial-gradient(ellipse 58% 18% at 50% 5%, rgba(67, 179, 155, 0.16), transparent 74%),
     radial-gradient(ellipse 44% 18% at 8% 34%, rgba(67, 179, 155, 0.055), transparent 78%),
@@ -353,6 +354,14 @@ body::before {
     0 24px 70px rgba(0, 0, 0, 0.25),
     0 0 58px rgba(67, 179, 155, 0.09),
     inset 0 1px 0 var(--surface-hairline);
+}
+
+.rev-checkout-future summary {
+  list-style: none;
+}
+
+.rev-checkout-future summary::-webkit-details-marker {
+  display: none;
 }
 
 @media (min-width: 640px) {

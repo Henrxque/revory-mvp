@@ -3,6 +3,7 @@
 import { type FormEvent, useEffect, useRef, useState, useTransition } from "react";
 
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
+import { formatBuyerFieldLabel } from "@/domain/revory/display-labels";
 import { revorySourceSystems } from "@/domain/revory/source-systems";
 import { canonicalFields } from "@/services/canonical-intake/definitions";
 import type { CanonicalColumnProfile } from "@/services/canonical-intake/assisted-mapping";
@@ -609,7 +610,7 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
                               <option value="">Do not import</option>
                               {Object.keys(canonicalFields[file.entityType]).map((field) => (
                                 <option key={field} value={field}>
-                                  {field}
+                                  {formatBuyerFieldLabel(field)}
                                 </option>
                               ))}
                             </select>

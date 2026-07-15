@@ -55,6 +55,7 @@ Select the model in Codex; naming it in a prompt records intent but may not swit
 | 11 | Pro security/compliance and paid beta | Sol max | Sol ultra or independent max | `$revory`, `$alice`, `vercel:vercel-firewall`, `vercel:observability`, `vercel:verification` |
 | 12 | Paid evidence and packaging decision | Sol high | Sol max | `$revory`, `$alice`, `spreadsheets:Spreadsheets` when needed |
 | 13 | Commercial packaging and pricing clarity | Terra high | Sol high | `$revory`, `$alice`, `vercel:react-best-practices` |
+| 14 | Pre-commercial UX, operations and security closure | Sol high | Sol max | `$revory`, `$alice`, `vercel:verification`, `vercel:observability`, `vercel:email` |
 
 Use Luna only for bounded support tasks inside a sprint. Luna must not own financial semantics, authorization, migrations or an exit-gate decision.
 

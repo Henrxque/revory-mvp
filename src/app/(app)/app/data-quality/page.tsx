@@ -55,7 +55,7 @@ export default async function DataQualityPage() {
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Metric id="records" label="Records imported" tone={detail.recordCount ? "success" : "danger"} value={detail.recordCount} />
-          <Metric label="Records matched" tone={detail.linkCoverage.linked ? "success" : "warning"} value={detail.linkCoverage.linked} />
+          <Metric label="Connections confirmed" tone={detail.linkCoverage.linked ? "success" : "warning"} value={detail.linkCoverage.linked} />
           <Metric label="Records needing attention" tone={detail.linkCoverage.unmatched ? "warning" : "success"} value={detail.linkCoverage.unmatched} />
           <Metric label="Checks REVORY can run" tone={eligibleCount ? "success" : "danger"} value={eligibleCount} />
         </div>
@@ -143,13 +143,15 @@ export default async function DataQualityPage() {
 }
 
 function Metric({ id, label, tone, value }: { id?: string; label: string; tone: QualityTone; value: number }) {
+  const status = tone === "success" ? "Ready" : tone === "warning" ? "Needs attention" : "Blocked";
   return (
     <div className={`rev-card-hover rounded-[20px] border p-4 ${toneStyles[tone]}`} id={id}>
-      <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black">
+      <div className="flex items-start justify-between gap-2">
+        <span aria-hidden="true" className="hidden">
           {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
         </span>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em]">{label}</p>
+        <span className="text-[9px] font-bold uppercase tracking-[0.12em]">{status}</span>
       </div>
       <p className="mt-3 text-3xl font-bold text-[color:var(--foreground)]">{value}</p>
     </div>

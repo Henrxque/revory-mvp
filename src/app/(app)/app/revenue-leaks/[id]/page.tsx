@@ -3,14 +3,11 @@ import { notFound, redirect } from "next/navigation";
 
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { formatWorkspaceMoney } from "@/domain/revory/currency";
+import { formatBuyerFieldLabel, formatEnumLabel } from "@/domain/revory/display-labels";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getQuoteRecoveryFindingDetail } from "@/services/quote-recovery/read-model";
 import { acknowledgeQuoteRecoveryFinding, dismissQuoteRecoveryFinding, recoverQuoteRecoveryFinding, resolveQuoteRecoveryFinding } from "../actions";
-
-function label(value: string) {
-  return value.toLowerCase().split("_").map((part) => part[0].toUpperCase() + part.slice(1)).join(" ");
-}
 
 export default async function FindingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const context = await getAppContext();
@@ -29,15 +26,15 @@ export default async function FindingDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-wrap justify-between gap-5">
           <div className="max-w-3xl">
             <div className="flex flex-wrap gap-2">
-              <RevoryStatusBadge tone="accent">{label(finding.findingType)}</RevoryStatusBadge>
-              <RevoryStatusBadge tone="neutral">{label(finding.status)}</RevoryStatusBadge>
+              <RevoryStatusBadge tone="accent">{formatEnumLabel(finding.findingType)}</RevoryStatusBadge>
+              <RevoryStatusBadge tone="neutral">{formatEnumLabel(finding.status)}</RevoryStatusBadge>
             </div>
             <h1 className="mt-4 text-3xl font-bold tracking-[-.04em]">Estimate {finding.estimateExternalId}</h1>
             <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">{finding.reason}</p>
           </div>
           <div>
             <p className="text-2xl font-bold">{finding.valueCents === null ? "Process gap" : formatWorkspaceMoney(finding.valueCents, finding.currency)}</p>
-            <p className="mt-1 text-xs text-[color:var(--text-muted)]">{finding.valueBasis === "OPERATIONAL" ? "No financial value assigned" : `${label(finding.confidence)} confidence`}</p>
+            <p className="mt-1 text-xs text-[color:var(--text-muted)]">{finding.valueBasis === "OPERATIONAL" ? "No financial value assigned" : `${formatEnumLabel(finding.confidence)} confidence`}</p>
             {finding.disposition === "RECOVERED" ? <p className="mt-2 text-sm font-bold text-[color:var(--success)]">Customer-confirmed recovered: {formatWorkspaceMoney(finding.recoveredValueCents ?? 0, finding.currency)}</p> : null}
           </div>
         </div>
@@ -52,7 +49,7 @@ export default async function FindingDetailPage({ params }: { params: Promise<{ 
               <thead className="text-xs uppercase tracking-wider text-[color:var(--text-subtle)]"><tr><th className="px-3 py-2">Field</th><th className="px-3 py-2">Value</th><th className="px-3 py-2">Source</th></tr></thead>
               <tbody>{evidence.map((item) => (
                 <tr className="border-t border-[color:var(--border)]" key={`${item.field}-${item.provenance?.rowNumber}`}>
-                  <td className="px-3 py-3 font-bold">{label(item.field)}</td>
+                  <td className="px-3 py-3 font-bold">{formatBuyerFieldLabel(item.field)}</td>
                   <td className="px-3 py-3 text-[color:var(--text-muted)]">{typeof item.value === "number" && item.field.toLowerCase().includes("cents") ? formatWorkspaceMoney(item.value, finding.currency) : String(item.value ?? "Not supplied")}</td>
                   <td className="px-3 py-3 text-[color:var(--text-muted)]">{item.provenance?.fileName ?? "Imported source"}{item.provenance?.rowNumber ? ` · row ${item.provenance.rowNumber}` : ""}</td>
                 </tr>

@@ -252,6 +252,14 @@ Deliver a recurring-plan-first visual group, a separate one-time Audit baseline 
 
 **Exit:** a buyer can distinguish what is paid once, what recurs, which Audit is required first and which paths remain closed; no gated offer can be purchased and no legacy Stripe price can grant hybrid access.
 
+### Sprint 14 — Pre-commercial launch closure
+
+**Outcome:** close every product, UX, email, production-operations and security item that does not depend on the final legal entity/CNPJ or Stripe activation.
+
+Repair cross-browser landing navigation, reduce `/start` to one actionable Quote Recovery decision surface, remove internal implementation language from customer UI, verify email delivery, cron execution, uptime, WAF/throttling, backup restore, bounded AI, MFA ownership and automated security evidence, and prepare factual legal drafts plus a customer-shaped usefulness test.
+
+**Exit:** all non-CNPJ/non-Stripe work passes with reproducible evidence; the only remaining Quote Recovery commercial blockers are explicitly owned legal-entity/counsel work, Stripe lifecycle activation and real customer/paid evidence. Checkout remains disabled.
+
 ## 9. Launch sequence
 
 1. internal and design-partner Quote Recovery reads;

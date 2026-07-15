@@ -25,30 +25,51 @@ type BillingOffer = {
   stage: string;
 };
 
-const ongoingPlans: readonly BillingOffer[] = [
+const starterPlan: BillingOffer =
   {
-    badge: "First ongoing plan",
+    badge: "Continue monthly",
     description:
       "Refresh Quote Recovery evidence as new exports arrive and see what is new, persistent, worsening or resolved.",
-    entryCondition: "Requires a completed Quote Recovery Audit.",
+    entryCondition: "Available after your first Quote Recovery Audit is complete.",
     features: [
       "Recurring export refreshes",
       "Saved mapping reuse",
       "Movement between reads",
       "Recurring access and billing portal",
     ],
-    featured: true,
     label: "Starter",
     offerKey: "STARTER",
     price: "$399",
     priceNote: "per month",
     stage: "Quote Recovery continuity",
-  },
+  };
+
+const quoteRecoveryAudit: BillingOffer =
   {
-    badge: "Release gated",
+    badge: "Start here",
     description:
-      "Add 12-month history, guarded segmentation and one bounded weekly management decision when the Growth gate passes.",
-    entryCondition: "Requires advanced evidence and the Growth release gate.",
+      "Create the first evidence-backed read of estimates and follow-ups before deciding whether recurring monitoring is useful.",
+    entryCondition: "Paid once. Continue with Starter only if repeated reviews are useful.",
+    features: [
+      "Structured export intake",
+      "Data Quality and column review",
+      "Prioritized Quote Recovery findings",
+      "Executive CSV and PDF exports",
+    ],
+    featured: true,
+    label: "Quote Recovery Audit",
+    offerKey: "QUOTE_RECOVERY_AUDIT",
+    price: "$799",
+    priceNote: "paid once",
+    stage: "Your first REVORY read",
+  };
+
+const futureOffers: readonly BillingOffer[] = [
+  {
+    badge: "Coming later",
+    description:
+      "Add 12-month history, reliable comparisons and one focused weekly management decision.",
+    entryCondition: "Not available for purchase yet.",
     features: [
       "Recurring Quote Recovery access",
       "Twelve-month movement",
@@ -62,10 +83,10 @@ const ongoingPlans: readonly BillingOffer[] = [
     stage: "Advanced recurring intelligence",
   },
   {
-    badge: "Release gated",
+    badge: "Coming later",
     description:
-      "Add Revenue Realization, change-order, underbilling and margin intelligence with higher-volume controls when Pro is released.",
-    entryCondition: "Requires a Full Revenue Leak Audit and the Pro release gate.",
+      "Add Revenue Realization, change-order, underbilling and margin review with higher-volume controls.",
+    entryCondition: "Not available for purchase yet.",
     features: [
       "Quote Recovery and Growth intelligence",
       "Change-order and underbilling review",
@@ -78,32 +99,11 @@ const ongoingPlans: readonly BillingOffer[] = [
     priceNote: "per month",
     stage: "Revenue Realization recurring",
   },
-] as const;
-
-const audits: readonly BillingOffer[] = [
   {
-    badge: "Required baseline",
-    description:
-      "Create the first evidence-backed read of estimates and follow-ups before deciding whether recurring monitoring is useful.",
-    entryCondition: "Leads to Starter monthly continuity after completion.",
-    features: [
-      "Structured export intake",
-      "Data Quality and mapping review",
-      "Prioritized Quote Recovery findings",
-      "Executive result export",
-    ],
-    featured: true,
-    label: "Quote Recovery Audit",
-    offerKey: "QUOTE_RECOVERY_AUDIT",
-    price: "$799",
-    priceNote: "paid once",
-    stage: "Start Quote Recovery here",
-  },
-  {
-    badge: "Release gated",
+    badge: "Coming later",
     description:
       "Establish an advanced estimate-to-job, invoice and change-order baseline only when the imported evidence supports it.",
-    entryCondition: "Leads to Growth or Pro only after their separate release gates pass.",
+    entryCondition: "Not available for purchase yet.",
     features: [
       "Explicit record matching",
       "Unmatched and conflict review",
@@ -155,7 +155,7 @@ function OfferCard({
   return (
     <article
       className={`rev-checkout-card flex flex-col rounded-[26px] border p-5 md:p-6 ${
-        compact ? "min-h-[350px]" : "min-h-[410px]"
+        compact ? "min-h-[360px]" : "min-h-[390px]"
       } ${offer.featured ? "rev-checkout-card-primary border-[rgba(67,179,155,0.4)]" : "border-[color:var(--border)]"}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -169,7 +169,7 @@ function OfferCard({
       </div>
 
       <div className="mt-5">
-        <p className="text-[clamp(2.7rem,4vw,3.75rem)] font-semibold leading-none tracking-[-0.055em] text-[color:var(--foreground)]">
+        <p className="text-[clamp(2.45rem,3.5vw,3.35rem)] font-semibold leading-none tracking-[-0.055em] text-[color:var(--foreground)]">
           {offer.price}
         </p>
         <p className="mt-2 text-xs font-bold uppercase tracking-[0.15em] text-[color:var(--accent-light)]">
@@ -210,11 +210,11 @@ function OfferCard({
           </form>
         ) : internalPreview && offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? (
           <Link className="rev-button-secondary w-full justify-center" href="/app/dashboard">
-            Open internal workspace
+            Open REVORY workspace
           </Link>
         ) : (
           <button className="rev-action-button w-full cursor-not-allowed justify-center opacity-60" disabled type="button">
-            Closed until the release gate passes
+            Not available yet
           </button>
         )}
       </div>
@@ -252,85 +252,85 @@ export default async function StartPage({
             <RevoryLogo compact />
           </Link>
           <div className="flex flex-wrap items-center gap-2">
-            <RevoryStatusBadge tone="accent">Commercial model clarified</RevoryStatusBadge>
-            <RevoryStatusBadge tone={internalPreview ? "real" : "future"}>
-              {internalPreview ? "Internal preview" : "Release gates preserved"}
-            </RevoryStatusBadge>
+            <RevoryStatusBadge tone="accent">Quote Recovery path</RevoryStatusBadge>
+            <RevoryStatusBadge tone="future">Checkout closed</RevoryStatusBadge>
             {session?.user?.id ? <AuthSignOutButton callbackUrl="/" compact /> : null}
           </div>
         </header>
 
-        <section className="mx-auto max-w-4xl px-2 pb-8 pt-8 text-center md:pb-10 md:pt-12">
-          <p className="rev-kicker">REVORY access</p>
-          <h1 className="mx-auto mt-3 max-w-3xl text-balance text-[clamp(2.25rem,4.2vw,4rem)] font-semibold leading-[0.96] tracking-[-0.05em] text-[color:var(--foreground)]">
-            Choose how often you want REVORY working for you.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-[13px] leading-6 text-[color:var(--text-muted)] md:text-sm">
-            Begin with a paid one-time Audit to establish a trusted baseline. Add an ongoing plan only when refreshed evidence and recurring decisions are useful.
-          </p>
-          {params.billing === "baseline-required" ? (
-            <p className="mx-auto mt-4 max-w-xl rounded-full border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-4 py-2 text-xs font-semibold text-[color:var(--accent-light)]">
-              Complete your Quote Recovery Audit before starting the recurring Starter plan.
+        <section className="grid gap-7 py-7 lg:min-h-[calc(100svh-92px)] lg:grid-cols-[minmax(280px,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-8 lg:py-4">
+          <div className="px-2 lg:pr-2">
+            <p className="rev-kicker">One clear path</p>
+            <h1 className="mt-3 max-w-[36rem] text-balance text-[clamp(2.4rem,4.2vw,4rem)] font-semibold leading-[0.94] tracking-[-0.055em] text-[color:var(--foreground)]">
+              Start with the Audit. Continue only when recurring reviews are useful.
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-[color:var(--text-muted)]">
+              The one-time Quote Recovery Audit creates your first trusted read. Starter keeps that read current as new exports arrive.
             </p>
-          ) : null}
-        </section>
-
-        <section aria-labelledby="ongoing-plans-title">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="rev-kicker">Primary commercial model</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-[-0.04em]" id="ongoing-plans-title">
-                Ongoing plans
-              </h2>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)] px-4 py-3">
+                <p className="rev-label">01 · Establish the baseline</p>
+                <p className="mt-1 text-sm font-bold">Quote Recovery Audit · $799 paid once</p>
+              </div>
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3">
+                <p className="rev-label">02 · Keep it current</p>
+                <p className="mt-1 text-sm font-bold">Starter · $399 per month after the Audit</p>
+              </div>
             </div>
-            <p className="max-w-2xl text-sm leading-6 text-[color:var(--text-muted)] md:text-right">
-              Every ongoing plan starts with the matching one-time Audit, so your first recurring read has a verified baseline.
+            {params.billing === "baseline-required" ? (
+              <p className="mt-4 max-w-xl rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-4 py-3 text-xs font-semibold text-[color:var(--accent-light)]">
+                Complete your Quote Recovery Audit before starting Starter.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-2 px-1">
+              <div>
+                <p className="rev-kicker">Quote Recovery</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em]" id="quote-recovery-path-title">
+                  Choose your next step
+                </h2>
+              </div>
+              <p className="max-w-xs text-xs leading-5 text-[color:var(--text-subtle)]">
+                The Audit is required once. Starter never replaces it.
+              </p>
+            </div>
+            <div aria-labelledby="quote-recovery-path-title" className="grid items-stretch gap-3 md:grid-cols-2">
+              {[quoteRecoveryAudit, starterPlan].map((offer) => (
+                <OfferCard
+                  activeOfferKeys={activeOfferKeys}
+                  compact
+                  hasQuoteRecoveryBaseline={hasQuoteRecoveryBaseline}
+                  internalPreview={internalPreview}
+                  key={offer.label}
+                  offer={offer}
+                />
+              ))}
+            </div>
+
+            <details className="rev-checkout-future mt-3 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.014)]">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 px-4 py-3 text-sm font-bold text-[color:var(--text-muted)] transition hover:text-[color:var(--foreground)]">
+                <span>View future Growth, Pro and advanced Audit paths</span>
+                <span aria-hidden="true" className="text-lg text-[color:var(--accent-light)]">+</span>
+              </summary>
+              <div className="grid gap-3 border-t border-[color:var(--border)] p-3 lg:grid-cols-3">
+                {futureOffers.map((offer) => (
+                  <OfferCard
+                    activeOfferKeys={activeOfferKeys}
+                    compact
+                    hasQuoteRecoveryBaseline={hasQuoteRecoveryBaseline}
+                    internalPreview={internalPreview}
+                    key={offer.label}
+                    offer={offer}
+                  />
+                ))}
+              </div>
+            </details>
+            <p className="mt-3 text-center text-[11px] leading-5 text-[color:var(--text-subtle)]">
+              Checkout is closed during private validation. No charge can be made from this screen.
             </p>
           </div>
-          <div className="grid items-stretch gap-4 lg:grid-cols-3">
-            {ongoingPlans.map((offer) => (
-              <OfferCard
-                activeOfferKeys={activeOfferKeys}
-                hasQuoteRecoveryBaseline={hasQuoteRecoveryBaseline}
-                internalPreview={internalPreview}
-                key={offer.label}
-                offer={offer}
-              />
-            ))}
-          </div>
-          <p className="mt-4 text-center text-xs leading-6 text-[color:var(--text-subtle)]">
-            Annual billing is not offered yet. Monthly/annual controls remain hidden until dedicated Stripe prices, renewal behavior and billing gates are verified.
-          </p>
-        </section>
-
-        <section aria-labelledby="audit-plans-title" className="pb-4 pt-16 md:pt-20">
-          <div className="mx-auto mb-6 max-w-4xl text-center">
-            <p className="rev-kicker">Paid baseline reads</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-[-0.04em]" id="audit-plans-title">
-              Start with an Audit
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">
-              Audits are paid once. They establish the initial trusted baseline; subscriptions pay for refreshed evidence, movement and recurring decisions.
-            </p>
-          </div>
-          <div className="mx-auto grid max-w-4xl items-stretch gap-4 md:grid-cols-2">
-            {audits.map((offer) => (
-              <OfferCard
-                activeOfferKeys={activeOfferKeys}
-                compact
-                hasQuoteRecoveryBaseline={hasQuoteRecoveryBaseline}
-                internalPreview={internalPreview}
-                key={offer.label}
-                offer={offer}
-              />
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto my-4 max-w-4xl rounded-[18px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-5 py-3 text-center">
-          <p className="text-[12px] leading-6 text-[color:var(--text-muted)]">
-            Target prices remain packaging hypotheses. Growth, Pro, annual billing and the Full Revenue Leak Audit stay closed until their separate evidence, security, Stripe and commercial release gates pass.
-          </p>
         </section>
       </div>
     </main>
