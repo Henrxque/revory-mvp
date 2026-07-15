@@ -369,6 +369,12 @@ try {
   ) {
     throw new Error(`Executive actions are not anchored in the upper-right hero area: ${JSON.stringify({ dashboardHeadingBox, executiveActionsBox })}`);
   }
+  const executiveActionRows = await page.locator('[data-testid="executive-actions"] > *').evaluateAll((elements) =>
+    elements.map((element) => Math.round(element.getBoundingClientRect().top)),
+  );
+  if (Math.max(...executiveActionRows) - Math.min(...executiveActionRows) > 2) {
+    throw new Error(`Executive actions wrapped onto multiple rows: ${JSON.stringify(executiveActionRows)}`);
+  }
   const executiveMetric = page.locator('[data-testid="executive-metric"]').first();
   const metricShadowBefore = await executiveMetric.evaluate((element) => getComputedStyle(element).boxShadow);
   await executiveMetric.hover();

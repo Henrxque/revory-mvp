@@ -33,14 +33,14 @@ export default async function DashboardPage() {
               Every finding is traceable to imported evidence.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 lg:justify-end" data-testid="executive-actions">
-            <a className="rev-button-secondary" href="/app/quote-recovery/export">
+          <div className="flex flex-wrap gap-2 lg:flex-nowrap lg:justify-end" data-testid="executive-actions">
+            <a className="rev-button-secondary whitespace-nowrap" href="/app/quote-recovery/export">
               Export CSV
             </a>
-            <a className="rev-button-secondary" href="/app/dashboard/report.pdf">
-              Export executive PDF
+            <a className="rev-button-secondary whitespace-nowrap" href="/app/dashboard/report.pdf">
+              Export PDF
             </a>
-            <Link className="rev-button-primary" href="/app/revenue-leaks">
+            <Link className="rev-button-primary whitespace-nowrap" href="/app/revenue-leaks">
               Review opportunities
             </Link>
           </div>
