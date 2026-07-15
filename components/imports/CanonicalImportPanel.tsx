@@ -62,7 +62,7 @@ function QualityGlyph({ tone }: { tone: QualityTone }) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-black shadow-[0_0_12px_currentColor] ${qualityToneClasses[tone]}`}
+      className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-black ${qualityToneClasses[tone]}`}
     >
       {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
     </span>

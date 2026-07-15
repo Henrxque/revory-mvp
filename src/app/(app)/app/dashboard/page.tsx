@@ -112,7 +112,6 @@ function Metric({ href, label, note, value }: { href: string; label: string; not
       <p className="rev-label">{label}</p>
       <p className="mt-2 text-2xl font-bold">{value}</p>
       <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">{note}</p>
-      <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--accent-light)] opacity-70 transition group-hover:opacity-100">View records →</p>
     </Link>
   );
 }
@@ -181,7 +180,7 @@ function QualityRow({ href, label, tone, value }: { href: string; label: string;
       href={href}
     >
       <span className="flex items-center gap-2">
-        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black shadow-[0_0_12px_currentColor]">
+        <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-black">
           {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
         </span>
         <span className="text-[color:var(--foreground)]">{label}</span>
