@@ -34,8 +34,8 @@ check(
 check(
   "visible-prelaunch-gate",
   home.includes("Audit checkout remains gated until validation is complete") &&
-    home.includes("Prices remain validation targets until the commercial gates pass"),
-  "Landing visibly marks the US$799 offer as prelaunch and gated.",
+    start.includes("Checkout closed"),
+  "Landing and start screen visibly mark checkout as closed during validation.",
 );
 check(
   "no-legacy-growth-cta",
@@ -44,20 +44,20 @@ check(
 );
 check(
   "audit-required-baseline",
-  /const audits:[\s\S]*?featured:\s*true,[\s\S]*?label:\s*"Quote Recovery Audit"/.test(start),
-  "The US$799 Quote Recovery Audit remains the highlighted required baseline inside the Audit group.",
+  /const quoteRecoveryAudit:[\s\S]*?featured:\s*true,[\s\S]*?label:\s*"Quote Recovery Audit"/.test(start),
+  "The US$799 Quote Recovery Audit remains the highlighted required baseline.",
 );
 check(
-  "sprint-13-commercial-hierarchy",
-  start.indexOf("Ongoing plans") < start.indexOf("Start with an Audit") &&
-    start.includes("Every ongoing plan starts with the matching one-time Audit") &&
+  "sprint-14-commercial-path",
+  start.includes("Start with the Audit. Continue only when recurring reviews are useful.") &&
+    start.includes("[quoteRecoveryAudit, starterPlan]") &&
     start.includes('priceNote: "paid once"') &&
     start.includes('priceNote: "per month"'),
-  "The pricing screen separates ongoing subscriptions from the one-time Audit baseline and states billing cadence.",
+  "The pricing screen presents the one-time Audit before Starter and states billing cadence.",
 );
 check(
   "starter-is-recurring-continuation",
-  start.includes('entryCondition: "Requires a completed Quote Recovery Audit."') &&
+  start.includes('entryCondition: "Available after your first Quote Recovery Audit is complete."') &&
     start.includes('priceNote: "per month"') &&
     !start.includes("Everything in the audit flow"),
   "Starter is described as recurring continuity after the Audit, not a cheaper replacement for it.",
@@ -65,7 +65,7 @@ check(
 check(
   "no-live-checkout-link",
   !start.includes('href="/api/billing/checkout"'),
-  "The checkout presentation does not start a charge before Sprint 5.",
+  "The checkout presentation does not expose a direct charge link.",
 );
 check(
   "preview-production-guard",

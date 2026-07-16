@@ -11,8 +11,8 @@ for (const required of [
   "not confirmed accounting loss",
   "not added",
   "No financial value",
-  "ambiguous links",
-  "without AI",
+  "Unclear record connections",
+  "incomplete inputs prevent unsupported totals",
 ]) {
   if (!source.toLowerCase().includes(required.toLowerCase())) {
     throw new Error(`Sprint 9 evidence surfaces are missing product-truth copy: ${required}`);

@@ -54,12 +54,12 @@ export default function DemoPage() {
         <section className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
           <aside className="rev-shell-panel rounded-[26px] p-5" id="sample-data-quality">
             <p className="rev-kicker">Data Quality</p>
-            <h2 className="mt-3 text-xl font-bold">Evidence eligibility</h2>
+            <h2 className="mt-3 text-xl font-bold">Evidence readiness</h2>
             <dl className="mt-5 space-y-4 text-sm">
               <QualityRow label="Accepted rows" value={String(sample.dataQuality.acceptedRows)} />
-              <QualityRow label="Explicit links" value={String(sample.dataQuality.linkedRecords)} />
+              <QualityRow label="Confirmed connections" value={String(sample.dataQuality.linkedRecords)} />
               <QualityRow label="Unmatched records" value={String(sample.dataQuality.unmatchedRecords)} />
-              <QualityRow label="Rule eligibility" value={sample.dataQuality.eligibility} />
+              <QualityRow label="Checks available" value={sample.dataQuality.eligibility} />
             </dl>
             <p className="mt-5 rounded-2xl border border-[color:var(--border)] p-4 text-xs leading-5 text-[color:var(--text-muted)]">
               Unmatched sample records stay visible and do not create unsupported financial output.

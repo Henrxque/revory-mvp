@@ -2,7 +2,29 @@
 
 ## Status
 
-**PLANNED / NOT STARTED.**
+**LOCAL UX/CODE PASS · EXTERNAL OPERATIONS AND LEGAL EVIDENCE PENDING.**
+
+Implemented locally on 2026-07-16:
+
+- landing navigation no longer creates a clipped vertical scroll container;
+- the public hero and pricing section expose a prominent read-only demo using fictional contractor data;
+- the Audit and Starter cards now explain buyer fit, included deliverables, expected outcome and entry condition;
+- `/start` presents the US$799 one-time Audit first and the US$399/month Starter second, with both actionable cards inside the `1280x720` first viewport;
+- Growth, Pro and Full Revenue Leak Audit remain collapsed, disabled and explicitly unavailable;
+- a shared buyer-label dictionary formats evidence fields and statuses without changing stored canonical contracts;
+- primary auth, imports, Data Quality, settings, Revenue Realization and Growth copy was simplified without weakening evidence or financial-claim limits;
+- `qa:sprint-14`, the landing interaction gate, the commercial desktop/mobile gate and the public-demo browser gate pass locally.
+
+Local closure evidence:
+
+- the complete `qa:launch-readiness` suite passed, including lint, typecheck, production build, authenticated browser journeys, landing, `/start`, public demo, mobile, CSV/PDF exports and security-header checks;
+- the Sprint 14 tracked-tree and Git-history secret scan passed without exposing a secret value;
+- the local database migration `20260715000100_deduplicate_quote_recovery_exposure` was applied and the environment check reports zero pending migrations;
+- the load gate processed 50,000 Quote Recovery records with 75,000 findings in 282 ms and 10,000 Revenue Realization records in 493 ms, with 94 MB peak heap in the recorded run;
+- the local email contract passed, and the deterministic bounded-AI fallback remained useful; a real provider happy-path smoke remains external because the available runtime key is missing or invalid;
+- `npm audit --audit-level=high` reports no critical or high vulnerability. Five moderate transitive findings remain documented for non-breaking remediation; no forced dependency downgrade was applied.
+
+This is not the Sprint 14 exit gate. Resend delivery evidence, observed jobs, uptime/incident ownership, WAF evidence, isolated restore, MFA ownership, DAST/security review, customer-shaped usefulness evidence and final legal/Stripe work remain external or pending.
 
 This sprint closes every launch-readiness item that can be completed before the final legal-entity/CNPJ and Stripe activation work. It does not enable checkout, publish a paid offer, claim legal approval, or make Growth, Pro or Revenue Realization sellable.
 

@@ -26,7 +26,7 @@ export default async function SettingsPage() {
         <h1 className="rev-display-hero mt-3">Keep the recurring read under your control.</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Manage retention, weekly digest, data portability and billing without a support call.</p>
       </section>
-      {isInternalMigrationPreviewEnabled() ? <Link className="rev-button-secondary" href="/app/launch-evidence">Review Sprint 12 launch evidence</Link> : null}
+      {isInternalMigrationPreviewEnabled() ? <Link className="rev-button-secondary" href="/app/launch-evidence">Review product evidence</Link> : null}
       <section className="grid gap-5 lg:grid-cols-2">
         <Card body="Choose the currency REVORY should use when an uploaded file does not include one. This changes display and reporting only; REVORY never performs currency conversion." title="Workspace currency">
           <form action={updateWorkspaceCurrencyAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -40,17 +40,17 @@ export default async function SettingsPage() {
           </form>
           <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">A currency explicitly included in an uploaded record always takes priority.</p>
         </Card>
-        <Card body="Download a workspace-scoped JSON package with canonical imports, mappings, findings, history, entitlements and audit events." title="Data export">
+        <Card body="Download a workspace-scoped JSON package with imported records, saved column matches, findings, history, plan access and account events." title="Data export">
           <a className="rev-button-primary" href="/app/settings/data-export">Export workspace data</a>
         </Card>
-        <Card body="Choose how long REVORY should retain analysis data once the scheduled retention worker is activated." title="Retention">
+        <Card body="Choose how long REVORY should keep imported analysis data after automated retention is enabled for your workspace." title="Retention">
           <form action={updateRetentionAction} className="flex gap-3">
             <select className="rev-input-field" defaultValue={settings?.retentionDays ?? 365} name="retentionDays">
               {[30, 90, 180, 365].map((days) => <option key={days} value={days}>{days} days</option>)}
             </select>
             <button className="rev-button-secondary">Save</button>
           </form>
-          <p className="mt-3 text-xs text-[color:var(--text-subtle)]">Policy is stored now; automated enforcement remains deployment-gated.</p>
+          <p className="mt-3 text-xs text-[color:var(--text-subtle)]">Your preference is saved now. REVORY will show when automated deletion is active.</p>
         </Card>
         <Card body="Receive one sample-guarded management priority plus separated movement and financial bases. No customer rows or source payloads are sent to the email provider." title="Weekly Growth decision digest">
           {growthAccess.enabled ? (
@@ -63,11 +63,13 @@ export default async function SettingsPage() {
             {growthAccess.preview
               ? "Internal preview only; provider sends stay blocked without a real Growth entitlement."
               : emailConfigured
-                ? `Email configured${digest?.lastSentAt ? ` · last sent ${digest.lastSentAt.toLocaleDateString("en-US")}` : ""}.`
+                ? digest?.lastSentAt
+                  ? `Email delivery is active · last sent ${digest.lastSentAt.toLocaleDateString("en-US")}.`
+                  : "Delivery setup is available; a successful test delivery is still required."
                 : "Delivery is paused until Resend and the sending domain are configured."}
           </p>
         </Card>
-        <Card body="Dedicated offer entitlements remain separate from historical plan IDs. Growth checkout is not public while its release gate is incomplete." title="Plans and billing">
+        <Card body="Review your current REVORY access and open the secure billing portal when a paid plan is active. Growth remains unavailable for purchase." title="Plans and billing">
           {context.workspace.stripeCustomerId
             ? <form action="/api/billing/portal" method="post"><button className="rev-button-secondary" type="submit">Open billing portal</button></form>
             : <Link className="rev-button-secondary" href="/start">Review gated plans</Link>}
@@ -76,7 +78,7 @@ export default async function SettingsPage() {
       <section className="rounded-[24px] border border-[rgba(255,114,141,.25)] bg-[rgba(255,114,141,.05)] p-6">
         <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--danger)]">Destructive data control</p>
         <h2 className="mt-3 text-xl font-bold">Delete imported analysis data</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">Deletes canonical imports, saved mappings, Quote Recovery and Revenue Realization findings, analysis runs and intelligence snapshots. Your account, workspace and billing identity remain intact.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-muted)]">Deletes imported records, saved column matches, Quote Recovery and Revenue Realization findings, completed reads and history snapshots. Your account, workspace and billing identity remain intact.</p>
         <form action={deleteAnalysisDataAction} className="mt-5 flex max-w-xl flex-col gap-3 sm:flex-row">
           <input aria-label="Deletion confirmation" className="rev-input-field flex-1" name="confirmation" placeholder="Type DELETE REVORY DATA" />
           <button className="rev-button-secondary">Delete analysis data</button>

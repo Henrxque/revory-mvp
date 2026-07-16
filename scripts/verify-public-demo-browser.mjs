@@ -7,6 +7,10 @@ import { chromium } from "playwright";
 const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3002";
 const outputDir = path.join(os.tmpdir(), "revory-public-demo");
 const qaDistDir = path.join(process.cwd(), ".next-demo-qa");
+const generatedSourceSnapshots = ["next-env.d.ts", "tsconfig.json"].map((relativePath) => ({
+  content: fs.readFileSync(path.join(process.cwd(), relativePath), "utf8"),
+  relativePath,
+}));
 fs.mkdirSync(outputDir, { recursive: true });
 let serverProcess = null;
 
@@ -96,5 +100,8 @@ try {
   await browser.close();
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");
   fs.rmSync(qaDistDir, { force: true, recursive: true });
+  for (const snapshot of generatedSourceSnapshots) {
+    fs.writeFileSync(path.join(process.cwd(), snapshot.relativePath), snapshot.content);
+  }
 }
 console.log("Canonical public sample workspace desktop/mobile: PASS");

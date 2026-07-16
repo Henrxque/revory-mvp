@@ -62,8 +62,16 @@ export async function requestPasswordReset(email: string) {
 
 export async function resetPasswordWithToken(input: {
   password: string;
+  passwordConfirmation: string;
   token: string;
 }) {
+  if (input.password !== input.passwordConfirmation) {
+    return {
+      message: "Passwords do not match.",
+      ok: false as const,
+    };
+  }
+
   const normalizedToken = input.token.trim();
   const tokenHash = hashResetToken(normalizedToken);
   const rateLimit = await checkRateLimit({

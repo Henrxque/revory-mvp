@@ -73,7 +73,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
               <p className="rev-kicker">Account recovery</p>
               <h2 className="rev-display-panel max-w-[22rem]">Choose a new password.</h2>
               <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
-                Minimum 10 characters. No extra account flow is created here.
+                Use at least 10 characters and enter the same password twice.
               </p>
             </div>
 

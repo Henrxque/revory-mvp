@@ -324,23 +324,23 @@ try {
   if (!(await page.getByText("$50,000.00").first().isVisible())) {
     throw new Error("Reconstructable calculated billing difference missing.");
   }
-  if (!(await page.getByText("Every explicit link resolves to exactly one record.").isVisible())) {
+  if (!(await page.getByText("Every imported reference connects to exactly one record.").isVisible())) {
     throw new Error("Explicit matching review did not resolve fixture links.");
   }
-  for (const expected of ["UNDERBILLING GAP", "APPROVED CHANGE ORDER NOT BILLED", "MARGIN AT RISK", "$10,000.00", "$19,000.00"]) {
+  for (const expected of ["Underbilling Gap", "Approved Change Order Not Billed", "Margin At Risk", "$10,000.00", "$19,000.00"]) {
     if (!(await page.getByText(expected, { exact: true }).first().isVisible())) {
       throw new Error(`Sprint 9 finding evidence missing: ${expected}`);
     }
   }
   const findingCountBeforeRefresh = await prisma.revenueRealizationFinding.count({ where: { workspaceId: workspace.id } });
-  await page.getByRole("button", { name: "Refresh deterministic findings" }).click();
+  await page.getByRole("button", { name: "Refresh findings" }).click();
   await page.waitForLoadState("networkidle");
   const findingCountAfterRefresh = await prisma.revenueRealizationFinding.count({ where: { workspaceId: workspace.id } });
   if (findingCountBeforeRefresh !== findingCountAfterRefresh) {
     throw new Error(`Sprint 9 persisted rerun drifted from ${findingCountBeforeRefresh} to ${findingCountAfterRefresh} findings.`);
   }
   await page.screenshot({ path: path.join(evidenceDir, "sprint-9-findings-desktop.png"), fullPage: true });
-  await page.getByText("UNDERBILLING GAP", { exact: true }).first().click();
+  await page.getByText("Underbilling Gap", { exact: true }).first().click();
   await page.getByText("Source lineage").waitFor();
   if (!(await page.getByText("This calculated gap contributes to the executive billing-gap total.", { exact: false }).isVisible())) {
     throw new Error("Dedicated Sprint 9 evidence view is missing its additive-boundary label.");
@@ -468,7 +468,7 @@ try {
   }
 
   await page.goto("/app/history", { waitUntil: "networkidle" });
-  if (!(await page.getByText("Turn recurring reads into one guarded weekly decision.").isVisible())) {
+  if (!(await page.getByText("Turn recurring reads into one careful weekly decision.").isVisible())) {
     throw new Error("Growth intelligence headline missing.");
   }
   if (!(await page.getByText(/Review .* first\./).first().isVisible())) {
@@ -509,7 +509,7 @@ try {
   if (horizontalOverflow > 1) throw new Error(`Revenue Realization mobile overflow: ${horizontalOverflow}px`);
   await page.screenshot({ path: path.join(evidenceDir, "sprint-9-findings-mobile.png"), fullPage: true });
   await page.goto("/app/history", { waitUntil: "networkidle" });
-  if (!(await page.getByText("Turn recurring reads into one guarded weekly decision.").isVisible())) {
+  if (!(await page.getByText("Turn recurring reads into one careful weekly decision.").isVisible())) {
     throw new Error("Mobile Growth intelligence headline missing.");
   }
   const growthOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

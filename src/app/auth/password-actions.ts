@@ -29,6 +29,7 @@ export async function createEmailPasswordAccount(input: {
   email: string;
   fullName: string;
   password: string;
+  passwordConfirmation: string;
 }) {
   const email = normalizeEmail(input.email);
   const fullName = normalizeName(input.fullName);
@@ -36,6 +37,13 @@ export async function createEmailPasswordAccount(input: {
   if (!email || !email.includes("@")) {
     return {
       message: "Use a valid work email.",
+      ok: false as const,
+    };
+  }
+
+  if (input.password !== input.passwordConfirmation) {
+    return {
+      message: "Passwords do not match.",
       ok: false as const,
     };
   }
@@ -73,12 +81,18 @@ export async function createEmailPasswordAccount(input: {
         userId: existingUser.id,
       });
 
+      if (!verification.sent) {
+        return {
+          message: "Account exists, but REVORY could not send the verification email. Check email setup and try again.",
+          ok: false as const,
+        };
+      }
+
       return {
-        message: verification.sent
-          ? "A verification email was sent again. Confirm your email before signing in."
-          : "Account exists, but REVORY could not send the verification email. Check email setup and try again.",
-        ok: verification.sent as boolean,
+        message: "A verification email was sent again. Confirm your email before signing in.",
+        ok: true as const,
         requiresVerification: true as const,
+        successKind: "VERIFICATION_RESENT" as const,
       };
     }
 
@@ -113,12 +127,18 @@ export async function createEmailPasswordAccount(input: {
     userId: user.id,
   });
 
+  if (!verification.sent) {
+    return {
+      message: "Account created, but REVORY could not send the verification email. Check email setup and try again.",
+      ok: false as const,
+    };
+  }
+
   return {
-    message: verification.sent
-      ? "Account created. Check your email to confirm your REVORY account."
-      : "Account created, but REVORY could not send the verification email. Check email setup and try again.",
-    ok: verification.sent as boolean,
+    message: "Account created. Check your email to confirm your REVORY account.",
+    ok: true as const,
     requiresVerification: true as const,
+    successKind: "ACCOUNT_CREATED" as const,
   };
 }
 
@@ -155,6 +175,7 @@ export async function requestPasswordResetAction(input: { email: string }) {
 
 export async function resetPasswordAction(input: {
   password: string;
+  passwordConfirmation: string;
   token: string;
 }) {
   return resetPasswordWithToken(input);

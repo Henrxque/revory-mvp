@@ -22,9 +22,9 @@ export default async function HistoryPage() {
     return (
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
         <p className="rev-kicker">Growth intelligence</p>
-        <h1 className="rev-display-hero mt-3">Recurring history remains gated.</h1>
+        <h1 className="rev-display-hero mt-3">Recurring history is not included in this workspace.</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
-          Twelve-month movement, guarded segmentation and the weekly management decision require a Growth or Pro entitlement. No financial snapshot is queried or disclosed on the Audit or Starter paths.
+          Twelve-month movement, careful segment comparisons and the weekly management decision require Growth or Pro access. Audit and Starter data remains private and is not displayed here.
         </p>
         <Link className="rev-button-secondary mt-5 inline-flex" href="/app/dashboard">Return to dashboard</Link>
       </section>
@@ -45,9 +45,9 @@ export default async function HistoryPage() {
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
-            <p className="rev-kicker">Growth intelligence {growthAccess.preview ? "· internal preview" : ""}</p>
-            <h1 className="rev-display-hero mt-3">Turn recurring reads into one guarded weekly decision.</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Twelve-month movement, source/owner/service concentration and financial bases remain separated. Thin cohorts are shown as suppressed, never ranked.</p>
+            <p className="rev-kicker">Growth intelligence</p>
+            <h1 className="rev-display-hero mt-3">Turn recurring reads into one careful weekly decision.</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">Twelve-month movement, source, owner and service concentration remain separated. Groups without enough comparable records stay visible as unavailable and are never ranked.</p>
           </div>
           {growthAccess.enabled ? <a className="rev-button-secondary" href="/app/history/report.pdf">Download executive PDF</a> : null}
         </div>
@@ -73,7 +73,7 @@ export default async function HistoryPage() {
       <section className="rev-shell-panel rounded-[26px] p-5 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><p className="rev-kicker">12-month movement</p><h2 className="mt-2 text-2xl font-bold">Comparable snapshots, separated by value basis.</h2></div>
-          <p className="text-xs text-[color:var(--text-subtle)]">{history.snapshots.length} distinct committed state{history.snapshots.length === 1 ? "" : "s"}</p>
+          <p className="text-xs text-[color:var(--text-subtle)]">{history.snapshots.length} distinct completed read{history.snapshots.length === 1 ? "" : "s"}</p>
         </div>
         {history.snapshots.length ? (
           <div className="mt-6 overflow-x-auto pb-2">
@@ -90,16 +90,16 @@ export default async function HistoryPage() {
             </div>
             <div className="mt-4 flex flex-wrap gap-4 text-xs text-[color:var(--text-muted)]"><span><span aria-hidden="true" className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[rgba(67,179,155,.38)]" />Estimated quote opportunity</span><span><span aria-hidden="true" className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[color:var(--accent)]" />Calculated additive billing gap</span></div>
           </div>
-        ) : <div className="mt-5 rounded-[22px] border border-dashed border-[color:var(--border)] p-6 text-sm text-[color:var(--text-muted)]">A committed import creates the first intelligence snapshot. Re-importing unchanged evidence does not duplicate history.</div>}
+        ) : <div className="mt-5 rounded-[22px] border border-dashed border-[color:var(--border)] p-6 text-sm text-[color:var(--text-muted)]">A completed import creates the first history point. Re-importing unchanged evidence does not duplicate history.</div>}
       </section>
 
       <section className="rev-shell-panel rounded-[26px] p-5 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <div><p className="rev-kicker">Guarded segmentation</p><h2 className="mt-2 text-2xl font-bold">Source, owner and service concentration.</h2></div>
+          <div><p className="rev-kicker">Careful comparisons</p><h2 className="mt-2 text-2xl font-bold">Source, owner and service concentration.</h2></div>
           <p className="max-w-sm text-xs leading-5 text-[color:var(--text-subtle)]">Ranking requires {history.current.segmentation.minimumRecords}+ comparable records and findings on {history.current.segmentation.minimumFindingRecords}+ distinct records in one currency.</p>
         </div>
         {growthAccess.enabled && eligible.length ? <div className="mt-5 grid gap-4 lg:grid-cols-2">{eligible.slice(0, 8).map((segment) => <SegmentCard key={`${segment.layer}-${segment.dimension}-${segment.label}`} segment={segment} />)}</div> : growthAccess.enabled ? <p className="mt-5 rounded-[22px] border border-dashed border-[color:var(--border)] p-5 text-sm text-[color:var(--text-muted)]">No cohort clears the minimum sample guard. REVORY will not manufacture a leaderboard.</p> : null}
-        {growthAccess.enabled && suppressed.length ? <details className="mt-5 rounded-[22px] border border-[color:var(--border)] bg-[rgba(20,21,22,.45)] p-4"><summary className="cursor-pointer text-sm font-bold">{suppressed.length} suppressed cohort{suppressed.length === 1 ? "" : "s"}</summary><div className="mt-4 grid gap-2 sm:grid-cols-2">{suppressed.slice(0, 12).map((segment) => <div className="rounded-xl border border-[color:var(--border)] p-3 text-xs" key={`suppressed-${segment.layer}-${segment.dimension}-${segment.label}`}><b>{segment.label}</b><p className="mt-1 text-[color:var(--text-subtle)]">{segment.recordCount} records · {segment.findingRecordCount} with findings · {segment.suppressionReason?.replaceAll("_", " ").toLowerCase()}</p></div>)}</div></details> : null}
+        {growthAccess.enabled && suppressed.length ? <details className="mt-5 rounded-[22px] border border-[color:var(--border)] bg-[rgba(20,21,22,.45)] p-4"><summary className="cursor-pointer text-sm font-bold">{suppressed.length} group{suppressed.length === 1 ? "" : "s"} without enough comparable records</summary><div className="mt-4 grid gap-2 sm:grid-cols-2">{suppressed.slice(0, 12).map((segment) => <div className="rounded-xl border border-[color:var(--border)] p-3 text-xs" key={`suppressed-${segment.layer}-${segment.dimension}-${segment.label}`}><b>{segment.label}</b><p className="mt-1 text-[color:var(--text-subtle)]">{segment.recordCount} records · {segment.findingRecordCount} with findings · not ranked until enough comparable evidence is available</p></div>)}</div></details> : null}
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -108,7 +108,7 @@ export default async function HistoryPage() {
         <Metric label="File size" value={`${Math.round(volumePolicy.maxFileBytes / 1024 / 1024)} MB`} />
       </section>
 
-      <p className="text-xs leading-5 text-[color:var(--text-subtle)]">Growth is implemented as a gated local capability. A technical preview, target price or report does not make the offer sellable; independent logic review, customer evidence, billing, email and production operations remain separate gates.</p>
+      <p className="text-xs leading-5 text-[color:var(--text-subtle)]">Growth is not available for purchase yet. The screen remains visible only to authorized testing workspaces.</p>
       {!history.snapshots.length ? <Link className="rev-button-primary" href="/app/imports">Import current evidence</Link> : null}
     </div>
   );

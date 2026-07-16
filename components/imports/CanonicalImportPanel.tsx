@@ -110,7 +110,7 @@ function getColumnQuality(
     };
   }
   return {
-    detail: column.fillRate === 100 ? "Mapped and populated in every profiled row." : "Mapped with strong coverage.",
+    detail: column.fillRate === 100 ? "Matched and populated in every reviewed row." : "Matched with strong coverage.",
     label: "Ready",
     tone: "success" as const,
   };

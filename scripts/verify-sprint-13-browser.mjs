@@ -6,7 +6,7 @@ import path from "node:path";
 import { chromium } from "playwright";
 
 if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
-  throw new Error("Sprint 13 browser QA is disabled in production.");
+  throw new Error("Commercial browser QA is disabled in production.");
 }
 
 const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3004";
@@ -24,8 +24,7 @@ let browser = null;
 
 async function isServerReady() {
   try {
-    const response = await fetch(`${baseURL}/start`, { redirect: "manual" });
-    return response.status > 0;
+    return (await fetch(`${baseURL}/start`, { redirect: "manual" })).status > 0;
   } catch {
     return false;
   }
@@ -34,16 +33,14 @@ async function isServerReady() {
 async function ensureServer() {
   if (await isServerReady()) return;
   if (process.env.REVORY_QA_BASE_URL) throw new Error(`Configured QA server is unavailable at ${baseURL}.`);
-
   const envSource = fs.readFileSync(path.join(process.cwd(), ".env"), "utf8");
   const databaseLine = envSource.split(/\r?\n/).find((line) => line.trim().startsWith("DATABASE_URL="));
   const databaseUrl = databaseLine?.slice(databaseLine.indexOf("=") + 1).trim().replace(/^['"]|['"]$/g, "");
-  if (!databaseUrl) throw new Error("Local .env DATABASE_URL is required for Sprint 13 browser QA.");
+  if (!databaseUrl) throw new Error("Local .env DATABASE_URL is required for commercial browser QA.");
   const databaseHost = new URL(databaseUrl).hostname;
   if (!["localhost", "127.0.0.1", "::1"].includes(databaseHost)) {
-    throw new Error(`Sprint 13 browser QA refuses a non-local database host: ${databaseHost}`);
+    throw new Error(`Commercial browser QA refuses a non-local database host: ${databaseHost}`);
   }
-
   const nextBin = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
   serverProcess = spawn(process.execPath, [nextBin, "dev", "--port", "3004"], {
     cwd: process.cwd(),
@@ -59,19 +56,14 @@ async function ensureServer() {
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
   });
-  serverProcess.stdout?.on("data", (chunk) => {
-    serverLogs = `${serverLogs}${String(chunk)}`.slice(-12_000);
-  });
-  serverProcess.stderr?.on("data", (chunk) => {
-    serverLogs = `${serverLogs}${String(chunk)}`.slice(-12_000);
-  });
-
+  serverProcess.stdout?.on("data", (chunk) => { serverLogs = `${serverLogs}${String(chunk)}`.slice(-12_000); });
+  serverProcess.stderr?.on("data", (chunk) => { serverLogs = `${serverLogs}${String(chunk)}`.slice(-12_000); });
   for (let attempt = 0; attempt < 80; attempt += 1) {
     if (await isServerReady()) return;
-    if (serverProcess.exitCode !== null) throw new Error(`Sprint 13 QA server exited early.\n${serverLogs}`);
+    if (serverProcess.exitCode !== null) throw new Error(`Commercial QA server exited early.\n${serverLogs}`);
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  throw new Error(`Sprint 13 QA server did not become ready.\n${serverLogs}`);
+  throw new Error(`Commercial QA server did not become ready.\n${serverLogs}`);
 }
 
 try {
@@ -79,70 +71,55 @@ try {
   browser = await chromium.launch({ headless: true });
 
   for (const viewport of [
-    { height: 1000, label: "desktop", width: 1440 },
+    { height: 720, label: "desktop-1280", width: 1280 },
+    { height: 1000, label: "desktop-1440", width: 1440 },
     { height: 844, label: "mobile", width: 390 },
   ]) {
     const context = await browser.newContext({ baseURL, viewport });
     const page = await context.newPage();
     const errors = [];
-    page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
-    });
+    page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 
     await page.goto("/start", { waitUntil: "networkidle" });
-    await page.getByRole("heading", { name: "Choose how often you want REVORY working for you." }).waitFor();
-    const ongoingHeading = page.getByRole("heading", { name: "Ongoing plans" });
-    const auditHeading = page.getByRole("heading", { name: "Start with an Audit" });
-    if (!(await ongoingHeading.isVisible()) || !(await auditHeading.isVisible())) {
-      throw new Error(`${viewport.label}: Sprint 13 pricing groups are not visible.`);
+    await page.getByRole("heading", { name: "Start with the Audit. Continue only when recurring reviews are useful." }).waitFor();
+    const audit = page.getByRole("heading", { exact: true, name: "Quote Recovery Audit" }).locator("xpath=ancestor::article");
+    const starter = page.getByRole("heading", { exact: true, name: "Starter" }).locator("xpath=ancestor::article");
+    if (!(await audit.getByText("paid once", { exact: true }).isVisible())) {
+      throw new Error(`${viewport.label}: Audit cadence is unclear.`);
     }
-    const ongoingBox = await ongoingHeading.boundingBox();
-    const auditBox = await auditHeading.boundingBox();
-    if (!ongoingBox || !auditBox || ongoingBox.y >= auditBox.y) {
-      throw new Error(`${viewport.label}: Ongoing plans are not visually before the Audit group.`);
-    }
-    if ((await page.locator("article.rev-checkout-card").count()) !== 5) {
-      throw new Error(`${viewport.label}: Expected five commercial cards.`);
-    }
-
-    const cardFor = (label) => page.getByRole("heading", { exact: true, name: label }).locator("xpath=ancestor::article");
-    const starter = cardFor("Starter");
     if (!(await starter.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Starter cadence is unclear.`);
     }
     if (!(await starter.getByRole("button", { name: "Complete the $799 Audit first" }).isVisible())) {
       throw new Error(`${viewport.label}: Starter prerequisite is not visible.`);
     }
-    for (const plan of ["Growth", "Pro"]) {
-      const card = cardFor(plan);
-      if (!(await card.getByRole("button", { name: "Closed until the release gate passes" }).isVisible())) {
-        throw new Error(`${viewport.label}: ${plan} does not show an honest closed state.`);
+    const future = page.getByText("View future Growth, Pro and advanced Audit paths", { exact: true });
+    if (!(await future.isVisible())) throw new Error(`${viewport.label}: Future offer disclosure is missing.`);
+    if (await page.getByRole("heading", { exact: true, name: "Growth" }).isVisible()) {
+      throw new Error(`${viewport.label}: Gated future offers compete with the actionable path.`);
+    }
+    if (viewport.label === "desktop-1280") {
+      for (const card of [audit, starter]) {
+        const box = await card.boundingBox();
+        if (!box || box.y + box.height > viewport.height) {
+          throw new Error(`${viewport.label}: An actionable card falls below the first viewport.`);
+        }
       }
     }
-    for (const audit of ["Quote Recovery Audit", "Full Revenue Leak Audit"]) {
-      const card = cardFor(audit);
-      if (!(await card.getByText("paid once", { exact: true }).isVisible())) {
-        throw new Error(`${viewport.label}: ${audit} cadence is unclear.`);
-      }
-    }
-    if (await page.getByRole("button", { name: /annual|monthly/i }).count()) {
-      throw new Error(`${viewport.label}: Unimplemented monthly/annual control is interactive.`);
-    }
 
-    const firstCard = page.locator("article.rev-checkout-card").first();
-    await firstCard.hover();
-    await page.waitForTimeout(300);
-    const transform = await firstCard.evaluate((element) => getComputedStyle(element).transform);
-    if (transform === "none") throw new Error(`${viewport.label}: Existing premium card hover treatment was lost.`);
-
+    await audit.hover();
+    await page.waitForTimeout(250);
+    if ((await audit.evaluate((element) => getComputedStyle(element).transform)) === "none") {
+      throw new Error(`${viewport.label}: Premium card hover treatment was lost.`);
+    }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 1) throw new Error(`${viewport.label}: Pricing screen horizontal overflow is ${overflow}px.`);
     if (errors.length) throw new Error(`${viewport.label}: Browser console errors: ${errors.join(" | ")}`);
-    await page.screenshot({ path: path.join(evidenceDir, `sprint-13-${viewport.label}.png`), fullPage: true });
+    await page.screenshot({ path: path.join(evidenceDir, `commercial-${viewport.label}.png`), fullPage: true });
     await context.close();
   }
 
-  console.log(`Sprint 13 desktop/mobile pricing hierarchy and preserved premium hover: PASS (${evidenceDir})`);
+  console.log(`Audit-to-Starter hierarchy, first-viewport actions and premium hover: PASS (${evidenceDir})`);
 } finally {
   if (browser) await browser.close().catch(() => {});
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");

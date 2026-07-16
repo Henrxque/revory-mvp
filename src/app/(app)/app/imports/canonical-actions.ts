@@ -221,7 +221,7 @@ export async function reviewCanonicalFiles(
   } catch (error) {
     return {
       files: [],
-      message: error instanceof Error ? error.message : "REVORY could not profile these files safely.",
+      message: error instanceof Error ? error.message : "REVORY could not review these files safely.",
       sourceDetection: emptySourceDetection,
       status: "error",
     };
@@ -257,7 +257,7 @@ export async function importCanonicalFiles(
   ) {
     return {
       status: "error",
-      message: "Confirm that this committed snapshot should consume the one-time Quote Recovery Audit.",
+      message: "Confirm that this completed import should use your one-time Quote Recovery Audit.",
     };
   }
   if (
@@ -379,7 +379,7 @@ export async function importCanonicalFiles(
         status: "committed",
         message: result.created
           ? "Your files were imported and the latest REVORY read is ready. Each selected dataset replaced its prior active snapshot while preserving history."
-          : "This unchanged import was already committed; no records were duplicated.",
+          : "This unchanged import was already processed; no records were duplicated.",
         acceptedCount: result.session.acceptedCount,
         findingCount: findingSync.activeCount,
         unmatchedCount: plan.linkCoverage.unmatched,
@@ -398,7 +398,7 @@ export async function importCanonicalFiles(
       message:
         error instanceof Error
           ? error.message
-          : "REVORY could not commit this import. No partial batch was kept.",
+          : "REVORY could not finish this import. No partial batch was kept.",
     };
   }
 }

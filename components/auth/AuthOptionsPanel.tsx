@@ -77,7 +77,7 @@ export function AuthOptionsPanel({
 
             {googleConfigured ? null : (
               <p className="text-[11px] leading-[1.55] text-[#8f8aa4]">
-                Google needs OAuth credentials before launch. No other social providers are exposed.
+                Google sign-in is temporarily unavailable. Email and password remain available.
               </p>
             )}
           </div>

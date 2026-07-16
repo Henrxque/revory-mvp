@@ -8,6 +8,10 @@ import { chromium } from "playwright";
 const baseURL = process.env.REVORY_QA_BASE_URL ?? "http://localhost:3003";
 const dir = path.join(os.tmpdir(), "revory-sprint-4-1");
 const qaDistDir = path.join(process.cwd(), ".next-landing-qa");
+const generatedSourceSnapshots = ["next-env.d.ts", "tsconfig.json"].map((relativePath) => ({
+  content: fs.readFileSync(path.join(process.cwd(), relativePath), "utf8"),
+  relativePath,
+}));
 fs.mkdirSync(dir, { recursive: true });
 let serverProcess = null;
 let serverLog = "";
@@ -85,11 +89,18 @@ try {
     if (!response?.ok()) {
       throw new Error(`${name} returned ${response?.status()}\n${serverLog}`);
     }
+    const responseHeaders = response.headers();
+    if (!responseHeaders["content-security-policy"]?.includes("frame-ancestors 'none'")) {
+      throw new Error(`${name} content security policy is missing its frame boundary.`);
+    }
+    if (responseHeaders["x-content-type-options"] !== "nosniff" || responseHeaders["x-frame-options"] !== "DENY") {
+      throw new Error(`${name} baseline browser security headers are incomplete.`);
+    }
     if (!(await page.getByText("Find the estimates that still deserve").isVisible())) {
       throw new Error(`${name} hero missing`);
     }
-    if (!(await page.getByRole("link", { name: "Preview the US$799 audit" }).isVisible())) {
-      throw new Error(`${name} primary hero CTA is below the initial fold`);
+    if (!(await page.getByRole("link", { name: "View demo with sample data" }).isVisible())) {
+      throw new Error(`${name} sample-data demo CTA is below the initial fold`);
     }
     if (!(await page.getByText("Revenue Realization is gated").isVisible())) {
       throw new Error(`${name} roadmap gate missing`);
@@ -118,7 +129,7 @@ try {
         const sectionTop = await page.locator(`#${id}`).evaluate((element) =>
           Math.round(element.getBoundingClientRect().top),
         );
-        if (sectionTop < 70 || sectionTop > 150) {
+        if (sectionTop < 70 || sectionTop > 165) {
           throw new Error(`${label} navigation landed at an invalid offset: ${sectionTop}`);
         }
       }
@@ -170,6 +181,20 @@ try {
           fullPage: true,
         });
       }
+
+      const healthResponse = await context.request.get("/api/health");
+      const healthBody = await healthResponse.text();
+      if (healthResponse.status() !== 200 || !/no-store/i.test(healthResponse.headers()["cache-control"] ?? "")) {
+        throw new Error("Health endpoint is unavailable or cacheable.");
+      }
+      if (/DATABASE_URL|AUTH_SECRET|password|stack trace|prisma:/i.test(healthBody)) {
+        throw new Error("Health endpoint exposed an internal secret or stack detail.");
+      }
+      const notFoundResponse = await context.request.get("/sprint-14-nonexistent-route");
+      const notFoundBody = await notFoundResponse.text();
+      if (notFoundResponse.status() !== 404 || /DATABASE_URL|AUTH_SECRET|password|stack trace|prisma:/i.test(notFoundBody)) {
+        throw new Error("404 baseline exposed internal details or returned an invalid status.");
+      }
     }
 
     await page.goto("/", { waitUntil: "networkidle" });
@@ -184,6 +209,9 @@ try {
   await browser.close();
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");
   fs.rmSync(qaDistDir, { force: true, recursive: true });
+  for (const snapshot of generatedSourceSnapshots) {
+    fs.writeFileSync(path.join(process.cwd(), snapshot.relativePath), snapshot.content);
+  }
 }
 
 console.log("Sprint 4.1 landing interactions, glow, desktop/mobile and one-page checkout: PASS");

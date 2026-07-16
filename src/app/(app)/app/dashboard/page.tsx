@@ -5,6 +5,8 @@ import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { formatWorkspaceMoney } from "@/domain/revory/currency";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
+import { hasCompletedQuoteRecoveryBaseline } from "@/services/billing/commercial-readiness";
+import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 import { getQuoteRecoveryRead } from "@/services/quote-recovery/read-model";
 
 function title(type: string) {
@@ -18,8 +20,13 @@ function title(type: string) {
 export default async function DashboardPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/dashboard"));
-  const read = await getQuoteRecoveryRead(context.workspace.id);
+  const [read, hasCompletedAudit, entitlements] = await Promise.all([
+    getQuoteRecoveryRead(context.workspace.id),
+    hasCompletedQuoteRecoveryBaseline(context.workspace.id),
+    getWorkspaceEntitlements(context.workspace.id),
+  ]);
   const top = read.findings.slice(0, 3);
+  const hasActiveStarter = entitlements.some((entitlement) => entitlement.offerKey === "STARTER");
 
   return (
     <div className="space-y-6">
@@ -63,6 +70,8 @@ export default async function DashboardPage() {
           <Metric href="/app/revenue-leaks?filter=OPERATIONAL" label="Process gaps" note="Never counted as financial loss" value={String(read.summary.operationalCount)} />
         </div>
       </section>
+
+      {hasCompletedAudit && !hasActiveStarter ? <AuditContinuation /> : null}
 
       {!read.dataQuality.hasImport ? (
         <Empty />
@@ -109,6 +118,33 @@ export default async function DashboardPage() {
         </section>
       )}
     </div>
+  );
+}
+
+function AuditContinuation() {
+  return (
+    <section
+      aria-labelledby="audit-continuation-title"
+      className="rev-shell-panel grid gap-5 rounded-[26px] p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-6"
+      data-testid="audit-continuation"
+    >
+      <div className="max-w-3xl">
+        <p className="rev-kicker">After your completed Audit</p>
+        <h2 className="mt-2 text-xl font-bold" id="audit-continuation-title">
+          Your Audit establishes the baseline.
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
+          Starter keeps this review current with refreshed imports and movement over time.
+          It is US$399/month after the completed Audit.
+        </p>
+        <p className="mt-2 text-xs leading-5 text-[color:var(--text-subtle)]">
+          Starter is not active yet. This explanation does not change your access or billing.
+        </p>
+      </div>
+      <Link className="rev-button-secondary whitespace-nowrap" href="/start#quote-recovery-path-title">
+        See how Starter works
+      </Link>
+    </section>
   );
 }
 

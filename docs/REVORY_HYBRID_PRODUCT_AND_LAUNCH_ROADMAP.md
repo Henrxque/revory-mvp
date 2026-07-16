@@ -260,6 +260,22 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 **Exit:** all non-CNPJ/non-Stripe work passes with reproducible evidence; the only remaining Quote Recovery commercial blockers are explicitly owned legal-entity/counsel work, Stripe lifecycle activation and real customer/paid evidence. Checkout remains disabled.
 
+### Sprint 15 — Authentication confidence and Audit continuation
+
+**Local status:** implemented and verified on 2026-07-16; no deploy, payment activation or public-sale claim is included.
+
+**Outcome:** make email/password access unambiguous and explain the completed-Audit-to-Starter continuation without enabling checkout or expanding product scope.
+
+**Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; a completed Audit accurately explains Starter at US$399/month and cannot bypass its baseline or payment gate.
+
+### Sprint 16 — Production operations and recovery evidence
+
+**Prerequisite:** Stripe is configured and the Quote Recovery Audit/Starter lifecycle has passed test-mode checkout, signed webhook and portal verification.
+
+**Outcome:** turn the already-deployed operational foundations into reproducible production evidence: observed digest/retention schedules, external uptime alerting, one isolated restore and MFA/recovery ownership. This is an operations sprint, not a feature sprint.
+
+**Exit:** each operational control has a timestamped, redacted private evidence record and an owner; no customer data, secret or provider account identifier is committed; legal-entity and real-customer evidence gates remain separate.
+
 ## 9. Launch sequence
 
 1. internal and design-partner Quote Recovery reads;

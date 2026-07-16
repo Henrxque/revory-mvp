@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getCanonicalDataQualityDetail } from "@/services/canonical-intake/data-quality-detail";
+import { formatBuyerFieldLabel, formatEnumLabel } from "@/domain/revory/display-labels";
 
 type QualityTone = "danger" | "success" | "warning";
 
@@ -24,14 +25,6 @@ const ruleLabels: Record<string, string> = {
   OVERDUE_FOLLOW_UP: "Overdue follow-ups can be flagged",
   RECOVERABLE_LOST_QUOTE: "Recently lost estimates can be reviewed",
 };
-
-function readable(value: string) {
-  return value
-    .replaceAll("ExternalId", " ID")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replaceAll("_", " ")
-    .toLowerCase();
-}
 
 export default async function DataQualityPage() {
   const context = await getAppContext();
@@ -88,7 +81,7 @@ export default async function DataQualityPage() {
                       </Status>
                     </td>
                     <td className="px-3 py-3 font-bold">{issue.sourceEntityType} · {issue.sourceExternalId}</td>
-                    <td className="px-3 py-3 text-[color:var(--text-muted)]">{readable(issue.relationField)}</td>
+                    <td className="px-3 py-3 text-[color:var(--text-muted)]">{formatBuyerFieldLabel(issue.relationField)}</td>
                     <td className="px-3 py-3">{issue.targetEntityType} · {issue.targetExternalId}</td>
                     <td className="px-3 py-3 text-[color:var(--text-muted)]">{issue.sourceSystem}</td>
                   </tr>
@@ -109,7 +102,7 @@ export default async function DataQualityPage() {
             <div className="mt-4 space-y-3">
               {detail.issues.map((issue, index) => (
                 <article className={`rounded-2xl border p-4 ${toneStyles.danger}`} key={`${issue.code}:${index}`}>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em]">{issue.code.replaceAll("_", " ")}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em]">{formatEnumLabel(issue.code)}</p>
                   <p className="mt-2 text-sm text-[color:var(--foreground)]">{issue.message}</p>
                   {issue.fileName ? <p className="mt-1 text-xs text-[color:var(--text-muted)]">{issue.fileName}{issue.rowNumber ? ` · row ${issue.rowNumber}` : ""}</p> : null}
                 </article>
@@ -127,11 +120,11 @@ export default async function DataQualityPage() {
             {eligibility.map(([rule, state]) => (
               <article className={`rounded-2xl border p-4 ${toneStyles[state.eligible ? "success" : "warning"]}`} key={rule}>
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold text-[color:var(--foreground)]">{ruleLabels[rule] ?? readable(rule)}</p>
+                  <p className="text-sm font-bold text-[color:var(--foreground)]">{ruleLabels[rule] ?? formatEnumLabel(rule)}</p>
                   <Status tone={state.eligible ? "success" : "warning"}>{state.eligible ? "Ready" : "Needs data"}</Status>
                 </div>
                 {!state.eligible ? (
-                  <p className="mt-2 text-xs text-[color:var(--text-muted)]">Still needed: {state.missingFields.map(readable).join(", ")}</p>
+                  <p className="mt-2 text-xs text-[color:var(--text-muted)]">Still needed: {state.missingFields.map(formatBuyerFieldLabel).join(", ")}</p>
                 ) : null}
               </article>
             ))}
@@ -147,9 +140,6 @@ function Metric({ id, label, tone, value }: { id?: string; label: string; tone: 
   return (
     <div className={`rev-card-hover rounded-[20px] border p-4 ${toneStyles[tone]}`} id={id}>
       <div className="flex items-start justify-between gap-2">
-        <span aria-hidden="true" className="hidden">
-          {tone === "success" ? "✓" : tone === "warning" ? "!" : "×"}
-        </span>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em]">{label}</p>
         <span className="text-[9px] font-bold uppercase tracking-[0.12em]">{status}</span>
       </div>

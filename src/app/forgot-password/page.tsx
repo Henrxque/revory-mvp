@@ -41,7 +41,7 @@ export default async function ForgotPasswordPage() {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Enter the email on the workspace. If email delivery is configured, REVORY sends a short-lived reset link.
+                Enter the email on the workspace. REVORY will send a secure, short-lived reset link when the address matches an email/password account.
               </p>
             </div>
           </div>
@@ -49,7 +49,7 @@ export default async function ForgotPasswordPage() {
           <div className="mt-8 h-px bg-[color:var(--border)]" />
 
           <div className="mt-8 rounded-[28px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.035)] p-5 text-sm leading-6 text-[#bdb6ca]">
-            Reset links expire in 45 minutes. REVORY does not expose unused social providers or fake login paths.
+            Reset links expire in 45 minutes. The confirmation screen never reveals whether an account exists for the address.
           </div>
         </section>
 
@@ -59,7 +59,7 @@ export default async function ForgotPasswordPage() {
               <p className="rev-kicker">Account recovery</p>
               <h2 className="rev-display-panel max-w-[22rem]">Request a reset link.</h2>
               <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
-                Keep this narrow: one email, one reset link, no support theater.
+                Enter your account email and use the secure link we send to choose a new password.
               </p>
             </div>
 

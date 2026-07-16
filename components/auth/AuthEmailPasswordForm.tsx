@@ -19,8 +19,52 @@ export function AuthEmailPasswordForm({
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [successKind, setSuccessKind] = useState<
+    "ACCOUNT_CREATED" | "VERIFICATION_RESENT" | null
+  >(null);
   const [isPending, startTransition] = useTransition();
+
+  if (!isSignIn && successKind) {
+    const accountCreated = successKind === "ACCOUNT_CREATED";
+
+    return (
+      <div
+        aria-live="polite"
+        className="rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.08)] p-5"
+        data-testid="signup-success"
+        role="status"
+      >
+        <p className="rev-kicker">Email confirmation</p>
+        <h3 className="mt-2 text-xl font-bold text-[color:var(--foreground)]">
+          {accountCreated ? "Account created" : "Check your inbox"}
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">
+          {accountCreated
+            ? `We sent a confirmation link to ${email}. Open it to activate email/password access.`
+            : `We sent a new confirmation link to ${email}. Open it before signing in.`}
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Link className="rev-action-button-primary inline-flex px-4 py-3 text-sm" href="/sign-in">
+            Sign in
+          </Link>
+          <button
+            className="rev-button-secondary px-4 py-3 text-sm"
+            onClick={() => {
+              setEmail("");
+              setFullName("");
+              setMessage(null);
+              setSuccessKind(null);
+            }}
+            type="button"
+          >
+            Use another email
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -29,12 +73,18 @@ export function AuthEmailPasswordForm({
         event.preventDefault();
         setMessage(null);
 
+        if (!isSignIn && password !== passwordConfirmation) {
+          setMessage("Passwords do not match.");
+          return;
+        }
+
         startTransition(async () => {
           if (!isSignIn) {
             const result = await createEmailPasswordAccount({
               email,
               fullName,
               password,
+              passwordConfirmation,
             });
 
             setMessage(result.message);
@@ -44,6 +94,8 @@ export function AuthEmailPasswordForm({
             }
 
             setPassword("");
+            setPasswordConfirmation("");
+            setSuccessKind(result.successKind);
             return;
           }
 
@@ -84,6 +136,7 @@ export function AuthEmailPasswordForm({
           className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@company.com"
+          required
           type="email"
           value={email}
         />
@@ -97,13 +150,34 @@ export function AuthEmailPasswordForm({
           minLength={10}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="At least 10 characters"
+          required
           type="password"
           value={password}
         />
       </label>
 
+      {!isSignIn ? (
+        <label className="block">
+          <span className="rev-label">Confirm password</span>
+          <input
+            autoComplete="new-password"
+            className="rev-input-field mt-1.5 px-3.5 py-3 text-sm"
+            minLength={10}
+            onChange={(event) => setPasswordConfirmation(event.target.value)}
+            placeholder="Enter the same password again"
+            required
+            type="password"
+            value={passwordConfirmation}
+          />
+        </label>
+      ) : null}
+
       {message ? (
-        <p className="text-[11px] leading-[1.45] text-[color:var(--warning)]">
+        <p
+          aria-live="assertive"
+          className="text-[11px] leading-[1.45] text-[color:var(--warning)]"
+          role="alert"
+        >
           {message}
         </p>
       ) : null}

@@ -27,8 +27,8 @@ const signUpSteps = [
   },
   {
     label: "02",
-    title: "Keep the workspace foundation",
-    text: "REVORY creates the same isolated workspace foundation used by the existing product.",
+    title: "Keep company data separate",
+    text: "REVORY creates a private workspace for your company and its imported evidence.",
   },
 ];
 

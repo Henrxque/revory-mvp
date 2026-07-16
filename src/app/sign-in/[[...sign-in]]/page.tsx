@@ -27,8 +27,8 @@ const signInSteps = [
   },
   {
     label: "02",
-    title: "Resume the REVORY workspace",
-    text: "REVORY reopens the same narrow revenue leak workspace.",
+    title: "Resume your review",
+    text: "REVORY returns you to the same imported evidence and current recovery list.",
   },
 ];
 

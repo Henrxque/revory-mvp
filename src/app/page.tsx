@@ -68,12 +68,12 @@ const steps = [
   {
     number: "01",
     title: "Upload exports",
-    text: "Add canonical CSV or XLSX exports for customers, estimates and activities.",
+    text: "Add CSV or XLSX exports for customers, estimates and follow-up activity.",
   },
   {
     number: "02",
     title: "Confirm Data Quality",
-    text: "Review mapping, duplicates, eligibility and unmatched links before analysis.",
+    text: "Review column matches, duplicates and records that still need attention.",
   },
   {
     number: "03",
@@ -101,7 +101,7 @@ const faq = [
   ],
   [
     "What about invoices, change orders, underbilling and margin?",
-    "Jobs, invoices, change orders and costs can be ingested, reconciled and turned into evidence-first Tier 2 findings in the internal product. The Full Revenue Leak Audit remains unavailable for sale until independent logic review, customer validation and commercial configuration pass.",
+    "That advanced Revenue Realization review is being validated separately and is not included in the Audit or Starter offer. It will remain unavailable until job, invoice and change-order evidence can support the result reliably.",
   ],
   [
     "Is the US$799 audit available now?",
@@ -144,8 +144,8 @@ export default async function HomePage() {
             <Link className="rev-button-ghost hidden sm:inline-flex" href="/sign-in">
               Sign in
             </Link>
-            <Link className="rev-button-primary" href="/start">
-              Preview the audit
+            <Link className="rev-button-primary" href="/demo">
+              View sample demo
             </Link>
           </div>
         </div>
@@ -167,18 +167,14 @@ export default async function HomePage() {
           and kitchen-and-bath teams.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link className="rev-button-primary" href="/start">
-            Preview the US$799 audit →
+          <Link className="rev-button-primary" href="/demo">
+            View demo with sample data →
           </Link>
-          <a className="rev-button-secondary" href="#how">
-            See how the read works
-          </a>
-          <Link className="rev-button-ghost" href="/demo">
-            Explore sample workspace
-          </Link>
+          <Link className="rev-button-secondary" href="/start">See plans and pricing</Link>
+          <a className="rev-button-ghost" href="#how">See how it works</a>
         </div>
         <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
-          Self-service · CSV/XLSX-first · Deterministic rules · No CRM replacement
+          Self-service · CSV/XLSX-first · Transparent rules · No CRM replacement
         </p>
       </section>
 
@@ -232,11 +228,11 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="signals">
         <SectionIntro
-          body="Current claims map directly to implemented Tier 1 rules. Missing evidence suppresses unsupported financial output."
+          body="Each signal comes from visible evidence in the imported files. When the evidence is incomplete, REVORY shows the gap instead of inventing a financial result."
           kicker="Current Quote Recovery scope"
           title={
             <>
-              Six deterministic signals. <em>No inflated analytics.</em>
+              Six evidence-backed signals. <em>No inflated analytics.</em>
             </>
           }
         />
@@ -266,13 +262,13 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-4">
             <RoadmapCard
-              text="Estimate and activity intake, Data Quality, six Quote Recovery rules, evidence detail, dispositions, history and export."
-              title="Available in the current local product"
+              text="Estimate and activity intake, Data Quality, six Quote Recovery signals, evidence detail, review status, history and export."
+              title="Available in Quote Recovery"
             />
             <RoadmapCard
               gated
-              text="Tier 2 change-order, underbilling and margin findings are implemented locally with evidence views and an executive report. Controlled sale still requires independent logic review, customer validation and commercial configuration; Growth and Pro remain later gates."
-              title="Roadmap — not sold as current capability"
+              text="Change-order, underbilling and margin review is being validated separately. It is not included in the Audit or Starter offer shown below."
+              title="Advanced Revenue Realization — coming later"
             />
           </div>
         </div>
@@ -281,8 +277,8 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="pricing">
         <SectionIntro
           centered
-          body="Prices remain validation targets until the commercial gates pass. No legacy Stripe price is reused."
-          kicker="Pricing hypothesis"
+          body="Begin with one evidence-backed baseline. Continue monthly only when new exports and repeated reviews make the recurring read useful."
+          kicker="Quote Recovery pricing"
           title={
             <>
               Start with one focused <em>Quote Recovery read.</em>
@@ -291,20 +287,41 @@ export default async function HomePage() {
         />
         <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
           <PriceCard
-            body="A focused self-service read with prioritized findings, evidence, CSV export and an executive report."
-            cta="Preview the audit"
+            body="Best for a team that wants to find which open estimates deserve attention before committing to recurring software."
+            cta="Review the one-time Audit"
+            features={[
+              "Guided CSV/XLSX import and column review",
+              "Data Quality and records needing attention",
+              "Prioritized Quote Recovery opportunities",
+              "Executive PDF and CSV exports",
+            ]}
             label="Quote Recovery Audit"
             note="one time"
+            outcome="Outcome: your first trusted recovery baseline, paid once."
             price="$799"
             primary
           />
           <PriceCard
-            body="Adds repeated reads and movement over time after the audit and paid-beta gates pass."
-            cta="Review the recurring plan"
+            body="Best for a team that completed the Audit and wants to keep the recovery list current as estimates and follow-ups change."
+            cta="Review Starter continuity"
+            features={[
+              "New reads as fresh exports arrive",
+              "Saved column matches for faster refreshes",
+              "New, persistent, worsening and resolved movement",
+              "Recurring workspace access and billing portal",
+            ]}
             label="Starter"
-            note="per month · gated"
+            note="per month · after the Audit"
+            outcome="Entry condition: a completed Quote Recovery Audit."
             price="$399"
           />
+        </div>
+        <div className="mx-auto mt-7 flex max-w-4xl flex-col items-center justify-between gap-4 rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-center sm:flex-row sm:text-left">
+          <div>
+            <p className="font-bold">Want to see the result before choosing a plan?</p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">Open a read-only REVORY workspace built with fictional contractor data. No sign-in or upload required.</p>
+          </div>
+          <Link className="rev-button-secondary shrink-0" href="/demo">View sample demo →</Link>
         </div>
       </section>
 
@@ -535,21 +552,25 @@ function RoadmapCard({
 function PriceCard({
   body,
   cta,
+  features,
   label,
   note,
+  outcome,
   price,
   primary = false,
 }: {
   body: string;
   cta: string;
+  features: readonly string[];
   label: string;
   note: string;
+  outcome: string;
   price: string;
   primary?: boolean;
 }) {
   return (
     <article
-      className={`rev-marketing-card flex min-h-[370px] flex-col rounded-[28px] border p-6 ${
+      className={`rev-marketing-card flex min-h-[500px] flex-col rounded-[28px] border p-6 ${
         primary ? "rev-price-primary border-[color:var(--border-accent)]" : "border-[color:var(--border)]"
       }`}
     >
@@ -560,8 +581,19 @@ function PriceCard({
         {note}
       </p>
       <p className="mt-6 text-sm leading-7 text-[color:var(--text-muted)]">{body}</p>
+      <div className="my-5 h-px bg-[color:var(--border)]" />
+      <p className="text-xs font-bold uppercase tracking-[.12em] text-[color:var(--accent-light)]">Included</p>
+      <ul className="mt-3 space-y-2.5">
+        {features.map((feature) => (
+          <li className="flex items-start gap-2.5 text-sm leading-6 text-[color:var(--text-muted)]" key={feature}>
+            <span aria-hidden="true" className="mt-[.48rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--accent)]" />
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5 rounded-2xl border border-[color:var(--border)] bg-[rgba(20,21,22,.42)] px-4 py-3 text-xs font-semibold leading-5 text-[color:var(--foreground)]">{outcome}</p>
       <Link
-        className={primary ? "rev-button-primary mt-auto" : "rev-button-secondary mt-auto"}
+        className={primary ? "rev-button-primary mt-5" : "rev-button-secondary mt-5"}
         href="/start"
       >
         {cta}

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { RevenueRealizationFindingIcon } from "@/components/revenue-realization/RevenueRealizationFindingIcon";
 import type { JobBillingReconciliation, RevenueRealizationFindingType } from "@/domain/revory/revenue-realization";
+import { formatEnumLabel } from "@/domain/revory/display-labels";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getCapabilityAccess } from "@/services/billing/capabilities";
@@ -38,7 +39,7 @@ function ReconciliationCard({ row }: { row: JobBillingReconciliation }) {
           </h3>
         </div>
         <span className="rounded-full border border-[color:var(--border-accent)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--accent-light)]">
-          {row.valueBasis.replaceAll("_", " ")}
+          {formatEnumLabel(row.valueBasis)}
         </span>
       </div>
       {row.state === "ELIGIBLE" ? (
@@ -74,7 +75,7 @@ export default async function RevenueRealizationPage() {
   if (!read || read.summary.recordCounts.JOB === 0) {
     return (
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <p className="rev-kicker">Revenue Realization · local gated preview</p>
+        <p className="rev-kicker">Revenue Realization</p>
         <h1 className="rev-display-hero mt-3 max-w-[42rem]">Add explicit job and billing evidence before comparing records.</h1>
         <p className="mt-4 max-w-[44rem] text-sm leading-7 text-[color:var(--text-muted)]">
           REVORY never guesses links from names or amounts. Import jobs, invoices, change orders and costs with external IDs.
@@ -88,18 +89,18 @@ export default async function RevenueRealizationPage() {
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
-        <p className="rev-kicker">Revenue Realization · Sprint 9 local product gate</p>
+        <p className="rev-kicker">Revenue Realization</p>
         <h1 className="rev-display-hero mt-3 max-w-[46rem]">Turn defensible reconciliation into review-ready findings.</h1>
         <p className="mt-4 max-w-[50rem] text-sm leading-7 text-[color:var(--text-muted)]">
-          Tier 2 rules run without AI. Every financial value has an observed or calculated basis;
-          ambiguous links and incomplete inputs suppress the claim. Findings are review opportunities,
-          not confirmed accounting loss or guaranteed recovery.
+          Every financial value has an observed or calculated basis. Unclear record connections and
+          incomplete inputs prevent unsupported totals. Findings are review opportunities, not confirmed
+          accounting loss or guaranteed recovery.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link className="rev-button-primary" href="/app/revenue-realization/report">Open executive report</Link>
           <Link className="rev-button-secondary" href="/app/imports">Review imports</Link>
           <form action={refreshRevenueRealizationFindings}>
-            <button className="rev-button-ghost" type="submit">Refresh deterministic findings</button>
+            <button className="rev-button-ghost" type="submit">Refresh findings</button>
           </form>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -130,13 +131,13 @@ export default async function RevenueRealizationPage() {
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
                         <p className="rev-label">Job {finding.jobExternalId}</p>
-                        <h3 className="mt-2 text-base font-bold">{finding.findingType.replaceAll("_", " ")}</h3>
+                        <h3 className="mt-2 text-base font-bold">{formatEnumLabel(finding.findingType)}</h3>
                       </div>
                       <strong>{money(finding.valueCents, finding.currency)}</strong>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-[color:var(--text-muted)]">{finding.reason}</p>
                     <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider text-[color:var(--text-subtle)]">
-                      <span>{finding.valueBasis}</span><span>·</span><span>{finding.confidence} confidence</span><span>·</span><span>P{finding.priority}</span>
+                      <span>{formatEnumLabel(finding.valueBasis)}</span><span>·</span><span>{formatEnumLabel(finding.confidence)} confidence</span><span>·</span><span>Priority {finding.priority}</span>
                     </div>
                   </div>
                 </div>
@@ -145,7 +146,7 @@ export default async function RevenueRealizationPage() {
           </div>
         ) : (
           <div className="rev-card mt-5 rounded-[20px] p-5 text-sm leading-6 text-[color:var(--text-muted)]">
-            No active Tier 2 finding is supported by the current evidence. Refresh after importing Sprint 9 fields such as explicit billing status or target gross margin.
+            The current files do not support an active Revenue Realization finding. Review job billing status, invoice evidence and target gross margin before refreshing.
           </div>
         )}
       </section>
@@ -157,7 +158,7 @@ export default async function RevenueRealizationPage() {
       </section>
 
       <section className="rev-shell-panel rounded-[28px] p-6">
-        <p className="rev-kicker">Explicit-link review</p>
+        <p className="rev-kicker">Record connection review</p>
         <h2 className="rev-display-section mt-2">No silent linking.</h2>
         {reviewLinks.length ? (
           <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -168,7 +169,7 @@ export default async function RevenueRealizationPage() {
               </article>
             ))}
           </div>
-        ) : <p className="mt-4 text-sm text-[color:var(--text-muted)]">Every explicit link resolves to exactly one record.</p>}
+        ) : <p className="mt-4 text-sm text-[color:var(--text-muted)]">Every imported reference connects to exactly one record.</p>}
       </section>
     </div>
   );
