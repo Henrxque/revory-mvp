@@ -81,11 +81,11 @@ try {
     page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 
     await page.goto("/start", { waitUntil: "networkidle" });
-    await page.getByRole("heading", { name: "Start with the Audit. Continue only when recurring reviews are useful." }).waitFor();
-    const audit = page.getByRole("heading", { exact: true, name: "Quote Recovery Audit" }).locator("xpath=ancestor::article");
+    await page.getByRole("heading", { name: "Make Growth your recurring revenue-leak management rhythm." }).waitFor();
+    const growth = page.getByRole("heading", { exact: true, name: "Growth" }).locator("xpath=ancestor::article");
     const starter = page.getByRole("heading", { exact: true, name: "Starter" }).locator("xpath=ancestor::article");
-    if (!(await audit.getByText("paid once", { exact: true }).isVisible())) {
-      throw new Error(`${viewport.label}: Audit cadence is unclear.`);
+    if (!(await growth.getByText("per month", { exact: true }).isVisible())) {
+      throw new Error(`${viewport.label}: Growth cadence is unclear.`);
     }
     if (!(await starter.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Starter cadence is unclear.`);
@@ -93,13 +93,13 @@ try {
     if (!(await starter.getByRole("button", { name: "Complete the US$799 Audit first" }).isVisible())) {
       throw new Error(`${viewport.label}: Starter prerequisite is not visible.`);
     }
-    const future = page.getByText("View future Growth, Pro and advanced Audit paths", { exact: true });
+    const future = page.getByText("View one-time Audit and advanced Pro options", { exact: true });
     if (!(await future.isVisible())) throw new Error(`${viewport.label}: Future offer disclosure is missing.`);
-    if (await page.getByRole("heading", { exact: true, name: "Growth" }).isVisible()) {
-      throw new Error(`${viewport.label}: Gated future offers compete with the actionable path.`);
+    if (await page.getByRole("heading", { exact: true, name: "Pro" }).isVisible()) {
+      throw new Error(`${viewport.label}: Gated Pro offer competes with the actionable path.`);
     }
     if (viewport.label === "desktop-1280") {
-      for (const card of [audit, starter]) {
+      for (const card of [growth, starter]) {
         const box = await card.boundingBox();
         if (!box || box.y + box.height > viewport.height) {
           throw new Error(`${viewport.label}: An actionable card falls below the first viewport.`);
@@ -107,9 +107,9 @@ try {
       }
     }
 
-    await audit.hover();
+    await growth.hover();
     await page.waitForTimeout(250);
-    if ((await audit.evaluate((element) => getComputedStyle(element).transform)) === "none") {
+    if ((await growth.evaluate((element) => getComputedStyle(element).transform)) === "none") {
       throw new Error(`${viewport.label}: Premium card hover treatment was lost.`);
     }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -119,7 +119,7 @@ try {
     await context.close();
   }
 
-  console.log(`Audit-to-Starter hierarchy, first-viewport actions and premium hover: PASS (${evidenceDir})`);
+  console.log(`Growth-first hierarchy, first-viewport actions and premium hover: PASS (${evidenceDir})`);
 } finally {
   if (browser) await browser.close().catch(() => {});
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");

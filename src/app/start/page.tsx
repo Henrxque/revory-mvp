@@ -10,7 +10,7 @@ import { getAppContext } from "@/services/app/get-app-context";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { hasCompletedQuoteRecoveryBaseline } from "@/services/billing/commercial-readiness";
 import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
-import { isRevoryOfferConfigured } from "@/services/billing/revory-offers";
+import { isPaidCheckoutReleaseEnabled, isRevoryOfferConfigured } from "@/services/billing/revory-offers";
 
 type BillingOffer = {
   badge: string;
@@ -46,7 +46,7 @@ const starterPlan: BillingOffer =
 
 const quoteRecoveryAudit: BillingOffer =
   {
-    badge: "Start here",
+    badge: "One-time option",
     description:
       "Create the first evidence-backed read of estimates and follow-ups before deciding whether recurring monitoring is useful.",
     entryCondition: "Paid once. Continue with Starter only if repeated reviews are useful.",
@@ -56,7 +56,6 @@ const quoteRecoveryAudit: BillingOffer =
       "Prioritized Quote Recovery findings",
       "Executive CSV and PDF exports",
     ],
-    featured: true,
     label: "Quote Recovery Audit",
     offerKey: "QUOTE_RECOVERY_AUDIT",
     price: "US$799",
@@ -64,24 +63,27 @@ const quoteRecoveryAudit: BillingOffer =
     stage: "Your first REVORY read",
   };
 
-const futureOffers: readonly BillingOffer[] = [
+const growthPlan: BillingOffer =
   {
-    badge: "Coming later",
+    badge: "Recommended",
     description:
-      "Add 12-month history, reliable comparisons and one focused weekly management decision.",
-    entryCondition: "Not available for purchase yet.",
+      "Build a recurring management rhythm with longer movement history, segmentation and one focused weekly decision.",
+    entryCondition: "Starts as a monthly subscription. No one-time Audit is added automatically.",
     features: [
       "Recurring Quote Recovery access",
-      "Twelve-month movement",
+      "Twelve-month movement history",
       "Source, owner and service segmentation",
       "Weekly management read and PDF",
     ],
+    featured: true,
     label: "Growth",
     offerKey: "GROWTH",
     price: "US$799",
     priceNote: "per month",
-    stage: "Advanced recurring intelligence",
-  },
+    stage: "Main recurring plan",
+  };
+
+const futureOffers: readonly BillingOffer[] = [
   {
     badge: "Coming later",
     description:
@@ -228,6 +230,7 @@ export default async function StartPage({
   searchParams: Promise<{ billing?: string }>;
 }) {
   const internalPreview = isInternalMigrationPreviewEnabled();
+  const paidCheckoutEnabled = isPaidCheckoutReleaseEnabled();
   const session = await getAuthSession();
   const params = await searchParams;
 
@@ -253,30 +256,32 @@ export default async function StartPage({
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             <RevoryStatusBadge tone="accent">Quote Recovery path</RevoryStatusBadge>
-            <RevoryStatusBadge tone="future">Checkout closed</RevoryStatusBadge>
+            <RevoryStatusBadge tone={paidCheckoutEnabled ? "accent" : "future"}>
+              {paidCheckoutEnabled ? "Secure checkout" : "Activation pending"}
+            </RevoryStatusBadge>
             {session?.user?.id ? <AuthSignOutButton callbackUrl="/" compact /> : null}
           </div>
         </header>
 
         <section className="grid gap-7 py-7 lg:min-h-[calc(100svh-92px)] lg:grid-cols-[minmax(280px,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-8 lg:py-4">
           <div className="px-2 lg:pr-2">
-            <p className="rev-kicker">One clear path</p>
+            <p className="rev-kicker">Recurring revenue intelligence</p>
             <h1 className="mt-3 max-w-[36rem] text-balance text-[clamp(2.4rem,4.2vw,4rem)] font-semibold leading-[0.94] tracking-[-0.055em] text-[color:var(--foreground)]">
-              Start with the Audit. Continue only when recurring reviews are useful.
+              Make Growth your recurring revenue-leak management rhythm.
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-6 text-[color:var(--text-muted)]">
-              The one-time Quote Recovery Audit creates your first trusted read. Starter keeps that read current as new exports arrive.
+              Growth is the main REVORY plan for teams that want history, segmentation and a focused weekly management decision.
             </p>
             <p className="mt-3 max-w-xl text-xs font-semibold leading-5 text-[color:var(--accent-light)]">
-              Every ongoing plan begins with the matching one-time Audit.
+              US$799 per month. A one-time Audit is never added automatically.
             </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
               <div className="rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)] px-4 py-3">
-                <p className="rev-label">01 · Establish the baseline</p>
-                <p className="mt-1 text-sm font-bold">Quote Recovery Audit · US$799 paid once</p>
+                <p className="rev-label">01 · Main recurring plan</p>
+                <p className="mt-1 text-sm font-bold">Growth · US$799 per month</p>
               </div>
               <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3">
-                <p className="rev-label">02 · Keep it current</p>
+                <p className="rev-label">02 · Lighter continuity</p>
                 <p className="mt-1 text-sm font-bold">Starter · US$399 per month after the Audit</p>
               </div>
             </div>
@@ -290,17 +295,17 @@ export default async function StartPage({
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-end justify-between gap-2 px-1">
               <div>
-                <p className="rev-kicker">Quote Recovery</p>
+                <p className="rev-kicker">Monthly plans</p>
                 <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em]" id="quote-recovery-path-title">
-                  Choose your next step
+                  Choose your recurring plan
                 </h2>
               </div>
               <p className="max-w-xs text-xs leading-5 text-[color:var(--text-subtle)]">
-                The Audit is required once. Starter never replaces it.
+                Growth is the recommended path. Starter requires the completed one-time Audit.
               </p>
             </div>
             <div aria-labelledby="quote-recovery-path-title" className="grid items-stretch gap-3 md:grid-cols-2">
-              {[quoteRecoveryAudit, starterPlan].map((offer) => (
+              {[growthPlan, starterPlan].map((offer) => (
                 <OfferCard
                   activeOfferKeys={activeOfferKeys}
                   compact
@@ -314,11 +319,11 @@ export default async function StartPage({
 
             <details className="rev-checkout-future mt-3 rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,0.014)]">
               <summary className="flex cursor-pointer items-center justify-between gap-4 px-4 py-3 text-sm font-bold text-[color:var(--text-muted)] transition hover:text-[color:var(--foreground)]">
-                <span>View future Growth, Pro and advanced Audit paths</span>
+                <span>View one-time Audit and advanced Pro options</span>
                 <span aria-hidden="true" className="text-lg text-[color:var(--accent-light)]">+</span>
               </summary>
               <div className="grid gap-3 border-t border-[color:var(--border)] p-3 lg:grid-cols-3">
-                {futureOffers.map((offer) => (
+                {[quoteRecoveryAudit, ...futureOffers].map((offer) => (
                   <OfferCard
                     activeOfferKeys={activeOfferKeys}
                     compact
@@ -331,7 +336,9 @@ export default async function StartPage({
               </div>
             </details>
             <p className="mt-3 text-center text-[11px] leading-5 text-[color:var(--text-subtle)]">
-              Checkout is closed during private validation. No charge can be made from this screen.
+              {paidCheckoutEnabled
+                ? "Checkout uses Stripe. Subscriptions renew monthly until canceled from billing."
+                : "Checkout activation is pending final Stripe verification. No charge can be made from this screen yet."}
             </p>
           </div>
         </section>

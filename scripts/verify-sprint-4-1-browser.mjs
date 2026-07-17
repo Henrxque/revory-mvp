@@ -122,7 +122,9 @@ try {
         ["FAQ", "faq"],
       ]) {
         await page.getByRole("link", { name: label, exact: true }).click();
-        await page.waitForTimeout(900);
+        // The landing keeps native smooth scrolling; the FAQ is far enough down the
+        // page that Chromium can still be animating after the shorter hover delay.
+        await page.waitForTimeout(1_500);
         if ((await page.evaluate(() => window.location.hash)) !== `#${id}`) {
           throw new Error(`${label} navigation did not update the hash`);
         }

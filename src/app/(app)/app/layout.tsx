@@ -152,7 +152,7 @@ export default async function PrivateAppLayout({
           {internalPreview ? (
             <aside className="rounded-[22px] border border-[color:var(--border-accent)] bg-[color:var(--surface-soft)] px-4 py-3 text-[12px] leading-5 text-[color:var(--text-muted)]">
               <strong className="text-[color:var(--foreground)]">Internal migration preview.</strong>{" "}
-              The contractor-native Quote Recovery slice is active locally. Audit checkout remains gated by dedicated Stripe sandbox configuration.
+              REVORY is active. Secure Growth checkout remains gated until final Stripe verification is complete.
             </aside>
           ) : null}
 

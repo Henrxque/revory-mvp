@@ -4,7 +4,7 @@ import type { RevoryOfferKey } from "@prisma/client";
 export const revoryOffers = {
   QUOTE_RECOVERY_AUDIT: { commerciallyAvailable: true, label: "Quote Recovery Audit", priceUsd: 799, mode: "payment", priceEnv: "STRIPE_QUOTE_RECOVERY_AUDIT_PRICE_ID" },
   STARTER: { commerciallyAvailable: true, label: "Starter", priceUsd: 399, mode: "subscription", priceEnv: "STRIPE_STARTER_PRICE_ID" },
-  GROWTH: { commerciallyAvailable: false, label: "Growth", priceUsd: 799, mode: "subscription", priceEnv: null },
+  GROWTH: { commerciallyAvailable: true, label: "Growth", priceUsd: 799, mode: "subscription", priceEnv: "STRIPE_REVORY_GROWTH_MONTHLY_PRICE_ID" },
   PRO: { commerciallyAvailable: false, label: "Pro", priceUsd: 1499, mode: "subscription", priceEnv: null },
 } as const;
 

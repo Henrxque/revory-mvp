@@ -34,10 +34,10 @@ for (const copy of [
   assert.ok(landing.includes(copy), `Landing pricing explanation is missing: ${copy}`);
 }
 assert.ok(
-  start.includes("Start with the Audit. Continue only when recurring reviews are useful.") &&
-    start.includes("View future Growth, Pro and advanced Audit paths") &&
+  start.includes("Make Growth your recurring revenue-leak management rhythm.") &&
+    start.includes("View one-time Audit and advanced Pro options") &&
     start.includes("Not available for purchase yet."),
-  "Start must keep one actionable Audit-to-Starter path and collapse future offers.",
+  "Start must prioritize Growth, preserve Starter's Audit prerequisite and collapse advanced offers.",
 );
 assert.ok(
   labels.includes('amountcents: "Estimate amount"') &&

@@ -155,7 +155,7 @@ export default async function HomePage() {
       </nav>
 
       <div className="border-b border-[rgba(67,179,155,.16)] bg-[rgba(67,179,155,.045)] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[.16em] text-[color:var(--accent-light)]">
-        Private launch · Audit checkout remains gated until validation is complete
+        Private launch · Secure checkout activation is being finalized
       </div>
 
       <section className="rev-hero mx-auto flex max-w-[1240px] flex-col items-center px-5 pb-16 pt-14 text-center md:pb-20 md:pt-16">
@@ -173,7 +173,7 @@ export default async function HomePage() {
           <a className="rev-button-primary" href="#pricing">
             See plans and pricing →
           </a>
-          <Link className="rev-button-secondary" href="/demo">View sample demo</Link>
+          <Link className="rev-button-secondary" href="/demo">View demo with sample data</Link>
           <a className="rev-button-ghost" href="#how">See how it works</a>
         </div>
         <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
@@ -280,7 +280,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="pricing">
         <SectionIntro
           centered
-          body="Every ongoing plan begins with the matching one-time Audit. The Audit establishes the evidence baseline; monthly access keeps that read current when repeated reviews are useful."
+          body="Growth is REVORY's main recurring plan: ongoing history, segmentation and one focused weekly management read. Starter remains the lighter continuity path, while one-time Audits remain available for teams that want a focused first read."
           kicker="Quote Recovery pricing"
           title={
             <>
@@ -291,16 +291,16 @@ export default async function HomePage() {
 
         <div className="mx-auto mt-10 max-w-5xl rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.055)] px-5 py-4 text-center">
           <p className="text-sm font-bold text-[color:var(--foreground)]">
-            Every ongoing plan begins with the matching one-time Audit.
+            Growth is the recommended recurring REVORY plan.
           </p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
-            An Audit is paid once. A monthly plan is a separate continuation and never activates automatically.
+            US$799/month, billed monthly. It starts only when you choose it and can be managed separately in billing.
           </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-6xl">
           <div className="mb-5">
-            <p className="rev-kicker">Continue after the baseline</p>
+            <p className="rev-kicker">Recurring access</p>
             <h3 className="mt-2 text-2xl font-bold">Monthly plans</h3>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -321,9 +321,10 @@ export default async function HomePage() {
               price="US$399"
             />
             <PriceCard
-              body="Add longer movement history and a focused weekly management read after paid evidence supports the release."
-              cta="Coming later"
-              eyebrow="Closed release gate"
+              available
+              body="Turn each new import into a management rhythm with longer movement history, segmentation and one focused weekly decision."
+              cta="Start with Growth"
+              eyebrow="Recommended recurring plan"
               features={[
                 "Recurring Quote Recovery access",
                 "Twelve-month movement history",
@@ -332,8 +333,9 @@ export default async function HomePage() {
               ]}
               label="Growth"
               note="per month"
-              outcome="Not available for purchase yet."
+              outcome="Best for teams that want REVORY to become a recurring weekly management habit."
               price="US$799"
+              primary
             />
             <PriceCard
               body="Add advanced Revenue Realization review only after job, invoice and change-order evidence passes its gate."
@@ -363,7 +365,7 @@ export default async function HomePage() {
             available
             body="Best for a team that wants to find which open estimates deserve attention before committing to recurring software."
             cta="Review the one-time Audit"
-            eyebrow="Primary offer"
+            eyebrow="Focused one-time read"
             features={[
               "Guided CSV/XLSX import and column review",
               "Data Quality and records needing attention",
@@ -374,7 +376,6 @@ export default async function HomePage() {
             note="paid once"
             outcome="Outcome: your first trusted recovery baseline, paid once."
             price="US$799"
-            primary
           />
           <PriceCard
             body="An advanced estimate-to-job, invoice and change-order baseline for a future Revenue Realization release."
@@ -399,7 +400,7 @@ export default async function HomePage() {
             US$799 paid once Audit <span className="text-[color:var(--accent-light)]">→</span> US$399/month Starter
           </div>
           <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-sm font-semibold text-[color:var(--text-muted)]">
-            US$1,499 paid once Full Audit <span className="text-[color:var(--accent-light)]">→</span> US$799/month Growth or US$1,499/month Pro when released
+            US$799/month Growth <span className="text-[color:var(--accent-light)]">→</span> REVORY&apos;s main recurring intelligence plan
           </div>
         </div>
 
@@ -412,7 +413,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="rev-section-band scroll-mt-24" id="faq">
+      <section className="rev-section-band min-h-[calc(100svh-96px)] scroll-mt-24" id="faq">
         <div className="mx-auto max-w-4xl px-5 py-24">
           <SectionIntro
             body="Short answers, clear limitations and no hidden service layer."

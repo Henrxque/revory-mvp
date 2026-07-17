@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
   const user = await syncAuthenticatedUser(); if (!user) return NextResponse.redirect(new URL("/sign-in?redirect_url=%2Fstart", request.url), { status: 303 });
   const workspace = await getOrCreateWorkspace(user); const existing = await getWorkspaceEntitlements(workspace.id);
   if (existing.some((entitlement) => entitlement.offerKey === offerKey)) return NextResponse.redirect(new URL("/app/dashboard", request.url), { status: 303 });
+  const activeRecurringEntitlement = existing.find((entitlement) => entitlement.offerKey !== "QUOTE_RECOVERY_AUDIT");
+  if (getRevoryOffer(offerKey).mode === "subscription" && activeRecurringEntitlement) {
+    return NextResponse.redirect(new URL("/app/settings?billing=manage-subscription", request.url), { status: 303 });
+  }
   if (offerKey === "STARTER" && !(await hasCompletedQuoteRecoveryBaseline(workspace.id))) {
     return NextResponse.redirect(new URL("/start?billing=baseline-required&offer=STARTER", request.url), { status: 303 });
   }

@@ -58,7 +58,7 @@ export default async function SettingsPage() {
               <label className="flex items-center gap-3 text-sm"><input defaultChecked={digest?.enabled ?? false} name="enabled" type="checkbox" />Enable weekly digest</label>
               <button className="rev-button-secondary mt-4">Save preference</button>
             </form>
-          ) : <p className="text-sm text-[color:var(--text-muted)]">Growth access is required. Checkout remains closed while the commercial gate is incomplete.</p>}
+          ) : <p className="text-sm text-[color:var(--text-muted)]">Growth access is required. Secure checkout appears after final Stripe verification.</p>}
           <p className="mt-3 text-xs text-[color:var(--text-subtle)]">
             {growthAccess.preview
               ? "Internal preview only; provider sends stay blocked without a real Growth entitlement."
@@ -69,7 +69,7 @@ export default async function SettingsPage() {
                 : "Delivery is paused until Resend and the sending domain are configured."}
           </p>
         </Card>
-        <Card body="Review your current REVORY access and open the secure billing portal when a paid plan is active. Growth remains unavailable for purchase." title="Plans and billing">
+        <Card body="Review your current REVORY access and open the secure billing portal when a paid plan is active. Growth is REVORY's main recurring plan; checkout stays fail-closed until Stripe verification is complete." title="Plans and billing">
           {context.workspace.stripeCustomerId
             ? <form action="/api/billing/portal" method="post"><button className="rev-button-secondary" type="submit">Open billing portal</button></form>
             : <Link className="rev-button-secondary" href="/start">Review gated plans</Link>}

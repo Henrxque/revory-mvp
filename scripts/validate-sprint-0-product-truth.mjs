@@ -33,8 +33,8 @@ check(
 );
 check(
   "visible-prelaunch-gate",
-  home.includes("Audit checkout remains gated until validation is complete") &&
-    start.includes("Checkout closed"),
+  home.includes("Secure checkout activation is being finalized") &&
+    start.includes("Activation pending"),
   "Landing and start screen visibly mark checkout as closed during validation.",
 );
 check(
@@ -43,17 +43,17 @@ check(
   "Public audit CTAs remove the historical Growth query parameter.",
 );
 check(
-  "audit-required-baseline",
-  /const quoteRecoveryAudit:[\s\S]*?featured:\s*true,[\s\S]*?label:\s*"Quote Recovery Audit"/.test(start),
-  "The US$799 Quote Recovery Audit remains the highlighted required baseline.",
+  "growth-recurring-primary",
+  /const growthPlan:[\s\S]*?featured:\s*true,[\s\S]*?offerKey:\s*"GROWTH"/.test(start),
+  "Growth is the highlighted US$799/month recurring plan.",
 );
 check(
   "sprint-14-commercial-path",
-  start.includes("Start with the Audit. Continue only when recurring reviews are useful.") &&
-    start.includes("[quoteRecoveryAudit, starterPlan]") &&
+  start.includes("Make Growth your recurring revenue-leak management rhythm.") &&
+    start.includes("[growthPlan, starterPlan]") &&
     start.includes('priceNote: "paid once"') &&
     start.includes('priceNote: "per month"'),
-  "The pricing screen presents the one-time Audit before Starter and states billing cadence.",
+  "The pricing screen presents Growth before Starter and preserves explicit billing cadence.",
 );
 check(
   "starter-is-recurring-continuation",

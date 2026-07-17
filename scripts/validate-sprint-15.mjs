@@ -94,17 +94,19 @@ for (const contract of [
   "paid once",
   "US$1,499",
   "Full Revenue Leak Audit",
-  "Every ongoing plan begins with the matching one-time Audit.",
+  "Growth is the recommended recurring REVORY plan.",
 ]) {
   assert.ok(home.includes(contract), `Landing pricing must include the explicit contract: ${contract}`);
-  assert.ok(start.includes(contract) || contract === "Every ongoing plan begins with the matching one-time Audit.", `Start pricing must include the explicit contract: ${contract}`);
+  assert.ok(start.includes(contract) || contract === "Growth is the recommended recurring REVORY plan.", `Start pricing must include the explicit contract: ${contract}`);
 }
 assert.ok(
   home.includes("Not available for purchase yet.") &&
     start.includes("Not available for purchase yet.") &&
+    home.includes("Start with Growth") &&
+    start.includes('offerKey: "GROWTH"') &&
     !home.toLowerCase().includes("per year") &&
     !start.toLowerCase().includes("per year"),
-  "Growth, Pro and Full Audit must stay visibly closed and annual billing must remain absent.",
+  "Growth must be connected, Pro and Full Audit must stay visibly closed, and annual billing must remain absent.",
 );
 
 console.log("Sprint 15 auth, Audit continuation, commercial CTA, product-faithful demo and pricing hierarchy contract: PASS");

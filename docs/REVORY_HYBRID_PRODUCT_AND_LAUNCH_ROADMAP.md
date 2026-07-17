@@ -268,6 +268,14 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 **Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; the primary landing CTA reaches pricing while a separate sample route mirrors the read-only product experience; every visible price distinguishes paid-once Audit from monthly plan, including the closed US$1,499 Full Audit; and a completed Audit accurately explains Starter at US$399/month without bypassing its baseline or payment gate.
 
+### Sprint 15.1 — Growth commercial connection
+
+**Current founder decision:** Growth at US$799/month is the main recurring REVORY plan and may start directly. Starter remains the lighter post-Audit continuation, while Pro and the Full Revenue Leak Audit retain their own gates.
+
+**Outcome:** connect the implemented Sprint 10 Growth surface to a dedicated non-legacy Stripe price, present it as the recommended recurring plan and keep charging fail-closed until the signed webhook and subscription lifecycle pass end to end.
+
+**Exit:** Growth uses `STRIPE_REVORY_GROWTH_MONTHLY_PRICE_ID`, no legacy Stripe key is reused, the home and `/start` agree on cadence and availability, and `REVORY_PAID_CHECKOUT_ENABLED` remains false until live verification evidence exists.
+
 ### Sprint 16 — Production operations and recovery evidence
 
 **Prerequisite:** Stripe is configured and the Quote Recovery Audit/Starter lifecycle has passed test-mode checkout, signed webhook and portal verification.
