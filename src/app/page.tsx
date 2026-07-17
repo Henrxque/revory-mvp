@@ -144,9 +144,12 @@ export default async function HomePage() {
             <Link className="rev-button-ghost hidden sm:inline-flex" href="/sign-in">
               Sign in
             </Link>
-            <Link className="rev-button-primary" href="/demo">
-              View sample demo
+            <Link className="rev-button-secondary hidden lg:inline-flex" href="/demo">
+              View sample
             </Link>
+            <a className="rev-button-primary" href="#pricing">
+              See pricing
+            </a>
           </div>
         </div>
       </nav>
@@ -167,10 +170,10 @@ export default async function HomePage() {
           and kitchen-and-bath teams.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link className="rev-button-primary" href="/demo">
-            View demo with sample data →
-          </Link>
-          <Link className="rev-button-secondary" href="/start">See plans and pricing</Link>
+          <a className="rev-button-primary" href="#pricing">
+            See plans and pricing →
+          </a>
+          <Link className="rev-button-secondary" href="/demo">View sample demo</Link>
           <a className="rev-button-ghost" href="#how">See how it works</a>
         </div>
         <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
@@ -277,18 +280,90 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="pricing">
         <SectionIntro
           centered
-          body="Begin with one evidence-backed baseline. Continue monthly only when new exports and repeated reviews make the recurring read useful."
+          body="Every ongoing plan begins with the matching one-time Audit. The Audit establishes the evidence baseline; monthly access keeps that read current when repeated reviews are useful."
           kicker="Quote Recovery pricing"
           title={
             <>
-              Start with one focused <em>Quote Recovery read.</em>
+              A clear path from first read to <em>recurring intelligence.</em>
             </>
           }
         />
-        <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
+
+        <div className="mx-auto mt-10 max-w-5xl rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.055)] px-5 py-4 text-center">
+          <p className="text-sm font-bold text-[color:var(--foreground)]">
+            Every ongoing plan begins with the matching one-time Audit.
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
+            An Audit is paid once. A monthly plan is a separate continuation and never activates automatically.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-12 max-w-6xl">
+          <div className="mb-5">
+            <p className="rev-kicker">Continue after the baseline</p>
+            <h3 className="mt-2 text-2xl font-bold">Monthly plans</h3>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            <PriceCard
+              available
+              body="Keep the Quote Recovery list current as estimate and follow-up exports change."
+              cta="Review Starter continuity"
+              eyebrow="After the $799 Audit"
+              features={[
+                "Fresh reads from new exports",
+                "Saved column matches",
+                "New, persistent, worsening and resolved movement",
+                "Recurring workspace access and billing portal",
+              ]}
+              label="Starter"
+              note="per month"
+              outcome="Entry condition: a completed Quote Recovery Audit."
+              price="US$399"
+            />
+            <PriceCard
+              body="Add longer movement history and a focused weekly management read after paid evidence supports the release."
+              cta="Coming later"
+              eyebrow="Closed release gate"
+              features={[
+                "Recurring Quote Recovery access",
+                "Twelve-month movement history",
+                "Source, owner and service segmentation",
+                "Weekly management read",
+              ]}
+              label="Growth"
+              note="per month"
+              outcome="Not available for purchase yet."
+              price="US$799"
+            />
+            <PriceCard
+              body="Add advanced Revenue Realization review only after job, invoice and change-order evidence passes its gate."
+              cta="Coming later"
+              eyebrow="Closed release gate"
+              features={[
+                "Quote Recovery and Growth intelligence",
+                "Change-order and underbilling review",
+                "Margin-basis intelligence",
+                "Higher-volume controls",
+              ]}
+              label="Pro"
+              note="per month"
+              outcome="Not available for purchase yet."
+              price="US$1,499"
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto mt-14 max-w-5xl">
+          <div className="mb-5">
+            <p className="rev-kicker">Establish the baseline</p>
+            <h3 className="mt-2 text-2xl font-bold">Start with an Audit</h3>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
           <PriceCard
+            available
             body="Best for a team that wants to find which open estimates deserve attention before committing to recurring software."
             cta="Review the one-time Audit"
+            eyebrow="Primary offer"
             features={[
               "Guided CSV/XLSX import and column review",
               "Data Quality and records needing attention",
@@ -296,27 +371,39 @@ export default async function HomePage() {
               "Executive PDF and CSV exports",
             ]}
             label="Quote Recovery Audit"
-            note="one time"
+            note="paid once"
             outcome="Outcome: your first trusted recovery baseline, paid once."
-            price="$799"
+            price="US$799"
             primary
           />
           <PriceCard
-            body="Best for a team that completed the Audit and wants to keep the recovery list current as estimates and follow-ups change."
-            cta="Review Starter continuity"
+            body="An advanced estimate-to-job, invoice and change-order baseline for a future Revenue Realization release."
+            cta="Coming later"
+            eyebrow="Closed release gate"
             features={[
-              "New reads as fresh exports arrive",
-              "Saved column matches for faster refreshes",
-              "New, persistent, worsening and resolved movement",
-              "Recurring workspace access and billing portal",
+              "Explicit estimate, job and invoice matching",
+              "Unmatched and conflict review",
+              "Deterministic billing reconciliation",
+              "Full Revenue Leak executive report",
             ]}
-            label="Starter"
-            note="per month · after the Audit"
-            outcome="Entry condition: a completed Quote Recovery Audit."
-            price="$399"
+            label="Full Revenue Leak Audit"
+            note="paid once"
+            outcome="Not available for purchase yet. It may later lead to Growth or Pro."
+            price="US$1,499"
           />
+          </div>
         </div>
-        <div className="mx-auto mt-7 flex max-w-4xl flex-col items-center justify-between gap-4 rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-center sm:flex-row sm:text-left">
+
+        <div className="mx-auto mt-7 grid max-w-5xl gap-3 md:grid-cols-2">
+          <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.045)] px-5 py-4 text-sm font-semibold">
+            US$799 paid once Audit <span className="text-[color:var(--accent-light)]">→</span> US$399/month Starter
+          </div>
+          <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-sm font-semibold text-[color:var(--text-muted)]">
+            US$1,499 paid once Full Audit <span className="text-[color:var(--accent-light)]">→</span> US$799/month Growth or US$1,499/month Pro when released
+          </div>
+        </div>
+
+        <div className="mx-auto mt-7 flex max-w-5xl flex-col items-center justify-between gap-4 rounded-[22px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-center sm:flex-row sm:text-left">
           <div>
             <p className="font-bold">Want to see the result before choosing a plan?</p>
             <p className="mt-1 text-sm text-[color:var(--text-muted)]">Open a read-only REVORY workspace built with fictional contractor data. No sign-in or upload required.</p>
@@ -550,8 +637,10 @@ function RoadmapCard({
 }
 
 function PriceCard({
+  available = false,
   body,
   cta,
+  eyebrow,
   features,
   label,
   note,
@@ -559,8 +648,10 @@ function PriceCard({
   price,
   primary = false,
 }: {
+  available?: boolean;
   body: string;
   cta: string;
+  eyebrow: string;
   features: readonly string[];
   label: string;
   note: string;
@@ -570,11 +661,22 @@ function PriceCard({
 }) {
   return (
     <article
-      className={`rev-marketing-card flex min-h-[500px] flex-col rounded-[28px] border p-6 ${
+      className={`rev-marketing-card flex min-h-[480px] flex-col rounded-[28px] border p-6 ${
         primary ? "rev-price-primary border-[color:var(--border-accent)]" : "border-[color:var(--border)]"
       }`}
     >
-      <p className="rev-label">{primary ? "Primary offer" : "Recurring gate"}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="rev-label">{eyebrow}</p>
+        <span
+          className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.12em] ${
+            available
+              ? "border-[color:var(--border-accent)] text-[color:var(--accent-light)]"
+              : "border-[rgba(245,166,35,.24)] text-[color:var(--warning)]"
+          }`}
+        >
+          {available ? "Current path" : "Coming later"}
+        </span>
+      </div>
       <h3 className="mt-3 text-xl font-bold">{label}</h3>
       <p className="mt-7 text-5xl font-bold tracking-[-.05em]">{price}</p>
       <p className="mt-2 text-xs uppercase tracking-wider text-[color:var(--text-subtle)]">
@@ -582,7 +684,9 @@ function PriceCard({
       </p>
       <p className="mt-6 text-sm leading-7 text-[color:var(--text-muted)]">{body}</p>
       <div className="my-5 h-px bg-[color:var(--border)]" />
-      <p className="text-xs font-bold uppercase tracking-[.12em] text-[color:var(--accent-light)]">Included</p>
+      <p className="text-xs font-bold uppercase tracking-[.12em] text-[color:var(--accent-light)]">
+        {available ? "What it includes" : "Planned scope"}
+      </p>
       <ul className="mt-3 space-y-2.5">
         {features.map((feature) => (
           <li className="flex items-start gap-2.5 text-sm leading-6 text-[color:var(--text-muted)]" key={feature}>
@@ -592,12 +696,18 @@ function PriceCard({
         ))}
       </ul>
       <p className="mt-5 rounded-2xl border border-[color:var(--border)] bg-[rgba(20,21,22,.42)] px-4 py-3 text-xs font-semibold leading-5 text-[color:var(--foreground)]">{outcome}</p>
-      <Link
-        className={primary ? "rev-button-primary mt-5" : "rev-button-secondary mt-5"}
-        href="/start"
-      >
-        {cta}
-      </Link>
+      {available ? (
+        <Link
+          className={primary ? "rev-button-primary mt-5" : "rev-button-secondary mt-5"}
+          href="/start"
+        >
+          {cta}
+        </Link>
+      ) : (
+        <button className="rev-button-secondary mt-5 cursor-not-allowed opacity-55" disabled type="button">
+          {cta}
+        </button>
+      )}
     </article>
   );
 }

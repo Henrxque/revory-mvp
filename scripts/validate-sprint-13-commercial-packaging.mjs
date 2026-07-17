@@ -21,20 +21,20 @@ assert.ok(
 );
 assert.ok(
   page.includes('label: "Quote Recovery Audit"') &&
-    page.includes('price: "$799"') &&
+    page.includes('price: "US$799"') &&
     page.includes('priceNote: "paid once"') &&
     page.includes("featured: true"),
   "The one-time US$799 Audit must remain the highlighted first offer.",
 );
 assert.ok(
   page.includes('label: "Starter"') &&
-    page.includes('price: "$399"') &&
+    page.includes('price: "US$399"') &&
     page.includes('priceNote: "per month"') &&
     page.includes("Available after your first Quote Recovery Audit is complete."),
   "Starter must be the US$399 monthly continuation after the Audit.",
 );
 assert.ok(
-  page.includes("Complete the $799 Audit first") &&
+  page.includes("Complete the US$799 Audit first") &&
     page.includes("Starter never replaces it"),
   "The Starter prerequisite must be visible and unambiguous.",
 );
@@ -65,7 +65,7 @@ assert.ok(
   "The premium billing visual contract must be preserved.",
 );
 assert.ok(
-  landing.includes("View demo with sample data") &&
+  landing.includes("View sample demo") &&
     landing.includes("Guided CSV/XLSX import and column review") &&
     landing.includes("Entry condition: a completed Quote Recovery Audit."),
   "The landing must offer a sample-data proof path and explain both commercial offers.",

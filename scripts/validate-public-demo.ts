@@ -8,7 +8,8 @@ assert(quoteRecoverySample.opportunities.every((item) => item.estimateExternalId
 assert(quoteRecoverySample.opportunities.some((item) => item.valueCents === null));
 assert(quoteRecoverySample.opportunities.some((item) => item.valueBasis === "Estimated opportunity"));
 const page = fs.readFileSync("src/app/demo/page.tsx", "utf8");
-assert.match(page, /Synthetic sample data/);
-assert.match(page, /accepts no files, writes no data/);
+assert.match(page, /synthetic sample data/i);
+assert.match(page, /nothing on this page is saved/);
+assert.match(page, /cannot upload, edit, dismiss, resolve, buy or persist anything/);
 assert.doesNotMatch(page, /href="\/(?:start|api\/billing)|type="file"/i);
 console.log("Canonical public sample workspace contract: PASS");

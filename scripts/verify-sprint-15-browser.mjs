@@ -137,6 +137,42 @@ try {
     const errors = [];
     page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 
+    await page.goto("/", { waitUntil: "networkidle" });
+    const pricingLink = page.getByRole("link", { name: "See pricing", exact: true });
+    await pricingLink.waitFor();
+    if ((await pricingLink.getAttribute("href")) !== "#pricing") {
+      throw new Error(`${viewport.label}: header primary CTA must point to #pricing.`);
+    }
+    const heroPricingLink = page.getByRole("link", { name: /See plans and pricing/ });
+    if ((await heroPricingLink.getAttribute("href")) !== "#pricing") {
+      throw new Error(`${viewport.label}: hero primary CTA must point to #pricing.`);
+    }
+    await heroPricingLink.click();
+    if (new URL(page.url()).hash !== "#pricing") {
+      throw new Error(`${viewport.label}: primary landing CTA did not reach pricing.`);
+    }
+    const sampleLinks = page.getByRole("link", { name: "View sample demo", exact: true });
+    if ((await sampleLinks.count()) < 1) {
+      throw new Error(`${viewport.label}: secondary sample demo path is missing.`);
+    }
+    await page.screenshot({ path: path.join(evidenceDir, `landing-${viewport.label}.png`), fullPage: true });
+    await sampleLinks.first().click();
+    await page.waitForURL(/\/demo$/);
+    await page.getByText("Cedar Ridge Contractors sample workspace", { exact: true }).waitFor();
+    await page.getByRole("heading", { name: "See what may still be recoverable - and why." }).waitFor();
+    await page.getByRole("heading", { name: "Top opportunities" }).waitFor();
+    await page.getByRole("heading", { name: "Data readiness" }).waitFor();
+    await page.getByRole("heading", { name: "What deserves review first" }).waitFor();
+    if (await page.getByText("Source lineage", { exact: true }).count()) {
+      throw new Error(`${viewport.label}: implementation-facing source-lineage label remains in the public demo.`);
+    }
+    if (await page.locator('input[type="file"], form[action*="billing"], form[action*="imports"]').count()) {
+      throw new Error(`${viewport.label}: public demo exposes a write, import or billing control.`);
+    }
+    const demoOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (demoOverflow > 1) throw new Error(`${viewport.label}: demo horizontal overflow is ${demoOverflow}px.`);
+    await page.screenshot({ path: path.join(evidenceDir, `demo-${viewport.label}.png`), fullPage: true });
+
     await page.goto("/sign-up", { waitUntil: "networkidle" });
     await page.getByLabel("Name").fill("Mismatch QA");
     await page.getByLabel("Work email").fill(`mismatch-${viewport.label}-${runId}@example.invalid`);

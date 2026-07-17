@@ -262,11 +262,11 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 ### Sprint 15 — Authentication confidence and Audit continuation
 
-**Local status:** implemented and verified on 2026-07-16; no deploy, payment activation or public-sale claim is included.
+**Local status:** implemented and verified on 2026-07-16; the founder-authorized Stripe sandbox catalog contains the approved Audit and Starter prices, but no deploy, live payment activation or public-sale claim is included.
 
-**Outcome:** make email/password access unambiguous and explain the completed-Audit-to-Starter continuation without enabling checkout or expanding product scope.
+**Outcome:** make email/password access unambiguous, restore pricing as the primary commercial path, make the sample demo faithful to the product, restore the audit-versus-subscription pricing hierarchy, and explain the completed-Audit-to-Starter continuation without enabling checkout or expanding product scope.
 
-**Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; a completed Audit accurately explains Starter at US$399/month and cannot bypass its baseline or payment gate.
+**Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; the primary landing CTA reaches pricing while a separate sample route mirrors the read-only product experience; every visible price distinguishes paid-once Audit from monthly plan, including the closed US$1,499 Full Audit; and a completed Audit accurately explains Starter at US$399/month without bypassing its baseline or payment gate.
 
 ### Sprint 16 — Production operations and recovery evidence
 

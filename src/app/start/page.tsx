@@ -39,7 +39,7 @@ const starterPlan: BillingOffer =
     ],
     label: "Starter",
     offerKey: "STARTER",
-    price: "$399",
+    price: "US$399",
     priceNote: "per month",
     stage: "Quote Recovery continuity",
   };
@@ -59,7 +59,7 @@ const quoteRecoveryAudit: BillingOffer =
     featured: true,
     label: "Quote Recovery Audit",
     offerKey: "QUOTE_RECOVERY_AUDIT",
-    price: "$799",
+    price: "US$799",
     priceNote: "paid once",
     stage: "Your first REVORY read",
   };
@@ -78,7 +78,7 @@ const futureOffers: readonly BillingOffer[] = [
     ],
     label: "Growth",
     offerKey: "GROWTH",
-    price: "$799",
+    price: "US$799",
     priceNote: "per month",
     stage: "Advanced recurring intelligence",
   },
@@ -95,7 +95,7 @@ const futureOffers: readonly BillingOffer[] = [
     ],
     label: "Pro",
     offerKey: "PRO",
-    price: "$1,499",
+    price: "US$1,499",
     priceNote: "per month",
     stage: "Revenue Realization recurring",
   },
@@ -112,7 +112,7 @@ const futureOffers: readonly BillingOffer[] = [
     ],
     label: "Full Revenue Leak Audit",
     offerKey: null,
-    price: "$1,499",
+    price: "US$1,499",
     priceNote: "paid once",
     stage: "Advanced Revenue Realization baseline",
   },
@@ -200,12 +200,12 @@ function OfferCard({
           </Link>
         ) : needsQuoteRecoveryBaseline ? (
           <button className="rev-action-button w-full cursor-not-allowed justify-center opacity-60" disabled type="button">
-            Complete the $799 Audit first
+            Complete the US$799 Audit first
           </button>
         ) : checkoutConfigured && offer.offerKey ? (
           <form action={`/api/billing/checkout?offer=${offer.offerKey}`} method="post">
             <button className="rev-button-primary w-full justify-center" type="submit">
-              {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the $799 Audit once" : `Continue with ${offer.label}`}
+              {offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? "Buy the US$799 Audit once" : `Continue with ${offer.label}`}
             </button>
           </form>
         ) : internalPreview && offer.offerKey === "QUOTE_RECOVERY_AUDIT" ? (
@@ -267,14 +267,17 @@ export default async function StartPage({
             <p className="mt-4 max-w-xl text-sm leading-6 text-[color:var(--text-muted)]">
               The one-time Quote Recovery Audit creates your first trusted read. Starter keeps that read current as new exports arrive.
             </p>
+            <p className="mt-3 max-w-xl text-xs font-semibold leading-5 text-[color:var(--accent-light)]">
+              Every ongoing plan begins with the matching one-time Audit.
+            </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
               <div className="rounded-2xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)] px-4 py-3">
                 <p className="rev-label">01 · Establish the baseline</p>
-                <p className="mt-1 text-sm font-bold">Quote Recovery Audit · $799 paid once</p>
+                <p className="mt-1 text-sm font-bold">Quote Recovery Audit · US$799 paid once</p>
               </div>
               <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3">
                 <p className="rev-label">02 · Keep it current</p>
-                <p className="mt-1 text-sm font-bold">Starter · $399 per month after the Audit</p>
+                <p className="mt-1 text-sm font-bold">Starter · US$399 per month after the Audit</p>
               </div>
             </div>
             {params.billing === "baseline-required" ? (

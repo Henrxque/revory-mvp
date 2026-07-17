@@ -20,7 +20,7 @@ assert.ok(
 );
 assert.ok(
   landing.includes('href="/demo"') &&
-    landing.includes("View demo with sample data") &&
+    landing.includes("View sample demo") &&
     landing.includes("Synthetic") === false,
   "Homepage must expose an obvious buyer-friendly sample-data demo path.",
 );

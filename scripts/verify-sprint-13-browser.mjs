@@ -90,7 +90,7 @@ try {
     if (!(await starter.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Starter cadence is unclear.`);
     }
-    if (!(await starter.getByRole("button", { name: "Complete the $799 Audit first" }).isVisible())) {
+    if (!(await starter.getByRole("button", { name: "Complete the US$799 Audit first" }).isVisible())) {
       throw new Error(`${viewport.label}: Starter prerequisite is not visible.`);
     }
     const future = page.getByText("View future Growth, Pro and advanced Audit paths", { exact: true });

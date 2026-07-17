@@ -72,10 +72,10 @@ try {
     });
     const response = await page.goto("/demo", { waitUntil: "networkidle" });
     if (!response?.ok()) throw new Error(`${name} demo returned ${response?.status()}`);
-    if (!(await page.getByText("See the evidence behind a Quote Recovery read.").isVisible())) {
+    if (!(await page.getByRole("heading", { name: "See what may still be recoverable - and why." }).isVisible())) {
       throw new Error(`${name} demo headline missing`);
     }
-    if (!(await page.getByText("Synthetic sample data").isVisible())) {
+    if (!(await page.getByText("Read-only sample", { exact: true }).isVisible())) {
       throw new Error(`${name} sample label missing`);
     }
     const body = await page.locator("body").innerText();

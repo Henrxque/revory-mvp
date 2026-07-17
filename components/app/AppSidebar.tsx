@@ -234,7 +234,7 @@ export function AppSidebar({
                 : "text-[color:var(--text-muted)]"
             }`}
             href={href}
-            key={href}
+            key={`${href}-${label}`}
             prefetch={false}
           >
             <SidebarIcon icon={icon as SidebarIconKey} />
@@ -295,7 +295,7 @@ export function AppSidebar({
 
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-${item.label}`}
                   className={itemClassName}
                   href={item.href}
                   prefetch={false}
