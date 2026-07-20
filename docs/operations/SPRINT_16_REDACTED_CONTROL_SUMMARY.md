@@ -12,8 +12,8 @@ This file contains conclusions only. Provider screenshots, account identifiers, 
 | Retention execution observed | PENDING | No completion marker remained inside the available provider log window | Founder |
 | Weekly digest schedule configured | PASS | Protected production route and weekly Vercel schedule are present | Founder |
 | Weekly digest execution observed | PENDING | No completion marker remained inside the available provider log window | Founder |
-| External uptime monitor | PREPARED | GitHub Actions workflow checks the public health endpoint and manages one incident issue | Founder |
-| Uptime alert delivery test | PENDING | Simulated failure must run after the workflow reaches the default branch | Founder |
+| External uptime monitor | LIVE CONFIG | Workflow is present on the default branch and checks the public health endpoint every 15 minutes | Founder |
+| Uptime alert delivery test | BLOCKED | GitHub accepted the controlled failure dispatch, but the hosted runner ended in `startup_failure` before any job started; no production change occurred | Founder |
 | Isolated database restore | PASS | A current-state isolated child branch matched the parent schema and aggregate counts across 10 control tables; measured RPO was under one minute and RTO was 54 seconds | Founder |
 | Restore verification harness | PASS | Read-only structural, row-count and RPO/RTO verifier is present and rejects the source endpoint | Founder |
 | Provider MFA and recovery ownership | PENDING | Must be confirmed privately for GitHub, Vercel, Neon, Resend, Google, DNS and Stripe | Founder |
