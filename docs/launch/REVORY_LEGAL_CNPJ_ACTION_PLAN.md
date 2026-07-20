@@ -28,8 +28,7 @@ Preencher somente depois da confirmação do contador/advogado:
 | CNPJ | 68.046.497/0001-12 · situação ATIVA em 16/07/2026 |
 | Endereço registrado | Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo - SP, 05424-150 |
 | Município/UF e jurisdição contratual | São Paulo/SP, Brasil · sujeito à revisão jurídica e direitos obrigatórios do cliente |
-| E-mail de suporte | support@revory.app · alias/recebimento a validar antes do checkout |
-| E-mail de privacidade/LGPD | privacy@revory.app · alias/recebimento a validar antes do checkout |
+| E-mail de suporte, cobrança, reembolso e privacidade/LGPD | support@revory.app · alias/recebimento a validar antes do checkout |
 | E-mail de segurança/incidentes | security@revory.app · alias/recebimento a validar antes do checkout |
 | Responsável primário por incidentes | Henrique, confirmar |
 | Responsável substituto por incidentes | PENDENTE |
