@@ -1,6 +1,6 @@
 # REVORY — plano de CNPJ, fiscal e legal para o lançamento
 
-Data: 2026-07-13. Status: **aguardando fatos e aprovações do fundador**.
+Data: 2026-07-19. Status: **identidade jurídica confirmada; revisão profissional e operação fiscal ainda pendentes**.
 
 Este documento organiza o trabalho; não substitui contador nem advogado. O código e as páginas públicas podem ser finalizados no repositório, mas a identidade jurídica, o enquadramento tributário e a aprovação dos textos precisam vir de profissionais habilitados.
 
@@ -23,21 +23,21 @@ Preencher somente depois da confirmação do contador/advogado:
 
 | Campo | Valor aprovado |
 |---|---|
-| Razão social | PENDENTE |
-| Nome fantasia | REVORY |
-| CNPJ | PENDENTE |
-| Endereço registrado | PENDENTE |
-| Município/UF e jurisdição contratual | PENDENTE |
-| E-mail de suporte | PENDENTE |
-| E-mail de privacidade/LGPD | PENDENTE |
-| E-mail de segurança/incidentes | PENDENTE |
+| Razão social | AMETRINE LABS DESENVOLVIMENTO DE SOFTWARE NAO CUSTOMIZAVEL LTDA |
+| Nome fantasia | AMETRINE LABS; produto público REVORY |
+| CNPJ | 68.046.497/0001-12 · situação ATIVA em 16/07/2026 |
+| Endereço registrado | Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo - SP, 05424-150 |
+| Município/UF e jurisdição contratual | São Paulo/SP, Brasil · sujeito à revisão jurídica e direitos obrigatórios do cliente |
+| E-mail de suporte | support@revory.app · alias/recebimento a validar antes do checkout |
+| E-mail de privacidade/LGPD | privacy@revory.app · alias/recebimento a validar antes do checkout |
+| E-mail de segurança/incidentes | security@revory.app · alias/recebimento a validar antes do checkout |
 | Responsável primário por incidentes | Henrique, confirmar |
 | Responsável substituto por incidentes | PENDENTE |
 | Regime tributário | PENDENTE |
 | Emissor de NFS-e | PENDENTE |
 | Moeda e mercados iniciais | USD / EUA, confirmar com contador |
-| Política do Audit de US$799 | reembolso/cancelamento PENDENTE |
-| Política do Starter de US$399/mês | cancelamento/renovação PENDENTE |
+| Política do Audit de US$799 | versão operacional publicada: reembolso antes do início da análise; após consumo, somente cobrança indevida/duplicada, falha verificável, direito legal ou exceção aprovada |
+| Política do Starter de US$399/mês | cancelar a qualquer momento para o fim do ciclo; sem pró-rata, salvo direito legal ou cobrança indevida/duplicada |
 | Prazo padrão de retenção | PENDENTE |
 | Prazo após cancelamento/exclusão | PENDENTE |
 
@@ -73,4 +73,3 @@ A ANPD mantém orientação oficial sobre os papéis de controlador, operador, s
 4. contatos públicos e política de cancelamento/reembolso publicados;
 5. Stripe test mode aprovado de ponta a ponta;
 6. evidência de segurança, backup/restore, email e operação exigida no checklist de lançamento.
-

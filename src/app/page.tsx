@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { getAuthSession } from "@/auth";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
+import { REVORY_LEGAL } from "@/content/revory-legal";
 
 export const metadata: Metadata = {
   title: "REVORY — Quote Recovery for High-Ticket Contractors",
@@ -462,16 +463,17 @@ export default async function HomePage() {
       <footer className="border-t border-[color:var(--border)] px-5 py-8">
         <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-5">
           <RevoryLogo compact />
-          <p className="text-xs text-[color:var(--text-subtle)]">
-            © 2026 REVORY. Quote Recovery intelligence for high-ticket service
-            businesses.
+          <p className="max-w-md text-xs leading-5 text-[color:var(--text-subtle)]">
+            © 2026 REVORY · Operated by {REVORY_LEGAL.legalName} · CNPJ {REVORY_LEGAL.taxId}
           </p>
-          <div className="flex gap-5 text-xs text-[color:var(--text-muted)]">
+          <div className="flex flex-wrap justify-end gap-x-5 gap-y-2 text-xs text-[color:var(--text-muted)]">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
+            <Link href="/refunds">Cancellation & refunds</Link>
             <Link href="/security">Security</Link>
             <Link href="/subprocessors">Subprocessors</Link>
             <Link href="/limitations">Limitations</Link>
+            <a href={REVORY_LEGAL.linkedinUrl} rel="noreferrer" target="_blank">LinkedIn</a>
             <Link href="/sign-in">Sign in</Link>
           </div>
         </div>

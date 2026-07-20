@@ -1,0 +1,74 @@
+name: REVORY external uptime monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: "Test the alert route without affecting production"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: revory-production-uptime
+  cancel-in-progress: true
+
+jobs:
+  production-health:
+    name: Check revory.app health
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check application and database health
+        env:
+          SIMULATE_FAILURE: ${{ github.event.inputs.simulate_failure || 'false' }}
+        run: |
+          set -euo pipefail
+          if [[ "$SIMULATE_FAILURE" == "true" ]]; then
+            echo "Simulated monitor failure requested. Production was not changed."
+            exit 1
+          fi
+
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          status_code="$(curl --silent --show-error --max-time 15 --retry 2 --retry-all-errors --output "$response_file" --write-out '%{http_code}' https://revory.app/api/health)"
+
+          test "$status_code" = "200"
+          jq -e '.status == "ok" and .database == "reachable"' "$response_file" >/dev/null
+
+      - name: Open or update the incident issue
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          issue_title="[REVORY uptime] Production health check failed"
+          issue_number="$(gh issue list --repo "$GH_REPO" --state open --search "$issue_title in:title" --json number,title --jq ".[] | select(.title == \"$issue_title\") | .number" | head -n 1)"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [[ -n "$issue_number" ]]; then
+            gh issue comment "$issue_number" --repo "$GH_REPO" --body "The external health monitor failed again. Review the private provider logs and this workflow run: $run_url"
+          else
+            gh issue create --repo "$GH_REPO" --title "$issue_title" --assignee "${{ github.repository_owner }}" --body "The external REVORY health monitor could not confirm both the application and database health. Primary owner: repository owner. Recovery route: this workflow run plus the private Vercel runtime logs. No customer data is included. Run: $run_url"
+          fi
+
+      - name: Close a recovered incident issue
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          issue_title="[REVORY uptime] Production health check failed"
+          issue_number="$(gh issue list --repo "$GH_REPO" --state open --search "$issue_title in:title" --json number,title --jq ".[] | select(.title == \"$issue_title\") | .number" | head -n 1)"
+
+          if [[ -n "$issue_number" ]]; then
+            gh issue close "$issue_number" --repo "$GH_REPO" --comment "The external monitor confirms that the application and database are reachable again. Review the incident timeline before considering the event closed operationally."
+          fi

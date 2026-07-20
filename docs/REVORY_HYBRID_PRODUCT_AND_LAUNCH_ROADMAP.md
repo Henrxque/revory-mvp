@@ -278,7 +278,7 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 ### Sprint 16 — Production operations and recovery evidence
 
-**Prerequisite:** Stripe is configured and the Quote Recovery Audit/Starter lifecycle has passed test-mode checkout, signed webhook and portal verification.
+**Prerequisite:** Stripe is configured and the Quote Recovery Audit plus every recurring offer intended to open, including main-plan Growth, have passed test-mode checkout, signed webhook, duplicate-event and portal verification.
 
 **Outcome:** turn the already-deployed operational foundations into reproducible production evidence: observed digest/retention schedules, external uptime alerting, one isolated restore and MFA/recovery ownership. This is an operations sprint, not a feature sprint.
 

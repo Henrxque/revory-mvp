@@ -340,6 +340,21 @@ export default async function StartPage({
                 ? "Checkout uses Stripe. Subscriptions renew monthly until canceled from billing."
                 : "Checkout activation is pending final Stripe verification. No charge can be made from this screen yet."}
             </p>
+            <p className="mt-1 text-center text-[10px] leading-5 text-[color:var(--text-subtle)]">
+              By continuing to checkout, you agree to the{" "}
+              <Link className="underline decoration-[rgba(67,179,155,0.45)] underline-offset-4 hover:text-[color:var(--foreground)]" href="/terms">
+                Terms
+              </Link>
+              ,{" "}
+              <Link className="underline decoration-[rgba(67,179,155,0.45)] underline-offset-4 hover:text-[color:var(--foreground)]" href="/privacy">
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link className="underline decoration-[rgba(67,179,155,0.45)] underline-offset-4 hover:text-[color:var(--foreground)]" href="/refunds">
+                Cancellation &amp; Refund Policy
+              </Link>
+              .
+            </p>
           </div>
         </section>
       </div>

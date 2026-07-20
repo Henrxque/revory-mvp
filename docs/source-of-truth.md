@@ -1,6 +1,6 @@
 # REVORY — Source of Truth
 
-> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-13.
+> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-18.
 
 ## Product identity
 
@@ -36,7 +36,7 @@ REVORY does not operate the customer's business. It sits above exports from the 
 
 This repository still contains MedSpa-era schema, import services, engine rules, fixtures, tests and isolated compatibility UI. Those capabilities are migration substrate, not the active public or authenticated product.
 
-As of the local implementation on 2026-07-15:
+As of the local implementation on 2026-07-18:
 
 - canonical contractor records, secure intake and deterministic Quote Recovery rules are implemented locally;
 - Quote Recovery financial summaries count imported exposure once per estimate across the dashboard, immutable analysis snapshots, CSV annotations, executive PDFs and Growth summaries; conflicting values for one estimate or incompatible currencies suppress the aggregate instead of selecting or multiplying a value;
@@ -63,8 +63,11 @@ As of the local implementation on 2026-07-15:
 - Pro entitlement/capability boundaries, higher bounded batch controls, durable auth throttling/session revocation, XLSX archive/aggregate-expansion checks, pre-parse multipart bounds, an atomically claimed Stripe event ledger, unique subscription ownership, paid-checkout release flag, expanded audit events, health endpoint and public security/legal status surfaces are implemented locally;
 - the final independent Sprint 11/12.1 review passed the local security, lineage and concurrency scope after adding Stripe entitlement compare-and-set, price-aware Checkout Session reuse, immutable per-import analysis snapshots and transactional serialization of full replacements;
 - Google OAuth has passed a real production round-trip on `revory.app`; the Resend domain and signed delivery webhook are configured in production, and the founder confirmed a delivered password-reset transaction on 2026-07-16; retain redacted provider and delivery-event references outside the repository;
-- Vercel Analytics, Speed Insights, default error alerting, a canonical-import WAF rule and durable database-backed throttling are active production foundations; uptime ownership, observed cron runs, managed backup restore and independent DAST/pentest remain external gates;
-- the Sprint 11 paid-beta exit remains closed on external MFA/ownership evidence, Stripe E2E, Resend delivery E2E, observed production operations, managed backup restore, independent DAST/pentest and qualified final legal review;
+- Vercel Analytics, Speed Insights, default error alerting, a canonical-import WAF rule and durable database-backed throttling are active production foundations; uptime ownership, observed cron runs and independent DAST/pentest remain external gates;
+- the legal entity is now confirmed as AMETRINE LABS DESENVOLVIMENTO DE SOFTWARE NAO CUSTOMIZAVEL LTDA, CNPJ 68.046.497/0001-12; public Terms, Privacy, subprocessor and cancellation/refund drafts contain the entity and current operating policy, while contact-alias delivery and qualified counsel approval remain launch gates;
+- the managed-database recovery gate passed an isolated Neon current-state branch drill on 2026-07-19: the parent/restore schema diff was empty and aggregate counts matched across 10 control tables, with measured RPO under one minute and RTO of 54 seconds;
+- Sprint 16 operational-control preparation is implemented locally with a GitHub-hosted external health workflow, a redacted cron observer and a guarded isolated-restore verifier; the isolated restore passed on 2026-07-19, while the workflow alert test, observed cron runs, MFA ownership and Stripe test-mode lifecycle proof are still missing, so the Sprint 16 exit remains blocked;
+- the Sprint 11 paid-beta exit remains closed on external MFA/ownership evidence, Stripe E2E, observed production operations, independent DAST/pentest and qualified final legal review;
 - Sprint 12 evidence events and per-offer RETAIN/REPACKAGE/DELAY rules are implemented; absent real customer observations every price correctly remains DELAY;
 - no hybrid offer is yet eligible for public sale from this repository;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.

@@ -2,15 +2,35 @@
 
 ## Status
 
-**PLANNED · START ONLY AFTER STRIPE CONFIGURATION AND TEST-MODE LIFECYCLE PASS.**
+**IN PROGRESS · LOCAL CONTROLS PREPARED · EXTERNAL EXIT EVIDENCE BLOCKED.**
+
+## Execution note — 2026-07-18
+
+**Stripe prerequisite: BLOCKED.** The repository and Vercel environment contain the dedicated Audit, Starter and Growth billing contracts, but test-mode checkout, signed fulfillment, duplicate-event handling and recurring customer-portal evidence have not been recorded end to end. Sprint 16 therefore remains in progress and cannot receive a pass.
+
+Safe preparation completed locally:
+
+- the existing retention and weekly-digest schedules remain configured in `vercel.json`, protected by `CRON_SECRET` and instrumented with redacted completion markers;
+- `scripts/observe-sprint-16-crons.mjs` captures only the job name, observation state and UTC timestamp from the provider-log window;
+- `.github/workflows/revory-uptime-monitor.yml` defines an external GitHub Actions check for `https://revory.app/api/health`, opens one owner-assigned incident issue on failure, closes it on recovery and supports a simulated alert test without changing production;
+- `scripts/verify-isolated-restore.mjs` refuses the source database as a target, performs read-only structural and aggregate row-count checks and calculates measured RPO/RTO from operator-supplied timestamps;
+- `docs/operations/SPRINT_16_REDACTED_CONTROL_SUMMARY.md` records only non-sensitive pass/pending conclusions.
+
+Current external evidence state:
+
+- the production health endpoint returned HTTP 200 with the application and database reachable on 2026-07-18;
+- no retention or digest completion event was available inside the current Vercel runtime-log retention window, so neither scheduled execution is marked observed;
+- the GitHub monitor is prepared locally but is not live or alert-tested until the workflow reaches the default branch;
+- a provider-created Neon child branch completed an isolated current-state restore drill on 2026-07-19; schema and aggregate counts across 10 control tables matched, with measured RPO under one minute and RTO of 54 seconds;
+- provider MFA and recovery ownership remain a founder-managed private checklist and are not inferred from code.
 
 This sprint intentionally holds the four external operations tasks deferred from the pre-commercial work: cron observation, uptime monitoring, isolated backup restore and MFA/recovery ownership. They remain important launch controls, but they are not customer-facing product features and should not distract from Sprint 15 or Stripe setup.
 
 ## Prerequisites
 
-1. Sprint 15 is complete.
-2. Stripe has the US$799 Quote Recovery Audit and US$399/month Starter configured in test mode.
-3. Test checkout, signed webhook fulfillment, duplicate-event handling and customer portal have passed end to end.
+1. Sprint 15 and the local Sprint 15.1 Growth connection are complete.
+2. Stripe has the US$799 Quote Recovery Audit, US$399/month Starter and main US$799/month Growth offers configured in test mode.
+3. Test checkout, signed webhook fulfillment, duplicate-event handling and the recurring customer portal have passed end to end for every offer intended to open.
 
 ## Scope
 
@@ -55,3 +75,13 @@ This sprint intentionally holds the four external operations tasks deferred from
 ## Evidence location
 
 Keep provider screenshots, message IDs, account identifiers, backup references, timestamps and recovery details in the founder's private operations record. Commit only redacted conclusions and dates.
+
+## Reproducible commands
+
+```bash
+npm run qa:sprint-16
+npm run ops:observe-crons
+npm run ops:verify-restore
+```
+
+`ops:verify-restore` intentionally requires explicit source/target database variables, three ISO timestamps and `REVORY_RESTORE_CHECK_ACK=READ_ONLY_ISOLATED_RESTORE`. Never place those values in tracked files.
