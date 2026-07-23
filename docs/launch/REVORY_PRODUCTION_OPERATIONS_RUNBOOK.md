@@ -1,6 +1,6 @@
 # REVORY — production operations runbook
 
-Date: 2026-07-13. Scope: Quote Recovery paid-beta preparation. Stripe remains disabled.
+Updated: 2026-07-22. Scope: Quote Recovery paid-beta preparation. Stripe remains disabled.
 
 ## Automated jobs
 
@@ -42,7 +42,7 @@ Remaining evidence: send one synthetic transactional email to an address owned b
 - Vercel default owner/admin error alerting remains active;
 - structured logs exist for jobs and Resend delivery attention events.
 
-Still required before first customer data: an external uptime check for `/api/health`, named alert primary/backup, and an isolated managed-database restore drill with measured RPO/RTO.
+Current evidence: the external GitHub monitor is live and has repeated successful scheduled checks; the founder confirmed receipt of a controlled GitHub alert notification on 2026-07-22; and the isolated Neon restore passed with measured RPO/RTO. GitHub issue history plus private Vercel runtime logs form the technical recovery route. Henrique remains the only human incident operator, an explicit solo-founder risk that must be revisited before scaling.
 
 ## Security controls
 
@@ -52,7 +52,16 @@ Still required before first customer data: an external uptime check for `/api/he
 - workspace isolation, explicit provenance, idempotent imports and immutable analysis snapshots;
 - moderate dependency findings recorded without applying npm's unsafe downgrade suggestions.
 
-Still required: independent DAST/pentest, MFA/ownership evidence for every provider, backup restore evidence and periodic dependency re-review.
+Still required: independent DAST/pentest, complete MFA/recovery ownership evidence for every provider and periodic dependency re-review.
+
+## Operating decisions
+
+- default active-workspace retention: 365 days, configurable to 30, 90, 180 or 365 days;
+- after recurring access ends: up to 30 days to export available workspace data, followed by deletion of uploaded analysis/import data subject to legal, security and backup-retention limits;
+- weekly digest: Mondays at 10:00 `America/Sao_Paulo`;
+- support target: first response within one business day, without a public 24/7 or contractual SLA promise;
+- public support/privacy/billing/refund contact: `support@revory.app`;
+- vulnerability and incident contact: `security@revory.app`.
 
 ## Stripe boundary
 
@@ -68,4 +77,3 @@ Legacy MedSpa Stripe price variables must never activate a current REVORY offer.
 4. Rotate the affected secret and redeploy if compromise is suspected.
 5. Restore into an isolated database before any production recovery.
 6. Record root cause, user impact, remediation, verification and follow-up owner.
-

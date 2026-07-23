@@ -472,6 +472,10 @@ export default async function HomePage() {
             <Link href="/refunds">Cancellation & refunds</Link>
             <Link href="/security">Security</Link>
             <Link href="/subprocessors">Subprocessors</Link>
+            <Link href="/dpa">DPA</Link>
+            <Link href="/cookies">Cookies</Link>
+            <Link href="/responsible-disclosure">Responsible disclosure</Link>
+            <Link href="/pt-br/terms">Português</Link>
             <Link href="/limitations">Limitations</Link>
             <a href={REVORY_LEGAL.linkedinUrl} rel="noreferrer" target="_blank">LinkedIn</a>
             <Link href="/sign-in">Sign in</Link>

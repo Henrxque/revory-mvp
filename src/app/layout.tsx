@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html className={`${dmSans.variable} ${instrumentSerif.variable} ${sora.variable}`} lang="en">
+    <html className={`${dmSans.variable} ${instrumentSerif.variable} ${sora.variable}`} data-scroll-behavior="smooth" lang="en">
       <body>
         <AuthJsProvider>{children}</AuthJsProvider>
         {vercelObservabilityEnabled ? (

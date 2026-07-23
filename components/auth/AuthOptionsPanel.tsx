@@ -80,6 +80,20 @@ export function AuthOptionsPanel({
                 Google sign-in is temporarily unavailable. Email and password remain available.
               </p>
             )}
+
+            {isSignIn ? null : (
+              <p className="text-[11px] leading-[1.55] text-[color:var(--text-subtle)]">
+                By creating an account, you agree to the{" "}
+                <Link className="font-semibold text-[color:var(--accent-light)] underline underline-offset-4" href="/terms" target="_blank">
+                  Terms of Service
+                </Link>{" "}
+                and acknowledge the{" "}
+                <Link className="font-semibold text-[color:var(--accent-light)] underline underline-offset-4" href="/privacy" target="_blank">
+                  Privacy Notice
+                </Link>
+                .
+              </p>
+            )}
           </div>
         </div>
       </div>

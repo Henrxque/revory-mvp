@@ -1059,3 +1059,44 @@ select {
   color: #f5f4f8 !important;
   -webkit-text-fill-color: #f5f4f8 !important;
 }
+
+@media print {
+  .legal-page {
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .legal-page article {
+    background: #ffffff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #111111 !important;
+    max-width: none !important;
+    padding: 18mm !important;
+  }
+
+  .legal-page header,
+  .legal-page footer,
+  .legal-page .legal-section {
+    border-color: #d8d8d8 !important;
+  }
+
+  .legal-page p,
+  .legal-page dd,
+  .legal-page dt,
+  .legal-page h1,
+  .legal-page h2,
+  .legal-page a {
+    color: #111111 !important;
+  }
+
+  .legal-page nav,
+  .legal-page footer a,
+  .legal-page header a {
+    display: none !important;
+  }
+
+  .legal-section {
+    break-inside: avoid-page;
+  }
+}

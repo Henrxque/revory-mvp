@@ -51,6 +51,7 @@
     "qa:sprint-15": "node scripts/validate-sprint-15.mjs && node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-sprint-15-auth.ts",
     "qa:sprint-15:browser": "node scripts/verify-sprint-15-browser.mjs",
     "qa:sprint-16": "node scripts/validate-sprint-16.mjs",
+    "qa:legal": "node scripts/validate-legal-review.mjs",
     "ops:observe-crons": "node scripts/observe-sprint-16-crons.mjs",
     "ops:verify-restore": "node scripts/verify-isolated-restore.mjs",
     "qa:quote-recovery-financial-summary": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-quote-recovery-financial-summary.ts",

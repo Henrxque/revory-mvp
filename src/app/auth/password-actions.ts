@@ -11,6 +11,7 @@ import {
   resetPasswordWithToken,
 } from "@/services/auth/password-reset";
 import { checkRateLimit } from "@/services/security/rate-limit";
+import { ACCOUNT_CREATION_LEGAL_VERSIONS } from "@/content/revory-legal";
 
 const AUTH_EMAIL_WINDOW_MS = 1000 * 60 * 15;
 const AUTH_EMAIL_ATTEMPT_LIMIT = 5;
@@ -30,6 +31,7 @@ export async function createEmailPasswordAccount(input: {
   fullName: string;
   password: string;
   passwordConfirmation: string;
+  legalAccepted?: boolean;
 }) {
   const email = normalizeEmail(input.email);
   const fullName = normalizeName(input.fullName);
@@ -68,6 +70,13 @@ export async function createEmailPasswordAccount(input: {
     };
   }
 
+  if (input.legalAccepted !== true) {
+    return {
+      message: "Accept the Terms and acknowledge the Privacy Notice to create an account.",
+      ok: false as const,
+    };
+  }
+
   const existingUser = await prisma.user.findUnique({
     where: {
       email,
@@ -102,24 +111,31 @@ export async function createEmailPasswordAccount(input: {
     };
   }
 
-  const user = await prisma.user.create({
-    data: {
-      authProvider: "credentials",
-      email,
-      fullName,
-      passwordHash: await hashPassword(input.password),
-      passwordUpdatedAt: new Date(),
-      status: UserStatus.PENDING_VERIFICATION,
-    },
-  });
-
-  await prisma.user.update({
-    data: {
-      authSubject: user.id,
-    },
-    where: {
-      id: user.id,
-    },
+  const passwordHash = await hashPassword(input.password);
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        authProvider: "credentials",
+        email,
+        fullName,
+        passwordHash,
+        passwordUpdatedAt: new Date(),
+        status: UserStatus.PENDING_VERIFICATION,
+      },
+    });
+    const linked = await tx.user.update({
+      data: { authSubject: created.id },
+      where: { id: created.id },
+    });
+    await tx.legalAcceptance.create({
+      data: {
+        contextJson: { authProvider: "credentials", surface: "sign-up" },
+        documentVersionsJson: ACCOUNT_CREATION_LEGAL_VERSIONS,
+        event: "ACCOUNT_CREATED",
+        userId: created.id,
+      },
+    });
+    return linked;
   });
 
   const verification = await requestEmailVerification({

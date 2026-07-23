@@ -85,6 +85,7 @@ export function AuthEmailPasswordForm({
               fullName,
               password,
               passwordConfirmation,
+              legalAccepted: true,
             });
 
             setMessage(result.message);

@@ -2,7 +2,7 @@
 
 ## Status
 
-**IN PROGRESS · LOCAL CONTROLS PREPARED · EXTERNAL EXIT EVIDENCE BLOCKED.**
+**IN PROGRESS · PRODUCTION HEALTH/MONITOR/RESTORE PASS · EXTERNAL EXIT EVIDENCE INCOMPLETE.**
 
 ## Execution note — 2026-07-18
 
@@ -19,10 +19,13 @@ Safe preparation completed locally:
 Current external evidence state:
 
 - the production health endpoint returned HTTP 200 with the application and database reachable on 2026-07-18;
-- no retention or digest completion event was available inside the current Vercel runtime-log retention window, so neither scheduled execution is marked observed;
-- the GitHub monitor is prepared locally but is not live or alert-tested until the workflow reaches the default branch;
+- the authenticated Vercel review on 2026-07-22 found no production 5xx responses or error/fatal runtime lines in the latest 24-hour window; one isolated Node URL-parser deprecation warning remains non-blocking technical debt in the authentication route;
+- the latest production deployment is ready, both protected job routes are deployed and `CRON_SECRET` is present in production; no retention or digest completion event was available inside the provider's short runtime-log retention window, so neither scheduled execution is marked observed;
+- the retention and digest observers were corrected on 2026-07-22 to query only the 30 minutes immediately after each schedule and to scope to the latest production deployment when the project-wide query times out;
+- the GitHub monitor is live on the default branch; public browser evidence showed 32 runs and repeated successful scheduled checks on 2026-07-22;
+- the founder confirmed receipt of the controlled GitHub alert notification on 2026-07-22; GitHub issue history plus private Vercel runtime logs form the backup/recovery route, while no second human incident operator exists in the current solo-founder phase;
 - a provider-created Neon child branch completed an isolated current-state restore drill on 2026-07-19; schema and aggregate counts across 10 control tables matched, with measured RPO under one minute and RTO of 54 seconds;
-- provider MFA and recovery ownership remain a founder-managed private checklist and are not inferred from code.
+- authenticated Resend browser evidence confirms MFA, a connected Google authentication route, a verified `revory.app` sender domain and an enabled signed webhook whose prior delivery event received HTTP 200; no weekly digest has been sent yet because the owned admin test workspace is not commercially entitled to Growth, while Resend recovery material and the Stripe recovery route remain incomplete in the private checklist.
 
 This sprint intentionally holds the four external operations tasks deferred from the pre-commercial work: cron observation, uptime monitoring, isolated backup restore and MFA/recovery ownership. They remain important launch controls, but they are not customer-facing product features and should not distract from Sprint 15 or Stripe setup.
 

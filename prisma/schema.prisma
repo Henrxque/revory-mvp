@@ -248,25 +248,26 @@ enum QuoteRecoveryDisposition {
 }
 
 model User {
-  id                         String          @id @default(cuid())
-  clerkUserId                String?         @unique
-  authProvider               String          @default("clerk")
-  authSubject                String?         @unique
-  email                      String          @unique
+  id                         String            @id @default(cuid())
+  clerkUserId                String?           @unique
+  authProvider               String            @default("clerk")
+  authSubject                String?           @unique
+  email                      String            @unique
   fullName                   String?
   passwordHash               String?
   passwordUpdatedAt          DateTime?
-  passwordResetTokenHash     String?         @unique
+  passwordResetTokenHash     String?           @unique
   passwordResetExpiresAt     DateTime?
   emailVerifiedAt            DateTime?
-  emailVerificationTokenHash String?         @unique
+  emailVerificationTokenHash String?           @unique
   emailVerificationExpiresAt DateTime?
-  status                     UserStatus      @default(ACTIVE)
-  sessionVersion             Int             @default(1)
-  createdAt                  DateTime        @default(now())
-  updatedAt                  DateTime        @updatedAt
+  status                     UserStatus        @default(ACTIVE)
+  sessionVersion             Int               @default(1)
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
   ownedWorkspaces            Workspace[]
-  triggeredRuns              AutomationRun[] @relation("AutomationTriggeredBy")
+  legalAcceptances           LegalAcceptance[]
+  triggeredRuns              AutomationRun[]   @relation("AutomationTriggeredBy")
 
   @@map("users")
 }
@@ -314,6 +315,7 @@ model Workspace {
   intelligenceSnapshots      RevenueIntelligenceSnapshot[]
   auditEvents                WorkspaceAuditEvent[]
   evidenceEvents             RevoryEvidenceEvent[]
+  legalAcceptances           LegalAcceptance[]
 
   @@map("workspaces")
 }
@@ -547,6 +549,23 @@ model WorkspaceAuditEvent {
 
   @@index([workspaceId, createdAt])
   @@map("workspace_audit_events")
+}
+
+model LegalAcceptance {
+  id                   String     @id @default(cuid())
+  userId               String
+  workspaceId          String?
+  event                String
+  locale               String     @default("en")
+  documentVersionsJson Json
+  contextJson          Json
+  acceptedAt           DateTime   @default(now())
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace            Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@index([userId, event, acceptedAt])
+  @@index([workspaceId, event, acceptedAt])
+  @@map("legal_acceptances")
 }
 
 model RevoryEvidenceEvent {

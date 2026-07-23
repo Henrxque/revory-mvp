@@ -84,4 +84,6 @@ assert.ok(privacy.includes("controller") && privacy.includes("processor"), "Priv
 assert.ok(refunds.includes("seven-day statutory right"), "Mandatory-rights savings language is missing.");
 
 console.log("Sprint 16 local operational-control preparation: PASS");
-console.log("External cron, alert and MFA evidence remains required before the exit gate can pass.");
+console.log(
+  "External cron, provider-recovery and Stripe lifecycle evidence remains required before the exit gate can pass.",
+);

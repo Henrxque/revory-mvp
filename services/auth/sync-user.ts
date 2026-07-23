@@ -5,6 +5,7 @@ import { UserStatus, type User as LocalUser } from "@prisma/client";
 
 import { getAuthSession } from "@/auth";
 import { prisma } from "@/db/prisma";
+import { ACCOUNT_CREATION_LEGAL_VERSIONS } from "@/content/revory-legal";
 
 function normalizeEmail(email: string | null | undefined) {
   const normalized = email?.trim().toLowerCase() ?? null;
@@ -95,14 +96,25 @@ export const syncAuthenticatedUser = cache(async (): Promise<LocalUser | null> =
     });
   }
 
-  return prisma.user.create({
-    data: {
-      authProvider,
-      authSubject,
-      email,
-      emailVerifiedAt: new Date(),
-      fullName,
-      status: UserStatus.ACTIVE,
-    },
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        authProvider,
+        authSubject,
+        email,
+        emailVerifiedAt: new Date(),
+        fullName,
+        status: UserStatus.ACTIVE,
+      },
+    });
+    await tx.legalAcceptance.create({
+      data: {
+        contextJson: { authProvider, surface: "sign-up" },
+        documentVersionsJson: ACCOUNT_CREATION_LEGAL_VERSIONS,
+        event: "ACCOUNT_CREATED",
+        userId: user.id,
+      },
+    });
+    return user;
   });
 });

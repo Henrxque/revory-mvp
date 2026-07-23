@@ -5,12 +5,14 @@ import { prisma } from "@/db/prisma";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { LegalReacceptGate } from "@/components/legal/LegalReacceptGate";
 import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { isProductAdminEmail } from "@/services/app/product-admin";
 import { getCapabilityAccess } from "@/services/billing/capabilities";
+import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -49,6 +51,10 @@ export default async function PrivateAppLayout({
 
   if (!appAccess.allowed) {
     redirect("/start");
+  }
+
+  if (!(await hasCurrentAccountLegalAcceptance(user.id))) {
+    return <LegalReacceptGate userEmail={user.email} />;
   }
 
   const [quoteRecoveryRecordCount, realizationRecordCount] = await Promise.all([

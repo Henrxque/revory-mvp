@@ -17,15 +17,16 @@ Status: **BLOCKED**. This is the canonical pre-launch checklist for the hybrid R
 
 An unchecked row remains blocked even when part of its infrastructure is already configured.
 
-- [ ] Stripe test-mode products/prices exist for the US$799 Quote Recovery Audit and US$399 Starter.
+- [x] Stripe test-mode products/prices exist for the US$799 Quote Recovery Audit, US$399 Starter and US$799 Growth.
 - [ ] Test checkout, signed webhook fulfillment, duplicate-event handling and customer portal pass end to end.
-- [ ] Resend sender domain is verified and the signed webhook is configured; a synthetic transactional delivery and received delivery event still need evidence.
+- [x] Resend sender domain and signed webhook are configured; authenticated browser evidence on 2026-07-22 confirmed the verified domain, enabled webhook and HTTP 200 delivery acknowledgement for the password-reset message sent on 2026-07-16. The public `support@` and `security@` aliases were also confirmed by the founder.
 - [x] Authentication callbacks and Google OAuth passed a real round-trip on `https://revory.app` on 2026-07-13.
 - [ ] Production database migration is reviewed, backed up and applied through the approved deployment path.
-- [ ] Protected cron is deployed with a production secret and both schedules are visible in Vercel; one observed digest and retention run remain required.
+- [ ] Protected cron routes and the production secret are deployed, and both schedules are present in `vercel.json`; one observed digest and retention run remain required. The observers now query inside the provider's short log-retention window.
 - [ ] Retention policy choices are approved and automated enforcement is verified in the deployment environment.
-- [ ] Backup and restore exercise succeeds with documented RPO/RTO decisions.
-- [ ] Web Analytics, Speed Insights and Vercel's default error rule are enabled; an external uptime check and named primary/backup alert owners remain required.
+- [x] Backup and restore exercise succeeded in an isolated Neon branch with redacted measured RPO/RTO evidence.
+- [x] Web Analytics, Speed Insights and Vercel's default error rule are enabled; the external GitHub monitor is live and repeatedly healthy, and the founder confirmed the controlled alert notification on 2026-07-22.
+- [ ] Add a second trusted human incident operator before scaling beyond the founder-led launch; the current GitHub issue/Vercel-log recovery route is documented, but it is not a substitute person.
 - [ ] Durable throttling, security headers and a live WAF rule are active; independent DAST/pentest and final review of the five moderate dependency findings remain required.
 - [ ] Bounded AI provider smoke test passes using synthetic, redacted profile data only.
 - [ ] Privacy, Terms, refund/cancellation, tax and data-processing language receive final legal review.

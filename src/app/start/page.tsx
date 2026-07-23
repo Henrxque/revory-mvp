@@ -353,7 +353,10 @@ export default async function StartPage({
               <Link className="underline decoration-[rgba(67,179,155,0.45)] underline-offset-4 hover:text-[color:var(--foreground)]" href="/refunds">
                 Cancellation &amp; Refund Policy
               </Link>
-              .
+              . For recurring plans, Stripe charges the displayed US-dollar price
+              monthly until cancellation; cancellation takes effect at the end of
+              the paid period. The one-time Audit is charged once and is consumed
+              only after you confirm the reviewed mapping and analysis use.
             </p>
           </div>
         </section>
