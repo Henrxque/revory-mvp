@@ -1,6 +1,21 @@
 # REVORY — production operations runbook
 
-Updated: 2026-07-22. Scope: Quote Recovery paid-beta preparation. Stripe remains disabled.
+Updated: 2026-07-23. Scope: Quote Recovery paid-beta preparation. Production Stripe checkout remains disabled.
+
+## Deployment and database migration gate
+
+Vercel's repository `buildCommand` calls the `vercel-build` script, overriding
+any stale dashboard build command. For Preview and Production deployments it
+runs `prisma migrate deploy` before `next build`.
+
+- a missing `DATABASE_URL` fails the deployment before new application code is promoted;
+- an unapplied or failed Prisma migration fails the deployment while the previous Vercel deployment remains active;
+- migrations must remain backward-compatible with the currently active deployment because the database changes before the new deployment is promoted;
+- Preview must use an isolated Neon branch. Do not point Preview at the production branch merely to make a build pass;
+- verify `/api/health` and one authenticated `/app` request after every production promotion.
+
+This gate was added after the 2026-07-23 incident in which application code that
+read `legal_acceptances` reached production before the corresponding migration.
 
 ## Automated jobs
 
@@ -65,7 +80,11 @@ Still required: independent DAST/pentest, complete MFA/recovery ownership eviden
 
 ## Stripe boundary
 
-Checkout, portal, signed webhook ledger, entitlement compare-and-set and price-aware Checkout Session reuse are implemented. They must remain unavailable until the dedicated REVORY price IDs, webhook secret, test lifecycle evidence and `REVORY_PAID_CHECKOUT_ENABLED=true` are supplied intentionally.
+Checkout, portal, signed webhook ledger, entitlement compare-and-set and price-aware Checkout Session reuse are implemented. The isolated 2026-07-23 Stripe test-mode run passed for Growth monthly, the one-time Quote Recovery Audit, Starter after its baseline gate, signed webhook delivery, replay idempotency and cancellation/revocation.
+
+Production checkout must remain unavailable until the live REVORY price IDs,
+live webhook secret and `REVORY_PAID_CHECKOUT_ENABLED=true` are supplied
+intentionally after the account and commercial launch gates are confirmed.
 
 Legacy MedSpa Stripe price variables must never activate a current REVORY offer.
 

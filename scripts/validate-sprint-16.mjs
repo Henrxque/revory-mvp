@@ -12,9 +12,13 @@ const restore = read("scripts/verify-isolated-restore.mjs");
 const sprint = read("docs/sprints/SPRINT_16_PRODUCTION_OPERATIONS_AND_RECOVERY.md");
 const home = read("src/app/page.tsx");
 const terms = read("src/app/terms/page.tsx");
+const legalDocuments = read("content/revory-legal-documents.ts");
 const privacy = read("src/app/privacy/page.tsx");
 const refunds = read("src/app/refunds/page.tsx");
 const legal = read("content/revory-legal.ts");
+const packageJson = JSON.parse(read("package.json"));
+const vercelBuild = read("scripts/vercel-build.mjs");
+const runbook = read("docs/launch/REVORY_PRODUCTION_OPERATIONS_RUNBOOK.md");
 
 assert.deepEqual(vercel.crons, [
   { path: "/api/jobs/enforce-retention", schedule: "15 5 * * *" },
@@ -66,9 +70,31 @@ for (const required of [
   assert.ok(restore.includes(required), `Restore verifier is missing: ${required}`);
 }
 
+assert.equal(
+  packageJson.scripts["vercel-build"],
+  "node scripts/vercel-build.mjs",
+  "Vercel must use the migration-gated build.",
+);
+assert.equal(
+  vercel.buildCommand,
+  "npm run vercel-build",
+  "vercel.json must override any stale dashboard build command.",
+);
+for (const required of ["VERCEL_ENV", "DATABASE_URL", "migrate", "deploy", "next", "build"]) {
+  assert.ok(vercelBuild.includes(required), `Vercel build gate is missing: ${required}`);
+}
+for (const required of [
+  "Deployment and database migration gate",
+  "prisma migrate deploy",
+  "Preview must use an isolated Neon branch",
+  "/api/health",
+]) {
+  assert.ok(runbook.includes(required), `Production runbook is missing: ${required}`);
+}
+
 assert.ok(
-  sprint.includes("IN PROGRESS") && sprint.includes("Stripe prerequisite: BLOCKED"),
-  "Sprint 16 must not claim completion before Stripe E2E and external evidence pass.",
+  sprint.includes("IN PROGRESS") && sprint.includes("Stripe prerequisite: PASS"),
+  "Sprint 16 must preserve the passed Stripe test prerequisite without claiming full completion.",
 );
 
 for (const required of [
@@ -79,11 +105,22 @@ for (const required of [
 }
 assert.ok(home.includes("REVORY_LEGAL.linkedinUrl"), "LinkedIn company link is missing.");
 assert.ok(home.includes('href="/refunds"'), "Refund policy is missing from the public footer.");
-assert.ok(terms.includes("Cancellation and Refund Policy"), "Terms do not link the commercial policy.");
-assert.ok(privacy.includes("controller") && privacy.includes("processor"), "Privacy roles are incomplete.");
-assert.ok(refunds.includes("seven-day statutory right"), "Mandatory-rights savings language is missing.");
+assert.ok(
+  terms.includes("termsDocuments") && legalDocuments.includes("Cancellation and Refund Policy"),
+  "Terms do not incorporate the commercial policy.",
+);
+assert.ok(
+  privacy.includes("privacyDocuments") &&
+    legalDocuments.includes("controller") &&
+    legalDocuments.includes("processor"),
+  "Privacy roles are incomplete.",
+);
+assert.ok(
+  refunds.includes("refundDocuments") && legalDocuments.includes("seven-day statutory right"),
+  "Mandatory-rights savings language is missing.",
+);
 
 console.log("Sprint 16 local operational-control preparation: PASS");
 console.log(
-  "External cron, provider-recovery and Stripe lifecycle evidence remains required before the exit gate can pass.",
+  "External cron and provider-recovery evidence remains required before the exit gate can pass.",
 );

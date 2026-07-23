@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { createHash } from "node:crypto";
-import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
 import {
@@ -98,10 +97,11 @@ export async function POST(request: Request) {
   }
 
   const payloadHash = createHash("sha256").update(payload).digest("hex");
-  try {
-    await prisma.stripeWebhookEvent.create({ data: { id: event.id, type: event.type, payloadHash } });
-  } catch (error) {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")) throw error;
+  const inserted = await prisma.stripeWebhookEvent.createMany({
+    data: [{ id: event.id, type: event.type, payloadHash }],
+    skipDuplicates: true,
+  });
+  if (inserted.count === 0) {
     const claim = await claimExistingWebhookEvent(event.id, payloadHash);
     if (claim.response) return claim.response;
   }

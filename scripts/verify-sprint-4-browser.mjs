@@ -202,6 +202,15 @@ try {
     );
   });
 
+  const legalConsent = page.getByRole("checkbox", {
+    name: /I agree to the Terms of Service and acknowledge the Privacy Notice/i,
+  });
+  if (await legalConsent.isVisible()) {
+    await legalConsent.check();
+    await page.getByRole("button", { name: "Accept and continue to REVORY" }).click();
+    await page.waitForLoadState("networkidle");
+  }
+
   await page.goto("/app/settings", { waitUntil: "networkidle" });
   await page.getByLabel("Default currency").selectOption("CAD");
   await page.getByRole("button", { name: "Save currency" }).click();

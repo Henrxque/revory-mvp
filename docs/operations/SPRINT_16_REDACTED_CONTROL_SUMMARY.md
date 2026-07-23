@@ -6,8 +6,8 @@ This file contains conclusions only. Provider screenshots, account identifiers, 
 
 | Control | State | Redacted evidence | Owner |
 |---|---|---|---|
-| Stripe test lifecycle prerequisite | BLOCKED | Test checkout, signed fulfillment, duplicate-event and portal evidence not yet recorded end to end | Founder |
-| Production health | PASS | Browser probe returned healthy application and reachable database; the authenticated Vercel review found no production 5xx responses or error/fatal runtime lines in the latest 24-hour window on 2026-07-22 | Founder |
+| Stripe test lifecycle prerequisite | PASS | Isolated test-mode runs passed the one-time Audit, gated Starter and Growth lifecycles, signed fulfillment, exact-event replay idempotency, portal creation and cancellation/revocation without a live charge | Founder |
+| Production health | PASS | The 2026-07-23 `/app` schema incident was repaired by applying the two pending migrations; authenticated application loading recovered and a migration-before-build deployment gate was added | Founder |
 | Retention schedule configured | PASS | Protected production route and daily Vercel schedule are present | Founder |
 | Retention execution observed | PENDING | The 30-minute production observer found no retention completion marker on 2026-07-23. The protected route and schedule remain configured; await a future observed completion within the provider log window | Founder |
 | Weekly digest schedule configured | PASS | Protected production route and weekly Vercel schedule are present | Founder |
@@ -22,4 +22,4 @@ This file contains conclusions only. Provider screenshots, account identifiers, 
 
 ## Exit decision
 
-Sprint 16 is **not complete**. Production health, the scheduled external monitor, controlled alert delivery, aliases and the isolated restore pass. The Stripe prerequisite, cron observation and complete provider recovery evidence remain open; the absence of a second human incident operator is an explicit solo-founder risk.
+Sprint 16 is **not complete**. Production health, Stripe sandbox lifecycle, the scheduled external monitor, controlled alert delivery, aliases and the isolated restore pass. Cron observation and complete provider recovery evidence remain open; the absence of a second human incident operator is an explicit solo-founder risk.

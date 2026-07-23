@@ -4,9 +4,9 @@
 
 **IN PROGRESS · PRODUCTION HEALTH/MONITOR/RESTORE PASS · EXTERNAL EXIT EVIDENCE INCOMPLETE.**
 
-## Execution note — 2026-07-18
+## Execution note — 2026-07-23
 
-**Stripe prerequisite: BLOCKED.** The repository and Vercel environment contain the dedicated Audit, Starter and Growth billing contracts, but test-mode checkout, signed fulfillment, duplicate-event handling and recurring customer-portal evidence have not been recorded end to end. Sprint 16 therefore remains in progress and cannot receive a pass.
+**Stripe prerequisite: PASS IN TEST MODE.** An isolated Neon branch and Stripe sandbox were used to exercise the US$799 one-time Audit, US$399/month Starter after its baseline gate, and US$799/month Growth. Signed fulfillment, exact-event replay idempotency, customer-portal session creation, cancellation and entitlement revocation passed without a live charge or production entitlement. Production checkout remains intentionally disabled until the live-account activation gates pass.
 
 Safe preparation completed locally:
 
@@ -26,6 +26,8 @@ Current external evidence state:
 - the founder confirmed receipt of the controlled GitHub alert notification on 2026-07-22; GitHub issue history plus private Vercel runtime logs form the backup/recovery route, while no second human incident operator exists in the current solo-founder phase;
 - a provider-created Neon child branch completed an isolated current-state restore drill on 2026-07-19; schema and aggregate counts across 10 control tables matched, with measured RPO under one minute and RTO of 54 seconds;
 - authenticated Resend browser evidence confirms MFA, a connected Google authentication route, a verified `revory.app` sender domain and an enabled signed webhook whose prior delivery event received HTTP 200; no weekly digest has been sent yet because the owned admin test workspace is not commercially entitled to Growth, while Resend recovery material and the Stripe recovery route remain incomplete in the private checklist.
+- on 2026-07-23, a production `/app` incident exposed two pending Prisma migrations. The migrations were applied to the production Neon branch, authenticated `/app` loading recovered, and a migration-gated Vercel build was added so future Preview and Production deployments fail before promotion when schema deployment cannot complete.
+- the 2026-07-23 Stripe sandbox run passed the Audit, Starter and Growth lifecycle paths, signed webhook delivery, exact-event replay, portal creation and cancellation/revocation on isolated test data. No live transaction was created.
 
 This sprint intentionally holds the four external operations tasks deferred from the pre-commercial work: cron observation, uptime monitoring, isolated backup restore and MFA/recovery ownership. They remain important launch controls, but they are not customer-facing product features and should not distract from Sprint 15 or Stripe setup.
 
