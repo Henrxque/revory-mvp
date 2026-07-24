@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
+import { LegalAcceptanceSubmitButton } from "@/components/legal/LegalAcceptanceSubmitButton";
 import { REVORY_LEGAL, REVORY_LEGAL_DOCUMENTS } from "@/content/revory-legal";
 import { acceptCurrentLegalDocuments } from "@/src/app/(app)/app/legal-actions";
 
@@ -27,7 +28,7 @@ export function LegalReacceptGate({ userEmail }: { userEmail: string }) {
             <input className="mt-1 h-4 w-4 accent-[#43B39B]" name="legalAccepted" required type="checkbox" value="yes" />
             <span>I agree to the Terms of Service and acknowledge the Privacy Notice for the REVORY account registered to <strong className="text-[color:var(--foreground)]">{userEmail}</strong>.</span>
           </label>
-          <button className="rev-button-primary mt-4 w-full justify-center" type="submit">Accept and continue to REVORY</button>
+          <LegalAcceptanceSubmitButton />
         </form>
         <p className="mt-5 text-xs leading-5 text-[color:var(--text-subtle)]">
           The acceptance record stores your account, workspace, document versions, event context and timestamp. It does not collect your IP address for this purpose.

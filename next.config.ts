@@ -52,6 +52,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        destination: "/:path*",
+        permanent: true,
+        source: "/pt-br/:path*",
+      },
+      {
         destination: "https://revory.app/:path*",
         has: [
           {

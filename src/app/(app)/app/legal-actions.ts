@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { getAppContext } from "@/services/app/get-app-context";
 import { recordLegalAcceptance } from "@/services/legal/acceptance";
@@ -17,5 +18,6 @@ export async function acceptCurrentLegalDocuments(formData: FormData) {
     userId: context.user.id,
     workspaceId: context.workspace.id,
   });
+  revalidatePath("/app", "layout");
   redirect("/app/dashboard");
 }

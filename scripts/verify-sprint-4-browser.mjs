@@ -208,7 +208,10 @@ try {
   if (await legalConsent.isVisible()) {
     await legalConsent.check();
     await page.getByRole("button", { name: "Accept and continue to REVORY" }).click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForURL("**/app/dashboard", { timeout: 15_000 });
+    if (await legalConsent.isVisible()) {
+      throw new Error("Legal acceptance remained visible after a successful submission.");
+    }
   }
 
   await page.goto("/app/settings", { waitUntil: "networkidle" });
