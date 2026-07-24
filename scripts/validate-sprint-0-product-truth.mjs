@@ -49,11 +49,12 @@ check(
 );
 check(
   "sprint-14-commercial-path",
-  start.includes("Make Growth your recurring revenue-leak management rhythm.") &&
-    start.includes("[growthPlan, starterPlan]") &&
+  start.includes("Choose how you want REVORY to review your revenue.") &&
+    start.includes("[growthPlan, starterPlan, proPlan]") &&
+    start.includes("[quoteRecoveryAudit, fullRevenueLeakAudit]") &&
     start.includes('priceNote: "paid once"') &&
     start.includes('priceNote: "per month"'),
-  "The pricing screen presents Growth before Starter and preserves explicit billing cadence.",
+  "The pricing screen separates monthly plans from one-time audits and preserves explicit billing cadence.",
 );
 check(
   "starter-is-recurring-continuation",

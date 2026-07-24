@@ -12,12 +12,12 @@ const sourceOfTruth = read("docs/source-of-truth.md");
 const sprint = read("docs/sprints/SPRINT_13_COMMERCIAL_PACKAGING_AND_PRICING_CLARITY.md");
 
 assert.ok(
-  page.includes("Make Growth your recurring revenue-leak management rhythm."),
-  "The Growth-first recurring commercial path is missing.",
+  page.includes("Choose how you want REVORY to review your revenue."),
+  "The commercial choice hierarchy is missing.",
 );
 assert.ok(
-  page.indexOf("const growthPlan") < page.indexOf("const futureOffers"),
-  "The recurring Growth plan must be defined before future offers.",
+  page.indexOf("const growthPlan") < page.indexOf("const proPlan"),
+  "The recurring Growth plan must be defined before the gated Pro plan.",
 );
 assert.ok(
   page.includes('label: "Growth"') &&
@@ -35,13 +35,15 @@ assert.ok(
 );
 assert.ok(
   page.includes("Complete the US$799 Audit first") &&
-    page.includes("Starter requires the completed one-time Audit"),
+    page.includes("Available after your first Quote Recovery Audit is complete."),
   "The Starter prerequisite must be visible and unambiguous.",
 );
 assert.ok(
-  page.includes("View one-time Audit and advanced Pro options") &&
+  page.includes("[growthPlan, starterPlan, proPlan]") &&
+    page.includes("[quoteRecoveryAudit, fullRevenueLeakAudit]") &&
+    page.includes("One-time audits") &&
     page.includes("Not available for purchase yet."),
-  "One-time and gated advanced offers must remain secondary.",
+  "Monthly plans and one-time audits must be visibly separated while gated offers remain unavailable.",
 );
 
 for (const annualPrice of ["$3,990", "$7,990", "$14,990"]) {

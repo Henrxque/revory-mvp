@@ -81,9 +81,12 @@ try {
     page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 
     await page.goto("/start", { waitUntil: "networkidle" });
-    await page.getByRole("heading", { name: "Make Growth your recurring revenue-leak management rhythm." }).waitFor();
+    await page.getByRole("heading", { name: "Choose how you want REVORY to review your revenue." }).waitFor();
     const growth = page.getByRole("heading", { exact: true, name: "Growth" }).locator("xpath=ancestor::article");
     const starter = page.getByRole("heading", { exact: true, name: "Starter" }).locator("xpath=ancestor::article");
+    const pro = page.getByRole("heading", { exact: true, name: "Pro" }).locator("xpath=ancestor::article");
+    const audit = page.getByRole("heading", { exact: true, name: "Quote Recovery Audit" }).locator("xpath=ancestor::article");
+    const fullAudit = page.getByRole("heading", { exact: true, name: "Full Revenue Leak Audit" }).locator("xpath=ancestor::article");
     if (!(await growth.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Growth cadence is unclear.`);
     }
@@ -93,17 +96,29 @@ try {
     if (!(await starter.getByRole("button", { name: "Complete the US$799 Audit first" }).isVisible())) {
       throw new Error(`${viewport.label}: Starter prerequisite is not visible.`);
     }
-    const future = page.getByText("View one-time Audit and advanced Pro options", { exact: true });
-    if (!(await future.isVisible())) throw new Error(`${viewport.label}: Future offer disclosure is missing.`);
-    if (await page.getByRole("heading", { exact: true, name: "Pro" }).isVisible()) {
-      throw new Error(`${viewport.label}: Gated Pro offer competes with the actionable path.`);
+    if (!(await pro.getByText("per month", { exact: true }).isVisible())) {
+      throw new Error(`${viewport.label}: Pro is not grouped as a monthly plan.`);
     }
-    if (viewport.label === "desktop-1280") {
-      for (const card of [growth, starter]) {
-        const box = await card.boundingBox();
-        if (!box || box.y + box.height > viewport.height) {
-          throw new Error(`${viewport.label}: An actionable card falls below the first viewport.`);
-        }
+    if (!(await audit.getByText("paid once", { exact: true }).isVisible()) ||
+        !(await fullAudit.getByText("paid once", { exact: true }).isVisible())) {
+      throw new Error(`${viewport.label}: One-time Audit cadence is unclear.`);
+    }
+    if (!(await pro.getByRole("button", { name: "Not available yet" }).isVisible()) ||
+        !(await fullAudit.getByRole("button", { name: "Not available yet" }).isVisible())) {
+      throw new Error(`${viewport.label}: Gated offers appear purchasable.`);
+    }
+    if (viewport.width >= 1280) {
+      const monthlyBoxes = await Promise.all([growth, starter, pro].map((card) => card.boundingBox()));
+      const auditBox = await audit.boundingBox();
+      if (monthlyBoxes.some((box) => !box) || !auditBox) {
+        throw new Error(`${viewport.label}: Pricing cards could not be measured.`);
+      }
+      const monthlyTop = monthlyBoxes[0].y;
+      if (monthlyBoxes.some((box) => Math.abs(box.y - monthlyTop) > 2)) {
+        throw new Error(`${viewport.label}: Monthly plans are not aligned in one comparison row.`);
+      }
+      if (auditBox.y <= monthlyTop + monthlyBoxes[0].height) {
+        throw new Error(`${viewport.label}: One-time Audits are mixed into the monthly plan group.`);
       }
     }
 
@@ -119,7 +134,7 @@ try {
     await context.close();
   }
 
-  console.log(`Growth-first hierarchy, first-viewport actions and premium hover: PASS (${evidenceDir})`);
+  console.log(`Monthly/audit grouping, responsive alignment and premium hover: PASS (${evidenceDir})`);
 } finally {
   if (browser) await browser.close().catch(() => {});
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");

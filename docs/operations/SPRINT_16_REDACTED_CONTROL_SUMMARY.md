@@ -18,8 +18,8 @@ This file contains conclusions only. Provider screenshots, account identifiers, 
 | Isolated database restore | PASS | A current-state isolated child branch matched the parent schema and aggregate counts across 10 control tables; measured RPO was under one minute and RTO was 54 seconds | Founder |
 | Restore verification harness | PASS | Read-only structural, row-count and RPO/RTO verifier is present and rejects the source endpoint | Founder |
 | Public support and security aliases | PASS | Founder confirmed receipt through `support@revory.app` and `security@revory.app` on 2026-07-22 | Founder |
-| Provider MFA and recovery ownership | PARTIAL | Resend browser evidence now confirms MFA, a connected Google authentication route, the verified sender domain and an enabled signed webhook. Resend recovery material and the Stripe recovery route remain unproven | Founder |
+| Provider MFA and recovery ownership | PASS | Founder confirmed on 2026-07-24 that recovery material and backup recovery routes are secured for both Resend and Stripe; provider screenshots and recovery material remain outside the repository | Founder |
 
 ## Exit decision
 
-Sprint 16 is **not complete**. Production health, Stripe sandbox lifecycle, the scheduled external monitor, controlled alert delivery, aliases and the isolated restore pass. Cron observation and complete provider recovery evidence remain open; the absence of a second human incident operator is an explicit solo-founder risk.
+Sprint 16 is **not complete**. Production health, Stripe sandbox lifecycle, the scheduled external monitor, controlled alert delivery, aliases, provider recovery ownership and the isolated restore pass. Cron observation remains open; the absence of a second human incident operator is an explicit solo-founder risk.

@@ -34,10 +34,11 @@ for (const copy of [
   assert.ok(landing.includes(copy), `Landing pricing explanation is missing: ${copy}`);
 }
 assert.ok(
-  start.includes("Make Growth your recurring revenue-leak management rhythm.") &&
-    start.includes("View one-time Audit and advanced Pro options") &&
+  start.includes("Choose how you want REVORY to review your revenue.") &&
+    start.includes("[growthPlan, starterPlan, proPlan]") &&
+    start.includes("[quoteRecoveryAudit, fullRevenueLeakAudit]") &&
     start.includes("Not available for purchase yet."),
-  "Start must prioritize Growth, preserve Starter's Audit prerequisite and collapse advanced offers.",
+  "Start must separate monthly plans from one-time audits and keep advanced offers gated.",
 );
 assert.ok(
   labels.includes('amountcents: "Estimate amount"') &&
