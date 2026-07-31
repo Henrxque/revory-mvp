@@ -56,7 +56,7 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
             currentStepTitle="Fictional data"
             demoMode
             userEmail="Read-only public sample"
-            workspaceName="Asteria Aesthetics"
+            workspaceName="Asteria Contracting"
             workspaceStatus="SAMPLE"
           />
         </div>
@@ -69,14 +69,14 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
                   REVORY Demo
                 </p>
                 <p className="mt-1 text-[12px] leading-5 text-[color:var(--text-muted)]">
-                  This demo uses fictional appointment data.
+                  This demo uses fictional contractor estimate data.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <RevoryStatusBadge tone="accent">Read-only demo</RevoryStatusBadge>
                 <RevoryStatusBadge tone="neutral">
-                  Sample data — not a live clinic account
+                  Sample data — not a live customer account
                 </RevoryStatusBadge>
               </div>
             </div>
@@ -100,7 +100,7 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
                       Review sample Revenue Leaks
                     </a>
                     <p className="text-center text-[10px] leading-4 text-[color:var(--text-subtle)]">
-                      Read-only sample. A paid workspace unlocks your clinic&apos;s own leak read.
+                      Read-only sample. A paid workspace unlocks your team&apos;s own recovery read.
                     </p>
                   </div>
                 }
@@ -125,7 +125,7 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
                         Revenue Leaks
                       </h2>
                       <p className="mt-3 max-w-2xl text-[15px] leading-7 text-[color:var(--text-muted)]">
-                        Review the revenue risks REVORY detected from this fictional clinic-data fixture.
+                        Review the revenue risks REVORY detected from this fictional contractor-data fixture.
                       </p>
                     </div>
 
@@ -194,12 +194,12 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
                 </div>
 
                 <div className="rev-shell-hero rounded-[26px] p-6 md:p-8">
-                  <p className="rev-kicker">See your clinic&apos;s first leak read</p>
+                  <p className="rev-kicker">See your team&apos;s first recovery read</p>
                   <h2 className="mt-3 max-w-[680px] font-[family:var(--font-display)] text-[clamp(2rem,4vw,3.6rem)] leading-[0.94] tracking-[-0.05em] text-white">
-                    Activate the same REVORY experience for your clinic.
+                    Start with one focused, evidence-backed Audit.
                   </h2>
                   <p className="mt-4 max-w-[690px] text-sm leading-6 text-[color:var(--text-muted)]">
-                    Your real clinic read becomes available after activating REVORY. The current public offer is {REVORY_PUBLIC_OFFER.monthlyPriceLabel}.
+                    Your real recovery read becomes available after checkout. The current primary offer is {REVORY_PUBLIC_OFFER.priceLabel}.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <Link
@@ -209,7 +209,7 @@ export function RevoryDemoDashboard({ read }: RevoryDemoDashboardProps) {
                       {REVORY_PUBLIC_OFFER.ctaLabel}
                     </Link>
                     <span className="text-xs leading-5 text-[color:var(--text-subtle)]">
-                      Subscribe first, then review and import your own clinic data inside the protected app.
+                      Pay once, then review and import your own data inside the protected app. No subscription is added.
                     </span>
                   </div>
                 </div>

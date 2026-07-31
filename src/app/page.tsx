@@ -102,11 +102,11 @@ const faq = [
   ],
   [
     "What about invoices, change orders, underbilling and margin?",
-    "That advanced Revenue Realization review is being validated separately and is not included in the Audit or Starter offer. It will remain unavailable until job, invoice and change-order evidence can support the result reliably.",
+    "Those advanced Revenue Realization checks remain gated while REVORY validates the required job, invoice, change-order and cost evidence. They are not part of the Audit, Starter or Growth offers.",
   ],
   [
-    "Is the US$799 audit available now?",
-    "The product flow is being validated privately. Checkout activates only after the remaining browser, Stripe sandbox and launch-security gates pass.",
+    "Do I need the Audit before choosing a monthly plan?",
+    "No. The US$399 Audit is the recommended first read, but Starter and Growth can be purchased directly. The Audit never starts a subscription.",
   ],
 ] as const;
 
@@ -156,7 +156,7 @@ export default async function HomePage() {
       </nav>
 
       <div className="border-b border-[rgba(67,179,155,.16)] bg-[rgba(67,179,155,.045)] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[.16em] text-[color:var(--accent-light)]">
-        Private launch · Secure checkout activation is being finalized
+        Quote Recovery Audit · US$399 paid once · No subscription required
       </div>
 
       <section className="rev-hero mx-auto flex max-w-[1240px] flex-col items-center px-5 pb-16 pt-14 text-center md:pb-20 md:pt-16">
@@ -171,14 +171,14 @@ export default async function HomePage() {
           and kitchen-and-bath teams.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <a className="rev-button-primary" href="#pricing">
-            See plans and pricing →
-          </a>
-          <Link className="rev-button-secondary" href="/demo">View demo with sample data</Link>
+          <Link className="rev-button-primary" href="/start">
+            Get your Quote Recovery Audit — $399 once
+          </Link>
+          <Link className="rev-button-secondary" href="/demo">View the sample audit</Link>
           <a className="rev-button-ghost" href="#how">See how it works</a>
         </div>
         <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">
-          Self-service · CSV/XLSX-first · Transparent rules · No CRM replacement
+          No sales call. No CRM migration. No subscription required.
         </p>
       </section>
 
@@ -260,7 +260,7 @@ export default async function HomePage() {
             <h2 className="mt-4 font-[family:var(--font-marketing-display)] text-[clamp(2.6rem,4.5vw,4.35rem)] leading-[.98]">
               Quote Recovery is current.{" "}
               <em className="text-[color:var(--accent-light)]">
-                Revenue Realization is gated.
+                Revenue Realization remains gated.
               </em>
             </h2>
           </div>
@@ -271,8 +271,8 @@ export default async function HomePage() {
             />
             <RoadmapCard
               gated
-              text="Change-order, underbilling and margin review is being validated separately. It is not included in the Audit or Starter offer shown below."
-              title="Advanced Revenue Realization — coming later"
+              text="Change-order, underbilling and margin review stays outside the current commercial offers until explicit imported evidence and release gates support it."
+              title="Advanced Revenue Realization — gated"
             />
           </div>
         </div>
@@ -281,7 +281,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1240px] scroll-mt-24 px-5 py-24" id="pricing">
         <SectionIntro
           centered
-          body="Growth is REVORY's main recurring plan: ongoing history, segmentation and one focused weekly management read. Starter remains the lighter continuity path, while one-time Audits remain available for teams that want a focused first read."
+          body="Start with one defined Audit, then continue only if recurring monitoring is useful. Starter and Growth can also be selected directly."
           kicker="Quote Recovery pricing"
           title={
             <>
@@ -290,118 +290,51 @@ export default async function HomePage() {
           }
         />
 
-        <div className="mx-auto mt-10 max-w-5xl rounded-[24px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.055)] px-5 py-4 text-center">
-          <p className="text-sm font-bold text-[color:var(--foreground)]">
-            Growth is the recommended recurring REVORY plan.
-          </p>
-          <p className="mt-1 text-xs leading-5 text-[color:var(--text-muted)]">
-            US$799/month, billed monthly. It starts only when you choose it and can be managed separately in billing.
-          </p>
+        <div className="mx-auto mt-12 max-w-5xl">
+          <div className="mb-5">
+            <p className="rev-kicker">01 · Recommended first read</p>
+            <h3 className="mt-2 text-2xl font-bold">Quote Recovery Audit</h3>
+          </div>
+          <PriceCard available body="One defined evidence-backed review for a team that wants to know which open estimates deserve attention first." cta="Get your Quote Recovery Audit — $399 once" eyebrow="Primary offer" features={["Data Quality and mapping review", "Prioritized Quote Recovery findings", "Evidence and confidence for each finding", "Executive CSV and PDF exports"]} label="Quote Recovery Audit" note="paid once" outcome="One analysis. No renewal and no subscription added automatically." price="US$399" primary />
         </div>
 
-        <div className="mx-auto mt-12 max-w-6xl">
+        <div className="mx-auto mt-14 max-w-6xl">
           <div className="mb-5">
-            <p className="rev-kicker">Recurring access</p>
-            <h3 className="mt-2 text-2xl font-bold">Monthly plans</h3>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            <PriceCard
-              available
-              body="Keep the Quote Recovery list current as estimate and follow-up exports change."
-              cta="Review Starter continuity"
-              eyebrow="After the $799 Audit"
-              features={[
-                "Fresh reads from new exports",
-                "Saved column matches",
-                "New, persistent, worsening and resolved movement",
-                "Recurring workspace access and billing portal",
-              ]}
-              label="Starter"
-              note="per month"
-              outcome="Entry condition: a completed Quote Recovery Audit."
-              price="US$399"
-            />
-            <PriceCard
-              available
-              body="Turn each new import into a management rhythm with longer movement history, segmentation and one focused weekly decision."
-              cta="Start with Growth"
-              eyebrow="Recommended recurring plan"
-              features={[
-                "Recurring Quote Recovery access",
-                "Twelve-month movement history",
-                "Source, owner and service segmentation",
-                "Weekly management read",
-              ]}
-              label="Growth"
-              note="per month"
-              outcome="Best for teams that want REVORY to become a recurring weekly management habit."
-              price="US$799"
-              primary
-            />
-            <PriceCard
-              body="Add advanced Revenue Realization review only after job, invoice and change-order evidence passes its gate."
-              cta="Coming later"
-              eyebrow="Closed release gate"
-              features={[
-                "Quote Recovery and Growth intelligence",
-                "Change-order and underbilling review",
-                "Margin-basis intelligence",
-                "Higher-volume controls",
-              ]}
-              label="Pro"
-              note="per month"
-              outcome="Not available for purchase yet."
-              price="US$1,499"
-            />
-          </div>
-        </div>
-
-        <div className="mx-auto mt-14 max-w-5xl">
-          <div className="mb-5">
-            <p className="rev-kicker">Establish the baseline</p>
-            <h3 className="mt-2 text-2xl font-bold">Start with an Audit</h3>
+            <p className="rev-kicker">02 · Ongoing monitoring</p>
+            <h3 className="mt-2 text-2xl font-bold">Continue with Starter or Growth</h3>
           </div>
           <div className="grid gap-5 md:grid-cols-2">
           <PriceCard
             available
-            body="Best for a team that wants to find which open estimates deserve attention before committing to recurring software."
-            cta="Review the one-time Audit"
-            eyebrow="Focused one-time read"
-            features={[
-              "Guided CSV/XLSX import and column review",
-              "Data Quality and records needing attention",
-              "Prioritized Quote Recovery opportunities",
-              "Executive PDF and CSV exports",
-            ]}
-            label="Quote Recovery Audit"
-            note="paid once"
-            outcome="Outcome: your first trusted recovery baseline, paid once."
-            price="US$799"
+            body="Keep Quote Recovery current as new estimate and follow-up exports arrive."
+            cta="Choose Starter — $399/month"
+            eyebrow="Quote Recovery continuity"
+            features={["Recurring imports and fresh reads", "Saved mapping reuse", "New, persistent, worsening, resolved and recovered movement", "Billing portal and cancellation"]}
+            label="Starter"
+            note="per month"
+            outcome="Choose directly or after an Audit. No one-time charge is added."
+            price="US$399"
           />
           <PriceCard
-            body="An advanced estimate-to-job, invoice and change-order baseline for a future Revenue Realization release."
-            cta="Coming later"
-            eyebrow="Closed release gate"
-            features={[
-              "Explicit estimate, job and invoice matching",
-              "Unmatched and conflict review",
-              "Deterministic billing reconciliation",
-              "Full Revenue Leak executive report",
-            ]}
-            label="Full Revenue Leak Audit"
-            note="paid once"
-            outcome="Not available for purchase yet. It may later lead to Growth or Pro."
-            price="US$1,499"
+            available
+            body="Add longer history, guarded segmentation and a focused weekly management decision."
+            cta="Choose Growth — $599/month"
+            eyebrow="Management upgrade"
+            features={["Everything currently delivered in Starter", "Up to twelve months of history", "Source, owner and service segmentation when supported", "Weekly digest and executive PDF when supported"]}
+            label="Growth"
+            note="per month"
+            outcome="No rankings are shown when the evidence sample is insufficient."
+            price="US$599"
           />
           </div>
         </div>
 
         <div className="mx-auto mt-7 grid max-w-5xl gap-3 md:grid-cols-2">
           <div className="rounded-[20px] border border-[color:var(--border-accent)] bg-[rgba(67,179,155,.045)] px-5 py-4 text-sm font-semibold">
-            US$799 paid once Audit <span className="text-[color:var(--accent-light)]">→</span> US$399/month Starter
+            Recommended journey: Audit → Starter → Growth.
           </div>
           <div className="rounded-[20px] border border-[color:var(--border)] bg-[rgba(255,255,255,.015)] px-5 py-4 text-sm font-semibold text-[color:var(--text-muted)]">
-            US$799/month Growth <span className="text-[color:var(--accent-light)]">→</span> REVORY&apos;s main recurring intelligence plan
+            Customer choice: all three current offers remain independently selectable.
           </div>
         </div>
 

@@ -1,5 +1,9 @@
 # REVORY — Hybrid Continuous Execution Guide
 
+## Current commercial override — 2026-07-30
+
+For current execution and QA, use Audit **US$399 once**, Starter **US$399/month**, and Growth **US$599/month**. Audit is the dominant recommended first purchase but is not required for direct Starter or Growth checkout. Pro and Full Revenue Leak Audit are preserved but not publicly sold. Treat earlier prices in sprint instructions as historical unless a task explicitly audits that historical decision.
+
 ## 1. Purpose
 
 Use this guide to execute the hybrid REVORY strategy without confusing vision, implemented capability and sellable product.

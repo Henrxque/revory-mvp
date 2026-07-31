@@ -6,6 +6,8 @@ import { supportedWorkspaceCurrencies } from "@/domain/revory/currency";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getGrowthAccess } from "@/services/billing/growth-access";
+import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
+import { getRevoryOffer } from "@/services/billing/revory-offers";
 import { getTransactionalEmailConfig } from "@/services/email/transactional-email";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { deleteAnalysisDataAction, updateDigestAction, updateRetentionAction, updateWorkspaceCurrencyAction } from "./actions";
@@ -13,10 +15,11 @@ import { deleteAnalysisDataAction, updateDigestAction, updateRetentionAction, up
 export default async function SettingsPage() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/settings"));
-  const [settings, digest, growthAccess] = await Promise.all([
+  const [settings, digest, growthAccess, entitlements] = await Promise.all([
     prisma.workspaceDataSettings.findUnique({ where: { workspaceId: context.workspace.id } }),
     prisma.quoteRecoveryDigestPreference.findUnique({ where: { workspaceId: context.workspace.id } }),
     getGrowthAccess(context.workspace.id),
+    getWorkspaceEntitlements(context.workspace.id),
   ]);
   const emailConfigured = getTransactionalEmailConfig().configured;
   return (
@@ -69,10 +72,20 @@ export default async function SettingsPage() {
                 : "Delivery is paused until Resend and the sending domain are configured."}
           </p>
         </Card>
-        <Card body="Review your current REVORY access and open the secure billing portal when a paid plan is active. Growth is REVORY's main recurring plan; checkout stays fail-closed until Stripe verification is complete." title="Plans and billing">
+        <Card body="Review your current REVORY access, choose an upgrade or open Stripe to manage payment and cancellation." title="Plans and billing">
+          {entitlements.length ? (
+            <div className="mb-4 space-y-2">
+              {entitlements.map((entitlement) => {
+                const offer = getRevoryOffer(entitlement.offerKey);
+                return <div className="rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,.02)] px-4 py-3" key={entitlement.id}><p className="font-bold">{offer.label}</p><p className="mt-1 text-xs text-[color:var(--text-muted)]">US${offer.priceUsd} {offer.mode === "payment" ? "paid once" : "per month"}</p></div>;
+              })}
+            </div>
+          ) : <p className="mb-4 text-sm text-[color:var(--text-muted)]">No paid REVORY offer is active in this workspace.</p>}
           {context.workspace.stripeCustomerId
             ? <form action="/api/billing/portal" method="post"><button className="rev-button-secondary" type="submit">Open billing portal</button></form>
-            : <Link className="rev-button-secondary" href="/start">Review gated plans</Link>}
+            : <Link className="rev-button-secondary" href="/start">Review current offers</Link>}
+          {context.workspace.currentPeriodEnd ? <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">{context.workspace.cancelAtPeriodEnd ? "Access scheduled to end" : "Next billing date"}: {context.workspace.currentPeriodEnd.toLocaleDateString("en-US")}</p> : null}
+          {entitlements.some((item) => item.offerKey === "STARTER") && context.workspace.stripeCustomerId ? <form action="/api/billing/portal" className="mt-2" method="post"><button className="rev-button-primary" type="submit">Upgrade to Growth — $599/month</button></form> : null}
         </Card>
       </section>
       <section className="rounded-[24px] border border-[rgba(255,114,141,.25)] bg-[rgba(255,114,141,.05)] p-6">

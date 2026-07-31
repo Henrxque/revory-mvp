@@ -32,10 +32,10 @@ check(
   "Historical QuoteSignal naming does not reach public rendering.",
 );
 check(
-  "visible-prelaunch-gate",
-  home.includes("Secure checkout activation is being finalized") &&
-    start.includes("Activation pending"),
-  "Landing and start screen visibly mark checkout as closed during validation.",
+  "visible-secure-checkout",
+  home.includes("Secure Stripe checkout") &&
+    start.includes("Secure checkout"),
+  "Landing and start screen explain the active secure-checkout boundary.",
 );
 check(
   "no-legacy-growth-cta",
@@ -57,11 +57,11 @@ check(
   "The pricing screen separates monthly plans from one-time audits and preserves explicit billing cadence.",
 );
 check(
-  "starter-is-recurring-continuation",
-  start.includes('entryCondition: "Available after your first Quote Recovery Audit is complete."') &&
+  "starter-is-independent-recurring-path",
+  start.includes("Start directly. A one-time Audit is optional") &&
     start.includes('priceNote: "per month"') &&
     !start.includes("Everything in the audit flow"),
-  "Starter is described as recurring continuity after the Audit, not a cheaper replacement for it.",
+  "Starter is described as an independent recurring path, not a forced Audit continuation.",
 );
 check(
   "no-live-checkout-link",

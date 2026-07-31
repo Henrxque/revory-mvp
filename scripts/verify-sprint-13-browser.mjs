@@ -51,7 +51,14 @@ async function ensureServer() {
       NEXTAUTH_URL: baseURL,
       NEXT_PUBLIC_APP_URL: baseURL,
       REVORY_INTERNAL_PREVIEW_MODE: "true",
+      REVORY_PAID_CHECKOUT_ENABLED: "true",
       REVORY_QA_DIST_DIR: ".next-s13",
+      STRIPE_FULL_REVENUE_LEAK_AUDIT_PRICE_ID: "price_full_audit_qa",
+      STRIPE_QUOTE_RECOVERY_AUDIT_PRICE_ID: "price_quote_audit_qa",
+      STRIPE_REVORY_GROWTH_MONTHLY_PRICE_ID: "price_growth_qa",
+      STRIPE_REVORY_PRO_MONTHLY_PRICE_ID: "price_pro_qa",
+      STRIPE_SECRET_KEY: "sk_test_commercial_browser_qa",
+      STRIPE_STARTER_PRICE_ID: "price_starter_qa",
     },
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
@@ -84,31 +91,25 @@ try {
     await page.getByRole("heading", { name: "Choose how you want REVORY to review your revenue." }).waitFor();
     const growth = page.getByRole("heading", { exact: true, name: "Growth" }).locator("xpath=ancestor::article");
     const starter = page.getByRole("heading", { exact: true, name: "Starter" }).locator("xpath=ancestor::article");
-    const pro = page.getByRole("heading", { exact: true, name: "Pro" }).locator("xpath=ancestor::article");
     const audit = page.getByRole("heading", { exact: true, name: "Quote Recovery Audit" }).locator("xpath=ancestor::article");
-    const fullAudit = page.getByRole("heading", { exact: true, name: "Full Revenue Leak Audit" }).locator("xpath=ancestor::article");
     if (!(await growth.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Growth cadence is unclear.`);
     }
     if (!(await starter.getByText("per month", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: Starter cadence is unclear.`);
     }
-    if (!(await starter.getByRole("button", { name: "Complete the US$799 Audit first" }).isVisible())) {
-      throw new Error(`${viewport.label}: Starter prerequisite is not visible.`);
+    if (!(await starter.getByRole("button", { name: "Continue with Starter" }).isVisible())) {
+      throw new Error(`${viewport.label}: Starter is not independently selectable.`);
     }
-    if (!(await pro.getByText("per month", { exact: true }).isVisible())) {
-      throw new Error(`${viewport.label}: Pro is not grouped as a monthly plan.`);
-    }
-    if (!(await audit.getByText("paid once", { exact: true }).isVisible()) ||
-        !(await fullAudit.getByText("paid once", { exact: true }).isVisible())) {
+    if (!(await audit.getByText("paid once", { exact: true }).isVisible())) {
       throw new Error(`${viewport.label}: One-time Audit cadence is unclear.`);
     }
-    if (!(await pro.getByRole("button", { name: "Not available yet" }).isVisible()) ||
-        !(await fullAudit.getByRole("button", { name: "Not available yet" }).isVisible())) {
-      throw new Error(`${viewport.label}: Gated offers appear purchasable.`);
+    if (await page.getByRole("heading", { exact: true, name: "Pro" }).count() ||
+        await page.getByRole("heading", { exact: true, name: "Full Revenue Leak Audit" }).count()) {
+      throw new Error(`${viewport.label}: Gated advanced offers leaked into the current public catalog.`);
     }
     if (viewport.width >= 1280) {
-      const monthlyBoxes = await Promise.all([growth, starter, pro].map((card) => card.boundingBox()));
+      const monthlyBoxes = await Promise.all([starter, growth].map((card) => card.boundingBox()));
       const auditBox = await audit.boundingBox();
       if (monthlyBoxes.some((box) => !box) || !auditBox) {
         throw new Error(`${viewport.label}: Pricing cards could not be measured.`);
@@ -117,8 +118,8 @@ try {
       if (monthlyBoxes.some((box) => Math.abs(box.y - monthlyTop) > 2)) {
         throw new Error(`${viewport.label}: Monthly plans are not aligned in one comparison row.`);
       }
-      if (auditBox.y <= monthlyTop + monthlyBoxes[0].height) {
-        throw new Error(`${viewport.label}: One-time Audits are mixed into the monthly plan group.`);
+      if (auditBox.y + auditBox.height >= monthlyTop) {
+        throw new Error(`${viewport.label}: The dominant one-time Audit is mixed into the monthly plan group.`);
       }
     }
 
@@ -134,7 +135,7 @@ try {
     await context.close();
   }
 
-  console.log(`Monthly/audit grouping, responsive alignment and premium hover: PASS (${evidenceDir})`);
+  console.log(`Current Audit/Starter/Growth grouping, responsive alignment and premium hover: PASS (${evidenceDir})`);
 } finally {
   if (browser) await browser.close().catch(() => {});
   if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");

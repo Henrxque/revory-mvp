@@ -52,25 +52,24 @@ assert.ok(
 assert.ok(
   dashboard.includes("hasCompletedQuoteRecoveryBaseline") &&
     dashboard.includes("getWorkspaceEntitlements") &&
-    dashboard.includes("hasCompletedAudit && !hasActiveStarter") &&
+    dashboard.includes("hasCompletedAudit && !hasActiveSubscription") &&
     dashboard.includes("Your Audit establishes the baseline.") &&
-    dashboard.includes("Starter keeps this review current with refreshed imports and movement over time.") &&
-    dashboard.includes("US$399/month after the completed Audit.") &&
-    dashboard.includes("does not change your access or billing") &&
+    dashboard.includes("Keep monitoring with Starter — $399/month") &&
+    dashboard.includes("Choose Growth — $599/month") &&
     !dashboard.includes("createCheckoutSession"),
-  "The post-Audit continuation must be accurate, conditional and unable to mutate billing.",
+  "The post-Audit continuation must be optional, conditional and unable to mutate billing.",
 );
-assert.match(
-  checkout,
-  /offerKey === "STARTER" && !\(await hasCompletedQuoteRecoveryBaseline\(workspace\.id\)\)/,
-  "Starter checkout must retain the completed-Audit server guard.",
+assert.ok(
+  !checkout.includes("hasCompletedQuoteRecoveryBaseline") &&
+    !checkout.includes("baseline-required"),
+  "Starter checkout must remain independent from the one-time Audit.",
 );
 
 assert.ok(
-  home.includes('className="rev-button-primary" href="#pricing"') &&
-    home.includes("See plans and pricing") &&
+  home.includes('className="rev-button-primary" href="/start"') &&
+    home.includes("Get your Quote Recovery Audit — $399 once") &&
     home.includes('href="/demo"') &&
-    home.includes("View sample demo"),
+    home.includes("View the sample audit"),
   "The landing must keep pricing as the primary commercial action and the sample demo as a separate secondary path.",
 );
 assert.ok(
@@ -90,23 +89,21 @@ assert.ok(
 for (const contract of [
   "US$399",
   "per month",
-  "US$799",
+  "US$599",
   "paid once",
-  "US$1,499",
-  "Full Revenue Leak Audit",
-  "Growth is the recommended recurring REVORY plan.",
+  "Quote Recovery Audit",
 ]) {
   assert.ok(home.includes(contract), `Landing pricing must include the explicit contract: ${contract}`);
-  assert.ok(start.includes(contract) || contract === "Growth is the recommended recurring REVORY plan.", `Start pricing must include the explicit contract: ${contract}`);
+  assert.ok(start.includes(contract) || ["US$399", "US$599"].includes(contract), `Start pricing must include the explicit contract: ${contract}`);
 }
 assert.ok(
-  home.includes("Not available for purchase yet.") &&
-    start.includes("Not available for purchase yet.") &&
-    home.includes("Start with Growth") &&
+  home.includes("Choose Growth — $599/month") &&
+    !home.includes("Start with Pro") &&
     start.includes('offerKey: "GROWTH"') &&
+    !start.includes('offerKey: "FULL_REVENUE_LEAK_AUDIT"') &&
     !home.toLowerCase().includes("per year") &&
     !start.toLowerCase().includes("per year"),
-  "Growth must be connected, Pro and Full Audit must stay visibly closed, and annual billing must remain absent.",
+  "All independent monthly and one-time paths must be connected while annual billing remains absent.",
 );
 
 console.log("Sprint 15 auth, Audit continuation, commercial CTA, product-faithful demo and pricing hierarchy contract: PASS");

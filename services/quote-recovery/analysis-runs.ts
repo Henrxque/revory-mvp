@@ -1,5 +1,5 @@
 import "server-only";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, RevoryOfferKey } from "@prisma/client";
 
 import { prisma } from "@/db/prisma";
 import { summarizeQuoteRecoveryFinancialExposure } from "@/domain/revory/quote-recovery-financial-summary";
@@ -8,7 +8,7 @@ import { getQuoteRecoveryRead } from "@/services/quote-recovery/read-model";
 
 export type AnalysisRunCapacityReservation = {
   entitlementId: string;
-  offerKey: "QUOTE_RECOVERY_AUDIT" | "STARTER" | "GROWTH" | "PRO";
+  offerKey: RevoryOfferKey;
 };
 
 export async function reserveQuoteRecoveryAnalysisRunCapacity(workspaceId: string): Promise<AnalysisRunCapacityReservation | null> {
@@ -16,7 +16,13 @@ export async function reserveQuoteRecoveryAnalysisRunCapacity(workspaceId: strin
   const entitlements = await prisma.workspaceEntitlement.findMany({
     where: { workspaceId, status: "ACTIVE", OR: [{ endsAt: null }, { endsAt: { gte: new Date() } }] },
   });
-  const rank = { PRO: 4, GROWTH: 3, STARTER: 2, QUOTE_RECOVERY_AUDIT: 1 } as const;
+  const rank: Record<RevoryOfferKey, number> = {
+    PRO: 5,
+    GROWTH: 4,
+    STARTER: 3,
+    FULL_REVENUE_LEAK_AUDIT: 2,
+    QUOTE_RECOVERY_AUDIT: 1,
+  };
   const entitlement = entitlements.sort((left, right) => rank[right.offerKey] - rank[left.offerKey])[0] ?? null;
   if (!entitlement) return null;
   if (entitlement.maxAnalysisRuns !== null) {
@@ -67,7 +73,13 @@ export async function createQuoteRecoveryAnalysisRun(
     findings.filter((finding): finding is Record<string, unknown> => Boolean(finding && typeof finding === "object" && !Array.isArray(finding))),
   );
   const estimatedValueCents = financialSummary.estimatedValueCents;
-  const rank = { PRO: 4, GROWTH: 3, STARTER: 2, QUOTE_RECOVERY_AUDIT: 1 } as const;
+  const rank: Record<RevoryOfferKey, number> = {
+    PRO: 5,
+    GROWTH: 4,
+    STARTER: 3,
+    FULL_REVENUE_LEAK_AUDIT: 2,
+    QUOTE_RECOVERY_AUDIT: 1,
+  };
   const entitlement = entitlements.sort((left, right) => rank[right.offerKey] - rank[left.offerKey])[0] ?? null;
   const ownsReservation = reservedCapacity === undefined;
   const reservation = ownsReservation

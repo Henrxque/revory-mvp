@@ -1,6 +1,10 @@
 # REVORY — Source of Truth
 
-> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-22.
+> Status: canonical product definition. The former MedSpa REVORY product is discontinued. Updated 2026-07-24.
+
+## Superseding commercial decision — 2026-07-30
+
+The current pricing hypothesis is **Quote Recovery Audit at US$399 paid once**, **Starter at US$399/month**, and **Growth at US$599/month**. Audit → Starter → Growth is the recommended journey, not a technical prerequisite: each current offer may be purchased directly, and an Audit never starts a subscription. Pro and Full Revenue Leak Audit remain preserved in code, entitlement history and existing customer contracts, but are commercially gated and absent from the primary public journey. These prices remain hypotheses until paid customer evidence validates them. This dated decision supersedes older public-price passages below without rewriting their historical context.
 
 ## Product identity
 
@@ -46,8 +50,8 @@ As of the local implementation on 2026-07-18:
 - the public read-only sample workspace passed desktop/mobile browser verification with synthetic contractor data;
 - the Sprint 6 recurring loop, second-read movement, recovered-value separation, digest boundary and workspace data controls are implemented locally;
 - protected idempotent retention enforcement is implemented and locally tested; the daily retention and weekly digest schedules are deployed and visible in Vercel, while the first observed production executions remain pending;
-- dedicated Audit, Starter and Growth entitlement/checkout code exists; Stripe contains the US$799 paid-once Audit, US$399/month Starter and US$799/month Growth prices, and Growth uses the dedicated `STRIPE_REVORY_GROWTH_MONTHLY_PRICE_ID` contract rather than the protected legacy price key; secret/webhook wiring and end-to-end payment evidence remain incomplete, so live checkout stays disabled;
-- Sprint 14 now presents one commercial sequence: the US$799 Quote Recovery Audit establishes the baseline, then the US$399/month Starter keeps it current only after the Audit; the public landing includes a no-login sample-data demo and fuller offer explanations, while Growth, Pro and Full Revenue Leak Audit remain collapsed and unavailable for purchase;
+- dedicated entitlement and checkout contracts exist for the US$799 paid-once Quote Recovery Audit, US$1,499 paid-once Full Revenue Leak Audit, US$399/month Starter, US$799/month Growth and US$1,499/month Pro; each offer uses a dedicated, non-legacy Stripe price contract;
+- the founder's current commercial decision is that monthly plans and one-time Audits are independent choices: Starter, Growth and Pro may start directly, neither Audit is required before a subscription, and buying an Audit never starts a recurring plan automatically;
 - Sprint 15 is implemented locally: sign-up and password reset confirm passwords in both client and server paths, successful auth moments use persistent accessible next-step cards, reset requests remain enumeration-safe, a completed Audit explains the US$399/month Starter continuation, the landing keeps pricing primary and the sample secondary, the public demo mirrors contractor product surfaces without writes, and pricing distinguishes every monthly plan from every one-time Audit while annual and gated offers remain unavailable;
 - landing fragment navigation, the 1280x720 first-viewport commercial path, desktop/mobile sample workspace and premium card interactions have dedicated browser regression gates;
 - customer-facing evidence fields use a shared readable-label dictionary, and primary import, Data Quality, settings, Revenue Realization and Growth surfaces no longer expose sprint labels or local implementation terminology;
@@ -70,7 +74,7 @@ As of the local implementation on 2026-07-18:
 - Sprint 16 operational-control preparation is implemented with a GitHub-hosted external health workflow on the default branch, a redacted cron observer and a guarded isolated-restore verifier; the isolated restore passed on 2026-07-19, the public monitor showed 32 runs and repeated successful scheduled production-health checks on 2026-07-22, the founder confirmed receipt of the controlled GitHub alert, and public support/security aliases passed; GitHub issue history plus private Vercel logs are the technical recovery route, while Henrique remains the only human incident operator; observed application cron runs, complete provider recovery evidence and Stripe test-mode lifecycle proof are still missing, so the Sprint 16 exit remains blocked;
 - the Sprint 11 paid-beta exit remains closed on external MFA/ownership evidence, Stripe E2E, observed production operations, independent DAST/pentest and qualified final legal review;
 - Sprint 12 evidence events and per-offer RETAIN/REPACKAGE/DELAY rules are implemented; absent real customer observations every price correctly remains DELAY;
-- no hybrid offer is yet eligible for public sale from this repository;
+- opening checkout still requires the paid-checkout release flag, a live Stripe secret, an exact configured price, a signed webhook and production verification; no UI state may bypass those technical controls;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 
 Capability becomes sellable only after its roadmap gate passes with executable evidence.
@@ -193,9 +197,9 @@ Treat these as target hypotheses, not published entitlements:
 - Pro: US$1,499/month;
 - Multi-location: US$2,499+/month in the future.
 
-The commercial sequence is not a three-tier price ladder. Growth at US$799/month is the recommended recurring REVORY plan and may start directly; it builds history, segmentation and a focused weekly management decision from the customer's recurring imports. The US$799 Quote Recovery Audit remains a focused paid-once first read, and Starter at US$399/month remains its lighter recurring continuation after that audit. The US$1,499 Full Revenue Leak Audit is a separate advanced one-time audit for customers whose evidence supports jobs, invoices, change orders and cost reconciliation.
+The commercial sequence is not a forced funnel. Growth at US$799/month is the recommended recurring REVORY plan and may start directly; it builds history, segmentation and a focused weekly management decision from the customer's recurring imports. Starter at US$399/month is a lighter recurring path that may also start directly. The US$799 Quote Recovery Audit and US$1,499 Full Revenue Leak Audit are independent paid-once choices for teams that prefer a focused baseline before deciding whether recurring monitoring is useful.
 
-The commercial screen must visually prioritize Growth as the main recurring plan while preserving cadence clarity. Starter retains the completed Quote Recovery Audit prerequisite; Growth does not silently add or bundle a one-time Audit. No visual priority may bypass a configured release flag, exact Stripe price match, signed webhook or entitlement gate.
+The commercial screen must visually prioritize Growth as the main recurring plan while preserving cadence clarity and customer choice. No subscription silently adds or bundles a one-time Audit, and no Audit silently starts a subscription. No visual priority may bypass a configured release flag, exact Stripe price match, signed webhook or entitlement gate.
 
 No price or plan is eligible until the specific release gate passes with paid or production-like evidence. Existing MedSpa Stripe plan keys and price IDs are protected migration inputs, not proof that the new packages are configured.
 

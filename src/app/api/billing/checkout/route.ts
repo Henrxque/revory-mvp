@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuthSession } from "@/auth";
-import { hasCompletedQuoteRecoveryBaseline } from "@/services/billing/commercial-readiness";
 import { ensureStripeCustomerForWorkspace } from "@/services/billing/stripe-sync";
 import { getStripeAppUrl, getStripeServerClient } from "@/services/billing/stripe-runtime";
-import { getRevoryOffer, getRevoryOfferPriceId, isRevoryOfferConfigured, parseRevoryOffer } from "@/services/billing/revory-offers";
+import { getRevoryOffer, getRevoryOfferPriceId, isRevoryOfferConfigured, parseRevoryOffer, revoryStripePriceMatchesContract } from "@/services/billing/revory-offers";
 import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 import { buildSignUpRedirectPath } from "@/services/auth/redirects";
 import { syncAuthenticatedUser } from "@/services/auth/sync-user";
@@ -21,17 +20,18 @@ export async function POST(request: NextRequest) {
   const user = await syncAuthenticatedUser(); if (!user) return NextResponse.redirect(new URL("/sign-in?redirect_url=%2Fstart", request.url), { status: 303 });
   const workspace = await getOrCreateWorkspace(user); const existing = await getWorkspaceEntitlements(workspace.id);
   if (existing.some((entitlement) => entitlement.offerKey === offerKey)) return NextResponse.redirect(new URL("/app/dashboard", request.url), { status: 303 });
-  const activeRecurringEntitlement = existing.find((entitlement) => entitlement.offerKey !== "QUOTE_RECOVERY_AUDIT");
+  const activeRecurringEntitlement = existing.find(
+    (entitlement) => getRevoryOffer(entitlement.offerKey).mode === "subscription",
+  );
   if (getRevoryOffer(offerKey).mode === "subscription" && activeRecurringEntitlement) {
     return NextResponse.redirect(new URL("/app/settings?billing=manage-subscription", request.url), { status: 303 });
-  }
-  if (offerKey === "STARTER" && !(await hasCompletedQuoteRecoveryBaseline(workspace.id))) {
-    return NextResponse.redirect(new URL("/start?billing=baseline-required&offer=STARTER", request.url), { status: 303 });
   }
   try {
     const customer = await ensureStripeCustomerForWorkspace({ existingStripeCustomerId: workspace.stripeCustomerId, userEmail: user.email, userName: user.fullName, workspaceId: workspace.id, workspaceName: workspace.name });
     const offer = getRevoryOffer(offerKey); const stripe = getStripeServerClient();
     const priceId = getRevoryOfferPriceId(offerKey);
+    const stripePrice = await stripe.prices.retrieve(priceId);
+    if (!revoryStripePriceMatchesContract(offerKey, stripePrice)) throw new Error(`Stripe price contract mismatch for ${offerKey}.`);
     const priorSessions = await stripe.checkout.sessions.list({ customer, limit: 10, expand: ["data.line_items"] });
     const prior = priorSessions.data.find((candidate) => {
       const observedPriceIds = candidate.line_items?.data.map((item) => item.price?.id).filter(Boolean) ?? [];

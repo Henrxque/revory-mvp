@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     getWorkspaceEntitlements(context.workspace.id),
   ]);
   const top = read.findings.slice(0, 3);
-  const hasActiveStarter = entitlements.some((entitlement) => entitlement.offerKey === "STARTER");
+  const hasActiveSubscription = entitlements.some((entitlement) => ["STARTER", "GROWTH", "PRO"].includes(entitlement.offerKey));
 
   return (
     <div className="space-y-6">
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {hasCompletedAudit && !hasActiveStarter ? <AuditContinuation /> : null}
+      {hasCompletedAudit && !hasActiveSubscription ? <AuditContinuation /> : null}
 
       {!read.dataQuality.hasImport ? (
         <Empty />
@@ -134,15 +134,14 @@ function AuditContinuation() {
           Your Audit establishes the baseline.
         </h2>
         <p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">
-          Starter keeps this review current with refreshed imports and movement over time.
-          It is US$399/month after the completed Audit.
+          Keep monitoring with Starter — $399/month.
         </p>
         <p className="mt-2 text-xs leading-5 text-[color:var(--text-subtle)]">
-          Starter is not active yet. This explanation does not change your access or billing.
+          Need history and segmentation? Choose Growth — $599/month. Both subscriptions are optional and never start automatically after an Audit.
         </p>
       </div>
       <Link className="rev-button-secondary whitespace-nowrap" href="/start#quote-recovery-path-title">
-        See how Starter works
+        Choose ongoing monitoring
       </Link>
     </section>
   );

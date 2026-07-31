@@ -48,14 +48,16 @@ export async function getCanonicalImportAccessNotice(
     };
   }
 
-  const audit = entitlements.find((item) => item.offerKey === "QUOTE_RECOVERY_AUDIT");
+  const audit = entitlements.find((item) =>
+    ["QUOTE_RECOVERY_AUDIT", "FULL_REVENUE_LEAK_AUDIT"].includes(item.offerKey),
+  );
   if (audit) {
     const maximum = audit.maxAnalysisRuns ?? 1;
     const blocked = audit.analysisRunsUsed >= maximum;
     return {
       analysisRunsUsed: audit.analysisRunsUsed,
       blocked,
-      label: "Quote Recovery Audit - one-time",
+      label: `${audit.offerKey === "FULL_REVENUE_LEAK_AUDIT" ? "Full Revenue Leak Audit" : "Quote Recovery Audit"} - one-time`,
       maxAnalysisRuns: maximum,
       mode: "AUDIT",
       requiresConsumptionConfirmation: !blocked,

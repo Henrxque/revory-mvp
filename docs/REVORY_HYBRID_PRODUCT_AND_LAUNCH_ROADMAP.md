@@ -1,5 +1,9 @@
 # REVORY — Hybrid Product and Launch Roadmap
 
+## Superseding commercial hypothesis — 2026-07-30
+
+Current public offers are Quote Recovery Audit at **US$399 once**, Starter at **US$399/month**, and Growth at **US$599/month**. The recommended sequence is Audit → Starter → Growth, while direct Starter and Growth checkout remains valid. Pro and Full Revenue Leak Audit stay implemented/preserved where applicable but are commercially gated. No price is treated as validated before paid customer evidence. Older sprint prices below remain historical implementation records.
+
 ## 1. Executive decision
 
 Build REVORY in two proven layers:
@@ -248,9 +252,9 @@ Deliver per-job export-completeness gates, active full-snapshot boundaries, stri
 
 **Outcome:** explain the audit-to-subscription business model without presenting one-time audits and recurring plans as a false tier ladder.
 
-Deliver a recurring-plan-first visual group, a separate one-time Audit baseline group, explicit billing cadence on every card, server-side Starter baseline enforcement, honest closed states for Growth/Pro/Full Audit and no annual control before dedicated Stripe and renewal evidence exists.
+Deliver a recurring-plan-first visual group, a separate one-time Audit group, explicit billing cadence on every card and no annual control before dedicated Stripe and renewal evidence exists. The original forced-Audit prerequisite and closed Growth/Pro/Full Audit states are historical decisions superseded by Sprint 16.2.
 
-**Exit:** a buyer can distinguish what is paid once, what recurs, which Audit is required first and which paths remain closed; no gated offer can be purchased and no legacy Stripe price can grant hybrid access.
+**Exit:** a buyer can distinguish what is paid once from what recurs; no Audit starts a subscription automatically, no legacy Stripe price grants hybrid access and every configured offer fails closed if its dedicated Stripe price or live billing runtime is unavailable.
 
 ### Sprint 14 — Pre-commercial launch closure
 
@@ -264,13 +268,13 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 **Local status:** implemented and verified on 2026-07-16; the founder-authorized Stripe sandbox catalog contains the approved Audit and Starter prices, but no deploy, live payment activation or public-sale claim is included.
 
-**Outcome:** make email/password access unambiguous, restore pricing as the primary commercial path, make the sample demo faithful to the product, restore the audit-versus-subscription pricing hierarchy, and explain the completed-Audit-to-Starter continuation without enabling checkout or expanding product scope.
+**Outcome:** make email/password access unambiguous, restore pricing as the primary commercial path, make the sample demo faithful to the product, distinguish optional one-time Audits from subscriptions, and explain optional post-Audit continuation without enabling checkout or expanding product scope.
 
-**Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; the primary landing CTA reaches pricing while a separate sample route mirrors the read-only product experience; every visible price distinguishes paid-once Audit from monthly plan, including the closed US$1,499 Full Audit; and a completed Audit accurately explains Starter at US$399/month without bypassing its baseline or payment gate.
+**Exit:** sign-up and reset have confirmed-password and durable success states; reset remains enumeration-safe; the primary landing CTA reaches pricing while a separate sample route mirrors the read-only product experience; every visible price distinguishes paid-once Audit from monthly plan; and a completed Audit explains that any recurring plan is an optional later choice rather than an automatic charge.
 
 ### Sprint 15.1 — Growth commercial connection
 
-**Current founder decision:** Growth at US$799/month is the main recurring REVORY plan and may start directly. Starter remains the lighter post-Audit continuation, while Pro and the Full Revenue Leak Audit retain their own gates.
+**Historical decision at implementation time:** Growth at US$799/month became the main recurring REVORY plan and could start directly. The later Sprint 16.2 decision removed the remaining forced Audit prerequisite and opened every configured commercial path independently.
 
 **Outcome:** connect the implemented Sprint 10 Growth surface to a dedicated non-legacy Stripe price, present it as the recommended recurring plan and keep charging fail-closed until the signed webhook and subscription lifecycle pass end to end.
 
@@ -283,6 +287,14 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 **Outcome:** turn the already-deployed operational foundations into reproducible production evidence: observed digest/retention schedules, external uptime alerting, one isolated restore and MFA/recovery ownership. This is an operations sprint, not a feature sprint.
 
 **Exit:** each operational control has a timestamped, redacted private evidence record and an owner; no customer data, secret or provider account identifier is committed; legal-entity and real-customer evidence gates remain separate.
+
+### Sprint 16.2 — Independent commercial paths
+
+**Current founder decision:** every recurring plan and every one-time Audit is chosen independently. Starter no longer requires a completed Quote Recovery Audit; no Audit starts a subscription; Growth remains the recommended recurring plan.
+
+**Outcome:** remove the legacy Audit prerequisite from UI and server checkout, connect dedicated Stripe price contracts for Pro and the Full Revenue Leak Audit, and preserve exact-price, webhook, entitlement, one-time-consumption and recurring-subscription boundaries.
+
+**Exit:** `/start` separates monthly plans from paid-once Audits, every offer has an explicit cadence and direct checkout path when its production configuration is valid, Starter can create a Checkout Session without Audit history, one-time purchases retain a one-analysis limit, and Stripe configuration still fails closed when any release control is missing.
 
 ## 9. Launch sequence
 

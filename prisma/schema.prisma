@@ -196,6 +196,7 @@ enum RevoryFindingUrgency {
 
 enum RevoryOfferKey {
   QUOTE_RECOVERY_AUDIT
+  FULL_REVENUE_LEAK_AUDIT
   STARTER
   GROWTH
   PRO

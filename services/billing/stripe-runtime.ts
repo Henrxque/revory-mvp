@@ -17,20 +17,37 @@ const priceIdsByPlan: Record<RevoryBillingPlan, string> = {
 
 let stripeClientSingleton: Stripe | null = null;
 
+function hasValidStripeSecretKey() {
+  if (!stripeSecretKey || /replace|placeholder|changeme/i.test(stripeSecretKey)) {
+    return false;
+  }
+
+  const isLiveEnvironment = process.env.VERCEL_ENV?.trim().toLowerCase() === "production";
+
+  return isLiveEnvironment
+    ? stripeSecretKey.startsWith("sk_live_")
+    : stripeSecretKey.startsWith("sk_test_");
+}
+
+function hasValidStripeWebhookSecret() {
+  return stripeWebhookSecret.startsWith("whsec_") &&
+    !/replace|placeholder|changeme/i.test(stripeWebhookSecret);
+}
+
 export function isStripeCheckoutConfiguredForPlan(planKey: RevoryBillingPlan) {
   if (planKey === "PREMIUM") {
     return false;
   }
 
-  return Boolean(stripeSecretKey && priceIdsByPlan[planKey]);
+  return Boolean(hasValidStripeSecretKey() && priceIdsByPlan[planKey]?.startsWith("price_"));
 }
 
 export function isStripeBillingConfigured() {
-  return Boolean(stripeSecretKey);
+  return hasValidStripeSecretKey();
 }
 
 export function isStripeWebhookConfigured() {
-  return Boolean(stripeSecretKey && stripeWebhookSecret);
+  return hasValidStripeSecretKey() && hasValidStripeWebhookSecret();
 }
 
 export function getStripeAppUrl() {
@@ -67,7 +84,7 @@ export function getBillingPlanByStripePriceId(priceId: string | null | undefined
 }
 
 export function getStripeServerClient() {
-  if (!stripeSecretKey) {
+  if (!hasValidStripeSecretKey()) {
     throw new Error("STRIPE_SECRET_KEY is not configured.");
   }
 

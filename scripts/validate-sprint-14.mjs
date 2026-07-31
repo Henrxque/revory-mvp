@@ -20,25 +20,25 @@ assert.ok(
 );
 assert.ok(
   landing.includes('href="/demo"') &&
-    landing.includes("View sample demo") &&
+    landing.includes("View the sample audit") &&
     landing.includes("Synthetic") === false,
   "Homepage must expose an obvious buyer-friendly sample-data demo path.",
 );
 for (const copy of [
-  "Guided CSV/XLSX import and column review",
-  "Prioritized Quote Recovery opportunities",
-  "Executive PDF and CSV exports",
-  "New, persistent, worsening and resolved movement",
-  "Entry condition: a completed Quote Recovery Audit.",
+  "Data Quality and mapping review",
+  "Prioritized Quote Recovery findings",
+  "Executive CSV and PDF exports",
+  "New, persistent, worsening, resolved and recovered movement",
+  "No renewal and no subscription added automatically",
 ]) {
   assert.ok(landing.includes(copy), `Landing pricing explanation is missing: ${copy}`);
 }
 assert.ok(
   start.includes("Choose how you want REVORY to review your revenue.") &&
-    start.includes("[growthPlan, starterPlan, proPlan]") &&
-    start.includes("[quoteRecoveryAudit, fullRevenueLeakAudit]") &&
-    start.includes("Not available for purchase yet."),
-  "Start must separate monthly plans from one-time audits and keep advanced offers gated.",
+    start.includes("[starterPlan, growthPlan]") &&
+    !start.includes("fullRevenueLeakAudit") &&
+    !start.includes("proPlan"),
+  "Start must list only current public offers.",
 );
 assert.ok(
   labels.includes('amountcents: "Estimate amount"') &&

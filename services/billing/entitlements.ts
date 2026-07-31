@@ -4,7 +4,7 @@ import type Stripe from "stripe";
 
 import { prisma } from "@/db/prisma";
 import { parseRevoryOffer } from "@/services/billing/revory-offers";
-import { getRevoryOffer, getRevoryOfferPriceId } from "@/services/billing/revory-offers";
+import { getRevoryOffer, getRevoryOfferPriceId, revoryStripePriceMatchesContract, revoryStripePriceMatchesEntitlementContract } from "@/services/billing/revory-offers";
 
 export async function getWorkspaceEntitlements(workspaceId: string) { return prisma.workspaceEntitlement.findMany({ where: { workspaceId, status: "ACTIVE", OR: [{ endsAt: null }, { endsAt: { gte: new Date() } }] }, orderBy: { createdAt: "desc" } }); }
 export async function hasCurrentRevoryAccess(workspaceId: string) { return (await getWorkspaceEntitlements(workspaceId)).length > 0; }
@@ -24,11 +24,12 @@ export async function fulfillRevoryCheckoutSession(session: Stripe.Checkout.Sess
   if (offer.mode === "payment" && session.payment_status !== "paid") throw new Error("One-time checkout is not paid.");
   if (session.payment_status === "unpaid") throw new Error("Checkout payment is incomplete.");
   const configuredPriceId = getRevoryOfferPriceId(offerKey);
-  const observedPriceIds = session.line_items?.data.map((item) => item.price?.id).filter(Boolean) ?? [];
-  if (!configuredPriceId || observedPriceIds.length !== 1 || observedPriceIds[0] !== configuredPriceId) throw new Error("Checkout line item does not match the configured offer price.");
+  const observedPrices = session.line_items?.data.map((item) => item.price).filter((price): price is NonNullable<typeof price> => Boolean(price)) ?? [];
+  if (!configuredPriceId || observedPrices.length !== 1 || !revoryStripePriceMatchesContract(offerKey, observedPrices[0])) throw new Error("Checkout line item does not match the configured offer contract.");
   const paymentIntentId = stripeObjectId(session.payment_intent);
   const subscriptionId = stripeObjectId(session.subscription);
-  const endsAt = offerKey === "QUOTE_RECOVERY_AUDIT" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+  const isOneTimeAudit = offer.mode === "payment";
+  const endsAt = isOneTimeAudit ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
   return prisma.$transaction(async (tx) => {
     const existing = subscriptionId
       ? await tx.workspaceEntitlement.findUnique({ where: { stripeSubscriptionId: subscriptionId } })
@@ -48,22 +49,24 @@ export async function fulfillRevoryCheckoutSession(session: Stripe.Checkout.Sess
           stripeSubscriptionId: subscriptionId,
           status: subscriptionIsActive ? "ACTIVE" : "REVOKED",
           endsAt: subscriptionIsActive ? endsAt : eventCreatedAt,
-          maxAnalysisRuns: offerKey === "QUOTE_RECOVERY_AUDIT" ? 1 : null,
+          maxAnalysisRuns: isOneTimeAudit ? 1 : null,
           stripeEventCreatedAt: eventCreatedAt,
         },
       });
       if (updated.count !== 1) throw new Error("Checkout entitlement changed concurrently; retry with current Stripe state.");
       entitlement = await tx.workspaceEntitlement.findUniqueOrThrow({ where: { id: existing.id } });
     } else {
-      entitlement = await tx.workspaceEntitlement.create({ data: { workspaceId, offerKey, stripeCheckoutSessionId: session.id, stripePaymentIntentId: paymentIntentId, stripeSubscriptionId: subscriptionId, status: subscriptionIsActive ? "ACTIVE" : "REVOKED", endsAt: subscriptionIsActive ? endsAt : eventCreatedAt, maxAnalysisRuns: offerKey === "QUOTE_RECOVERY_AUDIT" ? 1 : null, stripeEventCreatedAt: eventCreatedAt } });
+      entitlement = await tx.workspaceEntitlement.create({ data: { workspaceId, offerKey, stripeCheckoutSessionId: session.id, stripePaymentIntentId: paymentIntentId, stripeSubscriptionId: subscriptionId, status: subscriptionIsActive ? "ACTIVE" : "REVOKED", endsAt: subscriptionIsActive ? endsAt : eventCreatedAt, maxAnalysisRuns: isOneTimeAudit ? 1 : null, stripeEventCreatedAt: eventCreatedAt } });
     }
-    if (offerKey === "QUOTE_RECOVERY_AUDIT") await tx.revoryEvidenceEvent.upsert({
+    if (isOneTimeAudit) await tx.revoryEvidenceEvent.upsert({
       where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey: `billing:checkout:${session.id}` } },
       create: { workspaceId, metric: "AUDIT_CONVERSION", source: "BILLING", offerKey, booleanValue: true, idempotencyKey: `billing:checkout:${session.id}`, relatedEntityId: entitlement.id },
       update: {},
     });
-    if (offerKey !== "QUOTE_RECOVERY_AUDIT") {
-      const priorAudit = await tx.workspaceEntitlement.findFirst({ where: { workspaceId, offerKey: "QUOTE_RECOVERY_AUDIT" } });
+    if (offer.mode === "subscription") {
+      const priorAudit = await tx.workspaceEntitlement.findFirst({
+        where: { workspaceId, offerKey: { in: ["QUOTE_RECOVERY_AUDIT", "FULL_REVENUE_LEAK_AUDIT"] } },
+      });
       if (priorAudit) await tx.revoryEvidenceEvent.upsert({
         where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey: `billing:audit-to-subscription:${session.id}` } },
         create: { workspaceId, metric: "AUDIT_TO_SUBSCRIPTION_CONVERSION", source: "BILLING", offerKey, booleanValue: true, idempotencyKey: `billing:audit-to-subscription:${session.id}`, relatedEntityId: entitlement.id },
@@ -110,7 +113,7 @@ export async function syncRevoryEntitlementFromSubscription(subscription: Stripe
   };
   const offerKey = parseRevoryOffer(subscription.metadata.offerKey ?? null);
   const workspaceId = subscription.metadata.workspaceId ?? null;
-  if (!offerKey || !workspaceId || offerKey === "QUOTE_RECOVERY_AUDIT") {
+  if (!offerKey || !workspaceId || getRevoryOffer(offerKey).mode !== "subscription") {
     await quarantineExisting("INVALID_SUBSCRIPTION_METADATA");
     return null;
   }
@@ -129,8 +132,8 @@ export async function syncRevoryEntitlementFromSubscription(subscription: Stripe
     throw new Error("Subscription customer does not belong to the workspace.");
   }
   const configuredPriceId = getRevoryOfferPriceId(offerKey);
-  const observedPriceIds = subscription.items.data.map((item) => item.price.id);
-  if (!configuredPriceId || observedPriceIds.length !== 1 || observedPriceIds[0] !== configuredPriceId) {
+  const observedPrices = subscription.items.data.map((item) => item.price);
+  if (!configuredPriceId || observedPrices.length !== 1 || !revoryStripePriceMatchesEntitlementContract(offerKey, observedPrices[0])) {
     await quarantineExisting("SUBSCRIPTION_PRICE_MISMATCH");
     throw new Error("Subscription price does not match the configured offer.");
   }

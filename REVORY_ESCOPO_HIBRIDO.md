@@ -1,5 +1,9 @@
 # REVORY — Escopo Atualizado do Projeto
 
+## Decisão comercial vigente — 2026-07-30
+
+A hipótese pública atual é: **Quote Recovery Audit por US$399 uma vez**, **Starter por US$399/mês** e **Growth por US$599/mês**. Audit → Starter → Growth é uma jornada recomendada, não um funil técnico obrigatório. Audit não inicia assinatura; Starter e Growth exigem consentimento explícito e podem ser contratados diretamente. Pro e Full Revenue Leak Audit permanecem preservados tecnicamente e para contratos históricos, mas estão comercialmente gated. Esta decisão datada substitui preços públicos anteriores sem apagar o contexto histórico deste documento.
+
 ## 1. Visão do produto
 
 **REVORY** é um SaaS B2B focado em empresas de serviços high-ticket que querem descobrir onde estão perdendo dinheiro entre:

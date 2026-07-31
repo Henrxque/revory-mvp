@@ -143,15 +143,11 @@ try {
     if ((await pricingLink.getAttribute("href")) !== "#pricing") {
       throw new Error(`${viewport.label}: header primary CTA must point to #pricing.`);
     }
-    const heroPricingLink = page.getByRole("link", { name: /See plans and pricing/ });
-    if ((await heroPricingLink.getAttribute("href")) !== "#pricing") {
-      throw new Error(`${viewport.label}: hero primary CTA must point to #pricing.`);
+    const heroAuditLink = page.getByRole("link", { name: "Get your Quote Recovery Audit — $399 once", exact: true }).first();
+    if ((await heroAuditLink.getAttribute("href")) !== "/start") {
+      throw new Error(`${viewport.label}: dominant Audit CTA must point to /start.`);
     }
-    await heroPricingLink.click();
-    if (new URL(page.url()).hash !== "#pricing") {
-      throw new Error(`${viewport.label}: primary landing CTA did not reach pricing.`);
-    }
-    const sampleLinks = page.getByRole("link", { name: "View sample demo", exact: true });
+    const sampleLinks = page.getByRole("link", { name: "View the sample audit", exact: true });
     if ((await sampleLinks.count()) < 1) {
       throw new Error(`${viewport.label}: secondary sample demo path is missing.`);
     }
@@ -208,10 +204,19 @@ try {
   await appPage.getByLabel("Password", { exact: true }).fill(password);
   await appPage.getByRole("button", { name: "Continue with email" }).click();
   await appPage.waitForURL(/\/app/);
+  const legalAcceptance = appPage.getByRole("button", { name: "Accept and continue to REVORY" });
+  if (await legalAcceptance.count()) {
+    await appPage.getByRole("checkbox").check();
+    await legalAcceptance.click();
+    await appPage.waitForURL(/\/app/);
+  }
   await appPage.goto("/app/dashboard", { waitUntil: "networkidle" });
   const continuation = appPage.getByTestId("audit-continuation");
-  await continuation.getByText("Your Audit establishes the baseline.").waitFor();
-  await continuation.getByText(/US\$399\/month after the completed Audit/).waitFor();
+  if (!(await continuation.count())) {
+    throw new Error(`Post-Audit continuation is missing. Dashboard text: ${(await appPage.locator("body").innerText()).slice(0, 1200)}`);
+  }
+  await continuation.getByText(/Keep monitoring with Starter/).waitFor();
+  await continuation.getByText(/Need history and segmentation\? Choose Growth/).waitFor();
   if (await continuation.getByRole("button").count()) {
     throw new Error("The post-Audit explanation must not expose a payment button.");
   }
@@ -228,7 +233,13 @@ try {
   console.log(`Sprint 15 desktop/mobile auth and gated Audit continuation browser QA: PASS (${evidenceDir})`);
 } finally {
   if (browser) await browser.close().catch(() => {});
-  if (serverProcess && serverProcess.exitCode === null) serverProcess.kill("SIGTERM");
+  if (serverProcess && serverProcess.exitCode === null) {
+    serverProcess.kill("SIGTERM");
+    await Promise.race([
+      new Promise((resolve) => serverProcess.once("exit", resolve)),
+      new Promise((resolve) => setTimeout(resolve, 2_000)),
+    ]);
+  }
   if (workspace) await prisma.workspace.deleteMany({ where: { id: workspace.id } });
   if (user) await prisma.user.deleteMany({ where: { id: user.id } });
   await prisma.authRateLimitBucket.deleteMany({

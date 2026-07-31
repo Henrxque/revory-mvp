@@ -9,9 +9,9 @@ import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 export type RevoryCapability = "APP" | "QUOTE_RECOVERY" | "REVENUE_REALIZATION" | "GROWTH_INTELLIGENCE" | "PRO_VOLUME";
 
 const capabilityOffers: Record<RevoryCapability, readonly RevoryOfferKey[]> = {
-  APP: ["QUOTE_RECOVERY_AUDIT", "STARTER", "GROWTH", "PRO"],
-  QUOTE_RECOVERY: ["QUOTE_RECOVERY_AUDIT", "STARTER", "GROWTH", "PRO"],
-  REVENUE_REALIZATION: ["PRO"],
+  APP: ["QUOTE_RECOVERY_AUDIT", "FULL_REVENUE_LEAK_AUDIT", "STARTER", "GROWTH", "PRO"],
+  QUOTE_RECOVERY: ["QUOTE_RECOVERY_AUDIT", "FULL_REVENUE_LEAK_AUDIT", "STARTER", "GROWTH", "PRO"],
+  REVENUE_REALIZATION: ["FULL_REVENUE_LEAK_AUDIT", "PRO"],
   GROWTH_INTELLIGENCE: ["GROWTH", "PRO"],
   PRO_VOLUME: ["PRO"],
 };
