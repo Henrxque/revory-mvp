@@ -8,8 +8,8 @@ Current public offers are Quote Recovery Audit at **US$399 once**, Starter at **
 
 Build REVORY in two proven layers:
 
-1. **Quote Recovery:** estimates and follow-ups, monetized through a US$799 one-time audit and US$399/month Starter.
-2. **Revenue Realization:** jobs, invoices, change orders and costs, monetized through a US$1,499 full audit and US$799–US$1,499/month Growth/Pro.
+1. **Quote Recovery:** estimates and follow-ups, currently packaged as a US$399 one-time Audit, US$399/month Starter and US$599/month Growth.
+2. **Revenue Realization:** jobs, invoices, change orders and costs remain implemented/gated evidence layers; historical US$1,499 Pro and Full Audit packaging is not a current public offer.
 
 Do not build both layers as one big-bang MVP. Quote Recovery establishes intake, evidence, customer trust and the recurring loop. Revenue Realization adds the cross-record financial intelligence that can defend premium pricing.
 
@@ -17,12 +17,12 @@ Do not build both layers as one big-bang MVP. Quote Recovery establishes intake,
 
 | Offer | Buyer need | Core result | Target price |
 |---|---|---|---:|
-| Quote Recovery Audit | “What can still close?” | Prioritized estimate/follow-up findings | US$799 one-time |
+| Quote Recovery Audit | “What can still close?” | Prioritized estimate/follow-up findings | US$399 one-time |
 | Starter | “What changed and needs attention?” | Recurring quote-recovery control loop | US$399/month |
-| Full Revenue Leak Audit | “What was not fully billed or realized?” | Estimate-to-invoice/change-order reconciliation | US$1,499 one-time |
-| Growth | “Where is leakage concentrating over time?” | History, segmentation and weekly management view | US$799/month |
-| Pro | “Where are scope, billing and margin gaps?” | Change-order, underbilling and margin intelligence | US$1,499/month |
-| Multi-location | “Which branch is leaking and why?” | Branch controls and comparisons | US$2,499+/month, future |
+| Growth | “Where is leakage concentrating over time?” | History, segmentation and weekly management view | US$599/month |
+| Full Revenue Leak Audit | Historical/gated | Estimate-to-invoice/change-order reconciliation | Preserved, not public |
+| Pro | Historical/gated | Change-order, underbilling and margin intelligence | Preserved, not public |
+| Multi-location | Future | Branch controls and comparisons | No public price |
 
 Pricing is a hypothesis until paid use validates it. Audit-to-subscription conversion is the preferred low-friction path; no call may be mandatory.
 
@@ -176,9 +176,9 @@ Deliver dashboard, opportunities table, detail/evidence view, dispositions, Data
 
 **Exit:** a buyer can identify three priority opportunities, why they were flagged and what to review next in under five minutes after valid import.
 
-### Sprint 5 — One-time Quote Recovery Audit
+### Sprint 5 — One-time Quote Recovery Audit (historical milestone; current price supersedes its original target)
 
-**Outcome:** make the US$799 entry offer purchasable and self-service.
+**Historical outcome:** make the then-US$799 entry offer purchasable and self-service. The current Audit contract is US$399 paid once.
 
 Deliver audit checkout/entitlement, analysis history, top opportunities, executive report, sample workspace, limitations and audit completion flow.
 
@@ -216,9 +216,9 @@ Deliver Tier 2 rules, dedicated evidence views, executive Full Revenue Leak repo
 
 **Exit:** Full Revenue Leak Audit may enter controlled sale; customer-shaped fixtures and independent logic review pass.
 
-### Sprint 10 — Growth history and intelligence
+### Sprint 10 — Growth history and intelligence (historical milestone; current price supersedes its original target)
 
-**Outcome:** defend US$799/month with recurring management decisions.
+**Historical outcome:** defend the then-US$799/month hypothesis with recurring management decisions. The current Growth contract is US$599/month.
 
 Deliver 12-month movement, source/rep/service segmentation, minimum-sample guards, weekly executive digest, PDF and plan-aware volume controls.
 
@@ -290,11 +290,11 @@ Repair cross-browser landing navigation, reduce `/start` to one actionable Quote
 
 ### Sprint 16.2 — Independent commercial paths
 
-**Current founder decision:** every recurring plan and every one-time Audit is chosen independently. Starter no longer requires a completed Quote Recovery Audit; no Audit starts a subscription; Growth remains the recommended recurring plan.
+**Current founder decision:** the three current public offers are the US$399 paid-once Audit, US$399/month Starter and US$599/month Growth. Each is chosen independently: neither subscription requires an Audit and no Audit starts a subscription. Audit → Starter → Growth is recommendation, not enforcement.
 
-**Outcome:** remove the legacy Audit prerequisite from UI and server checkout, connect dedicated Stripe price contracts for Pro and the Full Revenue Leak Audit, and preserve exact-price, webhook, entitlement, one-time-consumption and recurring-subscription boundaries.
+**Outcome:** remove the legacy Audit prerequisite from UI and server checkout, keep Pro and Full Revenue Leak Audit preserved but non-public, and preserve exact-price, webhook, entitlement, one-time-consumption and recurring-subscription boundaries.
 
-**Exit:** `/start` separates monthly plans from paid-once Audits, every offer has an explicit cadence and direct checkout path when its production configuration is valid, Starter can create a Checkout Session without Audit history, one-time purchases retain a one-analysis limit, and Stripe configuration still fails closed when any release control is missing.
+**Exit:** `/start` presents Audit, Starter and Growth with explicit cadence and a direct checkout path when production configuration is valid; Starter and Growth can create Checkout Sessions without Audit history, one-time purchases retain a one-analysis limit, private historical offers stay absent, and Stripe configuration still fails closed when any release control is missing.
 
 ## 9. Launch sequence
 

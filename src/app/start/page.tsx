@@ -6,6 +6,7 @@ import { getAuthSession } from "@/auth";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
+import { currentPublicOfferJourney, type CurrentPublicOfferKey } from "@/domain/revory/commercial-offers";
 import { getAppContext } from "@/services/app/get-app-context";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
@@ -25,8 +26,8 @@ type BillingOffer = {
   stage: string;
 };
 
-const starterPlan: BillingOffer =
-  {
+const publicOfferPresentations: Record<CurrentPublicOfferKey, BillingOffer> = {
+  STARTER: {
     badge: "Monthly continuity",
     description:
       "Refresh Quote Recovery evidence as new exports arrive and see what is new, persistent, worsening or resolved.",
@@ -42,10 +43,8 @@ const starterPlan: BillingOffer =
     price: `US$${getRevoryOffer("STARTER").priceUsd}`,
     priceNote: "per month",
     stage: "Quote Recovery continuity",
-  };
-
-const quoteRecoveryAudit: BillingOffer =
-  {
+  },
+  QUOTE_RECOVERY_AUDIT: {
     badge: "Recommended first read",
     description:
       "Create the first evidence-backed read of estimates and follow-ups before deciding whether recurring monitoring is useful.",
@@ -62,10 +61,8 @@ const quoteRecoveryAudit: BillingOffer =
     price: `US$${getRevoryOffer("QUOTE_RECOVERY_AUDIT").priceUsd}`,
     priceNote: "paid once",
     stage: "Your first REVORY read",
-  };
-
-const growthPlan: BillingOffer =
-  {
+  },
+  GROWTH: {
     badge: "Management upgrade",
     description:
       "Build a recurring management rhythm with longer movement history, segmentation and one focused weekly decision.",
@@ -80,7 +77,12 @@ const growthPlan: BillingOffer =
     price: `US$${getRevoryOffer("GROWTH").priceUsd}`,
     priceNote: "per month",
     stage: "Main recurring plan",
-  };
+  },
+};
+
+const [recommendedOfferKey, ...recurringOfferKeys] = currentPublicOfferJourney;
+const recommendedOffer = publicOfferPresentations[recommendedOfferKey];
+const recurringOffers = recurringOfferKeys.map((offerKey) => publicOfferPresentations[offerKey]);
 
 function CheckIcon() {
   return (
@@ -115,6 +117,9 @@ function OfferCard({
 
   return (
     <article
+      data-cadence={offer.priceNote}
+      data-offer-key={offer.offerKey}
+      data-recommended={offer.featured ? "true" : "false"}
       className={`rev-checkout-card flex flex-col rounded-[26px] border p-5 md:p-6 ${
         compact ? "min-h-[350px]" : "min-h-[390px]"
       } ${offer.featured ? "rev-checkout-card-primary border-[rgba(67,179,155,0.4)]" : "border-[color:var(--border)]"}`}
@@ -245,7 +250,7 @@ export default async function StartPage({
                 Pay once for a defined evidence-backed read. Starter and Growth remain available without it.
               </p>
             </div>
-            <OfferCard activeOfferKeys={activeOfferKeys} compact internalPreview={internalPreview} offer={quoteRecoveryAudit} />
+            <OfferCard activeOfferKeys={activeOfferKeys} compact internalPreview={internalPreview} offer={recommendedOffer} />
           </section>
 
           <section className="mx-auto mt-12 max-w-5xl" aria-labelledby="monthly-plans-title">
@@ -261,7 +266,7 @@ export default async function StartPage({
               </p>
             </div>
             <div aria-labelledby="monthly-plans-title" className="grid items-stretch gap-4 md:grid-cols-2">
-              {[starterPlan, growthPlan].map((offer) => (
+              {recurringOffers.map((offer) => (
                 <OfferCard
                   activeOfferKeys={activeOfferKeys}
                   compact

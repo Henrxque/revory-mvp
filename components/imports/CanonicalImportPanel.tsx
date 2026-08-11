@@ -2,6 +2,12 @@
 
 import { type FormEvent, useEffect, useRef, useState, useTransition } from "react";
 
+import {
+  allImportDatasets,
+  type ImportDatasetDefinition,
+  quoteRecoveryQuickStartDatasets,
+  revenueRealizationAdvancedDatasets,
+} from "@/components/imports/import-dataset-catalog";
 import type { CanonicalEntityType } from "@/domain/revory/contracts";
 import { formatBuyerFieldLabel } from "@/domain/revory/display-labels";
 import { revorySourceSystems } from "@/domain/revory/source-systems";
@@ -10,18 +16,7 @@ import type { CanonicalColumnProfile } from "@/services/canonical-intake/assiste
 import type { CanonicalImportAccessNotice } from "@/services/billing/canonical-import-access";
 import type { CanonicalImportActionState, CanonicalReviewActionState } from "@/src/app/(app)/app/imports/canonical-actions";
 
-const activeDatasets = [
-  ["CUSTOMER", "Customers", "Customer identity and contact details", "QUOTE_RECOVERY"],
-  ["LEAD", "Leads", "Optional lead source, owner and sales-stage context", "QUOTE_RECOVERY"],
-  ["ESTIMATE", "Estimates", "Required to create the current Quote Recovery read", "QUOTE_RECOVERY"],
-  ["ACTIVITY", "Activities", "Follow-up dates and recent customer activity", "QUOTE_RECOVERY"],
-  ["JOB", "Jobs", "Job status, contract value and estimate reference", "REVENUE_REALIZATION"],
-  ["INVOICE", "Invoices", "Observed billing connected to a job", "REVENUE_REALIZATION"],
-  ["CHANGE_ORDER", "Change orders", "Approved changes connected to a job", "REVENUE_REALIZATION"],
-  ["COST", "Costs", "Observed job costs; REVORY never guesses margin", "REVENUE_REALIZATION"],
-] as const satisfies ReadonlyArray<readonly [CanonicalEntityType, string, string, "QUOTE_RECOVERY" | "REVENUE_REALIZATION"]>;
-
-const templateNames: Record<(typeof activeDatasets)[number][0], string> = {
+const templateNames: Record<CanonicalEntityType, string> = {
   ACTIVITY: "activities",
   CHANGE_ORDER: "change-orders",
   COST: "costs",
@@ -36,6 +31,13 @@ type SelectedFileMeta = {
   name: string;
   size: number;
 };
+
+const requirementLabels = {
+  advanced: "Advanced",
+  optional: "Optional",
+  recommended: "Recommended",
+  required: "Required for Quote Recovery",
+} as const;
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -127,6 +129,92 @@ function QualitySignal({ detail, label, tone }: { detail: string; label: string;
   );
 }
 
+function DatasetFileCard({
+  dataset,
+  onFileChange,
+  selected,
+}: {
+  dataset: ImportDatasetDefinition;
+  onFileChange: (entityType: CanonicalEntityType, file: File | null) => void;
+  selected?: SelectedFileMeta;
+}) {
+  const primary = dataset.requirement === "required";
+
+  return (
+    <article
+      className={`rev-card-hover rounded-2xl border p-4 text-sm font-bold transition ${
+        selected || primary
+          ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)]"
+          : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
+      }`}
+      data-entity-type={dataset.entityType}
+      data-requirement={dataset.requirement}
+    >
+      <span className="flex items-start justify-between gap-2">
+        <span>{dataset.label}</span>
+        <span className="flex flex-wrap justify-end gap-1">
+          {selected ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
+              <CheckIcon /> Attached
+            </span>
+          ) : null}
+          <span
+            className={`rounded-full border px-2 py-1 text-[8px] uppercase tracking-wider ${
+              primary
+                ? "border-[color:var(--border-accent)] text-[color:var(--accent-light)]"
+                : "border-[color:var(--border)] text-[color:var(--text-subtle)]"
+            }`}
+          >
+            {requirementLabels[dataset.requirement]}
+          </span>
+        </span>
+      </span>
+      <span className="mt-1 block min-h-10 text-xs font-normal leading-5 text-[color:var(--text-muted)]">
+        {dataset.description}
+      </span>
+      <input
+        accept=".csv,.xlsx"
+        aria-label={`${dataset.label} file`}
+        className="sr-only"
+        id={`canonical-file-${dataset.entityType}`}
+        name={`file_${dataset.entityType}`}
+        onChange={(event) => onFileChange(dataset.entityType, event.currentTarget.files?.[0] ?? null)}
+        type="file"
+      />
+      <label
+        className="mt-3 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[color:var(--border)] bg-[rgba(20,21,22,0.5)] px-3 py-2 text-xs font-bold text-[color:var(--text-primary)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(67,179,155,0.06)]"
+        htmlFor={`canonical-file-${dataset.entityType}`}
+      >
+        <AttachmentIcon />
+        {selected ? "Replace file" : "Attach CSV or XLSX"}
+      </label>
+      {selected ? (
+        <div
+          aria-live="polite"
+          className="mt-3 flex min-w-0 items-center gap-2 rounded-xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-2"
+          role="status"
+        >
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[#141516]">
+            <CheckIcon />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-xs font-bold" title={selected.name}>
+              {selected.name}
+            </span>
+            <span className="mt-0.5 block text-[10px] font-normal text-[color:var(--text-muted)]">
+              {formatFileSize(selected.size)} · ready to review
+            </span>
+          </span>
+        </div>
+      ) : (
+        <p className="mt-2 text-[10px] font-normal text-[color:var(--text-subtle)]">
+          No file attached yet.
+        </p>
+      )}
+    </article>
+  );
+}
+
 const initialCanonicalImportActionState: CanonicalImportActionState = {
   message: "",
   status: "idle",
@@ -164,7 +252,7 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
     const reviewFormData = new FormData();
     reviewFormData.set("sourceSystem", sourceSystem);
 
-    for (const [entityType] of activeDatasets) {
+    for (const { entityType } of allImportDatasets) {
       const selected = selectedFiles.current[entityType];
       if (selected?.size) {
         reviewFormData.set(`file_${entityType}`, selected, selected.name);
@@ -191,6 +279,28 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
         });
       }
     });
+  }
+
+  function handleFileChange(entityType: CanonicalEntityType, file: File | null) {
+    if (file) {
+      selectedFiles.current[entityType] = file;
+      setSelectedFileMeta((current) => ({
+        ...current,
+        [entityType]: { name: file.name, size: file.size },
+      }));
+    } else {
+      delete selectedFiles.current[entityType];
+      setSelectedFileMeta((current) => {
+        const next = { ...current };
+        delete next[entityType];
+        return next;
+      });
+    }
+    setReview(null);
+    setSourceDetectionAccepted(false);
+    setMappingConfirmed(false);
+    setSnapshotConfirmed(false);
+    setImportState(initialCanonicalImportActionState);
   }
 
   function submitImport(auditConsumptionConfirmed = false) {
@@ -257,6 +367,14 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
   }
 
   const selectedFileCount = Object.keys(selectedFileMeta).length;
+  const quickStartSelectedCount = quoteRecoveryQuickStartDatasets.filter(
+    ({ entityType }) => selectedFileMeta[entityType],
+  ).length;
+  const advancedSelectedCount = revenueRealizationAdvancedDatasets.filter(
+    ({ entityType }) => selectedFileMeta[entityType],
+  ).length;
+  const estimatesSelected = Boolean(selectedFileMeta.ESTIMATE);
+  const activitiesSelected = Boolean(selectedFileMeta.ACTIVITY);
   const auditBlocked = accessNotice.blocked || auditConsumedLocally;
   const requiresAuditConfirmation =
     accessNotice.requiresConsumptionConfirmation && !auditConsumedLocally;
@@ -324,19 +442,6 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
         </p>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2 text-xs">
-        {activeDatasets.map(([key, label]) => (
-          <a
-            className="rev-button-secondary !min-h-0 !px-3 !py-2"
-            download
-            href={`/templates/revory-${templateNames[key]}.csv`}
-            key={key}
-          >
-            {label} template
-          </a>
-        ))}
-      </div>
-
       <p className="mt-4 text-xs leading-5 text-[color:var(--text-subtle)]">
         Currency fallback: <strong className="text-[color:var(--text-primary)]">{defaultCurrency}</strong>. REVORY uses it only when a record has no currency; an uploaded currency always takes priority. Change it in Data &amp; settings.
       </p>
@@ -370,101 +475,41 @@ export function CanonicalImportPanel({ accessNotice, defaultCurrency }: { access
           </span>
         </label>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {activeDatasets.map(([key, label, description, layer]) => {
-            const selected = selectedFileMeta[key];
+        <section aria-labelledby="quote-recovery-quick-start-title" data-testid="quote-recovery-quick-start">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="rev-kicker">Quote Recovery Quick Start</p>
+              <h3 className="mt-1 text-xl font-bold" id="quote-recovery-quick-start-title">Start with your estimates. Add context when you have it.</h3>
+            </div>
+            <p aria-live="polite" className="text-xs font-bold text-[color:var(--accent-light)]">{quickStartSelectedCount} of {quoteRecoveryQuickStartDatasets.length} quick-start files selected</p>
+          </div>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-[color:var(--text-muted)]">Estimates are the only file required for the first Quote Recovery read. Activities improve follow-up evidence; Customers and Leads add useful context but are optional.</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {quoteRecoveryQuickStartDatasets.map((dataset) => <DatasetFileCard dataset={dataset} key={dataset.entityType} onFileChange={handleFileChange} selected={selectedFileMeta[dataset.entityType]} />)}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            {quoteRecoveryQuickStartDatasets.map(({ entityType, label }) => <a className="rev-button-secondary !min-h-0 !px-3 !py-2" download href={`/templates/revory-${templateNames[entityType]}.csv`} key={entityType}>{label} template</a>)}
+          </div>
+          <div className="mt-4 rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.018)] px-4 py-3 text-xs leading-5 text-[color:var(--text-muted)]" role="status">
+            {!estimatesSelected ? "Attach an Estimates export to create a Quote Recovery read. You can still inspect advanced files without committing an incomplete read." : activitiesSelected ? "Ready for a stronger first read: estimates provide value and status, while activities add recent follow-up evidence." : "Estimates alone can create a first read. Follow-up precision will be limited, and Data Quality will keep missing evidence visible rather than inventing financial results."}
+          </div>
+        </section>
 
-            return (
-              <article
-                className={`rev-card-hover rounded-2xl border p-4 text-sm font-bold transition ${
-                  selected
-                    ? "border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.06)]"
-                    : "border-[color:var(--border)] bg-[rgba(255,255,255,0.02)]"
-                }`}
-                key={key}
-              >
-                <span className="flex items-start justify-between gap-2">
-                  {label}
-                  <span className="flex flex-wrap justify-end gap-1">
-                    {selected ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
-                        <CheckIcon /> Attached
-                      </span>
-                    ) : null}
-                    {layer === "REVENUE_REALIZATION" ? (
-                      <span className="rounded-full border border-[color:var(--border-accent)] px-2 py-1 text-[8px] uppercase tracking-wider text-[color:var(--accent-light)]">
-                        Reconciliation
-                      </span>
-                    ) : null}
-                  </span>
-                </span>
-                <span className="mt-1 block min-h-10 text-xs font-normal leading-5 text-[color:var(--text-muted)]">
-                  {description}
-                </span>
-                <input
-                  accept=".csv,.xlsx"
-                  aria-label={`${label} file`}
-                  className="sr-only"
-                  id={`canonical-file-${key}`}
-                  name={`file_${key}`}
-                  onChange={(event) => {
-                    const file = event.currentTarget.files?.[0];
-                    if (file) {
-                      selectedFiles.current[key] = file;
-                      setSelectedFileMeta((current) => ({
-                        ...current,
-                        [key]: { name: file.name, size: file.size },
-                      }));
-                    } else {
-                      delete selectedFiles.current[key];
-                      setSelectedFileMeta((current) => {
-                        const next = { ...current };
-                        delete next[key];
-                        return next;
-                      });
-                    }
-                    setReview(null);
-                    setSourceDetectionAccepted(false);
-                    setMappingConfirmed(false);
-                    setSnapshotConfirmed(false);
-                    setImportState(initialCanonicalImportActionState);
-                  }}
-                  type="file"
-                />
-                <label
-                  className="mt-3 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[color:var(--border)] bg-[rgba(20,21,22,0.5)] px-3 py-2 text-xs font-bold text-[color:var(--text-primary)] transition hover:border-[color:var(--border-accent)] hover:bg-[rgba(67,179,155,0.06)]"
-                  htmlFor={`canonical-file-${key}`}
-                >
-                  <AttachmentIcon />
-                  {selected ? "Replace file" : "Attach CSV or XLSX"}
-                </label>
-                {selected ? (
-                  <div
-                    aria-live="polite"
-                    className="mt-3 flex min-w-0 items-center gap-2 rounded-xl border border-[color:var(--border-accent)] bg-[rgba(67,179,155,0.08)] px-3 py-2"
-                    role="status"
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[#141516]">
-                      <CheckIcon />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-bold" title={selected.name}>
-                        {selected.name}
-                      </span>
-                      <span className="mt-0.5 block text-[10px] font-normal text-[color:var(--text-muted)]">
-                        {formatFileSize(selected.size)} · ready to review
-                      </span>
-                    </span>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-[10px] font-normal text-[color:var(--text-subtle)]">
-                    No file attached yet.
-                  </p>
-                )}
-              </article>
-            );
-          })}
-        </div>
+        <details className="group rounded-2xl border border-[color:var(--border)] bg-[rgba(255,255,255,0.012)]" data-testid="revenue-realization-advanced">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent)]">
+            <span>Advanced: jobs, billing and change orders<span className="mt-1 block text-xs font-normal text-[color:var(--text-muted)]">Optional reconciliation evidence for Revenue Realization.</span></span>
+            <span className="shrink-0 text-xs text-[color:var(--accent-light)]">{advancedSelectedCount} selected <span aria-hidden="true" className="ml-1 inline-block transition group-open:rotate-45">+</span></span>
+          </summary>
+          <div className="border-t border-[color:var(--border)] p-4">
+            <p className="max-w-3xl text-xs leading-5 text-[color:var(--text-muted)]">Add these files only when you want data-supported job, invoice, change-order or cost reconciliation. REVORY requires explicit IDs, preserves unmatched records and never invents underbilling or margin.</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {revenueRealizationAdvancedDatasets.map((dataset) => <DatasetFileCard dataset={dataset} key={dataset.entityType} onFileChange={handleFileChange} selected={selectedFileMeta[dataset.entityType]} />)}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              {revenueRealizationAdvancedDatasets.map(({ entityType, label }) => <a className="rev-button-secondary !min-h-0 !px-3 !py-2" download href={`/templates/revory-${templateNames[entityType]}.csv`} key={entityType}>{label} template</a>)}
+            </div>
+          </div>
+        </details>
 
       <div className="flex flex-wrap items-center gap-3">
         <button

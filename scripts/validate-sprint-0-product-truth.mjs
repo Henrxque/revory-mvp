@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import {
+  currentPublicOfferJourney,
+  revoryCommercialOfferContracts,
+} from "../domain/revory/commercial-offers.ts";
+
 const cwd = process.cwd();
 
 function read(relativePath) {
@@ -15,6 +20,7 @@ function check(name, condition, detail) {
 
 const home = read("src/app/page.tsx");
 const start = read("src/app/start/page.tsx");
+const checkout = read("src/app/api/billing/checkout/route.ts");
 const preview = read("services/app/internal-preview.ts");
 const claimRegister = read("docs/sprints/SPRINT_0_PUBLIC_CLAIM_REGISTER.md");
 const threatModel = read("docs/security/REVORY_DATA_FLOW_AND_THREAT_MODEL.md");
@@ -33,29 +39,22 @@ check(
 );
 check(
   "visible-secure-checkout",
-  home.includes("Secure Stripe checkout") &&
-    start.includes("Secure checkout"),
-  "Landing and start screen explain the active secure-checkout boundary.",
+  start.includes('<form action={`/api/billing/checkout?offer=${offer.offerKey}`} method="post">') &&
+    checkout.includes("export async function GET()") &&
+    checkout.includes("status: 405"),
+  "The pricing screen uses POST checkout forms and rejects charge-like GET requests.",
 );
 check(
   "no-legacy-growth-cta",
   !home.includes("/start?plan=growth"),
   "Public audit CTAs remove the historical Growth query parameter.",
 );
-check(
-  "growth-recurring-primary",
-  /const growthPlan:[\s\S]*?featured:\s*true,[\s\S]*?offerKey:\s*"GROWTH"/.test(start),
-  "Growth is the highlighted US$799/month recurring plan.",
-);
-check(
-  "sprint-14-commercial-path",
-  start.includes("Choose how you want REVORY to review your revenue.") &&
-    start.includes("[growthPlan, starterPlan, proPlan]") &&
-    start.includes("[quoteRecoveryAudit, fullRevenueLeakAudit]") &&
-    start.includes('priceNote: "paid once"') &&
-    start.includes('priceNote: "per month"'),
-  "The pricing screen separates monthly plans from one-time audits and preserves explicit billing cadence.",
-);
+check("current-public-journey", JSON.stringify(currentPublicOfferJourney) === JSON.stringify(["QUOTE_RECOVERY_AUDIT", "STARTER", "GROWTH"]), "The recommended public order is Audit, Starter, then Growth without making it a prerequisite.");
+check("audit-contract", revoryCommercialOfferContracts.QUOTE_RECOVERY_AUDIT.amountCents === 39900 && revoryCommercialOfferContracts.QUOTE_RECOVERY_AUDIT.mode === "payment" && revoryCommercialOfferContracts.QUOTE_RECOVERY_AUDIT.interval === null, "Audit is US$399 paid once.");
+check("starter-contract", revoryCommercialOfferContracts.STARTER.amountCents === 39900 && revoryCommercialOfferContracts.STARTER.mode === "subscription" && revoryCommercialOfferContracts.STARTER.interval === "month", "Starter is US$399 per month.");
+check("growth-contract", revoryCommercialOfferContracts.GROWTH.amountCents === 59900 && revoryCommercialOfferContracts.GROWTH.mode === "subscription" && revoryCommercialOfferContracts.GROWTH.interval === "month", "Growth is US$599 per month.");
+check("advanced-offers-private", !revoryCommercialOfferContracts.PRO.publiclyListed && !revoryCommercialOfferContracts.PRO.commerciallyAvailable && !revoryCommercialOfferContracts.FULL_REVENUE_LEAK_AUDIT.publiclyListed && !revoryCommercialOfferContracts.FULL_REVENUE_LEAK_AUDIT.commerciallyAvailable, "Historical US$1,499 offers remain preserved but gated and private.");
+check("stable-offer-semantics", start.includes("currentPublicOfferJourney") && start.includes("data-offer-key") && start.includes("data-cadence") && start.includes("data-recommended"), "The pricing screen exposes semantic offer identity, cadence and recommendation markers.");
 check(
   "starter-is-independent-recurring-path",
   start.includes("Start directly. A one-time Audit is optional") &&
@@ -68,6 +67,7 @@ check(
   !start.includes('href="/api/billing/checkout"'),
   "The checkout presentation does not expose a direct charge link.",
 );
+check("dynamic-checkout-mode", checkout.includes("mode: offer.mode") && checkout.includes('offer.mode === "subscription"') && checkout.includes("subscription_data"), "Checkout derives payment versus subscription behavior from the canonical offer contract.");
 check(
   "preview-production-guard",
   preview.includes('process.env.NODE_ENV !== "production"') &&

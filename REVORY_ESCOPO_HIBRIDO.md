@@ -948,7 +948,9 @@ Esse deve ser o produto premium.
 
 ---
 
-## 29. Monetização
+## 29. Monetização — hipótese histórica substituída em 2026-07-30
+
+As seções 29–32 abaixo preservam o raciocínio original de packaging. Elas não definem preço ou disponibilidade pública atual; a decisão vigente está no início deste documento.
 
 ### Modelo híbrido sugerido
 
@@ -1427,7 +1429,9 @@ Essa frase é o coração do produto.
 
 ---
 
-## 48. Oferta inicial recomendada
+## 48. Oferta inicial recomendada — hipótese histórica substituída em 2026-07-30
+
+Esta oferta é evidência de decisão anterior, não o contrato comercial vigente.
 
 ### Oferta principal
 

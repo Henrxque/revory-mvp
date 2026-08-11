@@ -35,7 +35,8 @@ for (const copy of [
 }
 assert.ok(
   start.includes("Choose how you want REVORY to review your revenue.") &&
-    start.includes("[starterPlan, growthPlan]") &&
+    start.includes("currentPublicOfferJourney") &&
+    start.includes("data-offer-key") &&
     !start.includes("fullRevenueLeakAudit") &&
     !start.includes("proPlan"),
   "Start must list only current public offers.",

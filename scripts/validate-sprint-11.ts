@@ -36,7 +36,7 @@ assert.match(webhook, /stripeWebhookEvent/);
 assert.match(webhook, /payloadHash/);
 assert.match(webhook, /claimExistingWebhookEvent/);
 assert.match(webhook, /invoice\.paid/);
-assert.match(capabilities, /REVENUE_REALIZATION: \["PRO"\]/);
+assert.match(capabilities, /REVENUE_REALIZATION: \["FULL_REVENUE_LEAK_AUDIT", "PRO"\]/, "preserved advanced entitlements may retain Revenue Realization access while remaining commercially gated");
 assert.match(offers, /REVORY_PAID_CHECKOUT_ENABLED/);
 assert.match(analysisRuns, /reserveQuoteRecoveryAnalysisRunCapacity/);
 assert.match(importAction, /const reservation =[\s\S]*reserveQuoteRecoveryAnalysisRunCapacity[\s\S]*result = await persistSecureIntakePlan/, "one-time capacity must be reserved before canonical persistence");

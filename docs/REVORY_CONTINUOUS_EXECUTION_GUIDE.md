@@ -22,12 +22,12 @@ The source of truth is `docs/source-of-truth.md`. `REVORY_ESCOPO_HIBRIDO.md` con
 
 | Offer | Target price | Earliest gate | What must be true |
 |---|---:|---|---|
-| Quote Recovery Audit | US$799 one-time | Sprint 5 | Valid import, evidence-first quote findings, export/report and low founder intervention |
+| Quote Recovery Audit | US$399 one-time | Sprint 5 | Valid import, evidence-first quote findings, export/report and low founder intervention |
 | Starter | US$399/month | Sprint 6 | Second-read loop, recurring value, billing, security and paid-beta readiness |
-| Full Revenue Leak Audit | US$1,499 one-time | Sprint 9 | Reconciled estimate/job/invoice/change-order evidence and executive report |
-| Growth | US$799/month | Sprint 10 | Useful history, segmentation with sample guards and weekly management decision |
-| Pro | US$1,499/month | Sprint 11 | Trustworthy change-order, underbilling and margin reads plus independent security review |
-| Multi-location | US$2,499+/month | Future | Proven multi-unit demand, permissions, isolation and branch-level decisions |
+| Growth | US$599/month | Sprint 10 | Useful history, segmentation with sample guards and weekly management decision |
+| Full Revenue Leak Audit | US$1,499 one-time, gated historical | Sprint 9 | Preserved compatibility only; no public sale before a new commercial decision |
+| Pro | US$1,499/month, gated historical | Sprint 11 | Preserved compatibility only; no public sale before a new commercial decision |
+| Multi-location | Future, no public price | Future | Proven multi-unit demand, permissions, isolation and branch-level decisions |
 
 No price is “defended” by scope on paper. Defensibility requires paid evidence, repeat usage, low support burden and findings whose value basis survives customer review.
 

@@ -230,6 +230,23 @@ try {
   if (!(await page.getByText(/Currency fallback:\s*CAD/).isVisible())) {
     throw new Error("Import currency fallback explanation is missing.");
   }
+  const quickStartCards = page.locator('[data-testid="quote-recovery-quick-start"] [data-entity-type]');
+  const quickStartOrder = await quickStartCards.evaluateAll((cards) => cards.map((card) => card.getAttribute("data-entity-type")));
+  if (JSON.stringify(quickStartOrder) !== JSON.stringify(["ESTIMATE", "ACTIVITY", "CUSTOMER", "LEAD"])) {
+    throw new Error(`Quick Start order is wrong: ${quickStartOrder.join(", ")}.`);
+  }
+  const advancedImports = page.locator('[data-testid="revenue-realization-advanced"]');
+  if (await advancedImports.evaluate((details) => details.open)) {
+    throw new Error("Advanced imports must be collapsed on first use.");
+  }
+  if (await page.getByLabel("Jobs file").isVisible()) {
+    throw new Error("Advanced job upload should not compete with Quick Start before disclosure is opened.");
+  }
+  await page.screenshot({ path: path.join(evidenceDir, "imports-quick-start-closed-desktop.png"), fullPage: true });
+  await advancedImports.locator("summary").click();
+  if (!(await page.getByLabel("Jobs file").isVisible())) throw new Error("Advanced imports did not open from their native disclosure control.");
+  await page.screenshot({ path: path.join(evidenceDir, "imports-quick-start-open-desktop.png"), fullPage: true });
+  await advancedImports.locator("summary").click();
 
   const sourceSystem = page.getByLabel("Where did these exports come from?");
   if ((await sourceSystem.evaluate((element) => element.tagName)) !== "SELECT") {
@@ -317,6 +334,7 @@ try {
     },
   });
   await page.goto("/app/imports", { waitUntil: "networkidle" });
+  await page.locator('[data-testid="revenue-realization-advanced"] summary').click();
   await page.getByLabel("Jobs file").setInputFiles(jobsPath);
   await page.getByLabel("Invoices file").setInputFiles(invoicesPath);
   await page.getByLabel("Change orders file").setInputFiles(changesPath);
@@ -498,6 +516,17 @@ try {
   await page.screenshot({ path: path.join(evidenceDir, "sprint-10-growth-desktop.png"), fullPage: true });
 
   await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto("/app/imports", { waitUntil: "networkidle" });
+  const importOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  if (importOverflow > 1) throw new Error(`Quick Start mobile overflow: ${importOverflow}px`);
+  const mobileAdvancedImports = page.locator('[data-testid="revenue-realization-advanced"]');
+  if (await mobileAdvancedImports.evaluate((details) => details.open)) throw new Error("Advanced imports must be collapsed on mobile first use.");
+  await page.screenshot({ path: path.join(evidenceDir, "imports-quick-start-closed-mobile.png"), fullPage: true });
+  await mobileAdvancedImports.locator("summary").click();
+  if (!(await page.getByLabel("Jobs file").isVisible())) throw new Error("Advanced imports are not keyboard/native-disclosure accessible on mobile.");
+  const openImportOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  if (openImportOverflow > 1) throw new Error(`Open advanced imports mobile overflow: ${openImportOverflow}px`);
+  await page.screenshot({ path: path.join(evidenceDir, "imports-quick-start-open-mobile.png"), fullPage: true });
   await page.goto("/app/dashboard", { waitUntil: "networkidle" });
   if (!(await page.getByText("See what may still be recoverable").isVisible())) {
     throw new Error("Mobile dashboard headline missing.");

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 import { classifyQuoteRecoveryMovement } from "../domain/revory/movement";
+import { revoryCommercialOfferContracts } from "../domain/revory/commercial-offers";
 
 const before = [
   { fingerprint: "persistent", severity: "MEDIUM", valueCents: 1000 },
@@ -44,6 +45,8 @@ assert.match(files.digest, /CRON_SECRET/);
 assert.match(files.digest, /authorization/);
 assert.match(files.dispositions, /RECOVERED/);
 assert.match(files.dispositions, /recoveredValueCents/);
-assert.match(files.billing, /STRIPE_STARTER_PRICE_ID/);
+assert.equal(revoryCommercialOfferContracts.STARTER.priceEnv, "STRIPE_STARTER_PRICE_ID");
+assert.equal(revoryCommercialOfferContracts.STARTER.amountCents, 39900);
+assert.match(files.billing, /revoryCommercialOfferContracts/);
 assert.doesNotMatch(files.billing, /STRIPE_GROWTH_PRICE_ID/);
 console.log("Sprint 6 local recurring loop and security contracts: PASS");

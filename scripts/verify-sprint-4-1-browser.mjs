@@ -99,10 +99,10 @@ try {
     if (!(await page.getByText("Find the estimates that still deserve").isVisible())) {
       throw new Error(`${name} hero missing`);
     }
-    if (!(await page.getByRole("link", { name: "View demo with sample data" }).isVisible())) {
+    if (!(await page.getByRole("link", { name: /View (the )?sample audit/i }).first().isVisible())) {
       throw new Error(`${name} sample-data demo CTA is below the initial fold`);
     }
-    if (!(await page.getByText("Revenue Realization is gated").isVisible())) {
+    if (!(await page.getByText(/Revenue Realization (?:is|remains) gated/i).isVisible())) {
       throw new Error(`${name} roadmap gate missing`);
     }
     if (await page.locator("[data-nextjs-dialog],.vite-error-overlay").count()) {
@@ -172,12 +172,15 @@ try {
 
       const startResponse = await page.goto("/start", { waitUntil: "networkidle" });
       if (startResponse?.ok() && page.url().endsWith("/start")) {
-        const overflow = await page.evaluate(
-          () => document.documentElement.scrollHeight - window.innerHeight,
-        );
-        if (overflow > 24) {
-          throw new Error(`Checkout is not one-page on desktop: ${overflow}px overflow`);
-        }
+        const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        if (horizontalOverflow > 1) throw new Error(`Checkout has ${horizontalOverflow}px horizontal overflow`);
+        const visibleOffers = await page.locator("[data-offer-key]").evaluateAll((offers) => offers.map((offer) => ({ cadence: offer.getAttribute("data-cadence"), key: offer.getAttribute("data-offer-key"), recommended: offer.getAttribute("data-recommended") })));
+        const expectedOffers = [
+          { cadence: "paid once", key: "QUOTE_RECOVERY_AUDIT", recommended: "true" },
+          { cadence: "per month", key: "STARTER", recommended: "false" },
+          { cadence: "per month", key: "GROWTH", recommended: "false" },
+        ];
+        if (JSON.stringify(visibleOffers) !== JSON.stringify(expectedOffers)) throw new Error(`Checkout offer order/cadence is wrong: ${JSON.stringify(visibleOffers)}`);
         await page.screenshot({
           path: path.join(dir, "checkout-desktop.png"),
           fullPage: true,
@@ -216,4 +219,4 @@ try {
   }
 }
 
-console.log("Sprint 4.1 landing interactions, glow, desktop/mobile and one-page checkout: PASS");
+console.log("Sprint 4.1 landing interactions, glow, desktop/mobile and semantic checkout layout: PASS");

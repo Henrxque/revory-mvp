@@ -12,6 +12,10 @@ const content = publicFiles.map((file)=>({file,text:fs.readFileSync(path.join(pr
 for (const {file,text} of content) for (const pattern of forbidden) if(pattern.test(text)) throw new Error(`${file} contains forbidden public term ${pattern}`);
 const landing=content.find(({file})=>file==="src/app/page.tsx")?.text??"";
 for(const pattern of futureTerms){const match=landing.match(pattern);if(match){const window=landing.slice(Math.max(0,(match.index??0)-260),(match.index??0)+360);if(!/roadmap|gated|not sold|unavailable for sale|being validated separately|not included|coming later|require Sprints/i.test(window))throw new Error(`Future claim ${pattern} is not visibly gated`)}}
-for(const required of ["high-ticket contractors","Quote Recovery Audit","$799","$399","Data Quality","not guaranteed revenue","Revenue Realization is gated"])if(!landing.includes(required))throw new Error(`Landing missing required copy: ${required}`);
+for(const required of ["high-ticket contractors","Quote Recovery Audit","$399","Data Quality","not guaranteed revenue"])if(!landing.includes(required))throw new Error(`Landing missing required copy: ${required}`);
+if (!/Revenue Realization[\s\S]{0,80}gated/i.test(landing)) throw new Error("Landing must visibly gate Revenue Realization without depending on one exact sentence.");
+const publicCommercialCopy = `${landing}\n${content.find(({file})=>file==="src/app/start/page.tsx")?.text??""}`;
+if (/\$799|US\$799|\$1,499|US\$1,499/.test(publicCommercialCopy)) throw new Error("Historical US$799/US$1,499 pricing leaked into current public source.");
+if (!publicCommercialCopy.includes("currentPublicOfferJourney") || !publicCommercialCopy.includes("priceUsd")) throw new Error("Current public pricing must render from the canonical semantic catalog.");
 if(/dangerouslySetInnerHTML|revory-landing-reference\.html|replaceAll\("QuoteSignal"/i.test(landing))throw new Error("Landing still depends on historical markup transformation.");
 console.log("Sprint 4.1 public copy and brand guard: PASS");
