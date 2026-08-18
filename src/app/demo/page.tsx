@@ -266,9 +266,13 @@ function OpportunitySummary({
         <p className="mt-1 text-sm text-[color:var(--text-muted)]">{opportunity.reason}</p>
       </div>
       <div className="text-right">
-        <p className="text-lg font-bold">{sampleMoney(opportunity.valueCents)}</p>
+        <p className="text-lg font-bold">
+          {opportunity.valueCents === null ? opportunity.valueBasis : sampleMoney(opportunity.valueCents)}
+        </p>
         <p className="text-xs text-[color:var(--text-muted)]">
-          {opportunity.valueBasis.toLowerCase()} · {opportunity.confidence.toLowerCase()} confidence
+          {opportunity.valueCents === null
+            ? `${opportunity.confidence.toLowerCase()} confidence`
+            : `${opportunity.valueBasis.toLowerCase()} · ${opportunity.confidence.toLowerCase()} confidence`}
         </p>
       </div>
     </div>

@@ -75,6 +75,8 @@ As of the local implementation on 2026-07-18:
 - the Sprint 11 paid-beta exit remains closed on external MFA/ownership evidence, Stripe E2E, observed production operations, independent DAST/pentest and qualified final legal review;
 - Sprint 12 evidence events and per-offer RETAIN/REPACKAGE/DELAY rules are implemented; absent real customer observations every price correctly remains DELAY;
 - opening checkout still requires the paid-checkout release flag, a live Stripe secret, an exact configured price, a signed webhook and production verification; no UI state may bypass those technical controls;
+- the localhost development datasource applied `20260724000100_open_independent_commercial_paths` on 2026-08-18 and is protocol-ready with zero pending migrations; production application of that migration remains **NOT VERIFIED**, although the production build path is migration-gated with `prisma migrate deploy`;
+- read-only production-log observation on 2026-08-18 found no retained retention marker in one day and no weekly-digest marker in two days; both executions and digest delivery remain PENDING rather than inferred from schedule configuration;
 - MedSpa claims and appointment findings must not be relabeled as contractor findings.
 
 Capability becomes sellable only after its roadmap gate passes with executable evidence.

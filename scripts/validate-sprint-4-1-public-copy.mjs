@@ -13,6 +13,8 @@ for (const {file,text} of content) for (const pattern of forbidden) if(pattern.t
 const landing=content.find(({file})=>file==="src/app/page.tsx")?.text??"";
 for(const pattern of futureTerms){const match=landing.match(pattern);if(match){const window=landing.slice(Math.max(0,(match.index??0)-260),(match.index??0)+360);if(!/roadmap|gated|not sold|unavailable for sale|being validated separately|not included|coming later|require Sprints/i.test(window))throw new Error(`Future claim ${pattern} is not visibly gated`)}}
 for(const required of ["high-ticket contractors","Quote Recovery Audit","$399","Data Quality","not guaranteed revenue"])if(!landing.includes(required))throw new Error(`Landing missing required copy: ${required}`);
+for (const required of ["Start with your estimates", "Activity exports improve follow-up precision", "customer and lead files are optional"]) if (!landing.includes(required)) throw new Error(`Landing Quick Start copy is missing: ${required}`);
+if (/customer, estimate and activity exports are the core Quote Recovery inputs/i.test(landing)) throw new Error("Landing still presents optional datasets as mandatory core inputs.");
 if (!/Revenue Realization[\s\S]{0,80}gated/i.test(landing)) throw new Error("Landing must visibly gate Revenue Realization without depending on one exact sentence.");
 const publicCommercialCopy = `${landing}\n${content.find(({file})=>file==="src/app/start/page.tsx")?.text??""}`;
 if (/\$799|US\$799|\$1,499|US\$1,499/.test(publicCommercialCopy)) throw new Error("Historical US$799/US$1,499 pricing leaked into current public source.");

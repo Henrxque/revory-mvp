@@ -69,7 +69,7 @@ const steps = [
   {
     number: "01",
     title: "Upload exports",
-    text: "Add CSV or XLSX exports for customers, estimates and follow-up activity.",
+    text: "Start with estimates. Add activity, customer or lead exports when available.",
   },
   {
     number: "02",
@@ -98,7 +98,7 @@ const faq = [
   ],
   [
     "What data can we start with?",
-    "Canonical customer, estimate and activity exports are the core Quote Recovery inputs. CSV and XLSX are supported.",
+    "Start with your estimates. Activity exports improve follow-up precision, while customer and lead files are optional when those details live in separate exports. CSV and XLSX are supported, and Data Quality keeps unavailable checks visible.",
   ],
   [
     "What about invoices, change orders, underbilling and margin?",

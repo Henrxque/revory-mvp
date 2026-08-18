@@ -62,7 +62,7 @@ export const quoteRecoverySample = {
 } as const;
 
 export function sampleMoney(valueCents: number | null) {
-  if (valueCents === null) return "Operational";
+  if (valueCents === null) return "Operational risk";
   return new Intl.NumberFormat("en-US", {
     currency: "USD",
     maximumFractionDigits: 0,

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { CRON_JOBS, evaluateEntries, runObserver, selectedJobs } from "./observe-sprint-16-crons.mjs";
 
 const read = (path) => fs.readFileSync(path, "utf8");
 const vercel = JSON.parse(read("vercel.json"));
@@ -53,10 +54,38 @@ for (const required of [
   "retention_job_complete",
   "weekly_digest_job_complete",
   "timestampUtc",
-  "Sprint 16 cron evidence is incomplete",
+  "REVORY_CRON_JOB",
+  "--environment",
+  "production",
 ]) {
   assert.ok(observer.includes(required), `Cron observer is missing: ${required}`);
 }
+
+assert.deepEqual(selectedJobs("retention"), [CRON_JOBS.retention]);
+assert.deepEqual(selectedJobs("weekly_digest"), [CRON_JOBS.weekly_digest]);
+assert.equal(selectedJobs("all").length, 2);
+assert.throws(() => selectedJobs("unknown"), /all, retention, weekly_digest/);
+
+const timestamp = "2026-08-18T12:00:00.000Z";
+assert.equal(evaluateEntries({ entries: [], ...CRON_JOBS.retention, window: "1d" }).passed, false);
+const retentionSuccess = evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "retention_job_complete", failedWorkspaces: 0, workspaceId: "must-not-leak" }) }], ...CRON_JOBS.retention, window: "1d" });
+assert.equal(retentionSuccess.passed, true);
+assert.doesNotMatch(JSON.stringify(retentionSuccess), /workspaceId|must-not-leak|email|provider/i);
+assert.equal(evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "retention_job_complete", failedWorkspaces: 1 }) }], ...CRON_JOBS.retention, window: "1d" }).passed, false);
+
+const digestNoDelivery = evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "weekly_digest_job_complete", failed: 0, sent: 0, workspaces: 0, email: "must-not-leak" }) }], ...CRON_JOBS.weekly_digest, window: "2d" });
+assert.equal(digestNoDelivery.passed, true);
+assert.equal(digestNoDelivery.deliveryState, "NOT_APPLICABLE");
+assert.doesNotMatch(JSON.stringify(digestNoDelivery), /must-not-leak|email/i);
+const digestPendingDelivery = evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "weekly_digest_job_complete", failed: 0, sent: 2, workspaces: 2 }) }], ...CRON_JOBS.weekly_digest, window: "2d" });
+assert.equal(digestPendingDelivery.passed, true);
+assert.equal(digestPendingDelivery.deliveryState, "PENDING_PROVIDER_EVIDENCE");
+assert.equal(evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "weekly_digest_job_complete", failed: 1, sent: 0, workspaces: 1 }) }], ...CRON_JOBS.weekly_digest, window: "2d" }).passed, false);
+
+const fakeRun = (_command, args) => ({ error: null, status: 0, stdout: `${JSON.stringify({ timestamp, message: JSON.stringify({ message: args.includes("retention_job_complete") ? "retention_job_complete" : "weekly_digest_job_complete", failedWorkspaces: 0, failed: 0, sent: 0, workspaces: 0 }) })}\n` });
+assert.equal(runObserver({ jobSelection: "retention", requestedWindow: "1d", run: fakeRun }).length, 1);
+assert.equal(runObserver({ jobSelection: "weekly_digest", requestedWindow: "2d", run: fakeRun }).length, 1);
+assert.equal(runObserver({ jobSelection: "all", requestedWindow: "2d", run: fakeRun }).length, 2);
 
 for (const required of [
   "READ_ONLY_ISOLATED_RESTORE",
