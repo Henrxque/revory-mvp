@@ -67,6 +67,20 @@ assert.equal(selectedJobs("all").length, 2);
 assert.throws(() => selectedJobs("unknown"), /all, retention, weekly_digest/);
 
 const timestamp = "2026-08-18T12:00:00.000Z";
+for (const job of Object.values(CRON_JOBS)) {
+  const failureKey = job.job === "retention" ? "failedWorkspaces" : "failed";
+  const entry = (time, failed) => ({ timestamp: time, message: JSON.stringify({ message: job.marker, [failureKey]: failed, sent: 0, workspaces: 0 }) });
+  const olderSuccess = entry("2026-08-18T11:00:00.000Z", 0);
+  const newerFailure = entry(timestamp, 1);
+  for (const entries of [[newerFailure, olderSuccess], [olderSuccess, newerFailure]]) {
+    const result = evaluateEntries({ entries, ...job, window: "1d" });
+    assert.equal(result.passed, false);
+    assert.equal(result.timestampUtc, timestamp);
+  }
+  assert.equal(evaluateEntries({ entries: [entry(timestamp, 0), entry("2026-08-18T11:00:00.000Z", 1)], ...job, window: "1d" }).passed, true);
+  assert.equal(evaluateEntries({ entries: [entry(timestamp, 0), entry(undefined, 1)], ...job, window: "1d" }).passed, false);
+  assert.equal(evaluateEntries({ entries: [entry(timestamp, 1), entry(timestamp, 0)], ...job, window: "1d" }).passed, false);
+}
 assert.equal(evaluateEntries({ entries: [], ...CRON_JOBS.retention, window: "1d" }).passed, false);
 const retentionSuccess = evaluateEntries({ entries: [{ timestamp, message: JSON.stringify({ message: "retention_job_complete", failedWorkspaces: 0, workspaceId: "must-not-leak" }) }], ...CRON_JOBS.retention, window: "1d" });
 assert.equal(retentionSuccess.passed, true);

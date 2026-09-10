@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type Stripe from "stripe";
 
 import { getAuthSession } from "@/auth";
 import { ensureStripeCustomerForWorkspace } from "@/services/billing/stripe-sync";
@@ -32,21 +33,49 @@ export async function POST(request: NextRequest) {
     const priceId = getRevoryOfferPriceId(offerKey);
     const stripePrice = await stripe.prices.retrieve(priceId);
     if (!revoryStripePriceMatchesContract(offerKey, stripePrice)) throw new Error(`Stripe price contract mismatch for ${offerKey}.`);
-    const priorSessions = await stripe.checkout.sessions.list({ customer, limit: 10, expand: ["data.line_items"] });
-    const prior = priorSessions.data.find((candidate) => {
+    if (offer.mode === "subscription") {
+      // Stripe may already have activated billing before its webhook reaches our database.
+      for await (const subscription of stripe.subscriptions.list({ customer, status: "all", limit: 100 })) {
+        if (!["canceled", "incomplete_expired"].includes(subscription.status)) {
+          return NextResponse.redirect(new URL("/app/settings?billing=manage-subscription", request.url), { status: 303 });
+        }
+      }
+    }
+    const priorSessions = stripe.checkout.sessions.list({ customer, limit: 100, expand: ["data.line_items"] });
+    let prior: Stripe.Checkout.Session | undefined;
+    let replacementAfter: string | undefined;
+    for await (const candidate of priorSessions) {
+      if (candidate.metadata?.workspaceId !== workspace.id) continue;
+      if (offer.mode === "subscription" && candidate.mode === "subscription" && candidate.status === "open" && candidate.metadata?.offerKey !== offerKey) {
+        return NextResponse.redirect(new URL("/start?billing=processing", request.url), { status: 303 });
+      }
       const observedPriceIds = candidate.line_items?.data.map((item) => item.price?.id).filter(Boolean) ?? [];
-      return candidate.metadata?.workspaceId === workspace.id
-        && candidate.metadata?.offerKey === offerKey
-        && ["open", "complete"].includes(candidate.status ?? "")
-        && observedPriceIds.length === 1
-        && observedPriceIds[0] === priceId;
-    });
-    if (prior?.status === "complete") return NextResponse.redirect(new URL("/start?billing=processing", request.url), { status: 303 });
+      if (candidate.metadata?.offerKey !== offerKey || observedPriceIds.length !== 1 || observedPriceIds[0] !== priceId) continue;
+      if (candidate.status === "complete") {
+        const subscriptionId = typeof candidate.subscription === "string" ? candidate.subscription : candidate.subscription?.id;
+        const delivered = await prisma.workspaceEntitlement.findFirst({
+          where: {
+            workspaceId: workspace.id,
+            OR: [{ stripeCheckoutSessionId: candidate.id }, ...(subscriptionId ? [{ stripeSubscriptionId: subscriptionId }] : [])],
+          },
+          select: { offerKey: true, status: true, endsAt: true },
+        });
+        // An absent entitlement still means pending fulfillment, never permission to charge again.
+        if (!delivered || delivered.offerKey !== offerKey || (delivered.status === "ACTIVE" && (!delivered.endsAt || delivered.endsAt >= new Date()))) {
+          return NextResponse.redirect(new URL("/start?billing=processing", request.url), { status: 303 });
+        }
+        replacementAfter ??= candidate.id;
+      } else if (candidate.status === "expired") {
+        replacementAfter ??= candidate.id;
+      } else if (candidate.status === "open" && candidate.url) {
+        prior ??= candidate;
+      }
+    }
     if (prior?.status === "open" && prior.url) {
       await prisma.legalAcceptance.create({ data: { userId: user.id, workspaceId: workspace.id, event: "CHECKOUT_STARTED", locale: "en", documentVersionsJson: CHECKOUT_LEGAL_VERSIONS, contextJson: { checkoutSessionId: prior.id, offerKey, priceId, reused: true } } });
       return NextResponse.redirect(prior.url, { status: 303 });
     }
-    const checkout = await stripe.checkout.sessions.create({ allow_promotion_codes: true, cancel_url: `${getStripeAppUrl()}/start?checkout=cancel`, client_reference_id: workspace.id, customer, line_items: [{ price: priceId, quantity: 1 }], metadata: { offerKey, userId: user.id, workspaceId: workspace.id, legalTermsVersion: CHECKOUT_LEGAL_VERSIONS.terms, legalPrivacyVersion: CHECKOUT_LEGAL_VERSIONS.privacy, legalRefundsVersion: CHECKOUT_LEGAL_VERSIONS.refunds }, mode: offer.mode, ...(offer.mode === "subscription" ? { subscription_data: { metadata: { offerKey, userId: user.id, workspaceId: workspace.id } } } : {}), success_url: `${getStripeAppUrl()}/start?checkout=success&session_id={CHECKOUT_SESSION_ID}` }, { idempotencyKey: `revory-checkout:${workspace.id}:${offerKey}:${priceId}:${new Date().toISOString().slice(0, 10)}` });
+    const checkout = await stripe.checkout.sessions.create({ allow_promotion_codes: true, cancel_url: `${getStripeAppUrl()}/start?checkout=cancel`, client_reference_id: workspace.id, customer, line_items: [{ price: priceId, quantity: 1 }], metadata: { offerKey, userId: user.id, workspaceId: workspace.id, legalTermsVersion: CHECKOUT_LEGAL_VERSIONS.terms, legalPrivacyVersion: CHECKOUT_LEGAL_VERSIONS.privacy, legalRefundsVersion: CHECKOUT_LEGAL_VERSIONS.refunds }, mode: offer.mode, ...(offer.mode === "subscription" ? { subscription_data: { metadata: { offerKey, userId: user.id, workspaceId: workspace.id } } } : {}), success_url: `${getStripeAppUrl()}/start?checkout=success&session_id={CHECKOUT_SESSION_ID}` }, { idempotencyKey: `revory-checkout:${workspace.id}:${offerKey}:${priceId}:${new Date().toISOString().slice(0, 10)}${replacementAfter ? `:after:${replacementAfter}` : ""}` });
     await prisma.$transaction([
       prisma.legalAcceptance.create({ data: { userId: user.id, workspaceId: workspace.id, event: "CHECKOUT_STARTED", locale: "en", documentVersionsJson: CHECKOUT_LEGAL_VERSIONS, contextJson: { checkoutSessionId: checkout.id, offerKey, priceId, reused: false } } }),
       prisma.workspaceAuditEvent.create({ data: { workspaceId: workspace.id, actorUserId: user.id, action: "CHECKOUT_SESSION_CREATED", metadataJson: { checkoutSessionId: checkout.id, legalVersions: CHECKOUT_LEGAL_VERSIONS, offerKey, priceId } } }),

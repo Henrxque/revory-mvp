@@ -72,7 +72,7 @@ export default async function SettingsPage() {
                 : "Delivery is paused until Resend and the sending domain are configured."}
           </p>
         </Card>
-        <Card body="Review your current REVORY access, choose an upgrade or open Stripe to manage payment and cancellation." title="Plans and billing">
+        <Card body="Review your current REVORY access or open Stripe to manage payment details and cancellation." title="Plans and billing">
           {entitlements.length ? (
             <div className="mb-4 space-y-2">
               {entitlements.map((entitlement) => {
@@ -85,7 +85,7 @@ export default async function SettingsPage() {
             ? <form action="/api/billing/portal" method="post"><button className="rev-button-secondary" type="submit">Open billing portal</button></form>
             : <Link className="rev-button-secondary" href="/start">Review current offers</Link>}
           {context.workspace.currentPeriodEnd ? <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">{context.workspace.cancelAtPeriodEnd ? "Access scheduled to end" : "Next billing date"}: {context.workspace.currentPeriodEnd.toLocaleDateString("en-US")}</p> : null}
-          {entitlements.some((item) => item.offerKey === "STARTER") && context.workspace.stripeCustomerId ? <form action="/api/billing/portal" className="mt-2" method="post"><button className="rev-button-primary" type="submit">Upgrade to Growth — $599/month</button></form> : null}
+          {entitlements.some((item) => item.offerKey === "STARTER") ? <p className="mt-3 text-xs leading-5 text-[color:var(--text-subtle)]">Self-service plan changes are not available yet. Your current plan remains active until its scheduled end date if you cancel.</p> : null}
         </Card>
       </section>
       <section className="rounded-[24px] border border-[rgba(255,114,141,.25)] bg-[rgba(255,114,141,.05)] p-6">

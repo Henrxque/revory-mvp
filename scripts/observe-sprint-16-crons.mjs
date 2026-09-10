@@ -49,7 +49,13 @@ export function evaluateEntries({ entries, job, marker, window }) {
     const timestampUtc = parseTimestamp(entry.timestamp ?? entry.createdAt ?? entry.time ?? payload.timestamp);
     return [{ payload, timestampUtc }];
   });
-  const latest = matching.at(-1);
+  // An undated completion cannot safely be placed before a known success.
+  const undated = matching.find((entry) => !entry.timestampUtc);
+  const sorted = matching.toSorted((a, b) => (b.timestampUtc ?? "").localeCompare(a.timestampUtc ?? ""));
+  const newest = sorted[0];
+  const failureKey = job === "retention" ? "failedWorkspaces" : "failed";
+  const conflictingLatest = sorted.find((entry) => entry.timestampUtc === newest?.timestampUtc && safeNumber(entry.payload[failureKey]) !== 0);
+  const latest = undated ?? conflictingLatest ?? newest;
   if (!latest) return { job, markerFound: false, observed: false, passed: false, production: true, timestampUtc: null, window };
 
   if (job === "retention") {

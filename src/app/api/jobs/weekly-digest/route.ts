@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/db/prisma";
 import { sendWeeklyQuoteRecoveryDigest } from "@/services/email/weekly-quote-recovery-digest";
+import { summarizeDigestResults } from "@/services/email/digest-result-summary";
 
 async function runWeeklyDigest(request: Request) {
   const startedAt = Date.now();
@@ -18,7 +19,7 @@ async function runWeeklyDigest(request: Request) {
     where: { enabled: true },
     select: { workspaceId: true },
   });
-  const results: Array<{ sent: boolean }> = [];
+  const results: Array<{ sent: boolean; reason?: string | null }> = [];
 
   for (const preference of preferences) {
     try {
@@ -34,18 +35,18 @@ async function runWeeklyDigest(request: Request) {
     }
   }
 
-  const sent = results.filter((result) => result.sent).length;
-  const failed = results.length - sent;
+  const { sent, skipped, failed } = summarizeDigestResults(results);
   console.info(JSON.stringify({
     durationMs: Date.now() - startedAt,
     failed,
     level: failed ? "warning" : "info",
     message: "weekly_digest_job_complete",
     sent,
+    skipped,
     workspaces: preferences.length,
   }));
 
-  return NextResponse.json({ failed, processed: preferences.length, sent });
+  return NextResponse.json({ failed, processed: preferences.length, sent, skipped });
 }
 
 export function GET(request: Request) {
