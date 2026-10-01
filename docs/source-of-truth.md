@@ -1,6 +1,6 @@
 # REVORY — Source of Truth
 
-> Decisão de 2026-09-29; estado atualizado em 2026-10-01. Substitui a definição contractor. Detalhes em [REVORY_PRODUCT_BIBLE.md](REVORY_PRODUCT_BIBLE.md). Estado: **Sprints 0–4 implementados localmente. Sprint 05 adiciona experiência AI SaaS e compra pontual com simulação local; gate pendente de Stripe sandbox real. Sprint 06 tem preparação e ensaio de revisão sintética; coorte paga real não iniciada. Sprint 07 tem preparação local de fontes com fixtures, sem conexões reais. Sem oferta pública ou validação com clientes**.
+> Decisão de 2026-09-29; estado atualizado em 2026-10-01. Substitui a definição contractor. Detalhes em [REVORY_PRODUCT_BIBLE.md](REVORY_PRODUCT_BIBLE.md). Estado: **Sprints 0–4 implementados localmente. Sprint 05 adiciona experiência AI SaaS e compra pontual com simulação local; gate pendente de Stripe sandbox real. Sprint 06 tem preparação e ensaio de revisão sintética; coorte paga real não iniciada. Sprint 07 tem preparação local de fontes com fixtures, sem conexões reais. Sprint 08 tem comparação e alertas locais sintéticos, sem recorrência real. Sem oferta pública ou validação com clientes**.
 
 ## Identidade
 
@@ -56,6 +56,12 @@ O [Sprint 06](sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.m
 ## Sprint 07 — preparação de fontes
 
 A [Sprint 07](sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md) adiciona contratos paginados Stripe invoices/OpenAI completions usage e Costs, consentimento/revogação sintéticos, checkpoints incrementais, artefatos separados e comparação com CSV. A UI exige também `REVORY_AI_SOURCE_REHEARSAL=true`, fora de produção, em banco local preparado. O transporte usa fixtures fixas: nenhuma chave coletada, conta real conectada ou chamada externa ao provider. Sem scan/compra automáticos. Google login, Resend e billing existentes permanecem preservados. Preparação local verificada; gate completo de escopos, credenciais e equivalência com dados reais permanece aberto, assim como os gates das Sprints 05–06.
+
+## Sprint 08 — preparação de monitoramento e ordem atual
+
+A [Sprint 08](sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md) implementa comparação manual de dois scans sintéticos, movimentos por identidade temporal, alertas locais limitados, reconhecimento auditado, histórico e export. Períodos adjacentes de igual duração e escopos equivalentes são exigidos; evidência ausente/incompleta limita movimentos e nunca vira resolução financeira. Sem leitura agendada, e-mail ou assinatura. Exige `REVORY_AI_MONITOR_REHEARSAL=true` fora de produção em banco local preparado; preview comum mantém a flag desligada.
+
+Direção mais recente do fundador: **Stripe por último**. Preparação local de monitoramento pode avançar; conexão OpenAI real continua como pendência da Sprint 07, e Sprint 09 é o gate de lançamento. Entrada conectada desejada: APIs Stripe/OpenAI; CSV/XLSX inicialmente para o ledger interno. Comparação com CSV do provider é teste de equivalência, sem upload duplicado obrigatório no futuro fluxo conectado. Adiar Stripe não libera análise real gratuita, validação paga fictícia ou oferta recorrente antes de seus gates.
 
 ## Preservação explícita de integrações
 

@@ -87,6 +87,8 @@ Conflitos de mapping, customer com múltiplas subscriptions, shared keys, moedas
 
 **Preparação local do Sprint 07 (2026-10-01):** leituras paginadas com fixtures Stripe/OpenAI, consentimento/revogação e checkpoint incremental por workspace, artefatos separados e equivalência sintética com CSV. Invoice amount_paid é contexto de criação, não receita líquida; completions input já inclui cached tokens; Costs por project não tem model/customer automaticamente. Não há transporte HTTP, API keys ou contas reais. A tela exige a flag adicional `REVORY_AI_SOURCE_REHEARSAL=true` em banco local preparado, sem liberar dados reais ou produção. [Evidência e gate pendente](sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md).
 
+**Preparação local do Sprint 08 (2026-10-01):** compara dois scans sintéticos por escopo temporal, com estados New/Still observed/No longer observed/Limited, custo e uso separados, alertas locais limitados, reconhecimento auditado e export v9 do workspace. Exige períodos adjacentes de mesma duração, lag e fontes/buckets equivalentes. Não existe leitura agendada, envio de e-mail, assinatura ou OpenAI real. Stripe foi adiado pelo fundador para o final; isso não conclui gates comerciais. [Evidência](sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md) e [runbook](validation/SPRINT_08_MONITORING_REHEARSAL_RUNBOOK.md).
+
 ## 7. Findings do primeiro produto
 
 | Finding | Condição mínima | Saída honesta |

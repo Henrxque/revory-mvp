@@ -351,6 +351,7 @@ model Workspace {
   legalAcceptances           LegalAcceptance[]
   aiIntegrityImportBatches   AiIntegrityImportBatch[]
   aiIntegritySources        AiIntegritySourceConnection[]
+  aiMonitorComparisons      AiIntegrityMonitorComparison[]
   aiIntegrityMappings        AiIntegrityMapping[]
     aiIntegritySnapshots       AiIntegritySnapshot[]
     aiIntegrityScanOrders      AiIntegrityScanOrder[]
@@ -840,6 +841,8 @@ model AiIntegritySnapshot {
   workspace         Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   findings          AiIntegrityFinding[]
   reviewEvents      AiIntegrityReviewEvent[]
+  monitorBaselines  AiIntegrityMonitorComparison[] @relation("MonitorBaseline")
+  monitorCurrents   AiIntegrityMonitorComparison[] @relation("MonitorCurrent")
     inputs            AiIntegritySnapshotInput[]
     scanGrants        AiIntegrityScanGrant[]
 
@@ -847,6 +850,48 @@ model AiIntegritySnapshot {
   @@unique([workspaceId, idempotencyKey])
   @@index([workspaceId, windowStart, windowEnd, createdAt])
   @@map("ai_integrity_snapshots")
+}
+
+model AiIntegrityMonitorComparison {
+  id                 String   @id @default(cuid())
+  workspaceId        String
+  baselineSnapshotId String
+  currentSnapshotId  String
+  actorUserId        String
+  requestKey         String
+  payloadHash        String
+  mode               String   @default("SYNTHETIC_REHEARSAL")
+  monitorVersion     String
+  artifactJson       Json
+  artifactHash       String
+  createdAt          DateTime @default(now())
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, map: "ai_monitor_workspace_fkey")
+  baseline           AiIntegritySnapshot @relation("MonitorBaseline", fields: [workspaceId, baselineSnapshotId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_baseline_fkey")
+  current            AiIntegritySnapshot @relation("MonitorCurrent", fields: [workspaceId, currentSnapshotId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_current_fkey")
+  alerts             AiIntegrityMonitorAlert[]
+
+  @@unique([workspaceId, id], map: "ai_monitor_workspace_id_key")
+  @@unique([workspaceId, requestKey], map: "ai_monitor_request_key")
+  @@unique([workspaceId, baselineSnapshotId, currentSnapshotId, monitorVersion], map: "ai_monitor_pair_key")
+  @@index([workspaceId, createdAt], map: "ai_monitor_retention_idx")
+  @@map("ai_integrity_monitor_comparisons")
+}
+
+model AiIntegrityMonitorAlert {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  comparisonId     String
+  signalKey        String
+  kind             String
+  status           String   @default("OPEN")
+  acknowledgedBy   String?
+  acknowledgedAt   DateTime?
+  createdAt        DateTime @default(now())
+  comparison       AiIntegrityMonitorComparison @relation(fields: [workspaceId, comparisonId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_alert_comparison_fkey")
+
+  @@unique([workspaceId, comparisonId, signalKey], map: "ai_monitor_alert_signal_key")
+  @@index([workspaceId, status, createdAt], map: "ai_monitor_alert_status_idx")
+  @@map("ai_integrity_monitor_alerts")
 }
 
 model AiIntegrityScanOrder {

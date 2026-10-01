@@ -6,6 +6,8 @@ Sprint 06 adds local synthetic review rehearsal with revision history, usefulnes
 
 Sprint 07 adds local paginated source rehearsal, synthetic consent/revocation, incremental checkpoints and source artifacts separate from scans. Fixed fixtures only: no HTTP transport, API key collection or real Stripe/OpenAI connection. Its UI requires the additional nonproduction `REVORY_AI_SOURCE_REHEARSAL=true` flag in a prepared local database. Real scopes, credential protection and same-period CSV equivalence remain pending; Sprints 05–06 gates still open. See `docs/sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md`.
 
+Sprint 08 adds synthetic manual comparison of two immutable scans, temporal movements, bounded local alerts and audited acknowledgment, with workspace isolation, export and retention. It does not implement scheduled reads, email delivery, real OpenAI access or monitoring subscriptions. Requires nonproduction `REVORY_AI_MONITOR_REHEARSAL=true` in a prepared local database. Full recurring beta gate remains open. Latest founder direction: resolve Stripe last; do not reinterpret this as permission for real free scans or public launch. See `docs/sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md`.
+
 Read in this order:
 
 1. [docs/source-of-truth.md](docs/source-of-truth.md)

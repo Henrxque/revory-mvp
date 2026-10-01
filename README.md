@@ -10,6 +10,8 @@ Sprint 06 adds synthetic finding/report reviews, revision history, review export
 
 Sprint 07 adds paginated synthetic Stripe/OpenAI source reads, consent/revocation, incremental checkpoints and source evidence exports, with CSV parity against the same fixtures. **Real connection gate remains open.** No HTTP transport, API key collection or real provider account connection. The UI requires the additional nonproduction `REVORY_AI_SOURCE_REHEARSAL=true` flag in a prepared local database; it stays off in the common preview. Google auth, Resend and existing billing remain preserved.
 
+Sprint 08 adds manual comparison of two synthetic reports, conservative temporal movements, bounded local alerts, audited acknowledgment, history and exports. **Recurring beta gate remains open:** no scheduled reads, external alert delivery, real OpenAI connection or monitoring subscription. Requires nonproduction `REVORY_AI_MONITOR_REHEARSAL=true` in a prepared local database, off in the common preview. Founder direction: resolve Stripe last, before commercial release.
+
 Do not market or sell the new AI SaaS promise from this repository until its data, reconciliation, security and release gates pass. Existing contractor prices and Stripe objects are protected historical contracts.
 
 ## Living product documents
@@ -25,6 +27,8 @@ Do not market or sell the new AI SaaS promise from this repository until its dat
 - [Sprint 5 local experience, test purchase and pending sandbox gate](docs/sprints/SPRINT_05_AI_INTEGRITY_EXPERIENCE_2026-10-01.md)
 - [Sprint 6 validation preparation and synthetic rehearsal](docs/sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md)
 - [Sprint 7 local source preparation and pending real connection gate](docs/sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md)
+- [Sprint 8 local monitoring preparation and pending recurring beta gate](docs/sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md)
+- [Monitoring rehearsal runbook and data policy](docs/validation/SPRINT_08_MONITORING_REHEARSAL_RUNBOOK.md)
 - [Paid pilot protocol and templates](docs/validation/SPRINT_06_PAID_PILOT_PROTOCOL.md)
 - [Research analysis and decisions](docs/REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md)
 - [Historical documentation policy](docs/historical/README.md)
