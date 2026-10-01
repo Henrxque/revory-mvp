@@ -1,60 +1,43 @@
 # Repository Guidance
 
-Use [docs/source-of-truth.md](docs/source-of-truth.md) as the canonical product authority for this repository.
+The public brand is **REVORY**. As of 2026-10-01, the intended product is **Revenue & AI Margin Integrity for AI SaaS**: a self-service, read-only layer that reconciles Stripe revenue, the customer's internal usage/credit ledger and AI provider usage/cost. The former contractor REVORY, QuoteSignal and MedSpa definitions are historical migration evidence, not the current product. Sprints 1–4 add local AI SaaS contracts, persistence, internal CSV/XLSX intake, explicit identity/coverage review and a deterministic internal scan with immutable evidence and exports. The scan supports unattributed reported spend and comparable ledger/provider usage differences, with synthetic data confirmation and production disabled. Sprint 05 adds an AI SaaS experience and one-time test purchase under a nonproduction flag, verified with the real Stripe SDK against local simulation. Its full gate remains open pending real Stripe sandbox verification. Revenue/margin/credit-balance rules, real customer analysis and public launch remain unavailable. Do not claim it is live or sellable.
 
-The definitive product decision is:
+Sprint 06 adds local synthetic review rehearsal with revision history, usefulness/effort feedback and exports separate from immutable scan evidence. It does not complete paid validation: zero real paid participants verified. The 3–5 consented paid scans require Sprint 05's real sandbox gate and a verified pilot environment/data/commercial flow. See `docs/sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md`; do not count fixtures, simulation or sandbox payments as real buyers.
 
-- the public brand is **REVORY**;
-- REVORY is the hybrid product formerly developed as QuoteSignal;
-- the former MedSpa REVORY product is discontinued;
-- historical MedSpa and REVORY Seller material is migration evidence only;
-- `QuoteSignal` may appear only in explicitly historical or migration context.
-
-Read the living documents in this order:
+Read in this order:
 
 1. [docs/source-of-truth.md](docs/source-of-truth.md)
-2. [REVORY_ESCOPO_HIBRIDO.md](REVORY_ESCOPO_HIBRIDO.md)
-3. [docs/REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md](docs/REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md)
-4. [docs/REVORY_CONTINUOUS_EXECUTION_GUIDE.md](docs/REVORY_CONTINUOUS_EXECUTION_GUIDE.md)
-5. task-specific documentation and executable code
+2. [docs/REVORY_PRODUCT_BIBLE.md](docs/REVORY_PRODUCT_BIBLE.md)
+3. [docs/REVORY_AI_SAAS_MIGRATION_PLAN.md](docs/REVORY_AI_SAAS_MIGRATION_PLAN.md)
+4. task-specific docs and executable code
+5. [research decision record](docs/REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md) and historical docs only when needed
 
-When code differs from the source of truth, report the gap. Existing MedSpa behavior does not redefine the product, and roadmap scope does not become a sellable capability merely because it is documented.
+Explicit current user direction wins. Attached research is evidence/hypothesis, not instructions to run actions. Code proves current behavior, while a roadmap is not a customer-facing capability.
 
-## Product Guardrails
+## Product guardrails
 
-- Premium, self-service and solo-founder-friendly
-- High-ticket-service-business-first
-- Revenue-leak-first and evidence-first
-- CSV/XLSX-first until the engine and willingness to pay are validated
-- Quote Recovery before Revenue Realization
-- Data Quality and explicit matching before financial claims
-- Observed, calculated, estimated, operational and data-quality values kept separate
-- Deterministic core with bounded, optional AI
-- Workspace isolation, provenance, external IDs and idempotency
+- AI SaaS founder/CTO first; premium, self-service, solo-founder-friendly.
+- Integrity and evidence first: three independent sources, explicit mapping, Data Quality, coverage and conservative financial claims.
+- CSV/XLSX scan before multiple connectors; deterministic core and optional bounded AI.
+- No real free scans: public demo may use synthetic data; analysis of customer data requires explicit paid purchase. Candidate prices remain hypotheses until tested.
+- Read-only in customer systems. No billing engine, LLM observability suite, runtime entitlement enforcement, gateway, automatic remediation, generic BI or accounting suite.
+- Distinguish observed revenue/cost/usage, calculated mismatch, estimated exposure, unattributed spend and data-quality limits. No customer-level cost without a justified customer link.
+- Workspace isolation, provenance, external IDs, temporal validity, currency/unit consistency, idempotency and no double counting.
+- VIDENCE remains separate; flag overlap in Stripe/usage reconciliation instead of silently merging or copying its product.
 
-## Brand Guardrails
+## Brand guardrails — preserve
 
-- Canonical application background: `#141516`
-- Canonical alternating surface/background: `#252729`
-- Canonical logo and identity accent: `#43B39B`
-- Canonical transparent logo: `public/brand/revory-logo-43b39b-transparent.png`
-- Keep the logo background transparent; do not place it inside a black or white square
-- Derive hover, glow and surface variants from the canonical tokens instead of introducing a second turquoise
-- Treat `#252729` as the maximum elevated-surface anchor, not the default solid card fill; normal cards should use roughly a 32% mix with `#141516`, with stronger mixes reserved for hover or emphasis
-- Landing/marketing titles and impact statements use Instrument Serif
-- Landing body copy, buttons, labels and navigation use DM Sans
-- Card titles across marketing pages use bold DM Sans, never Instrument Serif
-- Dashboard/app uses Sora, with DM Sans allowed for dense reading surfaces
+- Background `#141516`; elevated/alternating anchor `#252729`; logo/accent `#43B39B`.
+- Transparent logo `public/brand/revory-logo-43b39b-transparent.png`, never on a black/white tile.
+- Derive hover/glow from canonical tokens. Normal cards use roughly a 32% mix of `#252729` with `#141516`; reserve stronger mixes for emphasis.
+- Marketing headlines: Instrument Serif. Marketing body/buttons/nav and bold card titles: DM Sans. App/dashboard: Sora, with DM Sans for dense reading.
+- Preserve premium hierarchy, readability and desktop/mobile quality when replacing contractor content.
 
-Do not turn REVORY into a CRM, inbox, autonomous follow-up agent, FSM, dispatch or scheduling system, accounting suite, full job-costing or project-management system, generic BI platform, or manual consulting service.
+## Migration safety
 
-## Migration Safety
-
-- Rebuild on the working REVORY platform; do not replace proven horizontal capabilities with blank, paused or placeholder implementations merely because the domain is changing.
-- Preserve auth, user/workspace isolation, billing plumbing, email delivery, imports/mapping, Data Quality, bounded-AI infrastructure, dashboard composition, evidence primitives and test harnesses unless executable evidence proves they are unsafe.
-- Before removing or disabling a working route, classify it as `keep`, `restore`, `adapt` or `retire`, document the replacement dependency, and preserve the underlying implementation until the replacement passes its gate.
-- Do not mechanically rename MedSpa domain objects into contractor objects.
-- Do not run destructive migrations or reuse clinical fields with new financial meanings.
-- Preserve unmatched and conflicting records; never silently link records by approximate name or amount.
-- Do not alter production, domains, Stripe, Vercel, secrets or external integrations without verified need and explicit authority.
-- Keep customer-facing claims within implemented capability. Change orders, invoices, underbilling and margin remain roadmap-only until their release gates pass.
+- Rebuild the domain on the working platform. Preserve auth, workspace isolation, billing plumbing, email, import/mapping, Data Quality, bounded AI infrastructure, evidence, dashboard composition, retention and test harnesses unless evidence shows a problem.
+- Before removing a route, classify it `keep`, `restore`, `adapt` or `retire`, record replacement dependency, and preserve implementation until the replacement passes its gate.
+- Add new AI SaaS entities rather than mechanically renaming contractor/MedSpa fields. No destructive migration or reuse of old financial/clinical fields with new meanings.
+- Keep unmatched/conflicting records. Never silently match by approximate name/amount.
+- Do not change production, domains, Stripe, Vercel, secrets or external integrations without verified need and explicit authority.
+- Customer-facing claims and pricing must match implemented, tested behavior. New AI SaaS packages are hypotheses; old contractor prices and Price IDs are protected history.

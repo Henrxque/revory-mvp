@@ -1,0 +1,53 @@
+{
+  "fixtureVersion": 1,
+  "synthetic": true,
+  "currency": "USD",
+  "window": { "from": "2026-08-01T00:00:00Z", "to": "2026-09-01T00:00:00Z" },
+  "workspaces": [
+    {
+      "id": "synthetic-ws-a",
+      "stripeRevenue": [
+        { "externalId": "ch_a_1", "customerExternalId": "cus_a", "netAmountCents": 12000, "status": "paid" },
+        { "externalId": "re_a_1", "customerExternalId": "cus_a", "netAmountCents": -2000, "status": "refunded", "parentExternalId": "ch_a_1" }
+      ],
+      "internalUsage": [
+        { "externalId": "evt_a_1", "customerExternalId": "cus_a", "providerRequestId": "req_shared", "units": 1000, "unitType": "tokens" },
+        { "externalId": "evt_a_2", "customerExternalId": "cus_b", "providerRequestId": null, "units": 500, "unitType": "tokens" }
+      ],
+      "providerCosts": [
+        { "externalId": "bucket_a_1", "provider": "openai", "providerRequestId": null, "costMicros": 2500000, "unitType": "USD_micros", "level": "workspace_daily_bucket" }
+      ],
+      "expected": {
+        "observedNetRevenueCents": 10000,
+        "customerCostAttribution": "UNATTRIBUTED",
+        "customerMarginClaimAllowed": false,
+        "reason": "Aggregate provider bucket has no explicit customer bridge."
+      }
+    },
+    {
+      "id": "synthetic-ws-b",
+      "stripeRevenue": [],
+      "internalUsage": [
+        { "externalId": "evt_b_1", "customerExternalId": "cus_b", "providerRequestId": "req_shared", "units": 700, "unitType": "tokens" }
+      ],
+      "providerCosts": [],
+      "expected": {
+        "visibleFromWorkspaceA": false,
+        "customerMarginClaimAllowed": false,
+        "reason": "Shared request ID across workspaces never authorizes cross-tenant matching."
+      }
+    }
+  ],
+  "adversarialCases": [
+    "duplicate source event ID in one workspace",
+    "same source event ID in two workspaces",
+    "ambiguous customer mapping",
+    "provider report lag",
+    "credit and refund applied in different windows",
+    "currency mismatch without explicit FX source",
+    "timezone boundary",
+    "formula cell in XLSX",
+    "CSV cell beginning with spreadsheet formula prefix",
+    "truncated or oversized XLSX archive"
+  ]
+}

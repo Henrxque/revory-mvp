@@ -1,0 +1,3 @@
+externalId,provider,organizationId,projectId,model,windowStart,windowEnd,reportedAt,costBasis,costAmount,costCurrency,usageQuantity,usageUnit
+bucket_aster,openai,org_sample,proj_aster,model_sample,2026-08-01T00:00:00Z,2026-09-01T00:00:00Z,2026-09-03T00:00:00Z,REPORTED,1840.50,USD,9020000,tokens
+bucket_shared,openai,org_sample,proj_shared,model_sample,2026-08-01T00:00:00Z,2026-09-01T00:00:00Z,2026-09-03T00:00:00Z,REPORTED,615.25,USD,3100000,tokens

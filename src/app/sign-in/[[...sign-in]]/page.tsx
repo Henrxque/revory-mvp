@@ -7,6 +7,7 @@ import { AuthStepCard } from "@/components/auth/AuthStepCard";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { isGoogleAuthConfigured } from "@/services/auth/provider-config";
+import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experience";
 import {
   buildSignUpRedirectPath,
   normalizeAuthRedirectTarget,
@@ -78,7 +79,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Secure access returns existing users to the same private Quote Recovery workspace and its imported evidence.
+                {isAiIntegrityExperienceEnabled() ? "Return to your private AI integrity workspace, imported evidence and saved reports." : "Secure access returns existing users to the same private Quote Recovery workspace and its imported evidence."}
               </p>
             </div>
           </div>
@@ -90,7 +91,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               <AuthStepCard
                 key={step.label}
                 label={step.label}
-                text={step.text}
+                text={isAiIntegrityExperienceEnabled() && step.label === "02" ? "Resume your source review, explicit identity mappings and evidence reports." : step.text}
                 title={step.title}
               />
             ))}

@@ -13,6 +13,8 @@ import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-previ
 import { isProductAdminEmail } from "@/services/app/product-admin";
 import { getCapabilityAccess } from "@/services/billing/capabilities";
 import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
+import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experience";
+import { AiAppShell } from "@/components/ai-integrity/AiAppShell";
 
 type PrivateAppLayoutProps = Readonly<{
   children: React.ReactNode;
@@ -44,6 +46,10 @@ export default async function PrivateAppLayout({
   }
 
   const { user, workspace } = appContext;
+  if (isAiIntegrityExperienceEnabled()) {
+    if (!(await hasCurrentAccountLegalAcceptance(user.id))) return <LegalReacceptGate userEmail={user.email} />;
+    return <AiAppShell workspaceName={workspace.name} email={user.email}>{children}</AiAppShell>;
+  }
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();
   const productAdmin = isProductAdminEmail(user.email);

@@ -27,7 +27,28 @@ export async function enforceWorkspaceRetention(
       }),
       tx.revoryEvidenceEvent.deleteMany({ where: { workspaceId, observedAt: { lt: cutoff } } }),
     ]);
-    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count;
+    const snapshotsWithExpiredInputs = await tx.aiIntegritySnapshotInput.findMany({
+      where: { workspaceId, importBatch: { createdAt: { lt: cutoff } } },
+      select: { snapshotId: true },
+    });
+    const expiredSnapshotWhere = { workspaceId, OR: [
+      { createdAt: { lt: cutoff } }, { id: { in: snapshotsWithExpiredInputs.map((item) => item.snapshotId) } },
+    ] };
+    const expiringSnapshotIds = await tx.aiIntegritySnapshot.findMany({ where: expiredSnapshotWhere, select: { id: true } });
+    // Retiring an artifact never restores a consumed purchase.
+    await tx.aiIntegrityScanGrant.updateMany({ where: { workspaceId, consumedSnapshotId: { in: expiringSnapshotIds.map((s) => s.id) } }, data: { consumedSnapshotId: null } });
+    const aiSnapshots = await tx.aiIntegritySnapshot.deleteMany({
+      where: { workspaceId, OR: [
+        { createdAt: { lt: cutoff } },
+        { id: { in: snapshotsWithExpiredInputs.map((item) => item.snapshotId) } },
+      ] },
+    });
+    // Composite snapshot-input FKs prevent deleting evidence still used by a retained snapshot.
+    const aiImportBatches = await tx.aiIntegrityImportBatch.deleteMany({ where: { workspaceId, createdAt: { lt: cutoff } } });
+    const aiMappings = await tx.aiIntegrityMapping.deleteMany({
+      where: { workspaceId, validUntil: { lt: cutoff } },
+    });
+    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count;
     if (deletedCount > 0) {
       await tx.workspaceAuditEvent.create({
         data: {
@@ -40,6 +61,9 @@ export async function enforceWorkspaceRetention(
             deletedRuns: runs.count,
             deletedSnapshots: snapshots.count,
             deletedEvidenceEvents: evidenceEvents.count,
+            deletedAiSnapshots: aiSnapshots.count,
+            deletedAiImportBatches: aiImportBatches.count,
+            deletedAiMappings: aiMappings.count,
             retentionDays: settings.retentionDays,
           },
           workspaceId,
@@ -53,6 +77,9 @@ export async function enforceWorkspaceRetention(
       deletedRuns: runs.count,
       deletedSnapshots: snapshots.count,
       deletedEvidenceEvents: evidenceEvents.count,
+      deletedAiSnapshots: aiSnapshots.count,
+      deletedAiImportBatches: aiImportBatches.count,
+      deletedAiMappings: aiMappings.count,
       skipped: false,
     };
   });
