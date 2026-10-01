@@ -35,6 +35,7 @@ Explicit current user direction wins. Attached research is evidence/hypothesis, 
 
 ## Migration safety
 
+- Explicit founder direction (2026-10-01): preserve Google OAuth/NextAuth, email/password, verification/reset, sessions, user/workspace identity, Resend transactional delivery/webhooks and existing horizontal infrastructure during the AI SaaS migration. Keep provider setup, credentials, callback URLs, sender domains and external resources unchanged unless a verified need and explicit authority justify a change. Adapt product copy/templates while preserving the integration behavior; do not replace these services as part of the niche migration.
 - Rebuild the domain on the working platform. Preserve auth, workspace isolation, billing plumbing, email, import/mapping, Data Quality, bounded AI infrastructure, evidence, dashboard composition, retention and test harnesses unless evidence shows a problem.
 - Before removing a route, classify it `keep`, `restore`, `adapt` or `retire`, record replacement dependency, and preserve implementation until the replacement passes its gate.
 - Add new AI SaaS entities rather than mechanically renaming contractor/MedSpa fields. No destructive migration or reuse of old financial/clinical fields with new meanings.

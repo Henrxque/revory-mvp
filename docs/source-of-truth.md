@@ -53,6 +53,10 @@ Não alterar produção, `revory.app`, Stripe, Vercel, secrets ou integrações 
 
 O [Sprint 06](sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md) implementou preparação local para validação: revisões de findings e utilidade com histórico, métricas com denominador explícito e export separado da evidência imutável. Tudo permanece como ensaio sintético, com zero compradores reais verificados. O [protocolo do piloto](validation/SPRINT_06_PAID_PILOT_PROTOCOL.md) define qualificação, dados, consentimento e avaliação assíncrona. O gate de 3–5 scans reais pagos/consentidos continua aberto; antes da coleta faltam fechar Stripe sandbox da Sprint 05 e definir/verificar ambiente e condições do piloto. Nenhum bloqueio de dados reais ou produção foi removido.
 
+## Preservação explícita de integrações
+
+Direção do fundador em 2026-10-01: manter Google login, Resend e a infraestrutura horizontal existente. Preservar Google OAuth/NextAuth, login por e-mail/senha, confirmação de e-mail, recuperação de senha, sessões, identidade de usuário/workspace, envio transacional e webhooks do Resend. Billing plumbing, isolamento, auditoria, export/retenção e demais serviços existentes continuam sujeitos aos contratos de preservação da migração. Adaptar conteúdo e contexto AI SaaS sem substituir provedores, alterar credenciais, callbacks, domínio remetente ou recursos externos por consequência da troca de nicho. A presença no código não substitui uma verificação operacional do serviço em cada ambiente.
+
 ## Relação com VIDENCE
 
 VIDENCE é distinto. O novo REVORY toca o eixo Stripe ↔ uso, mas seu wedge aqui é integridade de custo de IA e atribuição entre três fontes. Evitar duas implementações concorrentes de billing reconciliation sem decisão explícita de portfólio. Esta definição não altera VIDENCE.

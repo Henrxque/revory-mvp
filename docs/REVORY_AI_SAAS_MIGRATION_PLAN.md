@@ -11,14 +11,14 @@ Migrar **o domínio inteiro** de contractors para AI SaaS sem destruir as capaci
 | Superfície / caminho | Classe | Próxima ação e dependência |
 | --- | --- | --- |
 | `src/app/globals.css`, `src/app/layout.tsx`, `components/brand/RevoryLogo.tsx`, `public/brand/` | **keep** visual; **adapt** metadata | Congelar tokens/logo/fontes; trocar title/description contractor apenas quando landing nova e claims estiverem prontos. |
-| Auth: sign-in/up/reset/verify, NextAuth, usuário/workspace | **keep** | Confirmar isolamento e status de workspace com fixtures AI SaaS. |
+| Auth: Google OAuth, e-mail/senha, sign-in/up/reset/verify, NextAuth, sessões, usuário/workspace | **keep — direção explícita do fundador em 2026-10-01** | Preservar provedores, callbacks e identidade; adaptar somente contexto de produto. Confirmar isolamento e status de workspace com fixtures AI SaaS. |
 | `src/app/page.tsx`, `src/app/start/page.tsx`, `src/app/demo/` | **adapt** | Criar copy, demo e oferta do novo domínio; substituir publicamente só após experiência coerente. Demo sempre sintética/read-only. |
 | `src/app/(app)/app/imports/`, `lib/imports/`, mapping e Data Quality | **adapt** | Novos contratos Stripe revenue, internal usage e provider buckets; conservar parser, limites, preview e confirmação quando adequados. |
 | `src/app/(app)/app/dashboard/`, `revenue-leaks/`, `history/`, `reports/` | **adapt** | Novos read models, coverage, findings e relatórios; não renomear estimate finding para AI finding. |
 | `src/app/(app)/app/revenue-realization/`, `quote-recovery/` | **retire** da navegação nova após substituição | Preservar código/dados históricos até política de acesso/retirada e gates de nova UI; nenhum claim contractor na nova navegação. |
 | `src/app/(app)/app/setup/` e rotas MedSpa ainda existentes | **retire** ou **adapt** após inventário de consumidores | Não apagar schema/fluxos automaticamente; mapear dependências e dados antes. |
 | Billing checkout/portal/webhook, `WorkspaceEntitlement`, Stripe event ledger | **keep** plumbing; **adapt** ofertas | Novos offer keys/prices/entitlements apenas após contrato novo, testes e autorização externa separada. Price IDs antigos permanecem protegidos. |
-| Resend, legal, security, health, retention, audit events | **keep** infraestrutura; **adapt** conteúdo e eventos | Revisar finalidade/retention/DPA/subprocessors para dados AI SaaS antes de beta. |
+| Resend, envio transacional/webhooks, legal, security, health, retention, audit events | **keep** infraestrutura; **adapt** conteúdo e eventos | Resend preservado por direção explícita do fundador em 2026-10-01: manter integração, domínio remetente e recursos externos. Revisar finalidade/retention/DPA/subprocessors para dados AI SaaS antes de beta. |
 | `prisma/schema.prisma` models `CanonicalRecord`, `CanonicalImportSession`, findings, snapshots e MedSpa | **adapt** via modelos novos e migrações aditivas | Não sobrecarregar campos com sentido novo. Desenhar tabelas AI com workspace/external IDs, índices, unicidade, provenance e snapshot. |
 | Scripts `qa:*` contractor e fixtures | **keep** como regressão histórica; criar QA novo | Nunca chamar testes antigos de prova do novo motor. Separar suite AI SaaS e verificar cross-tenant/false positives. |
 
