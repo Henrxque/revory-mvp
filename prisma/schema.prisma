@@ -350,6 +350,7 @@ model Workspace {
   evidenceEvents             RevoryEvidenceEvent[]
   legalAcceptances           LegalAcceptance[]
   aiIntegrityImportBatches   AiIntegrityImportBatch[]
+  aiIntegritySources        AiIntegritySourceConnection[]
   aiIntegrityMappings        AiIntegrityMapping[]
     aiIntegritySnapshots       AiIntegritySnapshot[]
     aiIntegrityScanOrders      AiIntegrityScanOrder[]
@@ -629,6 +630,50 @@ model RevoryEvidenceEvent {
 }
 
 // AI SaaS data is additive and never reinterprets contractor CanonicalRecord rows.
+model AiIntegritySourceConnection {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  provider         String
+  mode             String   @default("SYNTHETIC_REHEARSAL")
+  status           String   @default("ACTIVE")
+  generation       Int      @default(1)
+  consentVersion   String
+  consentedBy      String
+  consentedAt      DateTime @default(now())
+  revokedAt        DateTime?
+  coverageStart    DateTime?
+  completeThrough  DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, map: "ai_source_workspace_fkey")
+  syncs            AiIntegritySourceSync[]
+
+  @@unique([workspaceId, provider, mode], map: "ai_source_provider_mode_key")
+  @@unique([workspaceId, id], map: "ai_source_workspace_id_key")
+  @@map("ai_integrity_source_connections")
+}
+
+model AiIntegritySourceSync {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  connectionId    String
+  generation      Int
+  requestKey      String
+  payloadHash     String
+  status          String
+  windowStart     DateTime
+  windowEnd       DateTime
+  effectiveStart  DateTime?
+  artifactJson    Json?
+  artifactHash    String?
+  createdAt       DateTime @default(now())
+  connection      AiIntegritySourceConnection @relation(fields: [workspaceId, connectionId], references: [workspaceId, id], onDelete: Cascade, map: "ai_source_sync_connection_fkey")
+
+  @@unique([workspaceId, requestKey], map: "ai_source_sync_request_key")
+  @@index([workspaceId, createdAt], map: "ai_source_sync_retention_idx")
+  @@map("ai_integrity_source_syncs")
+}
+
 model AiIntegrityImportBatch {
   id                  String                     @id @default(cuid())
   workspaceId         String

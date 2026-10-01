@@ -48,7 +48,9 @@ export async function enforceWorkspaceRetention(
     const aiMappings = await tx.aiIntegrityMapping.deleteMany({
       where: { workspaceId, validUntil: { lt: cutoff } },
     });
-    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count;
+    const aiSourceSyncs = await tx.aiIntegritySourceSync.deleteMany({ where: { workspaceId, createdAt: { lt: cutoff } } });
+    const aiRevokedSources = await tx.aiIntegritySourceConnection.deleteMany({ where: { workspaceId, status: "REVOKED", revokedAt: { lt: cutoff } } });
+    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count + aiSourceSyncs.count + aiRevokedSources.count;
     if (deletedCount > 0) {
       await tx.workspaceAuditEvent.create({
         data: {
@@ -64,6 +66,8 @@ export async function enforceWorkspaceRetention(
             deletedAiSnapshots: aiSnapshots.count,
             deletedAiImportBatches: aiImportBatches.count,
             deletedAiMappings: aiMappings.count,
+            deletedAiSourceSyncs: aiSourceSyncs.count,
+            deletedAiRevokedSources: aiRevokedSources.count,
             retentionDays: settings.retentionDays,
           },
           workspaceId,
@@ -80,6 +84,8 @@ export async function enforceWorkspaceRetention(
       deletedAiSnapshots: aiSnapshots.count,
       deletedAiImportBatches: aiImportBatches.count,
       deletedAiMappings: aiMappings.count,
+      deletedAiSourceSyncs: aiSourceSyncs.count,
+      deletedAiRevokedSources: aiRevokedSources.count,
       skipped: false,
     };
   });

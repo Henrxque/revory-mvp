@@ -4,6 +4,8 @@ The public brand is **REVORY**. As of 2026-10-01, the intended product is **Reve
 
 Sprint 06 adds local synthetic review rehearsal with revision history, usefulness/effort feedback and exports separate from immutable scan evidence. It does not complete paid validation: zero real paid participants verified. The 3–5 consented paid scans require Sprint 05's real sandbox gate and a verified pilot environment/data/commercial flow. See `docs/sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md`; do not count fixtures, simulation or sandbox payments as real buyers.
 
+Sprint 07 adds local paginated source rehearsal, synthetic consent/revocation, incremental checkpoints and source artifacts separate from scans. Fixed fixtures only: no HTTP transport, API key collection or real Stripe/OpenAI connection. Its UI requires the additional nonproduction `REVORY_AI_SOURCE_REHEARSAL=true` flag in a prepared local database. Real scopes, credential protection and same-period CSV equivalence remain pending; Sprints 05–06 gates still open. See `docs/sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md`.
+
 Read in this order:
 
 1. [docs/source-of-truth.md](docs/source-of-truth.md)

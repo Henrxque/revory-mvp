@@ -85,6 +85,8 @@ O snapshot congela dados normalizados, hashes, source reviews, mappings/provenan
 
 Conflitos de mapping, customer com múltiplas subscriptions, shared keys, moedas distintas, lacunas de datas e ausência de invoice/refund devem ficar em “Needs review” ou “Not enough evidence”. Esses records não desaparecem nem contaminam somas.
 
+**Preparação local do Sprint 07 (2026-10-01):** leituras paginadas com fixtures Stripe/OpenAI, consentimento/revogação e checkpoint incremental por workspace, artefatos separados e equivalência sintética com CSV. Invoice amount_paid é contexto de criação, não receita líquida; completions input já inclui cached tokens; Costs por project não tem model/customer automaticamente. Não há transporte HTTP, API keys ou contas reais. A tela exige a flag adicional `REVORY_AI_SOURCE_REHEARSAL=true` em banco local preparado, sem liberar dados reais ou produção. [Evidência e gate pendente](sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md).
+
 ## 7. Findings do primeiro produto
 
 | Finding | Condição mínima | Saída honesta |

@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-10-01T19:20:00.247Z",
+  "mode": "SYNTHETIC_REHEARSAL",
+  "realProviderConnections": 0,
+  "externalProviderRequests": 0,
+  "automaticScans": 0,
+  "flow": "auth → synthetic consent → Stripe/OpenAI paginated reads → incremental checkpoint → evidence export → revocation",
+  "screenshots": 6,
+  "consoleErrors": [],
+  "horizontalOverflow": false
+}

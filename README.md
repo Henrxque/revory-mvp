@@ -8,6 +8,8 @@ The deployed/default surfaces still implement the previous contractor product, w
 
 Sprint 06 adds synthetic finding/report reviews, revision history, review exports and a paid pilot protocol. Local browser/database checks passed. **Real paid validation is not complete: zero verified paid participants.** The 3–5 consented scans require the Sprint 05 sandbox gate and a verified pilot environment/data/commercial flow. Synthetic confirmation and production restrictions remain active.
 
+Sprint 07 adds paginated synthetic Stripe/OpenAI source reads, consent/revocation, incremental checkpoints and source evidence exports, with CSV parity against the same fixtures. **Real connection gate remains open.** No HTTP transport, API key collection or real provider account connection. The UI requires the additional nonproduction `REVORY_AI_SOURCE_REHEARSAL=true` flag in a prepared local database; it stays off in the common preview. Google auth, Resend and existing billing remain preserved.
+
 Do not market or sell the new AI SaaS promise from this repository until its data, reconciliation, security and release gates pass. Existing contractor prices and Stripe objects are protected historical contracts.
 
 ## Living product documents
@@ -22,6 +24,7 @@ Do not market or sell the new AI SaaS promise from this repository until its dat
 - [Sprint 4 internal deterministic scan and evidence](docs/sprints/SPRINT_04_AI_INTEGRITY_ENGINE_2026-09-30.md)
 - [Sprint 5 local experience, test purchase and pending sandbox gate](docs/sprints/SPRINT_05_AI_INTEGRITY_EXPERIENCE_2026-10-01.md)
 - [Sprint 6 validation preparation and synthetic rehearsal](docs/sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md)
+- [Sprint 7 local source preparation and pending real connection gate](docs/sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md)
 - [Paid pilot protocol and templates](docs/validation/SPRINT_06_PAID_PILOT_PROTOCOL.md)
 - [Research analysis and decisions](docs/REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md)
 - [Historical documentation policy](docs/historical/README.md)

@@ -1,6 +1,6 @@
 # REVORY — Source of Truth
 
-> Decisão de 2026-09-29; estado atualizado em 2026-10-01. Substitui a definição contractor. Detalhes em [REVORY_PRODUCT_BIBLE.md](REVORY_PRODUCT_BIBLE.md). Estado: **Sprints 0–4 implementados localmente. Sprint 05 adiciona experiência AI SaaS e compra pontual com simulação local; gate pendente de Stripe sandbox real. Sprint 06 tem preparação e ensaio de revisão sintética; coorte paga real não iniciada. Sem oferta pública ou validação com clientes**.
+> Decisão de 2026-09-29; estado atualizado em 2026-10-01. Substitui a definição contractor. Detalhes em [REVORY_PRODUCT_BIBLE.md](REVORY_PRODUCT_BIBLE.md). Estado: **Sprints 0–4 implementados localmente. Sprint 05 adiciona experiência AI SaaS e compra pontual com simulação local; gate pendente de Stripe sandbox real. Sprint 06 tem preparação e ensaio de revisão sintética; coorte paga real não iniciada. Sprint 07 tem preparação local de fontes com fixtures, sem conexões reais. Sem oferta pública ou validação com clientes**.
 
 ## Identidade
 
@@ -52,6 +52,10 @@ Reaproveitar horizontalmente auth, workspace isolation, billing plumbing, email,
 Não alterar produção, `revory.app`, Stripe, Vercel, secrets ou integrações externas por consequência desta documentação. Não divulgar a nova promessa como capacidade atual antes do gate de lançamento. Plano: [REVORY_AI_SAAS_MIGRATION_PLAN.md](REVORY_AI_SAAS_MIGRATION_PLAN.md).
 
 O [Sprint 06](sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md) implementou preparação local para validação: revisões de findings e utilidade com histórico, métricas com denominador explícito e export separado da evidência imutável. Tudo permanece como ensaio sintético, com zero compradores reais verificados. O [protocolo do piloto](validation/SPRINT_06_PAID_PILOT_PROTOCOL.md) define qualificação, dados, consentimento e avaliação assíncrona. O gate de 3–5 scans reais pagos/consentidos continua aberto; antes da coleta faltam fechar Stripe sandbox da Sprint 05 e definir/verificar ambiente e condições do piloto. Nenhum bloqueio de dados reais ou produção foi removido.
+
+## Sprint 07 — preparação de fontes
+
+A [Sprint 07](sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md) adiciona contratos paginados Stripe invoices/OpenAI completions usage e Costs, consentimento/revogação sintéticos, checkpoints incrementais, artefatos separados e comparação com CSV. A UI exige também `REVORY_AI_SOURCE_REHEARSAL=true`, fora de produção, em banco local preparado. O transporte usa fixtures fixas: nenhuma chave coletada, conta real conectada ou chamada externa ao provider. Sem scan/compra automáticos. Google login, Resend e billing existentes permanecem preservados. Preparação local verificada; gate completo de escopos, credenciais e equivalência com dados reais permanece aberto, assim como os gates das Sprints 05–06.
 
 ## Preservação explícita de integrações
 
