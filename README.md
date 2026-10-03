@@ -1,55 +1,32 @@
 # REVORY
 
-REVORY is Revenue Leak Intelligence for High-Ticket Service Businesses. It begins with Quote Recovery across estimates and follow-ups, then expands—after explicit evidence and release gates—into Revenue Realization across jobs, invoices, change orders, underbilling and margin risk.
+REVORY is being rebuilt as **Revenue & AI Margin Integrity for AI SaaS**. Its intended read-only product will compare Stripe billing context, an AI SaaS customer's internal usage ledger and AI provider usage/cost, with explicit attribution and visible evidence limits.
 
-## Migration status
+## What is public now
 
-This repository is being migrated from the discontinued MedSpa REVORY implementation. The current schema and authenticated product still contain appointment, booking and clinic behavior. They are reusable technical substrate, not proof that the hybrid contractor domain is implemented.
+`revory.app` presents the new direction and a **static synthetic demo**. These pages do not accept customer data, run scans, connect accounts or sell the new product. The authenticated app, existing checkout and customer records still serve the historical Quote Recovery product. The complete AI SaaS migration is in the separate `migration/ai-saas-sprints-0-6` branch and [draft PR #2](https://github.com/Henrxque/revory-mvp/pull/2); its real purchase, customer, connector, monitoring and launch gates remain open.
 
-Do not market or sell estimate, change-order, invoice, underbilling or margin capability from this repository until the corresponding roadmap gate passes.
-
-## Living product documents
-
-- [Canonical source of truth](docs/source-of-truth.md)
-- [Detailed hybrid scope](REVORY_ESCOPO_HIBRIDO.md)
-- [Product and launch roadmap](docs/REVORY_HYBRID_PRODUCT_AND_LAUNCH_ROADMAP.md)
-- [Continuous execution guide](docs/REVORY_CONTINUOUS_EXECUTION_GUIDE.md)
-- [Migration inventory and vertical-slice plan](docs/REVORY_MIGRATION_INVENTORY_AND_VERTICAL_SLICES.md)
-- [Historical documentation policy](docs/historical/README.md)
-
-## Product guardrails
-
-- Premium and self-service
-- High-ticket-service-business-first
-- CSV/XLSX-first
-- Evidence and Data Quality before financial claims
-- Explicit matching, provenance and workspace isolation
-- Deterministic core with optional bounded AI
-- No CRM, inbox, autonomous follow-up, FSM, accounting, project-management or generic BI expansion
+- [Current source of truth](docs/source-of-truth.md)
+- [Public-presentation release record](docs/launch/REVORY_AI_SAAS_PUBLIC_PRESENTATION_2026-10-02.md)
+- [Historical contractor product authority](docs/historical/REVORY_CONTRACTOR_SOURCE_OF_TRUTH_2026-10-02.md)
 
 ## Stack
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Prisma/PostgreSQL
+Next.js, TypeScript, Tailwind CSS and Prisma/PostgreSQL. Brand tokens, transparent logo and font roles are defined in the source of truth and preserved in `src/app/globals.css`.
 
 ## Local development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-Useful checks:
+Open [http://localhost:3000](http://localhost:3000). Useful checks:
 
 ```bash
-npm run lint
 npm run typecheck
+npm run lint
 npm run build
-npm run db:validate
 ```
 
-Copy `.env.example` to `.env.local` and set values for the intended environment. Do not reuse or change production secrets, Stripe resources, domains or deployments as part of the domain migration without separate verification and authorization.
+The production Vercel build runs `prisma migrate deploy` before `next build`. Verify the target environment before promoting changes that include migrations. This narrow public-presentation release does not include a schema change.
