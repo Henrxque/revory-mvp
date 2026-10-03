@@ -4,6 +4,7 @@ Everything in this directory is **deprecated migration evidence**. It is not an 
 
 Preserved snapshots:
 
+- `REVORY_CONTRACTOR_SOURCE_OF_TRUTH_2026-10-02.md`: the contractor/Quote Recovery authority before the public AI SaaS presentation.
 - `REVORY_MEDSPA_SOURCE_OF_TRUTH_2026-07-11.md`: the repository source of truth immediately before the definitive hybrid migration.
 - `REVORY_MEDSPA_EXTERNAL_LOUSA_2026-07-11.md`: the former external MedSpa V3 source document.
 
