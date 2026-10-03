@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-10-01T18:24:02.006Z",
+  "checkout": "real SDK against local simulation; NOT Stripe sandbox",
+  "flow": "landing/demo → auth gate → purchase → signed webhook → three CSV reviews/imports → exclusive mapping → scan → finding detail → JSON/CSV",
+  "reviewRehearsal": true,
+  "realPaidParticipants": 0,
+  "screenshots": 20,
+  "consoleErrors": [],
+  "horizontalOverflow": false,
+  "marketingHeadlineFont": "Instrument Serif"
+}

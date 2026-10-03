@@ -426,6 +426,12 @@ body::before {
   box-shadow: var(--shadow-soft), inset 0 1px 0 var(--surface-hairline);
 }
 
+.ai-integrity-experience .rev-shell-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+    var(--background-card);
+}
+
 .rev-shell-hero {
   border: 1px solid var(--border);
   background:

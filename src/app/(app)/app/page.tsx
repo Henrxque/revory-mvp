@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experience";
 
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
@@ -12,6 +13,7 @@ export default async function PrivateAppEntryPage() {
     redirect(buildSignInRedirectPath("/app"));
   }
 
+  if (isAiIntegrityExperienceEnabled()) redirect("/app/ai-integrity/dashboard");
   if (isInternalMigrationPreviewEnabled()) {
     redirect("/app/dashboard");
   }

@@ -248,6 +248,38 @@ enum QuoteRecoveryDisposition {
   FALSE_POSITIVE
 }
 
+enum AiIntegritySourceKind {
+  STRIPE_REVENUE
+  INTERNAL_LEDGER
+  PROVIDER_REPORT
+}
+
+enum AiIntegrityCostBasis {
+  REPORTED
+  ESTIMATED
+  UNAVAILABLE
+}
+
+enum AiIntegrityMappingKind {
+  STRIPE_CUSTOMER
+  PROVIDER_PROJECT
+  PROVIDER_KEY
+}
+
+enum AiIntegrityMappingStatus {
+  CONFIRMED
+  CONFLICTED
+  REVOKED
+}
+
+enum AiIntegrityValueBasis {
+  OBSERVED
+  CALCULATED
+  ESTIMATED
+  OPERATIONAL
+  DATA_QUALITY
+}
+
 model User {
   id                         String            @id @default(cuid())
   clerkUserId                String?           @unique
@@ -317,6 +349,13 @@ model Workspace {
   auditEvents                WorkspaceAuditEvent[]
   evidenceEvents             RevoryEvidenceEvent[]
   legalAcceptances           LegalAcceptance[]
+  aiIntegrityImportBatches   AiIntegrityImportBatch[]
+  aiIntegritySources        AiIntegritySourceConnection[]
+  aiMonitorComparisons      AiIntegrityMonitorComparison[]
+  aiIntegrityMappings        AiIntegrityMapping[]
+    aiIntegritySnapshots       AiIntegritySnapshot[]
+    aiIntegrityScanOrders      AiIntegrityScanOrder[]
+    aiIntegrityScanGrants      AiIntegrityScanGrant[]
 
   @@map("workspaces")
 }
@@ -589,6 +628,376 @@ model RevoryEvidenceEvent {
   @@unique([workspaceId, idempotencyKey])
   @@index([workspaceId, metric, observedAt])
   @@map("revory_evidence_events")
+}
+
+// AI SaaS data is additive and never reinterprets contractor CanonicalRecord rows.
+model AiIntegritySourceConnection {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  provider         String
+  mode             String   @default("SYNTHETIC_REHEARSAL")
+  status           String   @default("ACTIVE")
+  generation       Int      @default(1)
+  consentVersion   String
+  consentedBy      String
+  consentedAt      DateTime @default(now())
+  revokedAt        DateTime?
+  coverageStart    DateTime?
+  completeThrough  DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, map: "ai_source_workspace_fkey")
+  syncs            AiIntegritySourceSync[]
+
+  @@unique([workspaceId, provider, mode], map: "ai_source_provider_mode_key")
+  @@unique([workspaceId, id], map: "ai_source_workspace_id_key")
+  @@map("ai_integrity_source_connections")
+}
+
+model AiIntegritySourceSync {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  connectionId    String
+  generation      Int
+  requestKey      String
+  payloadHash     String
+  status          String
+  windowStart     DateTime
+  windowEnd       DateTime
+  effectiveStart  DateTime?
+  artifactJson    Json?
+  artifactHash    String?
+  createdAt       DateTime @default(now())
+  connection      AiIntegritySourceConnection @relation(fields: [workspaceId, connectionId], references: [workspaceId, id], onDelete: Cascade, map: "ai_source_sync_connection_fkey")
+
+  @@unique([workspaceId, requestKey], map: "ai_source_sync_request_key")
+  @@index([workspaceId, createdAt], map: "ai_source_sync_retention_idx")
+  @@map("ai_integrity_source_syncs")
+}
+
+model AiIntegrityImportBatch {
+  id                  String                     @id @default(cuid())
+  workspaceId         String
+  sourceKind          AiIntegritySourceKind
+  sourceSystem        String
+  idempotencyKey      String
+  fileName            String
+  fileSha256          String
+  mappingSha256       String
+  windowStart         DateTime
+  windowEnd           DateTime
+  sourceTimezone      String
+  rowCount            Int
+  insertedCount       Int                        @default(0)
+  duplicateCount      Int                        @default(0)
+  dataQualityJson     Json
+  createdAt           DateTime                   @default(now())
+  workspace           Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  revenueRecords      AiIntegrityRevenueRecord[]
+  usageRecords        AiIntegrityUsageRecord[]
+  providerCostBuckets AiIntegrityProviderBucket[]
+  snapshotInputs      AiIntegritySnapshotInput[]
+
+  @@unique([workspaceId, id])
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, sourceKind, windowStart, windowEnd])
+  @@map("ai_integrity_import_batches")
+}
+
+model AiIntegrityRevenueRecord {
+  id                       String                 @id @default(cuid())
+  workspaceId              String
+  importBatchId            String
+  sourceSystem             String
+  externalId               String
+  sourceVersion            String?
+  recordHash               String
+  eventKind                String
+  status                   String
+  stripeCustomerExternalId String?
+  stripeSubscriptionId     String?
+  stripeInvoiceId          String?
+  stripePaymentId          String?
+  parentExternalId         String?
+  amountMinor              Decimal?               @db.Decimal(30, 0)
+  currency                 String?
+  currencyExponent         Int?
+  occurredAt               DateTime
+  periodStart              DateTime?
+  periodEnd                DateTime?
+  sourceRowNumber          Int
+  sourcePayloadJson        Json
+  provenanceJson           Json
+  createdAt                DateTime               @default(now())
+  importBatch              AiIntegrityImportBatch @relation(fields: [workspaceId, importBatchId], references: [workspaceId, id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceSystem, externalId, recordHash])
+  @@index([workspaceId, sourceSystem, externalId, createdAt])
+  @@index([workspaceId, stripeCustomerExternalId, occurredAt])
+  @@index([workspaceId, importBatchId])
+  @@map("ai_integrity_revenue_records")
+}
+
+model AiIntegrityUsageRecord {
+  id                         String                 @id @default(cuid())
+  workspaceId                String
+  importBatchId              String
+  sourceSystem               String
+  externalId                 String
+  sourceVersion              String?
+  recordHash                 String
+  internalCustomerExternalId String?
+  provider                   String?
+  providerRequestId          String?
+  providerProjectId          String?
+  model                      String?
+  quantity                   Decimal                @db.Decimal(30, 9)
+  unit                       String
+  creditsDelta               Decimal?               @db.Decimal(30, 9)
+  occurredAt                 DateTime
+  sourceRowNumber            Int
+  sourcePayloadJson          Json
+  provenanceJson             Json
+  createdAt                  DateTime               @default(now())
+  importBatch                AiIntegrityImportBatch @relation(fields: [workspaceId, importBatchId], references: [workspaceId, id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceSystem, externalId, recordHash])
+  @@index([workspaceId, sourceSystem, externalId, createdAt])
+  @@index([workspaceId, internalCustomerExternalId, occurredAt])
+  @@index([workspaceId, providerRequestId])
+  @@index([workspaceId, providerProjectId, occurredAt], map: "ai_usage_project_window_idx")
+  @@index([workspaceId, importBatchId])
+  @@map("ai_integrity_usage_records")
+}
+
+model AiIntegrityProviderBucket {
+  id                 String                 @id @default(cuid())
+  workspaceId        String
+  importBatchId      String
+  sourceSystem       String
+  externalId         String
+  sourceVersion      String?
+  recordHash         String
+  provider           String
+  organizationId     String?
+  projectId          String?
+  model              String?
+  usageQuantity      Decimal?               @db.Decimal(30, 9)
+  usageUnit          String?
+  costAmount         Decimal?               @db.Decimal(30, 12)
+  costCurrency       String?
+  costBasis          AiIntegrityCostBasis
+  pricingVersion     String?
+  adjustmentKind     String?
+  windowStart        DateTime
+  windowEnd          DateTime
+  reportedAt         DateTime?
+  sourceRowNumber    Int
+  sourcePayloadJson  Json
+  provenanceJson     Json
+  createdAt          DateTime               @default(now())
+  importBatch        AiIntegrityImportBatch @relation(fields: [workspaceId, importBatchId], references: [workspaceId, id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceSystem, externalId, recordHash])
+  @@index([workspaceId, sourceSystem, externalId, createdAt])
+  @@index([workspaceId, provider, windowStart, windowEnd])
+  @@index([workspaceId, importBatchId])
+  @@map("ai_integrity_provider_buckets")
+}
+
+model AiIntegrityMapping {
+  id                         String                   @id @default(cuid())
+  workspaceId                String
+  kind                       AiIntegrityMappingKind
+  externalId                 String
+  internalCustomerExternalId String
+  validFrom                  DateTime
+  validUntil                 DateTime?
+  status                     AiIntegrityMappingStatus @default(CONFIRMED)
+  confirmationMethod         String
+  confirmedByUserId          String?
+  provenanceJson             Json
+  createdAt                  DateTime                 @default(now())
+  workspace                  Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, kind, externalId, internalCustomerExternalId, validFrom])
+  @@index([workspaceId, kind, externalId, validFrom, validUntil])
+  @@index([workspaceId, internalCustomerExternalId])
+  @@map("ai_integrity_mappings")
+}
+
+model AiIntegritySnapshot {
+  id                String                @id @default(cuid())
+  workspaceId       String
+  idempotencyKey    String
+  ruleVersion       String
+  windowStart       DateTime
+  windowEnd         DateTime
+  inputManifestJson Json
+  dataQualityJson   Json
+  coverageJson      Json
+  suppressionsJson  Json
+  createdAt         DateTime              @default(now())
+  workspace         Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  findings          AiIntegrityFinding[]
+  reviewEvents      AiIntegrityReviewEvent[]
+  monitorBaselines  AiIntegrityMonitorComparison[] @relation("MonitorBaseline")
+  monitorCurrents   AiIntegrityMonitorComparison[] @relation("MonitorCurrent")
+    inputs            AiIntegritySnapshotInput[]
+    scanGrants        AiIntegrityScanGrant[]
+
+  @@unique([workspaceId, id])
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, windowStart, windowEnd, createdAt])
+  @@map("ai_integrity_snapshots")
+}
+
+model AiIntegrityMonitorComparison {
+  id                 String   @id @default(cuid())
+  workspaceId        String
+  baselineSnapshotId String
+  currentSnapshotId  String
+  actorUserId        String
+  requestKey         String
+  payloadHash        String
+  mode               String   @default("SYNTHETIC_REHEARSAL")
+  monitorVersion     String
+  artifactJson       Json
+  artifactHash       String
+  createdAt          DateTime @default(now())
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, map: "ai_monitor_workspace_fkey")
+  baseline           AiIntegritySnapshot @relation("MonitorBaseline", fields: [workspaceId, baselineSnapshotId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_baseline_fkey")
+  current            AiIntegritySnapshot @relation("MonitorCurrent", fields: [workspaceId, currentSnapshotId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_current_fkey")
+  alerts             AiIntegrityMonitorAlert[]
+
+  @@unique([workspaceId, id], map: "ai_monitor_workspace_id_key")
+  @@unique([workspaceId, requestKey], map: "ai_monitor_request_key")
+  @@unique([workspaceId, baselineSnapshotId, currentSnapshotId, monitorVersion], map: "ai_monitor_pair_key")
+  @@index([workspaceId, createdAt], map: "ai_monitor_retention_idx")
+  @@map("ai_integrity_monitor_comparisons")
+}
+
+model AiIntegrityMonitorAlert {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  comparisonId     String
+  signalKey        String
+  kind             String
+  status           String   @default("OPEN")
+  acknowledgedBy   String?
+  acknowledgedAt   DateTime?
+  createdAt        DateTime @default(now())
+  comparison       AiIntegrityMonitorComparison @relation(fields: [workspaceId, comparisonId], references: [workspaceId, id], onDelete: Cascade, map: "ai_monitor_alert_comparison_fkey")
+
+  @@unique([workspaceId, comparisonId, signalKey], map: "ai_monitor_alert_signal_key")
+  @@index([workspaceId, status, createdAt], map: "ai_monitor_alert_status_idx")
+  @@map("ai_integrity_monitor_alerts")
+}
+
+model AiIntegrityScanOrder {
+  id                      String    @id @default(cuid())
+  workspaceId             String
+  actorUserId             String
+  requestKey              String
+  offerVersion            String
+  amountMinor             Int
+  currency                String
+  status                  String    @default("PENDING")
+  checkoutDriver          String
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?   @unique
+  checkoutUrl             String?
+  createdAt               DateTime @default(now())
+  paidAt                  DateTime?
+  workspace               Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  grant                   AiIntegrityScanGrant?
+
+  @@unique([workspaceId, id])
+  @@unique([workspaceId, requestKey])
+  @@index([workspaceId, status, createdAt])
+  @@map("ai_integrity_scan_orders")
+}
+
+model AiIntegrityScanGrant {
+  id                 String @id @default(cuid())
+  workspaceId        String
+  orderId            String @unique
+  status             String @default("ACTIVE")
+  createdAt          DateTime @default(now())
+  consumedAt         DateTime?
+  consumedSnapshotId String?
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  order              AiIntegrityScanOrder @relation(fields: [workspaceId, orderId], references: [workspaceId, id], onDelete: Cascade)
+  snapshot           AiIntegritySnapshot? @relation(fields: [workspaceId, consumedSnapshotId], references: [workspaceId, id], onDelete: Restrict)
+
+  @@unique([workspaceId, id])
+  @@unique([workspaceId, orderId])
+  @@index([workspaceId, status, consumedAt])
+  @@map("ai_integrity_scan_grants")
+}
+
+model AiIntegrityFinding {
+  id                  String                @id @default(cuid())
+  workspaceId         String
+  snapshotId          String
+  fingerprint         String
+  findingType         String
+  valueBasis          AiIntegrityValueBasis
+  valueAmount         Decimal?              @db.Decimal(30, 12)
+  valueCurrency       String?
+  formula             String?
+  confidenceClass     String
+  attributionClass    String?
+  evidenceJson        Json
+  limitationsJson     Json
+  recommendedReview   String
+  createdAt           DateTime              @default(now())
+  snapshot            AiIntegritySnapshot   @relation(fields: [workspaceId, snapshotId], references: [workspaceId, id], onDelete: Cascade)
+  reviewEvents        AiIntegrityReviewEvent[]
+
+  @@unique([workspaceId, snapshotId, fingerprint])
+  @@index([workspaceId, snapshotId])
+  @@map("ai_integrity_findings")
+}
+
+model AiIntegrityReviewEvent {
+  id                    String @id @default(cuid())
+  workspaceId           String
+  snapshotId            String
+  fingerprint           String?
+  actorUserId           String
+  requestKey            String
+  payloadHash           String
+  revision              Int
+  reviewVersion         String
+  mode                  String @default("SYNTHETIC_REHEARSAL")
+  kind                  String
+  disposition           String?
+  sourceEvidenceChecked Boolean @default(false)
+  usefulness            String?
+  assistanceRequired    Boolean?
+  preparationMinutes    Int?
+  comment               String
+  createdAt             DateTime @default(now())
+  snapshot              AiIntegritySnapshot @relation(fields: [workspaceId, snapshotId], references: [workspaceId, id], onDelete: Cascade, map: "ai_review_snapshot_fkey")
+  finding               AiIntegrityFinding? @relation(fields: [workspaceId, snapshotId, fingerprint], references: [workspaceId, snapshotId, fingerprint], onDelete: Cascade, map: "ai_review_finding_fkey")
+
+  @@unique([workspaceId, requestKey], map: "ai_review_workspace_request_key")
+  @@unique([workspaceId, snapshotId, revision], map: "ai_review_report_revision_key")
+  @@index([workspaceId, snapshotId, fingerprint, revision], map: "ai_review_report_finding_revision_idx")
+  @@map("ai_integrity_review_events")
+}
+
+model AiIntegritySnapshotInput {
+  workspaceId   String
+  snapshotId    String
+  importBatchId String
+  snapshot      AiIntegritySnapshot    @relation(fields: [workspaceId, snapshotId], references: [workspaceId, id], onDelete: Cascade)
+  importBatch   AiIntegrityImportBatch @relation(fields: [workspaceId, importBatchId], references: [workspaceId, id], onDelete: Restrict)
+
+  @@id([workspaceId, snapshotId, importBatchId])
+  @@index([workspaceId, importBatchId])
+  @@map("ai_integrity_snapshot_inputs")
 }
 
 model StripeWebhookEvent {

@@ -1,0 +1,2 @@
+externalId,occurredAt,quantity,unit,internalCustomerExternalId,provider,providerProjectId,model
+evt_aster_usage,2026-08-15T00:00:00Z,8640000,tokens,workspace_aster,openai,proj_aster,model_sample

@@ -1,0 +1,2 @@
+externalId,provider,windowStart,windowEnd,costBasis,costAmount,costCurrency,usageQuantity,usageUnit,projectId
+bucket_sample_001,openai,2026-08-10T00:00:00Z,2026-08-11T00:00:00Z,REPORTED,2.500000,USD,1500,tokens,proj_shared_sample

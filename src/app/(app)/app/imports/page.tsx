@@ -1,17 +1,21 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { CanonicalImportPanel } from "@/components/imports/CanonicalImportPanel";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { getCanonicalImportAccessNotice } from "@/services/billing/canonical-import-access";
+import { canUseAiIntegrityIntakePreview } from "@/services/ai-integrity/internal-access";
 
 export default async function ImportsPage() {
   const appContext = await getAppContext();
   if (!appContext) redirect(buildSignInRedirectPath("/app/imports"));
   const accessNotice = await getCanonicalImportAccessNotice(appContext.workspace.id);
+  const aiIntakePreview = await canUseAiIntegrityIntakePreview(appContext.workspace.id);
 
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
+      {aiIntakePreview ? <Link className="rev-action-button inline-flex px-4 py-2 text-xs" href="/app/ai-integrity/imports">Open internal AI Integrity intake preview →</Link> : null}
       <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-7">
         <div className="max-w-[46rem] space-y-3">
           <p className="rev-kicker">Contractor data import</p>
