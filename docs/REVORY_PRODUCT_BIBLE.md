@@ -89,6 +89,8 @@ Conflitos de mapping, customer com múltiplas subscriptions, shared keys, moedas
 
 **Preparação local do Sprint 08 (2026-10-01):** compara dois scans sintéticos por escopo temporal, com estados New/Still observed/No longer observed/Limited, custo e uso separados, alertas locais limitados, reconhecimento auditado e export v9 do workspace. Exige períodos adjacentes de mesma duração, lag e fontes/buckets equivalentes. Não existe leitura agendada, envio de e-mail, assinatura ou OpenAI real. Stripe foi adiado pelo fundador para o final; isso não conclui gates comerciais. [Evidência](sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md) e [runbook](validation/SPRINT_08_MONITORING_REHEARSAL_RUNBOOK.md).
 
+**Preparação local do Sprint 09 (2026-10-02):** audit reproduzível e runbook de lançamento controlado, com decisão `NO_GO`. A experiência AI SaaS segue indisponível em produção; home, metadados e limitações públicos ainda são contractor. Não há compradores pagos verificados, conexões reais, recorrência, funil de ativação ou operação de produção AI SaaS comprovados. É a última sprint numerada, mas o produto e o lançamento dependem do fechamento dos gates reais. [Evidência](sprints/SPRINT_09_AI_SAAS_LAUNCH_PREPARATION_2026-10-02.md) e [runbook](launch/REVORY_AI_SAAS_RELEASE_RUNBOOK.md).
+
 ## 7. Findings do primeiro produto
 
 | Finding | Condição mínima | Saída honesta |

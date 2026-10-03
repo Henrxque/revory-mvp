@@ -8,6 +8,8 @@ Sprint 07 adds local paginated source rehearsal, synthetic consent/revocation, i
 
 Sprint 08 adds synthetic manual comparison of two immutable scans, temporal movements, bounded local alerts and audited acknowledgment, with workspace isolation, export and retention. It does not implement scheduled reads, email delivery, real OpenAI access or monitoring subscriptions. Requires nonproduction `REVORY_AI_MONITOR_REHEARSAL=true` in a prepared local database. Full recurring beta gate remains open. Latest founder direction: resolve Stripe last; do not reinterpret this as permission for real free scans or public launch. See `docs/sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md`.
 
+Sprint 09 adds a local launch-readiness audit and AI SaaS release runbook. Its current decision is `NO_GO`: the production experience is blocked, public home/metadata/limitations still describe contractors, and real purchase, paid buyers, connected sources, recurring beta, operations and activation remain unverified. This is the last numbered sprint, not completion of migration or permission to deploy. See `docs/sprints/SPRINT_09_AI_SAAS_LAUNCH_PREPARATION_2026-10-02.md` and `docs/launch/REVORY_AI_SAAS_RELEASE_RUNBOOK.md`.
+
 Read in this order:
 
 1. [docs/source-of-truth.md](docs/source-of-truth.md)

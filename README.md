@@ -12,6 +12,8 @@ Sprint 07 adds paginated synthetic Stripe/OpenAI source reads, consent/revocatio
 
 Sprint 08 adds manual comparison of two synthetic reports, conservative temporal movements, bounded local alerts, audited acknowledgment, history and exports. **Recurring beta gate remains open:** no scheduled reads, external alert delivery, real OpenAI connection or monitoring subscription. Requires nonproduction `REVORY_AI_MONITOR_REHEARSAL=true` in a prepared local database, off in the common preview. Founder direction: resolve Stripe last, before commercial release.
 
+Sprint 09 adds a local release audit and an AI SaaS operations runbook. **Launch decision: NO_GO.** The new experience remains blocked in production; public fallback and metadata still describe contractors. Real Stripe sandbox purchase, paid buyers, OpenAI/Stripe connections, recurrence, production operation and independent activation remain unverified. Sprint 09 is the last numbered sprint, but these gates must close before the migration or public launch is complete. Run `npm run qa:ai-integrity-sprint-9` for the current local gate snapshot.
+
 Do not market or sell the new AI SaaS promise from this repository until its data, reconciliation, security and release gates pass. Existing contractor prices and Stripe objects are protected historical contracts.
 
 ## Living product documents
@@ -28,6 +30,8 @@ Do not market or sell the new AI SaaS promise from this repository until its dat
 - [Sprint 6 validation preparation and synthetic rehearsal](docs/sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md)
 - [Sprint 7 local source preparation and pending real connection gate](docs/sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md)
 - [Sprint 8 local monitoring preparation and pending recurring beta gate](docs/sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md)
+- [Sprint 9 launch preparation and NO_GO decision](docs/sprints/SPRINT_09_AI_SAAS_LAUNCH_PREPARATION_2026-10-02.md)
+- [AI SaaS release runbook](docs/launch/REVORY_AI_SAAS_RELEASE_RUNBOOK.md)
 - [Monitoring rehearsal runbook and data policy](docs/validation/SPRINT_08_MONITORING_REHEARSAL_RUNBOOK.md)
 - [Paid pilot protocol and templates](docs/validation/SPRINT_06_PAID_PILOT_PROTOCOL.md)
 - [Research analysis and decisions](docs/REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md)
