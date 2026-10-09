@@ -16,7 +16,7 @@ export function proxy(request: NextRequest) {
   if (!isSyntheticPreview()) return NextResponse.next();
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith("/app/") && !pathname.startsWith("/app/ai-integrity/")) {
-    return NextResponse.redirect(new URL("/app/ai-integrity/dashboard", request.url));
+    return NextResponse.redirect(new URL("/app/ai-integrity/dashboard", request.url), 303);
   }
   if (pathname.startsWith("/api/")
     && !pathname.startsWith("/api/auth/")
