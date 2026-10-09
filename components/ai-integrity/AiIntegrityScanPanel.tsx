@@ -7,7 +7,7 @@ type Batch = { id: string; sourceKind: string; fileName: string; windowStart: st
 const sources = ["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"] as const;
 const labels = { STRIPE_REVENUE: "Stripe revenue", INTERNAL_LEDGER: "Internal ledger", PROVIDER_REPORT: "Provider report" };
 
-export function AiIntegrityScanPanel({ batches, initialAsOf, grants }: { batches: Batch[]; initialAsOf: string; grants?: Array<{ id: string; label: string }> }) {
+export function AiIntegrityScanPanel({ batches, initialAsOf, grants, remoteSyntheticPreview = false }: { batches: Batch[]; initialAsOf: string; grants?: Array<{ id: string; label: string }>; remoteSyntheticPreview?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export function AiIntegrityScanPanel({ batches, initialAsOf, grants }: { batches
   }
   return <form onSubmit={submit} className="rev-shell-panel space-y-5 rounded-[26px] p-5 md:p-6">
     <h2 className="[font-family:var(--font-app)] text-lg font-semibold">Review a closed period</h2>
-    {grants ? <label className="block text-xs text-[color:var(--text-muted)]">Confirmed test purchase<select required className={inputClass} name="grantId"><option value="">Choose an available scan</option>{grants.map((grant) => <option key={grant.id} value={grant.id}>{grant.label}</option>)}</select></label> : null}
+    {grants ? <label className="block text-xs text-[color:var(--text-muted)]">{remoteSyntheticPreview ? "Synthetic scan access" : "Confirmed test purchase"}<select required className={inputClass} name="grantId"><option value="">Choose an available scan</option>{grants.map((grant) => <option key={grant.id} value={grant.id}>{grant.label}</option>)}</select></label> : null}
     <p className="text-sm leading-6 text-[color:var(--text-muted)]">Use synthetic fixtures for this internal scan. Select one complete batch per source covering the same period. Timestamps require an explicit timezone, such as 2026-09-03T00:00:00Z.</p>
     {sources.map((source) => {
       const batch = batches.find((b) => b.id === selected[source]);

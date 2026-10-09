@@ -7,7 +7,7 @@ import { canUseAiIntegrityIntakePreview } from "@/services/ai-integrity/internal
 import { getAiIntegrityScan } from "@/services/ai-integrity/scan";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experience";
+import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { AiScanSteps } from "@/components/ai-integrity/AiScanSteps";
 
 export default async function AiIntegrityScansPage({ searchParams }: { searchParams: Promise<{ snapshot?: string }> }) {
@@ -15,6 +15,7 @@ export default async function AiIntegrityScansPage({ searchParams }: { searchPar
   if (!context) redirect(buildSignInRedirectPath("/app/ai-integrity/scans"));
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) notFound();
   const experience = isAiIntegrityExperienceEnabled();
+  const remote = isAiIntegrityRemoteSyntheticPreviewEnabled();
   const { snapshot: snapshotId } = await searchParams;
   const [batches, history, scan, grants] = await Promise.all([
     prisma.aiIntegrityImportBatch.findMany({ where: { workspaceId: context.workspace.id }, orderBy: { createdAt: "desc" }, take: 100,
@@ -50,7 +51,7 @@ export default async function AiIntegrityScansPage({ searchParams }: { searchPar
       <details><summary className="cursor-pointer text-sm text-[color:var(--accent)]">Data Quality and suppressions ({scan.result.suppressions.length})</summary><pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-all text-xs">{JSON.stringify({ dataQuality: scan.result.dataQuality, suppressions: scan.result.suppressions }, null, 2)}</pre></details>
       <p className="text-xs leading-6 text-[color:var(--text-subtle)]">Currencies and usage units are kept separate. No combined loss or at-risk total. CSV summarizes findings; JSON includes reproducible inputs and exclusions.</p>
     </section> : null}
-    {experience && !grants.length ? <section className="rev-shell-panel rounded-[26px] p-6"><p className="text-sm leading-7 text-[color:var(--text-muted)]">Your existing reports remain in history. A new report needs an available one-time test scan.</p><Link className="rev-button-primary mt-4" href="/start">Review scan purchase →</Link></section> : <AiIntegrityScanPanel batches={batches.map((b) => ({ ...b, windowStart: b.windowStart.toISOString(), windowEnd: b.windowEnd.toISOString() }))} initialAsOf={new Date().toISOString()} grants={experience ? grants.map((g) => ({ id: g.id, label: `Test scan · confirmed ${g.createdAt.toISOString().slice(0, 10)}` })) : undefined} />}
+    {experience && !grants.length ? <section className="rev-shell-panel rounded-[26px] p-6"><p className="text-sm leading-7 text-[color:var(--text-muted)]">Your existing reports remain in history. A new report needs an available {remote ? "synthetic scan grant" : "one-time test scan"}.</p><Link className="rev-button-primary mt-4" href="/start">{remote ? "Review rehearsal access" : "Review scan purchase"} →</Link></section> : <AiIntegrityScanPanel batches={batches.map((b) => ({ ...b, windowStart: b.windowStart.toISOString(), windowEnd: b.windowEnd.toISOString() }))} initialAsOf={new Date().toISOString()} grants={experience ? grants.map((g) => ({ id: g.id, label: remote ? `Synthetic scan · granted ${g.createdAt.toISOString().slice(0, 10)}` : `Test scan · confirmed ${g.createdAt.toISOString().slice(0, 10)}` })) : undefined} remoteSyntheticPreview={remote} />}
     <section className="rev-shell-panel rounded-[26px] p-5 md:p-6"><h2 className="text-lg font-semibold">Recent internal snapshots</h2><div className="mt-4 space-y-3">{history.length ? history.map((run) => <Link key={run.id} className="block break-all text-xs leading-6 text-[color:var(--accent)]" href={`/app/ai-integrity/scans?snapshot=${run.id}`}>{run.createdAt.toISOString()} · {run.windowStart.toISOString().slice(0, 10)} → {run.windowEnd.toISOString().slice(0, 10)} · {run._count.findings} findings</Link>) : <p className="text-sm text-[color:var(--text-muted)]">No scans yet.</p>}</div></section>
   </div>;
 }
