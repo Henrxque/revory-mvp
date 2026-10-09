@@ -5,10 +5,10 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { AI_SCAN_OFFER, aiScanPriceMatches, assertAiScanPaidSession, buildAiScanCheckout } from "@/domain/ai-integrity/scan-offer";
 import { CHECKOUT_LEGAL_VERSIONS } from "@/content/revory-legal";
-import { isAiIntegrityExperienceEnabled } from "./experience";
+import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 
 export function aiScanCheckoutDriver(): "stripe-test" | "simulation" | "unavailable" {
-  if (!isAiIntegrityExperienceEnabled()) return "unavailable";
+  if (!isAiIntegrityExperienceEnabled() || isAiIntegrityRemoteSyntheticPreviewEnabled()) return "unavailable";
   const key = process.env.REVORY_AI_SCAN_TEST_SECRET_KEY ?? "";
   const priceId = process.env.REVORY_AI_SCAN_TEST_PRICE_ID ?? "";
   const secret = process.env.REVORY_AI_SCAN_TEST_WEBHOOK_SECRET ?? "";

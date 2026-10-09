@@ -11,8 +11,10 @@ import { syncAuthenticatedUser } from "@/services/auth/sync-user";
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 import { prisma } from "@/db/prisma";
 import { CHECKOUT_LEGAL_VERSIONS } from "@/content/revory-legal";
+import { isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 
 export async function POST(request: NextRequest) {
+  if (isAiIntegrityRemoteSyntheticPreviewEnabled()) return NextResponse.json({ error: "Checkout is unavailable in this synthetic preview." }, { status: 404 });
   const startedAt = Date.now(); const offerKey = parseRevoryOffer(request.nextUrl.searchParams.get("offer"));
   const origin = request.headers.get("origin"); if (origin && new URL(origin).host !== request.nextUrl.host) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   if (!offerKey) return NextResponse.redirect(new URL("/start?billing=invalid", request.url), { status: 303 });

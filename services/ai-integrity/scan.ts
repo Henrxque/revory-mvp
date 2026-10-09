@@ -3,7 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
-import { isAiIntegrityExperienceEnabled } from "./experience";
+import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 import { AI_INTEGRITY_RULE_VERSION, aiDigest, aiTimestamp, reconcileAiIntegrity,
   type AiScanInput, type AiScanResult, type ScanBucket, type ScanUsage, type SourceClosureReview } from "@/domain/ai-integrity/reconciliation";
 
@@ -21,7 +21,7 @@ const bucketSelect = { ...rowSelect, provider: true, organizationId: true, proje
   costAmount: true, costCurrency: true, costBasis: true, adjustmentKind: true, reportedAt: true, usageQuantity: true, usageUnit: true } as const;
 
 export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0): Promise<{ snapshotId: string; replayed: boolean; result: AiScanResult }> {
-  if (process.env.NODE_ENV === "production") throw new Error("Internal scan is unavailable in production.");
+  if (process.env.NODE_ENV === "production" && !isAiIntegrityRemoteSyntheticPreviewEnabled()) throw new Error("Internal scan is unavailable in production.");
   if (request.syntheticDataConfirmed !== true) throw new Error("Sprint 4 internal scans require synthetic test data confirmation.");
   if (!request.workspaceId || !request.actorUserId || request.batchIds.length !== 3 || new Set(request.batchIds).size !== 3) throw new Error("Three source batches and an authenticated actor are required.");
   if (aiTimestamp(request.asOf) > Date.now()) throw new Error("Analysis time cannot be in the future.");

@@ -1,6 +1,7 @@
 import type { AiIntegritySourceKind } from "@/domain/ai-integrity/contracts";
 import { AI_INTAKE_MAX_FILE_BYTES, type AiIntakeFile, type AiIntakeMetadata } from "@/services/ai-integrity/intake";
 import { readBoundedMultipartFormData } from "@/services/security/bounded-form-data";
+import { assertAiSyntheticPreviewSample } from "@/services/ai-integrity/synthetic-sample-policy";
 
 export function validOrigin(request: Request) {
   const origin = request.headers.get("origin");
@@ -17,6 +18,7 @@ export async function readAiIntakeRequest(request: Request) {
   const file: AiIntakeFile = { bytes: new Uint8Array(await fileValue.arrayBuffer()), fileName: fileValue.name, mimeType: fileValue.type };
   const sourceKind = String(form.get("sourceKind") ?? "") as AiIntegritySourceKind;
   if (!["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"].includes(sourceKind)) throw new Error("Choose a supported source type.");
+  assertAiSyntheticPreviewSample(file, sourceKind);
   const metadata = {
     sourceKind,
     sourceSystem: String(form.get("sourceSystem") ?? "").trim().slice(0, 80),

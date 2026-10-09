@@ -2,6 +2,8 @@
 
 > Atualizado em 2026-10-02. Sprints 0–4 adicionaram base, contratos, intake, identidade/cobertura e motor determinístico. Sprint 05 adiciona experiência AI e compra de teste sob flag local, com fallback histórico preservado; SDK/webhook verificados em simulação, sandbox real pendente. Sprints 06–08 têm preparação sintética de revisão, fontes e monitoramento, sem compradores, conexões ou recorrência reais. Sprint 09 prepara o gate de lançamento com audit `NO_GO` e runbook, sem publicação. Sem alteração de banco principal, preço histórico, deploy ou integração externa. Autoridade: [source of truth](source-of-truth.md) e [bíblia](REVORY_PRODUCT_BIBLE.md). Evidências em `docs/sprints/`.
 
+> Extensão aprovada para planejamento em 2026-10-05: Sprints [10](sprints/SPRINT_10_AI_SAAS_REMOTE_HOMOLOGATION_2026-10-05.md) → [11](sprints/SPRINT_11_AI_SAAS_OPENAI_SOURCE_2026-10-05.md) → [12](sprints/SPRINT_12_AI_SAAS_STRIPE_DATA_AND_PURCHASE_2026-10-05.md) → [13](sprints/SPRINT_13_AI_SAAS_PAID_SELF_SERVICE_PILOTS_2026-10-05.md) → [14](sprints/SPRINT_14_AI_SAAS_OFFICIAL_RELEASE_2026-10-05.md). São gates novos para fechar o trabalho externo pendente, ainda **não executados**. Após a Sprint 09, a landing e demo sintética foram publicadas; isso não liberou o produto autenticado, compra ou análise real.
+
 ## Regra de migração
 
 Migrar **o domínio inteiro** de contractors para AI SaaS sem destruir as capacidades horizontais já funcionais. Código contractor e MedSpa vira legado técnico, não fonte de linguagem ou semântica do novo produto. Preservar contratos, dados e entitlements antigos enquanto houver dependência; retirada exige substituição funcional e plano de dados. A única identidade de produto a manter é a visual do REVORY; reaproveitamento de infraestrutura é uma decisão técnica, não preservação de proposta antiga.
@@ -26,7 +28,7 @@ Classificação acima é inicial. Antes de desativar cada rota, rastrear callers
 
 ## Roadmap por sprints
 
-São **dez sprints sequenciais (0–9)**, definidos por entrega e gate, sem duração fixa. Um sprint não termina por ter telas ou código: o comportamento e a evidência do gate precisam passar. Não avançar automaticamente quando uma dependência externa estiver faltando.
+O plano inicial continha **dez sprints sequenciais (0–9)**; em 2026-10-05 foram planejadas mais cinco (10–14) para fechar seus gates externos e o lançamento. São definidos por entrega e gate, sem duração fixa. Um sprint não termina por ter telas ou código: o comportamento e a evidência do gate precisam passar. Não avançar automaticamente quando uma dependência externa estiver faltando.
 
 | Sprint | Entrega principal | Gate para avançar | Estado em 2026-10-01 |
 | --- | --- | --- | --- |

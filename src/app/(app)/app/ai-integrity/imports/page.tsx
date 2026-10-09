@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experience";
+import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { hasAiScanPreparationAccess } from "@/services/ai-integrity/purchase";
 import { AiScanSteps } from "@/components/ai-integrity/AiScanSteps";
 
@@ -31,7 +31,7 @@ export default async function AiIntegrityImportsPage() {
         <p className="mt-4 max-w-[50rem] text-sm leading-7 text-[color:var(--text-muted)]">
           Upload one CSV or XLSX export at a time: Stripe revenue, your internal usage ledger, or a provider usage and cost report. Confirm column matches, inspect excluded rows, then store evidence. No scan, attribution, margin or revenue finding is generated here.
         </p>
-        <p className="mt-3 text-xs leading-6 text-[color:var(--text-subtle)]">{experience ? "Synthetic test data only. Use the same closed period for all three sources; import each file after reviewing its columns and exclusions." : "Internal development access only. This page is unavailable in production and does not offer customer analysis."}</p>
+        <p className="mt-3 text-xs leading-6 text-[color:var(--text-subtle)]">{isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Protected rehearsal: only the three bundled synthetic CSV samples are accepted. Do not upload customer data." : experience ? "Synthetic test data only. Use the same closed period for all three sources; import each file after reviewing its columns and exclusions." : "Internal development access only. This page is unavailable in production and does not offer customer analysis."}</p>
         <Link className="mt-4 inline-block text-xs font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/attribution">Review identity and coverage →</Link>
       </section>
       <AiIntegrityImportPanel syntheticSamples={experience} />

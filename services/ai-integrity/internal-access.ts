@@ -5,6 +5,7 @@ import { isWorkspaceProductAdmin } from "@/services/app/product-admin";
 import { isAiIntegrityExperienceEnabled } from "./experience";
 
 export async function canUseAiIntegrityIntakePreview(workspaceId: string) {
+  if (isAiIntegrityExperienceEnabled()) return true;
   return process.env.NODE_ENV !== "production"
-    && (isAiIntegrityExperienceEnabled() || isInternalMigrationPreviewEnabled() || await isWorkspaceProductAdmin(workspaceId));
+    && (isInternalMigrationPreviewEnabled() || await isWorkspaceProductAdmin(workspaceId));
 }
