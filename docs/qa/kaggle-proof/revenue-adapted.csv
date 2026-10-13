@@ -1,0 +1,13 @@
+externalId,eventKind,status,occurredAt,amountMinor,currency,currencyExponent,stripeInvoiceId
+kg-saas-invoice-9,CHARGE,paid,2026-05-15T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-12,CHARGE,paid,2026-05-16T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-13,CHARGE,paid,2026-05-31T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-14,CHARGE,paid,2026-05-02T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-15,CHARGE,paid,2026-05-15T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-17,CHARGE,paid,2026-05-01T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-18,CHARGE,paid,2026-05-04T12:00:00Z,1943700,USD,2,
+kg-saas-invoice-35,CHARGE,paid,2026-05-03T12:00:00Z,165300,USD,2,
+kg-saas-invoice-53,CHARGE,paid,2026-05-07T12:00:00Z,105300,USD,2,
+kg-saas-invoice-94,CHARGE,paid,2026-05-08T12:00:00Z,9600,USD,2,
+kg-saas-invoice-99,CHARGE,paid,2026-05-12T12:00:00Z,9600,USD,2,
+kg-saas-invoice-225,CHARGE,paid,2026-05-31T12:00:00Z,3800,USD,2,
