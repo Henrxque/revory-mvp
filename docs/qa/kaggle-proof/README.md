@@ -29,4 +29,10 @@ O harness cria um banco aleatório `revory_sprint1_*`, aplica as migrações e o
 | Sem vínculo | 12 receita, 20 ledger, 1 provider | 0 findings; `CONFIRMED_COMPARABLE_SCOPE_REQUIRED`, `ESTIMATED_COST_EXCLUDED` e regras de margem/receita suprimidas. |
 | Falha controlada com vínculo fictício | 12 receita, 20 ledger, 1 provider | 1 `LEDGER_PROVIDER_USAGE_MISMATCH`, delta de 1.000 tokens; **nenhum valor monetário**. |
 
-Ambos os cenários repetiram o scan sem criar novo snapshot. `npm run typecheck`, ESLint do teste e compilação Python do adaptador passaram. Nenhuma credencial, conta real ou deploy foi usada. A prova não passou pela UI autenticada nem por Stripe/OpenAI conectados; esses fluxos precisam de validação própria.
+Ambos os cenários repetiram o scan sem criar novo snapshot. `npm run typecheck`, ESLint do teste e compilação Python do adaptador passaram. Nenhuma credencial, conta real ou deploy foi usada. Stripe/OpenAI conectados ainda precisam de validação própria.
+
+## Prova na interface autenticada
+
+O script [`seed-ai-kaggle-proof-local.ts`](../../../scripts/seed-ai-kaggle-proof-local.ts) importou a fixture `injected-linked` para o banco isolado `revory_kaggle_proof_de04fb46266a`, criou uma conta local de demonstração e persistiu o scan antes de habilitar o preview comercial. Ele recusa host/banco fora do padrão local, produção e execução após habilitar o gate de compra. A senha de demonstração é fornecida só por variável de ambiente, sem ser gravada no repositório.
+
+Em 2026-10-13, o app local autenticado abriu o [relatório](app-report-local.png) e a [evidência detalhada](app-evidence-local.png). A interface mostrou `469.411 provider − 468.411 internal = 1.000 tokens`, com limites explícitos: diferença de quantidade, sem conversão monetária ou conclusão de perda. As capturas são evidência da execução local; a URL `localhost` depende do servidor e do banco temporários estarem em execução.
