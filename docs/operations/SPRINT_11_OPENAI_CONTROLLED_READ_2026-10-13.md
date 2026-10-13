@@ -28,14 +28,13 @@ O consentimento persiste organização, todos os projetos, fontes Usage/Costs, f
 | Regressão Sprint 07 | `npm run qa:ai-integrity-sprint-7` | PASS |
 | Build | `npm run build` com variáveis locais descartáveis | PASS; rotas novas presentes |
 | Painel da conta pessoal | Platform Usage, filtro `All projects`, últimos 7 dias | Sem dados de uso; 0 requests/tokens na janela exibida. Isso não é uma resposta de API nem prova cobertura histórica. |
-| Transação/isolamento com Postgres descartável | Não executado; usuário local `postgres` padrão rejeitado | PENDENTE |
+| Migração e transações em Postgres descartável | Cluster local temporário; 33 migrações aplicadas. A primeira execução revelou que a constraint da Sprint 07 rejeitava o modo controlado e que a constraint de sync rejeitava `IN_PROGRESS`/`FAILED`. A migração aditiva `20261013000200_ai_openai_controlled_source_constraints` corrigiu os dois contratos. `npm run qa:ai-integrity-sprint-11-db` passou com consentimento, leitura vazia, checkpoint, replay, isolamento, export, revogação, geração, integridade e flag. `npm run qa:ai-integrity-sprint-7:db` passou novamente. | PASS |
 | Leitura real da conta autorizada | `npm run ops:openai-controlled-read`; janela UTC `2026-10-11T00:00:00Z` a `2026-10-12T00:00:00Z`; `READ_COMPLETED`, `NO_REPORTED_ROWS`, `openai-usage: 0`, `openai-costs: 0`. A lista da Platform marcou a chave `Revoked` após refresh, com gasto registrado `$0.00`. Segredo removido do processo e clipboard; nunca persistido no repositório. | PASS para acesso e interpretação de vazio; sem prova de reconciliação não vazia |
 | Export OpenAI independente ↔ API, mesmo período | Sem histórico não vazio disponível | PENDENTE |
 
 ## Próxima prova mínima
 
-1. Associar workspace autorizado, aplicar migração em **banco descartável** e testar consentimento/sync persistido, revogação, isolamento e export sem credencial. Guardar somente resultado redigido: atividade/canais/IDs de evidência; nenhum segredo.
-2. Confirmar na UI que `NO_REPORTED_ROWS` não aparece como custo zero ou scan. A leitura real concluída valida acesso e interpretação de vazio, mas não cobre cálculo financeiro real.
-3. Para fechar o gate, comparar uma janela com atividade autorizada com export independente da OpenAI do mesmo intervalo e explicar qualquer diferença de atraso, arredondamento ou ajuste. Pode ser uma conta de teste com atividade já existente ou futuro piloto consentido; não comprar uso fictício para forçar o teste.
+1. Confirmar no fluxo de UI que `NO_REPORTED_ROWS` não aparece como custo zero ou scan. A leitura real concluída valida acesso e interpretação de vazio, mas não cobre cálculo financeiro real.
+2. Para fechar o gate, comparar uma janela com atividade autorizada com export independente da OpenAI do mesmo intervalo e explicar qualquer diferença de atraso, arredondamento ou ajuste. Pode ser uma conta de teste com atividade já existente ou futuro piloto consentido; não comprar uso fictício para forçar o teste.
 
 **Decisão:** manter fora de produção, do Preview sintético, de checkout e de oferta conectada até as provas pendentes. Stripe permanece na Sprint 12.
