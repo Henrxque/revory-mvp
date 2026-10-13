@@ -1,12 +1,12 @@
 # Sprint 11 — OpenAI Usage/Costs, leitura controlada
 
-**Estado em 2026-10-13: implementação local revisável; gate `FAIL` para conclusão da Sprint 11.** O fundador autorizou uso da própria conta, mas informou ausência de histórico de API. A sessão da OpenAI Platform foi aberta e a organização **Personal** selecionada; a organização corporativa listada na escolha inicial não foi acessada. Nenhuma chamada autenticada aos endpoints da conta real foi executada nesta evidência.
+**Estado em 2026-10-13: implementação local revisável; gate `FAIL` para conclusão da Sprint 11.** O fundador autorizou uso da própria conta, mas informou ausência de histórico de API. A sessão da OpenAI Platform foi aberta e a organização **Personal** selecionada; a organização corporativa listada na escolha inicial não foi acessada. Os dois endpoints da conta pessoal foram consultados com uma chave temporária restrita, já revogada.
 
 ## Contrato verificado
 
 - Endpoints: `GET /v1/organization/usage/completions` e `GET /v1/organization/costs`, com início inclusivo, fim exclusivo e buckets diários. Usage agrupa por projeto/modelo; Costs por projeto. Tokens de entrada já incluem os cached tokens.
 - Ambos usam **Admin API key** da organização, separada de `OPENAI_API_KEY` de geração. A credencial administrativa não é enviada ao browser, armazenada no banco, exportada ou registrada em audit events.
-- A tela da organização pessoal permite uma Admin key **Restricted → Usage API Scope: Read**, com expiração personalizada. Nenhuma chave foi criada antes de autorização específica. O transporte REVORY só aceita `GET` nos dois caminhos fixos, sem redirects. Organizações/credenciais de clientes exigirão solução de cofre, escopo e consentimento próprios antes de beta.
+- A tela da organização pessoal permite uma Admin key **Restricted → Usage API Scope: Read**, com expiração personalizada. A chave temporária foi criada após autorização específica, usada somente nesta prova e revogada em seguida. O transporte REVORY só aceita `GET` nos dois caminhos fixos, sem redirects. Organizações/credenciais de clientes exigirão solução de cofre, escopo e consentimento próprios antes de beta.
 - Páginas, retry limitado de 429/5xx, timeout de 8 s por tentativa, resposta de 2 MiB por página, 20 páginas e 10 mil buckets/linhas são limites locais. Cursor OpenAI aceita padding `=`. Respostas inválidas e paginação incompleta falham sem avançar o checkpoint.
 - Um response vazio em ambos os canais produz `NO_REPORTED_ROWS`, dois canais sem batch e **nenhuma afirmação de gasto zero**. Costs pode incluir outras modalidades de produto além de completions; Usage de completions não é cobertura universal de uso OpenAI.
 
@@ -29,14 +29,13 @@ O consentimento persiste organização, todos os projetos, fontes Usage/Costs, f
 | Build | `npm run build` com variáveis locais descartáveis | PASS; rotas novas presentes |
 | Painel da conta pessoal | Platform Usage, filtro `All projects`, últimos 7 dias | Sem dados de uso; 0 requests/tokens na janela exibida. Isso não é uma resposta de API nem prova cobertura histórica. |
 | Transação/isolamento com Postgres descartável | Não executado; usuário local `postgres` padrão rejeitado | PENDENTE |
-| Leitura real da conta autorizada | Login na OpenAI Platform ainda pendente | PENDENTE |
+| Leitura real da conta autorizada | `npm run ops:openai-controlled-read`; janela UTC `2026-10-11T00:00:00Z` a `2026-10-12T00:00:00Z`; `READ_COMPLETED`, `NO_REPORTED_ROWS`, `openai-usage: 0`, `openai-costs: 0`. A lista da Platform marcou a chave `Revoked` após refresh, com gasto registrado `$0.00`. Segredo removido do processo e clipboard; nunca persistido no repositório. | PASS para acesso e interpretação de vazio; sem prova de reconciliação não vazia |
 | Export OpenAI independente ↔ API, mesmo período | Sem histórico não vazio disponível | PENDENTE |
 
 ## Próxima prova mínima
 
-1. Com aprovação específica, criar uma Admin API key temporária com `Restricted → Usage API Scope: Read` na organização pessoal e expiração curta. Não fazer chamada de geração só para produzir gasto.
-2. Configurar a chave apenas em ambiente local privado. Executar `npm run ops:openai-controlled-read`, que faz somente os dois GETs e imprime cobertura/contagem redigidas sem banco. Depois associar workspace autorizado, aplicar migração em **banco descartável** e testar consentimento/sync persistido. Guardar somente resultado redigido: HTTP/atividade/canais/IDs de evidência; nenhum segredo.
-3. Se vier vazio, registrar `NO_REPORTED_ROWS` e confirmar que a UI não apresenta custo zero ou scan. Isso valida acesso e interpretação de vazio, mas não cobre cálculo financeiro real.
-4. Para fechar o gate, comparar uma janela com atividade autorizada com export independente da OpenAI do mesmo intervalo e explicar qualquer diferença de atraso, arredondamento ou ajuste. Pode ser uma conta de teste com atividade já existente ou futuro piloto consentido; não comprar uso fictício para forçar o teste.
+1. Associar workspace autorizado, aplicar migração em **banco descartável** e testar consentimento/sync persistido, revogação, isolamento e export sem credencial. Guardar somente resultado redigido: atividade/canais/IDs de evidência; nenhum segredo.
+2. Confirmar na UI que `NO_REPORTED_ROWS` não aparece como custo zero ou scan. A leitura real concluída valida acesso e interpretação de vazio, mas não cobre cálculo financeiro real.
+3. Para fechar o gate, comparar uma janela com atividade autorizada com export independente da OpenAI do mesmo intervalo e explicar qualquer diferença de atraso, arredondamento ou ajuste. Pode ser uma conta de teste com atividade já existente ou futuro piloto consentido; não comprar uso fictício para forçar o teste.
 
 **Decisão:** manter fora de produção, do Preview sintético, de checkout e de oferta conectada até as provas pendentes. Stripe permanece na Sprint 12.
