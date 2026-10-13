@@ -8,6 +8,11 @@ import { RevoryLogo } from "@/components/brand/RevoryLogo";
 
 export const metadata: Metadata = {
   title: "REVORY — Account preview",
+  description: "Your REVORY account can explore the AI SaaS product preview and synthetic demo while the new workspace is in preparation.",
+  openGraph: {
+    title: "REVORY — Account preview",
+    description: "Explore the REVORY AI SaaS product preview and synthetic demo.",
+  },
   robots: { index: false, follow: false },
 };
 

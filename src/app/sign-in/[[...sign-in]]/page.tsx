@@ -13,6 +13,12 @@ import {
 } from "@/services/auth/redirects";
 
 export const metadata = {
+  title: "REVORY — Sign in",
+  description: "Sign in to an existing REVORY account. New AI SaaS accounts can explore the current synthetic preview.",
+  openGraph: {
+    title: "REVORY — Sign in",
+    description: "Access an existing REVORY account or explore the AI SaaS product preview.",
+  },
   robots: {
     follow: false,
     index: false,
