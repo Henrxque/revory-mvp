@@ -8,6 +8,7 @@ import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { currentPublicOfferJourney, type CurrentPublicOfferKey } from "@/domain/revory/commercial-offers";
 import { getAppContext } from "@/services/app/get-app-context";
+import { hasHistoricalBillingAccess } from "@/services/app/historical-billing-access";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 import { getRevoryOffer, isPaidCheckoutReleaseEnabled, isRevoryOfferConfigured } from "@/services/billing/revory-offers";
@@ -201,6 +202,9 @@ export default async function StartPage({
   }
 
   const appContext = session?.user?.id ? await getAppContext() : null;
+  if (appContext && !(await hasHistoricalBillingAccess(appContext.user, appContext.workspace))) {
+    redirect("/ai-integrity/account-preview");
+  }
   const activeEntitlements = appContext
     ? await getWorkspaceEntitlements(appContext.workspace.id)
     : [];

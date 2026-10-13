@@ -80,6 +80,9 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
                 Secure access returns existing users to the same private Quote Recovery workspace and its imported evidence.
               </p>
+              <p className="max-w-xl text-xs leading-6 text-[color:var(--text-subtle)]">
+                New Google accounts currently open the AI SaaS public preview and synthetic demo. A new customer workspace is not available yet.
+              </p>
             </div>
           </div>
 
