@@ -13,6 +13,12 @@ import {
 } from "@/services/auth/redirects";
 
 export const metadata = {
+  title: "REVORY — Create account",
+  description: "Create a REVORY account to explore the AI SaaS product preview and its synthetic demo.",
+  openGraph: {
+    title: "REVORY — Create account",
+    description: "Create an account for the current REVORY AI SaaS preview.",
+  },
   robots: {
     follow: false,
     index: false,
@@ -27,8 +33,8 @@ const signUpSteps = [
   },
   {
     label: "02",
-    title: "Keep company data separate",
-    text: "REVORY creates a private workspace for your company and its imported evidence.",
+    title: "Explore the current preview",
+    text: "New AI SaaS workspaces are still in preparation. The public demo uses fictional data only.",
   },
 ];
 
@@ -74,11 +80,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
               <h1 className="rev-display-hero max-w-[32rem]">
                 Create your{" "}
                 <span className="italic text-[color:var(--accent-light)]">
-                  REVORY workspace.
+                  REVORY account.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Create secure access to a private REVORY workspace. Google or confirmed email/password keeps the account and workspace isolated from the start.
+                Create secure access to REVORY. The new AI SaaS workspace is still in preparation; your account currently opens the public preview and synthetic demo.
               </p>
             </div>
           </div>

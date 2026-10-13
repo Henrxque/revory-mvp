@@ -8,6 +8,7 @@ import { RevoryStatusBadge } from "@/components/ui/RevoryStatusBadge";
 import { LegalReacceptGate } from "@/components/legal/LegalReacceptGate";
 import { getWorkspaceBillingSummary } from "@/services/billing/workspace-billing";
 import { getAppContext } from "@/services/app/get-app-context";
+import { hasHistoricalBillingAccess } from "@/services/app/historical-billing-access";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
 import { isInternalMigrationPreviewEnabled } from "@/services/app/internal-preview";
 import { isProductAdminEmail } from "@/services/app/product-admin";
@@ -50,7 +51,7 @@ export default async function PrivateAppLayout({
   const appAccess = await getCapabilityAccess(workspace.id, "APP");
 
   if (!appAccess.allowed) {
-    redirect("/start");
+    redirect((await hasHistoricalBillingAccess(user, workspace)) ? "/start" : "/ai-integrity/account-preview");
   }
 
   if (!(await hasCurrentAccountLegalAcceptance(user.id))) {
