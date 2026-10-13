@@ -4,6 +4,8 @@
 
 > Atualização de planejamento em 2026-10-05: o fundador pediu cinco novas sprints executáveis, [10 — homologação remota](sprints/SPRINT_10_AI_SAAS_REMOTE_HOMOLOGATION_2026-10-05.md), [11 — OpenAI](sprints/SPRINT_11_AI_SAAS_OPENAI_SOURCE_2026-10-05.md), [12 — Stripe](sprints/SPRINT_12_AI_SAAS_STRIPE_DATA_AND_PURCHASE_2026-10-05.md), [13 — pilotos pagos](sprints/SPRINT_13_AI_SAAS_PAID_SELF_SERVICE_PILOTS_2026-10-05.md) e [14 — liberação](sprints/SPRINT_14_AI_SAAS_OFFICIAL_RELEASE_2026-10-05.md). Todas estão **planejadas, não concluídas**; `NO_GO` permanece. A apresentação e demo sintética já estão públicas em `revory.app`, mas a experiência AI SaaS autenticada não está publicada. A Sprint 09 foi a última do plano original 0–9, não o fim da migração.
 
+> Atualização técnica em 2026-10-13: a [Sprint 11](operations/SPRINT_11_OPENAI_CONTROLLED_READ_2026-10-13.md) agora tem um caminho local controlado para OpenAI Usage/Costs, ainda **sem leitura da conta real e sem equivalência com export real**. A flag permanece indisponível em Vercel/produção e no Preview sintético. Esta nota não altera a decisão `NO_GO`.
+
 ## Identidade
 
 **REVORY** é uma camada independente, read-only e self-service de **Revenue & AI Margin Integrity para AI SaaS**. Reconcilia três verdades: receita/estado de cobrança, uso ou créditos registrados pelo produto do cliente e uso/custo reportado pelos provedores de IA. Expõe diferenças explicáveis, cobertura de atribuição e exposição financeira limitada pela evidência.

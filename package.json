@@ -91,7 +91,9 @@
     "qa:ai-integrity-sprint-8:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-integrity-sprint-8-db.ts",
     "qa:ai-integrity-sprint-8:browser": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-integrity-sprint-8-browser.ts",
     "qa:ai-integrity-sprint-9": "node scripts/validate-ai-integrity-sprint-9.mjs",
-    "qa:ai-integrity-sprint-10": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-ai-integrity-sprint-10.ts"
+    "qa:ai-integrity-sprint-10": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-ai-integrity-sprint-10.ts",
+    "qa:ai-integrity-sprint-11-source": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-ai-integrity-sprint-11-source.ts",
+    "ops:openai-controlled-read": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/check-openai-controlled-read.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.58.2",
