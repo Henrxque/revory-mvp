@@ -10,6 +10,7 @@ Founder feedback: the premium visual identity is intact, but a first-time user c
 - File settings move into a disclosure. Period boundaries remain explicitly UTC and exclusive at the end.
 - Report setup preselects only unambiguous original files. Mixed periods, unknown IDs, duplicate imports and wrong source kinds cannot be silently selected. Reviewed identity-page selections travel to setup in query parameters and resolve only within workspace-scoped data.
 - Calendar values convert to explicit UTC without interpreting the user's computer timezone. Export dates, completeness and settling delay remain user-reviewed inputs; upload time is not substituted for source completeness.
+- Browser verification exposed a pre-existing sample hash mismatch between Windows CRLF and deployed LF files. The Preview allowlist now normalizes only newline spelling and still rejects changed/extra data. Both newline formats are covered by Sprint 10 gate tests.
 - Report explains the comparison, the two source quantities, a next review action and unavailable conclusions. Exports and optional synthetic feedback remain accessible in disclosures.
 - Brand tokens, auth, scope checks, deterministic rules, evidence and purchase requirements remain in place. No migration or new connector.
 

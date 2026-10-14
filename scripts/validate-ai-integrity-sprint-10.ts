@@ -24,6 +24,12 @@ try {
   for (const [kind, file] of [["STRIPE_REVENUE", "stripe-revenue.csv"], ["INTERNAL_LEDGER", "internal-ledger.csv"], ["PROVIDER_REPORT", "provider-report.csv"]] as const) {
     const bytes = new Uint8Array(await readFile(`public/samples/ai-integrity/${file}`));
     assert.doesNotThrow(() => assertAiSyntheticPreviewSample({ bytes, fileName: file, mimeType: "text/csv" }, kind));
+    const lf = Buffer.from(bytes).toString("utf8").replaceAll("\r\n", "\n");
+    const crlf = lf.replaceAll("\n", "\r\n");
+    for (const content of [lf, crlf]) {
+      assert.doesNotThrow(() => assertAiSyntheticPreviewSample({ bytes: Buffer.from(content), fileName: file, mimeType: "text/csv" }, kind));
+      assert.throws(() => assertAiSyntheticPreviewSample({ bytes: Buffer.from(content + "extra,customer,data\n"), fileName: file, mimeType: "text/csv" }, kind), /only the three bundled synthetic/);
+    }
     const changed = bytes.slice(); changed[0] ^= 1;
     assert.throws(() => assertAiSyntheticPreviewSample({ bytes: changed, fileName: file, mimeType: "text/csv" }, kind), /only the three bundled synthetic/);
   }
