@@ -14,5 +14,5 @@ export default async function AiReportPage({ params }: { params: Promise<{ snaps
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) notFound();
   const { snapshotId } = await params;
   const scan = await getAiIntegrityScan(context.workspace.id, snapshotId); if (!scan) notFound();
-  return <div className="space-y-5"><Link className="text-xs font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/dashboard">← Report history</Link><AiIntegrityReport snapshotId={snapshotId} result={scan.result} />{isAiIntegrityExperienceEnabled() ? <><AiValidationReviewSummary workspaceId={context.workspace.id} snapshotId={snapshotId} /><AiValidationReviewPanel snapshotId={snapshotId} /></> : null}</div>;
+  return <div className="space-y-5"><Link className="text-sm font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/dashboard">Home & reports</Link><AiIntegrityReport snapshotId={snapshotId} result={scan.result} />{isAiIntegrityExperienceEnabled() ? <details className="rev-shell-panel rounded-[26px] p-6"><summary className="cursor-pointer text-sm font-semibold">Review progress & optional feedback on this example</summary><div className="mt-5 space-y-5"><AiValidationReviewSummary workspaceId={context.workspace.id} snapshotId={snapshotId} /><AiValidationReviewPanel snapshotId={snapshotId} /></div></details> : null}</div>;
 }

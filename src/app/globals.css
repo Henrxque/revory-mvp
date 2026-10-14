@@ -426,6 +426,23 @@ body::before {
   box-shadow: var(--shadow-soft), inset 0 1px 0 var(--surface-hairline);
 }
 
+.ai-integrity-experience summary {
+  list-style: none;
+}
+
+.ai-integrity-experience summary::-webkit-details-marker {
+  display: none;
+}
+
+.ai-integrity-experience summary::after {
+  content: "+";
+  margin-inline-start: 0.65em;
+}
+
+.ai-integrity-experience details[open] > summary::after {
+  content: "−";
+}
+
 .ai-integrity-experience .rev-shell-panel {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),

@@ -48,7 +48,7 @@ export default async function PrivateAppLayout({
   const { user, workspace } = appContext;
   if (isAiIntegrityExperienceEnabled()) {
     if (!(await hasCurrentAccountLegalAcceptance(user.id))) return <LegalReacceptGate userEmail={user.email} />;
-    return <AiAppShell workspaceName={workspace.name} email={user.email}>{children}</AiAppShell>;
+    return <AiAppShell workspaceId={workspace.id} workspaceName={workspace.name} email={user.email}>{children}</AiAppShell>;
   }
   const billingSummary = getWorkspaceBillingSummary(workspace);
   const internalPreview = isInternalMigrationPreviewEnabled();

@@ -3,6 +3,8 @@ import { canonicalAiJson, prepareAiIntegrityBatch, type AiIntegrityBatchInput, t
 
 export const AI_SOURCE_MODE = "SYNTHETIC_REHEARSAL";
 export const AI_SOURCE_VERSION = "connected-sources/rehearsal-v1";
+export const AI_OPENAI_SOURCE_MODE = "CONTROLLED_OPENAI_READ";
+export const AI_OPENAI_SOURCE_VERSION = "connected-sources/openai-api-v1";
 export const AI_SOURCE_PROVIDERS = ["STRIPE", "OPENAI"] as const;
 export type AiSourceProvider = typeof AI_SOURCE_PROVIDERS[number];
 export type AiSourceRead = { method: "GET"; origin: "https://api.stripe.com" | "https://api.openai.com"; path: string; query: Record<string, string | string[]> };
@@ -18,6 +20,11 @@ function object(value: unknown): Record<string, unknown> {
 function id(value: unknown, nullable = false): string | null {
   if (nullable && (value === null || value === undefined)) return null;
   if (typeof value !== "string" || !/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,159}$/.test(value)) throw new Error("Invalid source identity.");
+  return value;
+}
+function pageCursor(value: unknown): string {
+  // OpenAI's opaque next_page tokens can contain base64 padding (=).
+  if (typeof value !== "string" || !/^[A-Za-z0-9_+/=-]{1,512}$/.test(value)) throw new Error("Invalid source page cursor.");
   return value;
 }
 function integer(value: unknown): number {
@@ -59,27 +66,27 @@ async function pages(read: AiSourceRead, transport: AiSourceTransport, checkActi
     if (result.data.length > 1000 || collected.length + result.data.length > 10000) throw new Error("Source response exceeds the row limit.");
     collected.push(...result.data.map(object));
     if (!result.has_more) { await checkActive(); return collected; }
-    cursor = read.path === "/v1/invoices" ? id(result.data.at(-1)?.id) : id(result.next_page);
+    cursor = read.path === "/v1/invoices" ? id(result.data.at(-1)?.id) : pageCursor(result.next_page);
     if (!cursor || cursors.has(cursor)) throw new Error("Source pagination did not advance.");
     cursors.add(cursor);
   }
   throw new Error("Source response exceeds the page limit; no checkpoint was advanced.");
 }
 
-export async function readAiConnectedSource(input: { workspaceId: string; provider: AiSourceProvider; accountId: string; windowStart: string; windowEnd: string; asOf: string; lagHours: number }, transport: AiSourceTransport, checkActive: () => Promise<void> = async () => {}) {
+export async function readAiConnectedSource(input: { workspaceId: string; provider: AiSourceProvider; accountId: string; windowStart: string; windowEnd: string; asOf: string; lagHours: number }, transport: AiSourceTransport, checkActive: () => Promise<void> = async () => {}, source: { mode: string; version: string } = { mode: AI_SOURCE_MODE, version: AI_SOURCE_VERSION }) {
   if (!AI_SOURCE_PROVIDERS.includes(input.provider)) throw new Error("Unsupported source provider.");
   id(input.accountId); id(input.workspaceId);
   const period = validateAiSourceWindow(input.windowStart, input.windowEnd, input.asOf, input.lagHours);
   const channels: AiSourceChannel[] = [];
   const make = (channel: AiSourceChannel["channel"], rows: AiRevenueInput[] | AiProviderBucketInput[]) => {
     rows.sort((a, b) => a.externalId.localeCompare(b.externalId));
-    const batch = rows.length ? { workspaceId: input.workspaceId, sourceSystem: `${channel}-rehearsal`, fileName: `${channel}.json`, fileSha256: digest(rows), mappingSha256: digest({ channel, version: AI_SOURCE_VERSION }), sourceTimezone: "UTC", windowStart: input.windowStart, windowEnd: input.windowEnd,
-      dataQuality: { mode: AI_SOURCE_MODE, connectorVersion: AI_SOURCE_VERSION, paginationComplete: true, scope: channel === "stripe-invoices" ? "invoice creation context; not net collected revenue" : channel === "openai-usage" ? "completions only; separate input/output tokens" : "reported cost by project; no model/customer allocation", customerAttribution: "REQUIRES_EXPLICIT_MAPPING", lagHours: input.lagHours, fetchedAt: input.asOf },
+    const batch = rows.length ? { workspaceId: input.workspaceId, sourceSystem: `${channel}-${source.mode === AI_SOURCE_MODE ? "rehearsal" : "api"}`, fileName: `${channel}.json`, fileSha256: digest(rows), mappingSha256: digest({ channel, version: source.version }), sourceTimezone: "UTC", windowStart: input.windowStart, windowEnd: input.windowEnd,
+      dataQuality: { mode: source.mode, connectorVersion: source.version, paginationComplete: true, scope: channel === "stripe-invoices" ? "invoice creation context; not net collected revenue" : channel === "openai-usage" ? "completions only; separate input/output tokens" : "reported cost by project; no model/customer allocation", customerAttribution: "REQUIRES_EXPLICIT_MAPPING", lagHours: input.lagHours, fetchedAt: input.asOf },
       sourceKind: channel === "stripe-invoices" ? "STRIPE_REVENUE" : "PROVIDER_REPORT", records: rows.map((row, index) => ({ ...row, sourceRowNumber: index + 1 })) } as AiIntegrityBatchInput : null;
     if (batch) prepareAiIntegrityBatch(batch);
     channels.push({ channel, batch, rowCount: rows.length });
   };
-  const common = (externalId: string, payload: Record<string, unknown>) => ({ workspaceId: input.workspaceId, externalId, sourceVersion: AI_SOURCE_VERSION, sourceRowNumber: 1, sourcePayload: payload, provenance: { mode: AI_SOURCE_MODE, accountId: input.accountId, connectorVersion: AI_SOURCE_VERSION } });
+  const common = (externalId: string, payload: Record<string, unknown>) => ({ workspaceId: input.workspaceId, externalId, sourceVersion: source.version, sourceRowNumber: 1, sourcePayload: payload, provenance: { mode: source.mode, accountId: input.accountId, connectorVersion: source.version } });
   if (input.provider === "STRIPE") {
     const invoices = await pages({ method: "GET", origin: "https://api.stripe.com", path: "/v1/invoices", query: { "created[gte]": String(period.start), "created[lt]": String(period.end), limit: "100" } }, transport, checkActive);
     const rows = invoices.map((invoice): AiRevenueInput => {
@@ -125,7 +132,7 @@ export async function readAiConnectedSource(input: { workspaceId: string; provid
     make("openai-usage", rows(usage, "openai-usage")); make("openai-costs", rows(costs, "openai-costs"));
   }
   await checkActive();
-  return { mode: AI_SOURCE_MODE, connectorVersion: AI_SOURCE_VERSION, provider: input.provider, windowStart: input.windowStart, windowEnd: input.windowEnd, fetchedAt: input.asOf, paginationComplete: true, channels };
+  return { mode: source.mode, connectorVersion: source.version, provider: input.provider, organizationId: input.accountId, windowStart: input.windowStart, windowEnd: input.windowEnd, fetchedAt: input.asOf, paginationComplete: true, activity: channels.some((channel) => channel.rowCount > 0) ? "REPORTED_ROWS" : "NO_REPORTED_ROWS", channels };
 }
 
 export function aiSourceSemanticRows(batch: AiIntegrityBatchInput) {

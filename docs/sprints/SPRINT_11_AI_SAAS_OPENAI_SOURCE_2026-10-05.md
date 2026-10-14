@@ -1,6 +1,6 @@
 # Sprint 11 — Fonte OpenAI Usage/Costs real
 
-Estado em 2026-10-05: **PLANEJADA; gate aberto**. A [Sprint 07](SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md) implementou paginação, consentimento e checkpoints apenas com fixtures. Esta sprint substitui o transporte fictício por uma leitura real e limitada da conta autorizada, após a [Sprint 10](SPRINT_10_AI_SAAS_REMOTE_HOMOLOGATION_2026-10-05.md). Stripe continua para a Sprint 12, conforme direção do fundador.
+Estado em 2026-10-13: **implementação local controlada; gate real aberto**. A [Sprint 07](SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md) implementou paginação, consentimento e checkpoints apenas com fixtures. Esta sprint adiciona transporte HTTP real e limitado, condicionado a uma credencial administrativa e a um único workspace local. A conta do fundador ainda precisa passar por login/configuração e leitura; nenhuma equivalência com export real foi observada. Evidência e instruções: [Sprint 11 — leitura controlada](../operations/SPRINT_11_OPENAI_CONTROLLED_READ_2026-10-13.md). Stripe continua para a Sprint 12, conforme direção do fundador.
 
 ## Resultado executável
 
