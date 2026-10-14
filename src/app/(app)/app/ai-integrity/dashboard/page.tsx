@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/db/prisma";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
+import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { AI_INTEGRITY_RULE_VERSION } from "@/domain/ai-integrity/reconciliation";
 
 export default async function AiIntegrityDashboard() {
@@ -11,7 +11,7 @@ export default async function AiIntegrityDashboard() {
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/ai-integrity/dashboard"));
   const [grants, batches, mappings, reports] = await Promise.all([
-    prisma.aiIntegrityScanGrant.count({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: { status: "PAID" } } }),
+    prisma.aiIntegrityScanGrant.count({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: aiScanEligibleOrderWhere() } }),
     prisma.aiIntegrityImportBatch.findMany({ where: { workspaceId: context.workspace.id }, orderBy: { createdAt: "desc" }, take: 100, select: { id: true, sourceKind: true, fileName: true, duplicateCount: true, createdAt: true } }),
     prisma.aiIntegrityMapping.count({ where: { workspaceId: context.workspace.id, kind: "PROVIDER_PROJECT", status: "CONFIRMED" } }),
     prisma.aiIntegritySnapshot.findMany({ where: { workspaceId: context.workspace.id, ruleVersion: AI_INTEGRITY_RULE_VERSION }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, windowStart: true, windowEnd: true, createdAt: true, _count: { select: { findings: true } } } }),

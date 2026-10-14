@@ -7,7 +7,7 @@ import { canUseAiIntegrityIntakePreview } from "@/services/ai-integrity/internal
 import { getAiIntegrityScan } from "@/services/ai-integrity/scan";
 import { getAppContext } from "@/services/app/get-app-context";
 import { buildSignInRedirectPath } from "@/services/auth/redirects";
-import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
+import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { AiScanSteps } from "@/components/ai-integrity/AiScanSteps";
 
 export default async function AiIntegrityScansPage({ searchParams }: { searchParams: Promise<{ snapshot?: string }> }) {
@@ -23,7 +23,7 @@ export default async function AiIntegrityScansPage({ searchParams }: { searchPar
     prisma.aiIntegritySnapshot.findMany({ where: { workspaceId: context.workspace.id, ruleVersion: AI_INTEGRITY_RULE_VERSION }, orderBy: { createdAt: "desc" }, take: 20,
       select: { id: true, createdAt: true, windowStart: true, windowEnd: true, _count: { select: { findings: true } } } }),
     snapshotId ? getAiIntegrityScan(context.workspace.id, snapshotId) : null,
-    experience ? prisma.aiIntegrityScanGrant.findMany({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: { status: "PAID" } }, orderBy: { createdAt: "asc" }, select: { id: true, createdAt: true } }) : [],
+    experience ? prisma.aiIntegrityScanGrant.findMany({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: aiScanEligibleOrderWhere() }, orderBy: { createdAt: "asc" }, select: { id: true, createdAt: true } }) : [],
   ]);
   if (snapshotId && !scan) notFound();
   if (experience && snapshotId && scan) redirect(`/app/ai-integrity/reports/${scan.snapshot.id}`);

@@ -7,9 +7,9 @@ import { isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 
 // SHA-256 of the three public, fictional CSV samples. No other upload is accepted remotely.
 const SAMPLE_SHA256: Record<AiIntegritySourceKind, string> = {
-  STRIPE_REVENUE: "0595b018ff410106a6055de68f1df9d2fd817b4214a63fc777d1467067d986af",
-  INTERNAL_LEDGER: "f6a138b3248ceb3bd0be4bd8cc9bdd9f06e8f5a33bcfad5a18957f69ead60e34",
-  PROVIDER_REPORT: "88c6e882a7c22fc52fa78a3256b3e86bc75b56bd4d52fb35d531eac6461e1625",
+  STRIPE_REVENUE: "bdd56034f9003d2707326c13f1bdf0a954900ca57de72b6d548a17af838de51e",
+  INTERNAL_LEDGER: "d1d80b5328539e683d98677e24e873bb19c836d8065cdaaa2fccc9e2770e3759",
+  PROVIDER_REPORT: "f64e1946be42dff79ec40ca711bbab6f538bec6cf6b5cf8a9b9ecc9b84d20756",
 };
 
 export function assertAiSyntheticPreviewSample(file: AiIntakeFile, sourceKind: AiIntegritySourceKind) {

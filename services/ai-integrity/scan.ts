@@ -3,7 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
-import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
+import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 import { AI_INTEGRITY_RULE_VERSION, aiDigest, aiTimestamp, reconcileAiIntegrity,
   type AiScanInput, type AiScanResult, type ScanBucket, type ScanUsage, type SourceClosureReview } from "@/domain/ai-integrity/reconciliation";
 
@@ -32,7 +32,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       if (requiresPurchase && !request.grantId) throw new Error("Select a confirmed one-time test purchase before running a scan.");
       if (requiresPurchase) await tx.$queryRaw`SELECT id FROM ai_integrity_scan_grants WHERE id = ${request.grantId!} AND "workspaceId" = ${request.workspaceId} FOR UPDATE`;
       const grant = requiresPurchase ? await tx.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId,
-        status: "ACTIVE", order: { status: "PAID" } } }) : null;
+        status: "ACTIVE", order: aiScanEligibleOrderWhere() } }) : null;
       if (requiresPurchase && !grant) throw new Error("A confirmed test purchase is required in this workspace.");
       const batches = await tx.aiIntegrityImportBatch.findMany({ where: { workspaceId: request.workspaceId, id: { in: request.batchIds } }, orderBy: { id: "asc" },
         select: { id: true, sourceKind: true, sourceSystem: true, windowStart: true, windowEnd: true, sourceTimezone: true,
@@ -96,7 +96,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       const snapshot = await prisma.aiIntegritySnapshot.findUnique({ where: { workspaceId_idempotencyKey: { workspaceId: request.workspaceId, idempotencyKey: raceKey } } });
       if (snapshot) {
         if (isAiIntegrityExperienceEnabled()) {
-          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: { status: "PAID" } } });
+          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: aiScanEligibleOrderWhere() } });
           if (!grant || (grant.consumedAt && grant.consumedSnapshotId !== snapshot.id)) throw new Error("Purchase is unavailable for this report.");
         }
         const manifest = snapshot.inputManifestJson as unknown as { input: AiScanInput }; return { snapshotId: snapshot.id, replayed: true, result: reconcileAiIntegrity(manifest.input) };

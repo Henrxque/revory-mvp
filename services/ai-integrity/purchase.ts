@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { AI_SCAN_OFFER, aiScanPriceMatches, assertAiScanPaidSession, buildAiScanCheckout } from "@/domain/ai-integrity/scan-offer";
 import { CHECKOUT_LEGAL_VERSIONS } from "@/content/revory-legal";
-import { isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
+import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 
 export function aiScanCheckoutDriver(): "stripe-test" | "simulation" | "unavailable" {
   if (!isAiIntegrityExperienceEnabled() || isAiIntegrityRemoteSyntheticPreviewEnabled()) return "unavailable";
@@ -32,7 +32,7 @@ export function aiScanStripeClient() {
 
 export async function hasAiScanPreparationAccess(workspaceId: string) {
   if (!isAiIntegrityExperienceEnabled()) return true;
-  return Boolean(await prisma.aiIntegrityScanGrant.findFirst({ where: { workspaceId, status: "ACTIVE", consumedAt: null, order: { status: "PAID" } }, select: { id: true } }));
+  return Boolean(await prisma.aiIntegrityScanGrant.findFirst({ where: { workspaceId, status: "ACTIVE", consumedAt: null, order: aiScanEligibleOrderWhere() }, select: { id: true } }));
 }
 export async function requireAiScanPreparationAccess(workspaceId: string) {
   if (!(await hasAiScanPreparationAccess(workspaceId))) throw new Error("Purchase a test scan before preparing new evidence.");
