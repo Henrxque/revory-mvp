@@ -32,7 +32,7 @@ export default async function AiIntegrityImportsPage() {
           Start with Stripe payments, your product&apos;s recorded usage and your AI provider&apos;s report. Add one file at a time for the same period. We&apos;ll help you check the columns and show any rows that cannot be used.
         </p>
         <p className="mt-3 text-xs leading-6 text-[color:var(--text-subtle)]">{isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Protected rehearsal: only the three bundled synthetic CSV samples are accepted. Do not upload customer data." : experience ? "Synthetic test data only. Use the same closed period for all three sources; import each file after reviewing its columns and exclusions." : "Internal development access only. This page is unavailable in production and does not offer customer analysis."}</p>
-        <Link className="mt-4 inline-block text-sm font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/attribution">Already added your files? Next: link customers →</Link>
+        <Link className="mt-4 inline-block text-sm font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/attribution">Already added your files? Next: link customers</Link>
       </section>
       <AiIntegrityImportPanel syntheticSamples={experience} />
       <section className="rev-shell-panel rounded-[26px] p-5 md:p-6">

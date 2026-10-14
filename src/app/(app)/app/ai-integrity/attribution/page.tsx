@@ -51,8 +51,8 @@ export default async function AiIntegrityAttributionPage({ searchParams }: { sea
       <h1 className="rev-display-hero mt-3 max-w-[53rem]">Help us understand who used the AI.</h1>
       <p className="mt-4 max-w-[52rem] text-sm leading-7 text-[color:var(--text-muted)]">Link a Stripe customer or an exclusive AI project to the matching customer in your product. Use exact IDs and confirm the dates. A project shared by several customers must stay unlinked.</p>
       <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">Already reviewed your links? Continue to report setup. Missing or conflicting links stay visible and may limit which usage can be compared.</p>
-      <Link className="mt-4 inline-block text-xs font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/imports">← Back to evidence imports</Link>
-      <Link className="rev-button-primary mt-5" href={reportSetupHref}>{experience ? "Next: check files & create report →" : "Run internal synthetic scan →"}</Link>
+      <Link className="mt-4 inline-block text-xs font-semibold text-[color:var(--accent)]" href="/app/ai-integrity/imports">Back to evidence imports</Link>
+      <Link className="rev-button-primary mt-5" href={reportSetupHref}>{experience ? "Next: check files & create report" : "Run internal synthetic scan"}</Link>
     </section>
     <details className="rev-shell-panel rounded-[26px] p-5 md:p-6"><summary className="cursor-pointer text-sm font-semibold">Check or change the files being reviewed</summary><form method="get" className="mt-5 grid gap-4 md:grid-cols-3">
       {([ ["provider", "Provider report", providers, providerBatch], ["ledger", "Internal ledger", ledgers, ledgerBatch], ["revenue", "Stripe revenue", revenues, revenueBatch] ] as const).map(([name, label, options, selected]) =>
