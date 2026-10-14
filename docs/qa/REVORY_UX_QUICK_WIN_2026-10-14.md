@@ -6,6 +6,7 @@ Founder feedback: the premium visual identity is intact, but a first-time user c
 
 - Home prioritizes the latest saved report, with a separate next-step card based on existing access, files and links. File counts do not imply comparable periods or validated attribution.
 - Navigation uses Home & reports, Add your data, Link customers and Create a report.
+- On smaller screens navigation collapses into a labeled Menu so the report action appears in the first viewport. Desktop retains the premium sidebar.
 - Intake explains each source and can load the exact bundled fictional CSV into the existing review flow. It still requires column review, quality validation and confirmation before storage. Real files remain blocked by the existing Preview policy.
 - File settings move into a disclosure. Period boundaries remain explicitly UTC and exclusive at the end.
 - Report setup preselects only unambiguous original files. Mixed periods, unknown IDs, duplicate imports and wrong source kinds cannot be silently selected. Reviewed identity-page selections travel to setup in query parameters and resolve only within workspace-scoped data.
