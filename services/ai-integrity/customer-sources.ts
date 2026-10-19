@@ -53,12 +53,17 @@ async function lockOwner(tx: Prisma.TransactionClient, workspaceId: string, acto
 const publicConnection = {
   id: true, provider: true, status: true, generation: true, organizationId: true,
   consentStart: true, consentEnd: true, completeThrough: true, updatedAt: true,
-  syncs: { orderBy: { createdAt: "desc" as const }, take: 10, select: { id: true, status: true, windowStart: true, windowEnd: true, createdAt: true } },
+  syncs: { orderBy: { createdAt: "desc" as const }, take: 10, select: { id: true, generation: true, status: true, windowStart: true, windowEnd: true, createdAt: true, promotions: { select: { batchId: true } } } },
 } as const;
 
 export async function listAiCustomerSources(workspaceId: string, actorUserId: string) {
   await access(workspaceId, actorUserId);
-  return prisma.aiIntegritySourceConnection.findMany({ where: { workspaceId, mode: AI_CUSTOMER_SOURCE_MODE }, orderBy: { provider: "asc" }, select: publicConnection });
+  const connections = await prisma.aiIntegritySourceConnection.findMany({ where: { workspaceId, mode: AI_CUSTOMER_SOURCE_MODE }, orderBy: { provider: "asc" }, select: publicConnection });
+  const ids = connections.flatMap((connection) => connection.syncs.map((sync) => sync.id));
+  // Extract only the activity marker in PostgreSQL; never load full artifacts
+  // into the page or return their potentially large bodies as list metadata.
+  const markers = ids.length ? await prisma.$queryRaw<Array<{ id: string; activity: string | null }>>`SELECT id, "artifactJson"->>'activity' AS activity FROM ai_integrity_source_syncs WHERE "workspaceId" = ${workspaceId} AND id IN (${Prisma.join(ids)})` : [];
+  return connections.map((connection) => ({ ...connection, syncs: connection.syncs.map((sync) => ({ ...sync, activity: markers.find((marker) => marker.id === sync.id)?.activity ?? null })) }));
 }
 
 export async function registerAiCustomerSource(workspaceId: string, actorUserId: string, raw: unknown) {

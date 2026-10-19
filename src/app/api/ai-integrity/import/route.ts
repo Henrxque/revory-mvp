@@ -1,3 +1,6 @@
+import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
+import { persistConnectedLedger } from "@/services/ai-integrity/connected-ledger";
+import { isAiConnectedReportsEnabled, requireConnectedReportAccess } from "@/services/ai-integrity/connected-report-access";
 import { NextResponse } from "next/server";
 
 import { getAppContext } from "@/services/app/get-app-context";
@@ -12,16 +15,20 @@ export async function POST(request: Request) {
   const context = await getAppContext();
   if (!context) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) return NextResponse.json({ error: "Unavailable." }, { status: 404 });
-  if (!validOrigin(request)) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
+  if (!validOrigin(request) || (isAiConnectedReportsEnabled() && !request.headers.get("origin"))) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
   if ((await checkRateLimit({ key: `ai-integrity-import:${context.workspace.id}`, limit: 8, windowMs: 10 * 60 * 1000 })).limited) return NextResponse.json({ error: "Too many import attempts." }, { status: 429 });
   try {
-    await requireAiScanPreparationAccess(context.workspace.id);
+    if (isAiConnectedReportsEnabled() && !(await hasCurrentAccountLegalAcceptance(context.user.id))) throw new Error("Review the current account terms before preparing source data.");
+    if (isAiConnectedReportsEnabled()) await requireConnectedReportAccess(context.workspace.id, context.user.id);
+    else await requireAiScanPreparationAccess(context.workspace.id);
     const { file, form, metadata } = await readAiIntakeRequest(request);
     if (form.get("mappingConfirmed") !== "yes") throw new Error("Confirm the reviewed column mapping before import.");
     const plan = await buildAiIntakePlan(file, { ...metadata, workspaceId: context.workspace.id }, readMapping(form));
     if (!plan.batch || !plan.reviewToken) throw new Error("No valid rows remain; review the Data Quality issues.");
     if (form.get("reviewToken") !== plan.reviewToken) throw new Error("File, mapping or window changed after review. Review again before importing.");
-    const result = await persistAiIntegrityBatch(plan.batch, context.user.id);
+    const result = isAiConnectedReportsEnabled()
+      ? await persistConnectedLedger(plan.batch, context.user.id, form.get("dataAuthorized") === "yes")
+      : await persistAiIntegrityBatch(plan.batch, context.user.id);
     return NextResponse.json({ batchId: result.batch.id, replayed: result.replayed, acceptedCount: plan.acceptedCount, rejectedCount: plan.rejectedCount, insertedCount: result.batch.insertedCount, duplicateCount: result.batch.duplicateCount, issueCount: plan.issues.length, issues: plan.issues.slice(0, 50), message: "Rows stored for later reconciliation. No financial finding was generated." }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to import file safely." }, { status: 400, headers: { "Cache-Control": "private, no-store" } });

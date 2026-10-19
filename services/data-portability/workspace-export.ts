@@ -35,6 +35,8 @@ export async function buildWorkspaceExport(workspaceId: string) {
     aiReviewEvents,
     aiSourceConnections,
     aiSourceSyncs,
+    aiSourcePromotions,
+    aiReportDraft,
     aiMonitorComparisons,
     aiMonitorAlerts,
   ] = await Promise.all([
@@ -70,6 +72,8 @@ export async function buildWorkspaceExport(workspaceId: string) {
     prisma.aiIntegrityReviewEvent.findMany({ where: { workspaceId }, orderBy: { createdAt: "asc" } }),
     prisma.aiIntegritySourceConnection.findMany({ where: { workspaceId } }),
     prisma.aiIntegritySourceSync.findMany({ where: { workspaceId } }),
+    prisma.aiIntegritySourcePromotion.findMany({ where: { workspaceId } }),
+    prisma.aiIntegrityReportDraft.findUnique({ where: { workspaceId } }),
     prisma.aiIntegrityMonitorComparison.findMany({ where: { workspaceId } }),
     prisma.aiIntegrityMonitorAlert.findMany({ where: { workspaceId } }),
   ]);
@@ -90,9 +94,9 @@ export async function buildWorkspaceExport(workspaceId: string) {
     quoteRecoveryRuns,
     records,
     revenueRealizationFindings,
-    schemaVersion: 9,
+    schemaVersion: 10,
     settings,
-    connectedSourceRehearsal: { connections: aiSourceConnections, reads: aiSourceSyncs },
+    connectedSourceRehearsal: { connections: aiSourceConnections, reads: aiSourceSyncs, promotions: aiSourcePromotions, reportDraft: aiReportDraft },
     monitoringRehearsal: { comparisons: aiMonitorComparisons, alerts: aiMonitorAlerts },
     workspace,
   };

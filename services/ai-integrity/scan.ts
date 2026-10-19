@@ -3,13 +3,14 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
+import { assertConnectedReportAccess, CONNECTED_LEDGER_MODE, CONNECTED_REPORT_MODE, isAiConnectedReportsEnabled } from "./connected-report-access";
 import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
-import { AI_INTEGRITY_RULE_VERSION, aiDigest, aiTimestamp, reconcileAiIntegrity,
+import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_SUPPORTED_RULE_VERSIONS, aiDigest, aiTimestamp, reconcileAiIntegrity,
   type AiScanInput, type AiScanResult, type ScanBucket, type ScanUsage, type SourceClosureReview } from "@/domain/ai-integrity/reconciliation";
 
 export type RunAiScanRequest = {
   workspaceId: string; actorUserId: string; batchIds: string[]; asOf: string; lagHours: number;
-  sourceReviews: SourceClosureReview[]; syntheticDataConfirmed: boolean;
+  sourceReviews: SourceClosureReview[]; syntheticDataConfirmed: boolean; connectedReportAuthorized?: boolean;
   grantId?: string;
 };
 const MAX_ROWS = 25000;
@@ -22,26 +23,40 @@ const bucketSelect = { ...rowSelect, provider: true, organizationId: true, proje
 
 export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0): Promise<{ snapshotId: string; replayed: boolean; result: AiScanResult }> {
   if (process.env.NODE_ENV === "production" && !isAiIntegrityRemoteSyntheticPreviewEnabled()) throw new Error("Internal scan is unavailable in production.");
-  if (request.syntheticDataConfirmed !== true) throw new Error("Sprint 4 internal scans require synthetic test data confirmation.");
+  const connected = request.connectedReportAuthorized === true && request.syntheticDataConfirmed === false;
+  if (connected ? !isAiConnectedReportsEnabled() : request.syntheticDataConfirmed !== true || request.connectedReportAuthorized === true) throw new Error("Confirm synthetic data or supported connected source authorization.");
   if (!request.workspaceId || !request.actorUserId || request.batchIds.length !== 3 || new Set(request.batchIds).size !== 3) throw new Error("Three source batches and an authenticated actor are required.");
   if (aiTimestamp(request.asOf) > Date.now()) throw new Error("Analysis time cannot be in the future.");
   let raceKey: string | null = null;
   try {
     return await prisma.$transaction(async (tx) => {
+      if (connected) await assertConnectedReportAccess(tx, request.workspaceId, request.actorUserId, false);
       const requiresPurchase = isAiIntegrityExperienceEnabled();
+      const orderWhere = connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere();
       if (requiresPurchase && !request.grantId) throw new Error("Select a confirmed one-time test purchase before running a scan.");
       if (requiresPurchase) await tx.$queryRaw`SELECT id FROM ai_integrity_scan_grants WHERE id = ${request.grantId!} AND "workspaceId" = ${request.workspaceId} FOR UPDATE`;
       const grant = requiresPurchase ? await tx.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId,
-        status: "ACTIVE", order: aiScanEligibleOrderWhere() } }) : null;
+        status: "ACTIVE", order: orderWhere } }) : null;
       if (requiresPurchase && !grant) throw new Error("A confirmed test purchase is required in this workspace.");
       const batches = await tx.aiIntegrityImportBatch.findMany({ where: { workspaceId: request.workspaceId, id: { in: request.batchIds } }, orderBy: { id: "asc" },
         select: { id: true, sourceKind: true, sourceSystem: true, windowStart: true, windowEnd: true, sourceTimezone: true,
-          fileSha256: true, mappingSha256: true, rowCount: true, insertedCount: true, duplicateCount: true, dataQualityJson: true } });
+          fileSha256: true, mappingSha256: true, rowCount: true, insertedCount: true, duplicateCount: true, dataQualityJson: true,
+          sourcePromotion: { include: { sync: { include: { connection: true } } } } } });
       if (batches.length !== 3) throw new Error("Source batch missing or unavailable in this workspace.");
+      for (const batch of batches) {
+        const mode = (batch.dataQualityJson as Record<string, unknown>)?.mode;
+        if (connected) {
+          if (batch.sourceKind === "INTERNAL_LEDGER" ? mode !== CONNECTED_LEDGER_MODE : mode !== CONNECTED_REPORT_MODE) throw new Error("Choose authorized ledger and connected API evidence only.");
+          if (batch.sourceKind !== "INTERNAL_LEDGER") {
+            const sync = batch.sourcePromotion?.sync;
+            if (!sync || sync.status !== "COMPLETED" || sync.generation !== sync.connection.generation || sync.connection.status !== "ACTIVE" || !sync.artifactJson || aiDigest(sync.artifactJson) !== sync.artifactHash) throw new Error("Connected source evidence is incomplete, changed or revoked.");
+          }
+        } else if (mode === CONNECTED_REPORT_MODE || mode === CONNECTED_LEDGER_MODE) throw new Error("Authorized source data cannot be labeled as fictional.");
+      }
       // Load workspace evidence once within a repeatable read. Other imports are used only for contradictions, never totals.
       const [usageRows, bucketRows, revenueRows, mappings] = await Promise.all([
-        tx.aiIntegrityUsageRecord.findMany({ where: { workspaceId: request.workspaceId }, select: usageSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
-        tx.aiIntegrityProviderBucket.findMany({ where: { workspaceId: request.workspaceId }, select: bucketSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
+        tx.aiIntegrityUsageRecord.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_LEDGER_MODE } } } : {}) }, select: usageSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
+        tx.aiIntegrityProviderBucket.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_REPORT_MODE } } } : {}) }, select: bucketSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
         tx.aiIntegrityRevenueRecord.findMany({ where: { workspaceId: request.workspaceId, importBatchId: { in: request.batchIds } },
           select: { ...rowSelect, eventKind: true, status: true, occurredAt: true, amountMinor: true, currency: true, parentExternalId: true }, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
         tx.aiIntegrityMapping.findMany({ where: { workspaceId: request.workspaceId }, orderBy: { id: "asc" }, take: MAX_ROWS + 1,
@@ -50,15 +65,19 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       ]);
       if ([usageRows, bucketRows, revenueRows, mappings].some((rows) => rows.length > MAX_ROWS)) throw new Error("Workspace evidence limit exceeded; narrow intake before running this internal scan.");
       const knownUsage = json<ScanUsage[]>(usageRows), knownBuckets = json<ScanBucket[]>(bucketRows);
-      const input: AiScanInput = { ruleVersion: AI_INTEGRITY_RULE_VERSION, workspaceId: request.workspaceId,
+      const input: AiScanInput = { ruleVersion: connected ? AI_CONNECTED_RULE_VERSION : AI_INTEGRITY_RULE_VERSION, workspaceId: request.workspaceId,
         asOf: new Date(request.asOf).toISOString(), lagHours: request.lagHours,
-        sourceReviews: [...request.sourceReviews].sort((a, b) => a.batchId.localeCompare(b.batchId)).map((r) => ({ batchId: r.batchId,
-          exportedAt: new Date(aiTimestamp(r.exportedAt)).toISOString(), completeThrough: new Date(aiTimestamp(r.completeThrough)).toISOString() })),
-        batches: json(batches), usage: knownUsage.filter((r) => request.batchIds.includes(r.importBatchId)),
+        sourceReviews: [...request.sourceReviews].sort((a, b) => a.batchId.localeCompare(b.batchId)).map((r) => {
+          const source = connected ? batches.find((batch) => batch.id === r.batchId)?.sourcePromotion?.sync.artifactJson as unknown as { fetchedAt?: string } | undefined : undefined;
+          return { batchId: r.batchId, exportedAt: new Date(aiTimestamp(source?.fetchedAt ?? r.exportedAt)).toISOString(), completeThrough: new Date(aiTimestamp(r.completeThrough)).toISOString() };
+        }),
+        batches: json(batches.map((batch) => ({ ...batch, sourcePromotion: undefined }))), usage: knownUsage.filter((r) => request.batchIds.includes(r.importBatchId)),
         buckets: knownBuckets.filter((r) => request.batchIds.includes(r.importBatchId)),
         knownUsage, knownBuckets, revenue: json(revenueRows), mappings: json(mappings) };
       const result = reconcileAiIntegrity(input);
-      const manifest = { format: "revory-ai-integrity-evidence/v1", syntheticDataConfirmed: true, input, resultHash: aiDigest(result) };
+      const manifest = { format: "revory-ai-integrity-evidence/v1", syntheticDataConfirmed: !connected,
+        ...(connected ? { dataMode: CONNECTED_REPORT_MODE, connectedReportAuthorized: true,
+          sourceArtifacts: batches.flatMap((batch) => batch.sourcePromotion ? [{ syncId: batch.sourcePromotion.sync.id, artifactHash: batch.sourcePromotion.sync.artifactHash, artifact: batch.sourcePromotion.sync.artifactJson }] : []) } : {}), input, resultHash: aiDigest(result) };
       const manifestText = canonicalAiJson(manifest);
       if (Buffer.byteLength(manifestText, "utf8") > 20 * 1024 * 1024) throw new Error("Snapshot evidence exceeds the 20 MB internal limit.");
       const idempotencyKey = aiDigest(manifest);
@@ -70,7 +89,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       }
       if (grant?.consumedAt) throw new Error("This purchase already delivered a report. Purchase another scan for new evidence.");
       const snapshot = await tx.aiIntegritySnapshot.create({ data: { workspaceId: request.workspaceId, idempotencyKey,
-        ruleVersion: AI_INTEGRITY_RULE_VERSION, windowStart: new Date(result.windowStart), windowEnd: new Date(result.windowEnd),
+        ruleVersion: result.ruleVersion, windowStart: new Date(result.windowStart), windowEnd: new Date(result.windowEnd),
         inputManifestJson: json<Prisma.InputJsonValue>(manifest), dataQualityJson: json<Prisma.InputJsonValue>(result.dataQuality),
         coverageJson: json<Prisma.InputJsonValue>(result.coverage), suppressionsJson: json<Prisma.InputJsonValue>({ items: result.suppressions, comparisons: result.comparisons }) } });
       const evidenceBatchIds = new Set([...request.batchIds, ...knownUsage.map((r) => r.importBatchId), ...knownBuckets.map((r) => r.importBatchId)]);
@@ -87,7 +106,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
         evidenceJson: json<Prisma.InputJsonValue>(f.evidence), limitationsJson: f.limitations, recommendedReview: f.recommendedReview })) });
       if (grant) await tx.aiIntegrityScanGrant.update({ where: { id: grant.id }, data: { consumedAt: new Date(), consumedSnapshotId: snapshot.id } });
       await tx.workspaceAuditEvent.create({ data: { workspaceId: request.workspaceId, actorUserId: request.actorUserId, action: "AI_INTEGRITY_SCAN_CREATED",
-        metadataJson: { snapshotId: snapshot.id, ruleVersion: AI_INTEGRITY_RULE_VERSION, findingCount: result.findings.length, syntheticDataConfirmed: true } } });
+        metadataJson: { snapshotId: snapshot.id, ruleVersion: result.ruleVersion, findingCount: result.findings.length, syntheticDataConfirmed: !connected, ...(connected ? { dataMode: CONNECTED_REPORT_MODE } : {}) } } });
       return { snapshotId: snapshot.id, replayed: false, result };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead, maxWait: 10000, timeout: 60000 });
   } catch (error) {
@@ -96,7 +115,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       const snapshot = await prisma.aiIntegritySnapshot.findUnique({ where: { workspaceId_idempotencyKey: { workspaceId: request.workspaceId, idempotencyKey: raceKey } } });
       if (snapshot) {
         if (isAiIntegrityExperienceEnabled()) {
-          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: aiScanEligibleOrderWhere() } });
+          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere() } });
           if (!grant || (grant.consumedAt && grant.consumedSnapshotId !== snapshot.id)) throw new Error("Purchase is unavailable for this report.");
         }
         const manifest = snapshot.inputManifestJson as unknown as { input: AiScanInput }; return { snapshotId: snapshot.id, replayed: true, result: reconcileAiIntegrity(manifest.input) };
@@ -107,11 +126,12 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
 }
 
 export async function getAiIntegrityScan(workspaceId: string, snapshotId: string) {
-  const snapshot = await prisma.aiIntegritySnapshot.findFirst({ where: { workspaceId, id: snapshotId, ruleVersion: AI_INTEGRITY_RULE_VERSION },
+  const snapshot = await prisma.aiIntegritySnapshot.findFirst({ where: { workspaceId, id: snapshotId, ruleVersion: { in: AI_SUPPORTED_RULE_VERSIONS } },
     include: { findings: { orderBy: { fingerprint: "asc" } } } });
   if (!snapshot) return null;
   const manifest = snapshot.inputManifestJson as unknown as { format: string; input: AiScanInput; resultHash: string };
   if (manifest.format !== "revory-ai-integrity-evidence/v1") throw new Error("Unsupported snapshot manifest.");
+  if (manifest.input.ruleVersion !== snapshot.ruleVersion || aiDigest(manifest) !== snapshot.idempotencyKey) throw new Error("Snapshot manifest failed integrity check.");
   const result = reconcileAiIntegrity(manifest.input);
   if (aiDigest(result) !== manifest.resultHash) throw new Error("Snapshot reproduction failed integrity check.");
   return { snapshot, result };

@@ -1,6 +1,6 @@
 export const scanSources = ["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"] as const;
 export type ScanSource = typeof scanSources[number];
-export type ScanSetupBatch = { id: string; sourceKind: string; fileName: string; windowStart: string; windowEnd: string; duplicateCount: number };
+export type ScanSetupBatch = { id: string; sourceKind: string; fileName: string; windowStart: string; windowEnd: string; duplicateCount: number; apiFetchedAt?: string };
 
 // Only preselect unambiguous originals from one identical period. URL values
 // must resolve to the workspace-scoped batches supplied by the server.

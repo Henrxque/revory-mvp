@@ -1,8 +1,10 @@
+import type { ConnectedReportSetup } from "@/services/ai-integrity/report-draft";
+import { isAiConnectedReportsEnabled, CONNECTED_REPORT_MODE, CONNECTED_LEDGER_MODE } from "@/services/ai-integrity/connected-report-access";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AiIntegrityScanPanel } from "@/components/ai-integrity/AiIntegrityScanPanel";
 import { prisma } from "@/db/prisma";
-import { AI_INTEGRITY_RULE_VERSION } from "@/domain/ai-integrity/reconciliation";
+import { AI_SUPPORTED_RULE_VERSIONS } from "@/domain/ai-integrity/reconciliation";
 import { canUseAiIntegrityIntakePreview } from "@/services/ai-integrity/internal-access";
 import { getAiIntegrityScan } from "@/services/ai-integrity/scan";
 import { getAppContext } from "@/services/app/get-app-context";
@@ -16,15 +18,17 @@ export default async function AiIntegrityScansPage({ searchParams }: { searchPar
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) notFound();
   const experience = isAiIntegrityExperienceEnabled();
   const remote = isAiIntegrityRemoteSyntheticPreviewEnabled();
+  const connected = isAiConnectedReportsEnabled();
   const { snapshot: snapshotId, provider, ledger, revenue } = await searchParams;
   const [batches, history, scan, grants] = await Promise.all([
     prisma.aiIntegrityImportBatch.findMany({ where: { workspaceId: context.workspace.id }, orderBy: { createdAt: "desc" }, take: 100,
-      select: { id: true, sourceKind: true, fileName: true, windowStart: true, windowEnd: true, duplicateCount: true } }),
-    prisma.aiIntegritySnapshot.findMany({ where: { workspaceId: context.workspace.id, ruleVersion: AI_INTEGRITY_RULE_VERSION }, orderBy: { createdAt: "desc" }, take: 20,
+      select: { id: true, sourceKind: true, fileName: true, windowStart: true, windowEnd: true, duplicateCount: true, dataQualityJson: true } }),
+    prisma.aiIntegritySnapshot.findMany({ where: { workspaceId: context.workspace.id, ruleVersion: { in: AI_SUPPORTED_RULE_VERSIONS } }, orderBy: { createdAt: "desc" }, take: 20,
       select: { id: true, createdAt: true, windowStart: true, windowEnd: true, _count: { select: { findings: true } } } }),
     snapshotId ? getAiIntegrityScan(context.workspace.id, snapshotId) : null,
-    experience ? prisma.aiIntegrityScanGrant.findMany({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: aiScanEligibleOrderWhere() }, orderBy: { createdAt: "asc" }, select: { id: true, createdAt: true } }) : [],
+    experience ? prisma.aiIntegrityScanGrant.findMany({ where: { workspaceId: context.workspace.id, status: "ACTIVE", consumedAt: null, order: connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere() }, orderBy: { createdAt: "asc" }, select: { id: true, createdAt: true } }) : [],
   ]);
+  const draft = connected ? await prisma.aiIntegrityReportDraft.findUnique({ where: { workspaceId: context.workspace.id } }) : null;
   if (snapshotId && !scan) notFound();
   if (experience && snapshotId && scan) redirect(`/app/ai-integrity/reports/${scan.snapshot.id}`);
   return <div className="min-w-0 space-y-6">
@@ -51,7 +55,7 @@ export default async function AiIntegrityScansPage({ searchParams }: { searchPar
       <details><summary className="cursor-pointer text-sm text-[color:var(--accent)]">Data Quality and suppressions ({scan.result.suppressions.length})</summary><pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-all text-xs">{JSON.stringify({ dataQuality: scan.result.dataQuality, suppressions: scan.result.suppressions }, null, 2)}</pre></details>
       <p className="text-xs leading-6 text-[color:var(--text-subtle)]">Currencies and usage units are kept separate. No combined loss or at-risk total. CSV summarizes findings; JSON includes reproducible inputs and exclusions.</p>
     </section> : null}
-    {experience && !grants.length ? <section className="rev-shell-panel rounded-[26px] p-6"><p className="text-sm leading-7 text-[color:var(--text-muted)]">Your existing reports remain in history. A new report needs an available {remote ? "synthetic test report" : "one-time test scan"}.</p><Link className="rev-button-primary mt-4" href="/start">{remote ? "View test access" : "Review scan purchase"}</Link></section> : <AiIntegrityScanPanel key={[provider, ledger, revenue].join("|")} requestedSelection={{ PROVIDER_REPORT: provider, INTERNAL_LEDGER: ledger, STRIPE_REVENUE: revenue }} batches={batches.map((b) => ({ ...b, windowStart: b.windowStart.toISOString(), windowEnd: b.windowEnd.toISOString() }))} initialAsOf={new Date().toISOString()} grants={experience ? grants.map((g) => ({ id: g.id, label: remote ? `Synthetic scan · granted ${g.createdAt.toISOString().slice(0, 10)}` : `Test scan · confirmed ${g.createdAt.toISOString().slice(0, 10)}` })) : undefined} remoteSyntheticPreview={remote} />}
+    {experience && !grants.length ? <section className="rev-shell-panel rounded-[26px] p-6"><p className="text-sm leading-7 text-[color:var(--text-muted)]">Your existing reports remain in history. A new report needs an available {remote ? "synthetic test report" : "one-time test scan"}.</p><Link className="rev-button-primary mt-4" href="/start">{remote ? "View test access" : "Review scan purchase"}</Link></section> : <AiIntegrityScanPanel key={[provider, ledger, revenue].join("|")} requestedSelection={{ PROVIDER_REPORT: provider, INTERNAL_LEDGER: ledger, STRIPE_REVENUE: revenue }} savedSetup={draft ? { revision: draft.revision, setup: draft.setupJson as unknown as ConnectedReportSetup } : undefined} connectedReports={connected} batches={batches.filter((batch) => !connected || [CONNECTED_REPORT_MODE, CONNECTED_LEDGER_MODE].includes(String((batch.dataQualityJson as Record<string, unknown>)?.mode))).map((b) => ({ id: b.id, sourceKind: b.sourceKind, fileName: b.fileName, duplicateCount: b.duplicateCount, windowStart: b.windowStart.toISOString(), windowEnd: b.windowEnd.toISOString(), apiFetchedAt: typeof (b.dataQualityJson as { sourceEvidence?: { fetchedAt?: unknown } })?.sourceEvidence?.fetchedAt === "string" ? (b.dataQualityJson as { sourceEvidence: { fetchedAt: string } }).sourceEvidence.fetchedAt : undefined }))} initialAsOf={new Date().toISOString()} grants={experience ? grants.map((g) => ({ id: g.id, label: remote ? `Synthetic scan · granted ${g.createdAt.toISOString().slice(0, 10)}` : `Test scan · confirmed ${g.createdAt.toISOString().slice(0, 10)}` })) : undefined} remoteSyntheticPreview={remote} />}
     <section className="rev-shell-panel rounded-[26px] p-5 md:p-6"><h2 className="text-lg font-semibold">Recent internal snapshots</h2><div className="mt-4 space-y-3">{history.length ? history.map((run) => <Link key={run.id} className="block break-all text-xs leading-6 text-[color:var(--accent)]" href={`/app/ai-integrity/scans?snapshot=${run.id}`}>{run.createdAt.toISOString()} · {run.windowStart.toISOString().slice(0, 10)} to {run.windowEnd.toISOString().slice(0, 10)} · {run._count.findings} findings</Link>) : <p className="text-sm text-[color:var(--text-muted)]">No scans yet.</p>}</div></section>
   </div>;
 }

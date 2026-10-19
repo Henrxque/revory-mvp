@@ -1,3 +1,4 @@
+import { isAiConnectedReportsEnabled, requireConnectedReportAccess } from "@/services/ai-integrity/connected-report-access";
 import { NextResponse } from "next/server";
 import { requireAiScanPreparationAccess } from "@/services/ai-integrity/purchase";
 
@@ -43,7 +44,8 @@ export async function POST(request: Request) {
   const auth = await authorize(request);
   if ("response" in auth) return auth.response;
   try {
-    await requireAiScanPreparationAccess(auth.context.workspace.id);
+    if (isAiConnectedReportsEnabled()) await requireConnectedReportAccess(auth.context.workspace.id, auth.context.user.id);
+    else await requireAiScanPreparationAccess(auth.context.workspace.id);
     const body = await readJson(request);
     if (body.kind !== "STRIPE_CUSTOMER" && body.kind !== "PROVIDER_PROJECT") throw new Error("Choose a supported identity kind.");
     const required = ["externalId", "internalCustomerExternalId", "sourceBatchId", "ledgerBatchId", "validFrom", "validUntil"] as const;
@@ -65,7 +67,8 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request);
   if ("response" in auth) return auth.response;
   try {
-    await requireAiScanPreparationAccess(auth.context.workspace.id);
+    if (isAiConnectedReportsEnabled()) await requireConnectedReportAccess(auth.context.workspace.id, auth.context.user.id);
+    else await requireAiScanPreparationAccess(auth.context.workspace.id);
     const body = await readJson(request);
     if (typeof body.mappingId !== "string" || !body.mappingId) throw new Error("Mapping ID required.");
     const mapping = await revokeAiIdentityMapping(auth.context.workspace.id, auth.context.user.id, body.mappingId);

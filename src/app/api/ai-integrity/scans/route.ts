@@ -1,3 +1,5 @@
+import { isAiConnectedReportsEnabled } from "@/services/ai-integrity/connected-report-access";
+import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
@@ -12,9 +14,10 @@ export async function POST(request: Request) {
   const context = await getAppContext();
   if (!context) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) return NextResponse.json({ error: "Unavailable." }, { status: 404 });
-  if (!validOrigin(request)) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
+  if (!validOrigin(request) || (isAiConnectedReportsEnabled() && !request.headers.get("origin"))) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
   if ((await checkRateLimit({ key: `ai-integrity-scan:${context.workspace.id}`, limit: 10, windowMs: 600000 })).limited) return NextResponse.json({ error: "Too many scans. Try again later." }, { status: 429 });
   try {
+    if (isAiConnectedReportsEnabled() && !(await hasCurrentAccountLegalAcceptance(context.user.id))) throw new Error("Review the current account terms before preparing source data.");
     const body = await readScanRequest(request);
     const result = await runAiIntegrityScan({ ...body, workspaceId: context.workspace.id, actorUserId: context.user.id });
     return NextResponse.json({ snapshotId: result.snapshotId, replayed: result.replayed }, { headers: { "Cache-Control": "private, no-store" } });

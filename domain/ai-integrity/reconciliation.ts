@@ -5,6 +5,8 @@ import { evaluateAiAttributionCoverage, type CoverageBucket, type CoverageMappin
 import { providerProjectMappingKey } from "./mapping-key";
 
 export const AI_INTEGRITY_RULE_VERSION = "ai-integrity/4.1.0";
+export const AI_CONNECTED_RULE_VERSION = "ai-integrity/4.2.0";
+export const AI_SUPPORTED_RULE_VERSIONS = [AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION];
 const ZERO = BigInt(0);
 const SCALE = BigInt(10) ** BigInt(12);
 export function aiDecimal(value: string): bigint {
@@ -41,7 +43,7 @@ export type ScanBatch = {
 };
 export type SourceClosureReview = { batchId: string; exportedAt: string; completeThrough: string };
 export type AiScanInput = {
-  ruleVersion: typeof AI_INTEGRITY_RULE_VERSION; workspaceId: string; asOf: string; lagHours: number;
+  ruleVersion: typeof AI_INTEGRITY_RULE_VERSION | typeof AI_CONNECTED_RULE_VERSION; workspaceId: string; asOf: string; lagHours: number;
   sourceReviews: SourceClosureReview[]; batches: ScanBatch[];
   buckets: ScanBucket[]; usage: ScanUsage[]; knownBuckets: ScanBucket[]; knownUsage: ScanUsage[];
   mappings: ScanMapping[];
@@ -96,7 +98,8 @@ export function reconcileAiIntegrity(input: AiScanInput) {
   input = { ...input, batches: byId(input.batches), buckets: byId(input.buckets), usage: byId(input.usage), revenue: byId(input.revenue),
     knownUsage: byId(input.knownUsage), knownBuckets: byId(input.knownBuckets), mappings: byId(input.mappings),
     sourceReviews: [...input.sourceReviews].sort((a, b) => a.batchId.localeCompare(b.batchId)) };
-  if (input.ruleVersion !== AI_INTEGRITY_RULE_VERSION) throw new Error("Unsupported rule version.");
+  if (!AI_SUPPORTED_RULE_VERSIONS.includes(input.ruleVersion)) throw new Error("Unsupported rule version.");
+  const separateUsageUnits = input.ruleVersion === AI_CONNECTED_RULE_VERSION;
   const asOf = aiTimestamp(input.asOf);
   if (!Number.isInteger(input.lagHours) || input.lagHours < 0 || input.lagHours > 720) throw new Error("Choose a consolidation lag between 0 and 720 hours.");
   const batchOf = (kind: ScanBatch["sourceKind"]) => {
@@ -192,6 +195,7 @@ export function reconcileAiIntegrity(input: AiScanInput) {
     const scopeMapping = confirmedUsageScope(input, bucket);
     const relevant = input.usage.filter((u) => providerKey(u.provider) === providerKey(bucket.provider)
       && compatible(u.providerProjectId, bucket.projectId) && compatible(u.model, bucket.model)
+      && (!separateUsageUnits || !bucket.usageUnit || u.unit === bucket.usageUnit)
       && aiTimestamp(u.occurredAt) >= aiTimestamp(bucket.windowStart) && aiTimestamp(u.occurredAt) < aiTimestamp(bucket.windowEnd));
     let reason: string | null = null;
     if (!ledgerComplete || !providerComplete) reason = "SOURCE_INCOMPLETE_FOR_USAGE_COMPARISON";
@@ -202,7 +206,7 @@ export function reconcileAiIntegrity(input: AiScanInput) {
     else if (!bucket.usageUnit || bucket.usageQuantity === null) reason = "PROVIDER_USAGE_UNAVAILABLE";
     else if (aiDecimal(bucket.usageQuantity) < ZERO || bucket.adjustmentKind || (bucket.costAmount !== null && aiDecimal(bucket.costAmount) < ZERO)
       || relevant.some((u) => aiDecimal(u.quantity) < ZERO)) reason = "USAGE_ADJUSTMENT_REQUIRES_REVIEW";
-    else if (input.buckets.some((other) => other.id !== bucket.id && other.usageQuantity !== null && usageScopeOverlaps(other, bucket))) reason = "OVERLAPPING_USAGE_BUCKETS";
+    else if (input.buckets.some((other) => other.id !== bucket.id && other.usageQuantity !== null && (!separateUsageUnits || !other.usageUnit || !bucket.usageUnit || other.usageUnit === bucket.usageUnit) && usageScopeOverlaps(other, bucket))) reason = "OVERLAPPING_USAGE_BUCKETS";
     else if (relevant.some((u) => !u.providerProjectId || (bucket.model && !u.model))) reason = "LEDGER_DIMENSION_INCOMPLETE";
     else if (!relevant.length || relevant.some((u) => u.unit !== bucket.usageUnit)) reason = "USAGE_UNIT_NOT_COMPARABLE";
     else if (relevant.some((u) => usageConflicts.has(identityKey(u)))) reason = "CONFLICTING_LEDGER_RECORD_VERSION";

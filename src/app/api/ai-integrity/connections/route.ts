@@ -5,6 +5,7 @@ import { readAiBoundedText } from "@/services/ai-integrity/request-text";
 import { checkRateLimit } from "@/services/security/rate-limit";
 import { validOrigin } from "@/src/app/api/ai-integrity/_shared";
 import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
+import { promoteAiCustomerSource } from "@/services/ai-integrity/promote-source";
 
 export const maxDuration = 90;
 const headers = { "Cache-Control": "private, no-store" };
@@ -28,10 +29,14 @@ export async function POST(request: Request) {
     const raw: unknown = JSON.parse(await readAiBoundedText(request, 8192));
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error();
     const { action, ...input } = raw as Record<string, unknown>;
-    if ((action === "REGISTER" || action === "SYNC") && !(await hasCurrentAccountLegalAcceptance(context.user.id))) return NextResponse.json({ error: "Review the current account terms before connecting a source." }, { status: 403, headers });
+    if ((action === "REGISTER" || action === "SYNC" || action === "PREPARE") && !(await hasCurrentAccountLegalAcceptance(context.user.id))) return NextResponse.json({ error: "Review the current account terms before connecting a source." }, { status: 403, headers });
     if (action === "REGISTER") return NextResponse.json({ connection: await registerAiCustomerSource(context.workspace.id, context.user.id, input) }, { headers });
     if (action === "REVOKE") return NextResponse.json(await revokeAiCustomerSource(context.workspace.id, context.user.id, input), { headers });
     if (action === "SYNC") return NextResponse.json(await syncAiCustomerSource(context.workspace.id, context.user.id, input), { headers });
+    if (action === "PREPARE") {
+      if (Object.keys(input).length !== 1 || typeof input.syncId !== "string") throw new Error();
+      return NextResponse.json(await promoteAiCustomerSource(context.workspace.id, context.user.id, input.syncId), { headers });
+    }
     throw new Error();
   } catch {
     return NextResponse.json({ error: "The connection action could not be completed. Check the credential type, consent period and confirmed test purchase. A read retry can use the same request key; interrupted reads become retryable after 15 minutes." }, { status: 400, headers });

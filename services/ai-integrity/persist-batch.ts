@@ -11,7 +11,7 @@ import {
   type AiUsageInput,
 } from "@/domain/ai-integrity/contracts";
 
-export async function persistAiIntegrityBatch(input: AiIntegrityBatchInput, actorUserId?: string) {
+export async function persistAiIntegrityBatch(input: AiIntegrityBatchInput, actorUserId?: string, transaction?: Prisma.TransactionClient) {
   const plan = prepareAiIntegrityBatch(input);
   const idempotencyWhere = {
     workspaceId_idempotencyKey: {
@@ -20,8 +20,7 @@ export async function persistAiIntegrityBatch(input: AiIntegrityBatchInput, acto
     },
   };
 
-  try {
-    return await prisma.$transaction(async (tx) => {
+  const write = async (tx: Prisma.TransactionClient) => {
       const existing = await tx.aiIntegrityImportBatch.findUnique({ where: idempotencyWhere });
       if (existing) return { batch: existing, replayed: true };
 
@@ -124,7 +123,10 @@ export async function persistAiIntegrityBatch(input: AiIntegrityBatchInput, acto
         await tx.workspaceAuditEvent.create({ data: { workspaceId: plan.workspaceId, actorUserId, action: "AI_INTEGRITY_IMPORT_COMMITTED", metadataJson: { batchId: committed.id, sourceKind: plan.sourceKind, rowCount: committed.rowCount, insertedCount, duplicateCount: committed.duplicateCount, rejectedCount: (plan.dataQuality.rejectedRows as number | undefined) ?? 0 } } });
       }
       return { batch: committed, replayed: false };
-    }, { maxWait: 10_000, timeout: 120_000 });
+  };
+  if (transaction) return write(transaction);
+  try {
+    return await prisma.$transaction(write, { maxWait: 10_000, timeout: 120_000 });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const existing = await prisma.aiIntegrityImportBatch.findUnique({ where: idempotencyWhere });

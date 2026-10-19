@@ -20,14 +20,14 @@ const sourceHelp: Record<SourceKind, string> = {
 };
 const sampleFiles: Record<SourceKind, string> = { STRIPE_REVENUE: "stripe-revenue.csv", INTERNAL_LEDGER: "internal-ledger.csv", PROVIDER_REPORT: "provider-report.csv" };
 
-export function AiIntegrityImportPanel({ syntheticSamples = false }: { syntheticSamples?: boolean }) {
+export function AiIntegrityImportPanel({ syntheticSamples = false, connectedLedger = false, suggestedPeriod }: { syntheticSamples?: boolean; connectedLedger?: boolean; suggestedPeriod?: { start: string; end: string } }) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [sourceKind, setSourceKind] = useState<SourceKind>("STRIPE_REVENUE");
+  const [sourceKind, setSourceKind] = useState<SourceKind>(connectedLedger ? "INTERNAL_LEDGER" : "STRIPE_REVENUE");
   const [file, setFile] = useState<File | null>(null);
-  const [sourceSystem, setSourceSystem] = useState("stripe-export");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [sourceSystem, setSourceSystem] = useState(connectedLedger ? "internal-ledger" : "stripe-export");
+  const [startDate, setStartDate] = useState(suggestedPeriod?.start ?? "");
+  const [endDate, setEndDate] = useState(suggestedPeriod?.end ?? "");
   const [sourceTimezone, setSourceTimezone] = useState("UTC");
   const [review, setReview] = useState<Review | null>(null);
   const [mapping, setMapping] = useState<Record<string, string>>({});
@@ -36,12 +36,15 @@ export function AiIntegrityImportPanel({ syntheticSamples = false }: { synthetic
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
 
   function resetReview() { setReview(null); setMapping({}); setPlan(null); setConfirmed(false); setResult(null); setError(""); }
   function formData(includeMapping: boolean) {
+    if (connectedLedger && !authorized) throw new Error("Confirm authorization to upload this internal usage file.");
     if (!file || !sourceSystem.trim() || !startDate || !endDate || startDate >= endDate) throw new Error("Choose a file, source system and a valid closed UTC date range.");
     const body = new FormData();
     body.set("file", file);
+    if (connectedLedger) body.set("dataAuthorized", "yes");
     body.set("sourceKind", sourceKind);
     body.set("sourceSystem", sourceSystem.trim());
     body.set("windowStart", `${startDate}T00:00:00Z`);
@@ -98,11 +101,11 @@ export function AiIntegrityImportPanel({ syntheticSamples = false }: { synthetic
 
   const inputClass = "min-h-11 w-full rounded-xl border border-[color:var(--border-strong)] bg-[color:var(--background-card)] px-3 text-sm text-[color:var(--foreground)] outline-none focus:border-[color:var(--accent)]";
   return <section className="rev-shell-panel rounded-[28px] p-5 md:p-7">
-    <h2 className="text-lg font-semibold">Which data are you adding?</h2>
-    <p className="mt-2 mb-5 text-sm leading-7 text-[color:var(--text-muted)]">Choose one source, then review the file before saving it. Repeat for each of the three sources.</p>
+    <h2 className="text-lg font-semibold">{connectedLedger ? "Upload your product usage" : "Which data are you adding?"}</h2>
+    <p className="mt-2 mb-5 text-sm leading-7 text-[color:var(--text-muted)]">{connectedLedger ? "Stripe and OpenAI come from your saved API reads. Upload only the internal usage file from your SaaS for the same period." : "Choose one source, then review the file before saving it. Repeat for each of the three sources."}</p>
     <div className="grid gap-4 md:grid-cols-2">
       <label className="space-y-2 text-sm font-semibold text-[color:var(--text-muted)]">Data source
-        <select className={inputClass} disabled={busy} value={sourceKind} onChange={(event) => { const kind = event.target.value as SourceKind; setSourceKind(kind); setFile(null); if (fileInput.current) fileInput.current.value = ""; setSourceSystem(kind === "STRIPE_REVENUE" ? "stripe-export" : kind === "INTERNAL_LEDGER" ? "internal-ledger" : "provider-report"); resetReview(); }}>
+        <select className={inputClass} disabled={busy || connectedLedger} value={sourceKind} onChange={(event) => { const kind = event.target.value as SourceKind; setSourceKind(kind); setFile(null); if (fileInput.current) fileInput.current.value = ""; setSourceSystem(kind === "STRIPE_REVENUE" ? "stripe-export" : kind === "INTERNAL_LEDGER" ? "internal-ledger" : "provider-report"); resetReview(); }}>
           {Object.entries(sourceLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
       </label>
@@ -121,9 +124,10 @@ export function AiIntegrityImportPanel({ syntheticSamples = false }: { synthetic
     </div>
     <p className="mt-4 text-sm leading-6 text-[color:var(--text-muted)]">Use the same period for all three files. For August, choose August 1 to September 1; September 1 is outside the analysis.</p>
     <details className="mt-4 rounded-xl border border-[color:var(--border)] p-4"><summary className="cursor-pointer text-sm text-[color:var(--text-muted)]">File settings & format requirements</summary><div className="mt-4 grid gap-4 md:grid-cols-2"><label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source system<input className={inputClass} value={sourceSystem} onChange={(event) => { setSourceSystem(event.target.value); resetReview(); }} /></label><label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source timezone label<input className={inputClass} value={sourceTimezone} onChange={(event) => { setSourceTimezone(event.target.value); resetReview(); }} /></label></div><p className="mt-4 text-xs leading-6 text-[color:var(--text-muted)]">Dates inside the file need their own timezone offset. Stripe amounts use minor units, such as cents; provider costs use decimal currency units. Import one source per file.</p></details>
-    <div className="mt-3 flex flex-wrap gap-4 text-xs text-[color:var(--accent)]"><a href="/templates/ai-integrity-stripe-revenue.csv" download>Stripe template</a><a href="/templates/ai-integrity-internal-ledger.csv" download>Ledger template</a><a href="/templates/ai-integrity-provider-report.csv" download>Provider template</a></div>
+    <div className="mt-3 flex flex-wrap gap-4 text-xs text-[color:var(--accent)]">{!connectedLedger ? <a href="/templates/ai-integrity-stripe-revenue.csv" download>Stripe template</a> : null}<a href="/templates/ai-integrity-internal-ledger.csv" download>Ledger template</a>{!connectedLedger ? <a href="/templates/ai-integrity-provider-report.csv" download>Provider template</a> : null}</div>
     {syntheticSamples ? <div className="mt-4 rounded-xl border border-[color:var(--border)] p-4"><p className="text-xs leading-6 text-[color:var(--text-muted)]">Test with the synthetic August dataset: use August 1–September 1, 2026 (UTC). Never upload customer data into this preview.</p><div className="mt-2 flex flex-wrap gap-4 text-xs text-[color:var(--accent)]"><a href="/samples/ai-integrity/stripe-revenue.csv" download>Synthetic Stripe</a><a href="/samples/ai-integrity/internal-ledger.csv" download>Synthetic ledger</a><a href="/samples/ai-integrity/provider-report.csv" download>Synthetic provider</a></div></div> : null}
-    <button className="rev-action-button mt-5 px-5 py-3 text-sm" type="button" disabled={busy || !file || !startDate || !endDate} onClick={firstReview}>{busy ? "Working…" : "Next: review this file"}</button>
+    {connectedLedger ? <label className="mt-5 flex items-start gap-3 text-sm leading-7 text-[color:var(--text-muted)]"><input type="checkbox" checked={authorized} onChange={(event) => { setAuthorized(event.target.checked); resetReview(); }} />I am authorized to share this internal usage file for this workspace and reviewed its period. This does not start a scan.</label> : null}
+    <button className="rev-action-button mt-5 px-5 py-3 text-sm" type="button" disabled={busy || !file || !startDate || !endDate || (connectedLedger && !authorized)} onClick={firstReview}>{busy ? "Working…" : "Next: review this file"}</button>
     {error ? <p role="alert" className="mt-4 rounded-xl border border-[color:var(--danger)] px-4 py-3 text-sm text-[color:var(--danger)]">{error}</p> : null}
     {review ? <div className="mt-7 space-y-5 border-t border-[color:var(--border)] pt-6">
       <div><h2 className="[font-family:var(--font-app)] text-lg font-semibold">Column review</h2><p className="mt-1 text-xs text-[color:var(--text-muted)]">{review.rowCount} rows · Confirm every required field. Suggestions are deterministic and never create customer links.</p></div>

@@ -1,3 +1,4 @@
+import { isAiConnectedReportsEnabled } from "./connected-report-access";
 import type { RunAiScanRequest } from "./scan";
 
 export async function readScanRequest(request: Request): Promise<Omit<RunAiScanRequest, "workspaceId" | "actorUserId">> {
@@ -19,7 +20,9 @@ export async function readScanRequest(request: Request): Promise<Omit<RunAiScanR
   let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   const body = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as Record<string, unknown> | null;
-  if (!body || Array.isArray(body) || body.syntheticDataConfirmed !== true || body.closureReviewed !== true) throw new Error("Confirm synthetic data and source closure review.");
+  if (!body || Array.isArray(body) || body.closureReviewed !== true) throw new Error("Confirm source closure review.");
+  const connected = body.connectedReportAuthorized === true && body.syntheticDataConfirmed === false;
+  if (connected ? !isAiConnectedReportsEnabled() : body.syntheticDataConfirmed !== true || body.connectedReportAuthorized === true) throw new Error("Confirm the supported data mode and source authorization.");
   if (!Array.isArray(body.batchIds) || body.batchIds.length !== 3 || body.batchIds.some((id) => typeof id !== "string" || !id || id.length > 200)) throw new Error("Select three source batches.");
   if (typeof body.asOf !== "string" || typeof body.lagHours !== "number" || !Array.isArray(body.sourceReviews) || body.sourceReviews.length !== 3) throw new Error("Complete analysis time, consolidation lag and source reviews.");
   const sourceReviews = body.sourceReviews.map((value: unknown) => {
@@ -29,6 +32,6 @@ export async function readScanRequest(request: Request): Promise<Omit<RunAiScanR
     return { batchId: r.batchId, exportedAt: r.exportedAt, completeThrough: r.completeThrough };
   });
   if (body.grantId !== undefined && (typeof body.grantId !== "string" || body.grantId.length > 200)) throw new Error("Invalid purchase reference.");
-  return { batchIds: body.batchIds as string[], asOf: body.asOf, lagHours: body.lagHours, sourceReviews, syntheticDataConfirmed: true,
+  return { batchIds: body.batchIds as string[], asOf: body.asOf, lagHours: body.lagHours, sourceReviews, syntheticDataConfirmed: !connected, connectedReportAuthorized: connected,
     ...(typeof body.grantId === "string" ? { grantId: body.grantId } : {}) };
 }

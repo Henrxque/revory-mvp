@@ -351,6 +351,7 @@ model Workspace {
   legalAcceptances           LegalAcceptance[]
   aiIntegrityImportBatches   AiIntegrityImportBatch[]
   aiIntegritySources        AiIntegritySourceConnection[]
+  aiIntegrityReportDraft    AiIntegrityReportDraft?
   aiMonitorComparisons      AiIntegrityMonitorComparison[]
   aiIntegrityMappings        AiIntegrityMapping[]
     aiIntegritySnapshots       AiIntegritySnapshot[]
@@ -693,10 +694,38 @@ model AiIntegritySourceSync {
   artifactHash    String?
   createdAt       DateTime @default(now())
   connection      AiIntegritySourceConnection @relation(fields: [workspaceId, connectionId], references: [workspaceId, id], onDelete: Cascade, map: "ai_source_sync_connection_fkey")
+  promotions      AiIntegritySourcePromotion[]
 
+  @@unique([workspaceId, id], map: "ai_source_sync_workspace_id_key")
   @@unique([workspaceId, requestKey], map: "ai_source_sync_request_key")
   @@index([workspaceId, createdAt], map: "ai_source_sync_retention_idx")
   @@map("ai_integrity_source_syncs")
+}
+
+model AiIntegritySourcePromotion {
+  id           String @id @default(cuid())
+  workspaceId  String
+  syncId       String
+  batchId      String @unique
+  contentHash  String
+  createdAt    DateTime @default(now())
+  sync         AiIntegritySourceSync @relation(fields: [workspaceId, syncId], references: [workspaceId, id], onDelete: Restrict, map: "ai_source_promotion_sync_fkey")
+  batch        AiIntegrityImportBatch @relation(fields: [workspaceId, batchId], references: [workspaceId, id], onDelete: Cascade, map: "ai_source_promotion_batch_fkey")
+
+  @@unique([workspaceId, batchId], map: "ai_source_promotion_workspace_batch_key")
+  @@unique([workspaceId, contentHash], map: "ai_source_promotion_content_key")
+  @@index([workspaceId, syncId], map: "ai_source_promotion_sync_idx")
+  @@map("ai_integrity_source_promotions")
+}
+
+model AiIntegrityReportDraft {
+  workspaceId String @id
+  revision    Int @default(1)
+  setupJson   Json
+  updatedAt   DateTime @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("ai_integrity_report_drafts")
 }
 
 model AiIntegrityImportBatch {
@@ -721,6 +750,7 @@ model AiIntegrityImportBatch {
   usageRecords        AiIntegrityUsageRecord[]
   providerCostBuckets AiIntegrityProviderBucket[]
   snapshotInputs      AiIntegritySnapshotInput[]
+  sourcePromotion     AiIntegritySourcePromotion?
 
   @@unique([workspaceId, id])
   @@unique([workspaceId, idempotencyKey])

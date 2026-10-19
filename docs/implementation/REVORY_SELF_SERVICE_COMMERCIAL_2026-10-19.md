@@ -36,6 +36,8 @@ Aceite: duas contas de teste em workspaces diferentes conectam/revogam independe
 
 ## Entrega B — conectar fontes ao relatório
 
+**Execução local em 2026-10-19:** [registro da entrega B](REVORY_CONNECTED_REPORT_FLOW_2026-10-19.md). Promoção de leituras completas, ledger autorizado, revisão, rascunho por workspace, scan conectado e exports implementados sob gate local separado. Prova com fixtures não vazias e CSV encontra diferença de 20 input tokens. Ainda falta equivalência com contas reais e a ativação comercial da parte C.
+
 1. Converter artefatos completos das APIs em lotes normalizados próprios do intake, com origem API, IDs externos, versão, hash, período, unidade, moeda, canal, coleta e limites. Preservar artefato original e proveniência. Não exigir upload CSV duplicado de Stripe/OpenAI conectados.
 2. Manter custos e uso OpenAI em canais separados quando suas dimensões diferirem. Custo por projeto não herda modelo/customer sem evidência. Evitar fan-out ou união que duplique custo; dados agregados não provam margem por cliente.
 3. Aceitar CSV/XLSX do ledger interno no modo real com compra e consentimento aprovados; manter o Preview sintético existente com sua política de amostras. Não converter grants sintéticos em autorização para dados reais.

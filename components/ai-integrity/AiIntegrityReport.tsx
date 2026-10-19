@@ -12,14 +12,14 @@ export function AiFindingEvidence({ finding }: { finding: AiScanFinding }) {
   </div>;
 }
 
-export function AiIntegrityReport({ result, snapshotId, demo = false }: { result: AiScanResult; snapshotId?: string; demo?: boolean }) {
+export function AiIntegrityReport({ result, snapshotId, demo = false, connected = false }: { result: AiScanResult; snapshotId?: string; demo?: boolean; connected?: boolean }) {
   const reasons = [...new Map(result.suppressions.map((s) => [s.code, s])).values()];
   return <div className="space-y-6">
     <section className="rev-shell-hero rev-accent-mist rounded-[30px] p-6 md:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-3"><p className="rev-kicker">{demo ? "Synthetic example · Read-only demo" : "Integrity Scan · Synthetic test report"}</p><span className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-xs text-[color:var(--text-muted)]">{result.windowStart.slice(0, 10)} to {result.windowEnd.slice(0, 10)}</span></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><p className="rev-kicker">{demo ? "Synthetic example · Read-only demo" : connected ? "Integrity Scan · Connected source report" : "Integrity Scan · Synthetic test report"}</p><span className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-xs text-[color:var(--text-muted)]">{result.windowStart.slice(0, 10)} to {result.windowEnd.slice(0, 10)}</span></div>
       <h1 className="rev-display-hero mt-5">{result.findings.length ? `${result.findings.length} ${result.findings.length === 1 ? "difference" : "differences"} to review.` : "No comparable differences found."}</h1>
       <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--text-muted)]">{result.findings.length ? "Start with the comparison below. See what each source recorded, understand the difference and check the suggested next step. A difference alone does not prove financial loss." : "Check the data limits below before drawing a conclusion. Missing or incomplete data can prevent a comparison."}</p>
-      <p className="mt-3 text-xs leading-6 text-[color:var(--text-muted)]">Fictional test data · Use this report to practice reviewing evidence.</p>
+      <p className="mt-3 text-xs leading-6 text-[color:var(--text-muted)]">{connected ? "Authorized source review · Limited to the selected API reads and internal usage file. Stripe invoices are billing context, not net collected revenue." : "Fictional test data · Use this report to practice reviewing evidence."}</p>
       {result.findings.length ? <a className="rev-button-primary mt-5" href="#report-findings">Understand the result</a> : null}
       {snapshotId ? <details className="mt-5"><summary className="cursor-pointer text-sm text-[color:var(--accent)]">Export this report</summary><div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-[color:var(--accent)]"><a href={`/api/ai-integrity/scans/${snapshotId}/export`}>Download evidence JSON</a><a href={`/api/ai-integrity/scans/${snapshotId}/export?format=csv`}>Download findings CSV</a></div></details> : null}
     </section>

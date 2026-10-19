@@ -1,3 +1,4 @@
+import { isAiConnectedReportsEnabled } from "@/services/ai-integrity/connected-report-access";
 import type { AiIntegritySourceKind } from "@/domain/ai-integrity/contracts";
 import { AI_INTAKE_MAX_FILE_BYTES, type AiIntakeFile, type AiIntakeMetadata } from "@/services/ai-integrity/intake";
 import { readBoundedMultipartFormData } from "@/services/security/bounded-form-data";
@@ -18,7 +19,9 @@ export async function readAiIntakeRequest(request: Request) {
   const file: AiIntakeFile = { bytes: new Uint8Array(await fileValue.arrayBuffer()), fileName: fileValue.name, mimeType: fileValue.type };
   const sourceKind = String(form.get("sourceKind") ?? "") as AiIntegritySourceKind;
   if (!["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"].includes(sourceKind)) throw new Error("Choose a supported source type.");
-  assertAiSyntheticPreviewSample(file, sourceKind);
+  if (isAiConnectedReportsEnabled()) {
+    if (sourceKind !== "INTERNAL_LEDGER" || form.get("dataAuthorized") !== "yes") throw new Error("Authorize an internal ledger file; use the connected sources for Stripe and OpenAI.");
+  } else assertAiSyntheticPreviewSample(file, sourceKind);
   const metadata = {
     sourceKind,
     sourceSystem: String(form.get("sourceSystem") ?? "").trim().slice(0, 80),

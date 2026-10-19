@@ -1,3 +1,5 @@
+import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
+import { isAiConnectedReportsEnabled, requireConnectedReportAccess } from "@/services/ai-integrity/connected-report-access";
 import { NextResponse } from "next/server";
 import { requireAiScanPreparationAccess } from "@/services/ai-integrity/purchase";
 
@@ -11,10 +13,12 @@ export async function POST(request: Request) {
   const context = await getAppContext();
   if (!context) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   if (!(await canUseAiIntegrityIntakePreview(context.workspace.id))) return NextResponse.json({ error: "Unavailable." }, { status: 404 });
-  if (!validOrigin(request)) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
+  if (!validOrigin(request) || (isAiConnectedReportsEnabled() && !request.headers.get("origin"))) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
   if ((await checkRateLimit({ key: `ai-integrity-review:${context.workspace.id}`, limit: 15, windowMs: 10 * 60 * 1000 })).limited) return NextResponse.json({ error: "Too many review attempts." }, { status: 429 });
   try {
-    await requireAiScanPreparationAccess(context.workspace.id);
+    if (isAiConnectedReportsEnabled() && !(await hasCurrentAccountLegalAcceptance(context.user.id))) throw new Error("Review the current account terms before preparing source data.");
+    if (isAiConnectedReportsEnabled()) await requireConnectedReportAccess(context.workspace.id, context.user.id);
+    else await requireAiScanPreparationAccess(context.workspace.id);
     const { file, form, metadata } = await readAiIntakeRequest(request);
     const review = await reviewAiIntakeFile(file, metadata.sourceKind);
     if (form.get("mapping") === null) return NextResponse.json({ review }, { headers: { "Cache-Control": "private, no-store" } });
