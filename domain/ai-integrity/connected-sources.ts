@@ -8,7 +8,7 @@ export const AI_OPENAI_SOURCE_VERSION = "connected-sources/openai-api-v1";
 export const AI_SOURCE_PROVIDERS = ["STRIPE", "OPENAI"] as const;
 export type AiSourceProvider = typeof AI_SOURCE_PROVIDERS[number];
 export type AiSourceRead = { method: "GET"; origin: "https://api.stripe.com" | "https://api.openai.com"; path: string; query: Record<string, string | string[]> };
-// There is deliberately no HTTP/credential implementation in this rehearsal.
+// The domain accepts a bounded transport; HTTP and credentials stay server-side.
 export type AiSourceTransport = (read: AiSourceRead) => Promise<unknown>;
 export type AiSourceChannel = { channel: "stripe-invoices" | "openai-usage" | "openai-costs"; batch: AiIntegrityBatchInput | null; rowCount: number };
 

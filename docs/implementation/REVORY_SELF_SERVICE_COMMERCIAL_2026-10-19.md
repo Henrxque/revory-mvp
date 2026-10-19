@@ -22,6 +22,8 @@ Compatível significa ter autorização sobre as contas das fontes, permissões 
 
 ## Entrega A — conexões por empresa
 
+**Execução em 2026-10-19:** a base local por workspace foi implementada e verificada conforme [registro de entrega](REVORY_CUSTOMER_CONNECTIONS_FOUNDATION_2026-10-19.md). Cadastro/revogação, envelope criptográfico e transporte Stripe estão no código; o gate permanece local e Stripe test-only. A tabela de evidência acima descreve o ponto de partida. Não houve ativação remota, prova nova nas APIs reais, ligação ao scan ou checkout comercial.
+
 1. Criar armazenamento protegido de credenciais por workspace e conexão. Preferir cofre gerenciado; qualquer envelope criptográfico precisa de chave mestra fora do banco, versionamento, integridade ligada ao workspace/provider/connection, rotação e política operacional definida. Banco, logs, exports e respostas nunca contêm credenciais em claro.
 2. Separar chaves das fontes do cliente, credencial da cobrança do REVORY e credenciais usadas para geração de IA. Usar migração aditiva, sem reaproveitar campos contractor.
 3. Implementar endpoints autenticados para cadastrar, verificar, substituir e desconectar fontes. Validar origem/CSRF, limites de corpo, rate limit, papel do membro, escopo, ambiente e workspace. Verificação de conexão não pode iniciar um scan gratuito.

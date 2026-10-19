@@ -653,10 +653,29 @@ model AiIntegritySourceConnection {
   updatedAt        DateTime @updatedAt
   workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, map: "ai_source_workspace_fkey")
   syncs            AiIntegritySourceSync[]
+  credential       AiIntegritySourceCredential?
 
   @@unique([workspaceId, provider, mode], map: "ai_source_provider_mode_key")
   @@unique([workspaceId, id], map: "ai_source_workspace_id_key")
   @@map("ai_integrity_source_connections")
+}
+
+// Secret material is kept separate from source metadata and workspace exports.
+model AiIntegritySourceCredential {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  connectionId String   @unique
+  keyVersion   String
+  iv           String
+  authTag      String
+  ciphertext   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  connection   AiIntegritySourceConnection @relation(fields: [workspaceId, connectionId], references: [workspaceId, id], onDelete: Cascade, map: "ai_source_credential_connection_fkey")
+
+  @@unique([workspaceId, connectionId], map: "ai_source_credential_workspace_connection_key")
+  @@index([workspaceId], map: "ai_source_credential_workspace_idx")
+  @@map("ai_integrity_source_credentials")
 }
 
 model AiIntegritySourceSync {
