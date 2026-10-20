@@ -1,3 +1,4 @@
+import { recurringEnabled } from "./recurring-access";
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
@@ -73,8 +74,8 @@ export async function acknowledgeAiMonitorAlert(workspaceId: string, actorUserId
   });
 }
 export async function getAiMonitorArtifact(workspaceId: string, id: string) {
-  if (!isAiMonitorRehearsalEnabled()) return null;
-  const comparison = await prisma.aiIntegrityMonitorComparison.findFirst({ where: { workspaceId, id, mode: AI_MONITOR_MODE } });
+  if (!isAiMonitorRehearsalEnabled() && !recurringEnabled()) return null;
+  const comparison = await prisma.aiIntegrityMonitorComparison.findFirst({ where: { workspaceId, id, mode: recurringEnabled() ? "CONNECTED_MONITOR" : AI_MONITOR_MODE } });
   if (!comparison) return null;
   if (aiDigest(comparison.artifactJson) !== comparison.artifactHash) throw new Error("Monitoring artifact integrity check failed.");
   return { comparison, artifact: comparison.artifactJson as unknown as AiMonitorArtifact };

@@ -1,4 +1,5 @@
 import "server-only";
+import { monitorPaid } from "./recurring-access";
 import { createHash } from "node:crypto";
 import Stripe from "stripe";
 import type { Prisma } from "@prisma/client";
@@ -32,6 +33,7 @@ export function aiScanStripeClient() {
 
 export async function hasAiScanPreparationAccess(workspaceId: string) {
   if (!isAiIntegrityExperienceEnabled()) return true;
+  if (await monitorPaid(prisma, workspaceId)) return true;
   return Boolean(await prisma.aiIntegrityScanGrant.findFirst({ where: { workspaceId, status: "ACTIVE", consumedAt: null, order: aiScanEligibleOrderWhere() }, select: { id: true } }));
 }
 export async function requireAiScanPreparationAccess(workspaceId: string) {

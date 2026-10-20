@@ -52,6 +52,7 @@ export async function enforceWorkspaceRetention(
       where: { workspaceId, validUntil: { lt: cutoff } },
     });
     await tx.aiIntegrityReportDraft.deleteMany({ where: { workspaceId, updatedAt: { lt: cutoff } } });
+    await tx.aiIntegrityMonitorState.deleteMany({ where: { workspaceId, kind: { in: ["RUN", "NOTICE", "INVESTIGATION", "CHECKOUT"] }, updatedAt: { lt: cutoff }, status: { not: "RUNNING" } } });
     const aiSourceSyncs = await tx.aiIntegritySourceSync.deleteMany({ where: { workspaceId, createdAt: { lt: cutoff }, promotions: { none: {} } } });
     const aiRevokedSources = await tx.aiIntegritySourceConnection.deleteMany({ where: { workspaceId, status: "REVOKED", revokedAt: { lt: cutoff }, syncs: { none: { promotions: { some: {} } } } } });
     const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count + aiSourceSyncs.count + aiRevokedSources.count + aiMonitorComparisons.count;

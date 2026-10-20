@@ -1,5 +1,5 @@
 import { canonicalAiJson } from "./contracts";
-import { AI_INTEGRITY_RULE_VERSION, aiDecimal, aiDecimalString, aiDigest, aiTimestamp, reconcileAiIntegrity, type AiScanInput, type AiScanResult } from "./reconciliation";
+import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, aiDecimal, aiDecimalString, aiDigest, aiTimestamp, reconcileAiIntegrity, type AiScanInput, type AiScanResult } from "./reconciliation";
 
 export const AI_MONITOR_VERSION = "ai-monitor/rehearsal-v1";
 export const AI_MONITOR_MODE = "SYNTHETIC_REHEARSAL";
@@ -50,9 +50,10 @@ function signals(input: AiScanInput, result: AiScanResult) {
   return rows;
 }
 
-export function compareAiIntegrityPeriods(baseline: AiScanInput, current: AiScanInput) {
+export function compareAiIntegrityPeriods(baseline: AiScanInput, current: AiScanInput, connected = false) {
   if (baseline.workspaceId !== current.workspaceId) throw new Error("Reports must belong to the same workspace.");
-  if (baseline.ruleVersion !== AI_INTEGRITY_RULE_VERSION || current.ruleVersion !== AI_INTEGRITY_RULE_VERSION) throw new Error("Unsupported monitoring rule version.");
+  const ruleVersion = connected ? AI_CONNECTED_RULE_VERSION : AI_INTEGRITY_RULE_VERSION;
+  if (baseline.ruleVersion !== ruleVersion || current.ruleVersion !== ruleVersion) throw new Error("Unsupported monitoring rule version.");
   const before = reconcileAiIntegrity(baseline), after = reconcileAiIntegrity(current);
   const from = aiTimestamp(before.windowStart), through = aiTimestamp(before.windowEnd);
   const nextFrom = aiTimestamp(after.windowStart), nextThrough = aiTimestamp(after.windowEnd);
@@ -82,12 +83,21 @@ export function compareAiIntegrityPeriods(baseline: AiScanInput, current: AiScan
   const candidates = movements.filter((row) => row.movement === "NEW" || (row.movement === "PERSISTENT" && abs(aiDecimal(row.current!)) > abs(aiDecimal(row.previous!))));
   const alerts = candidates.slice(0, 19).map((row) => ({ key: row.key, kind: row.movement === "NEW" ? "NEW_DIFFERENCE" : "DIFFERENCE_INCREASED", signalKey: row.key }));
   if (limited) alerts.push({ key: aiDigest(["quality", limit, movements.filter((r) => r.reason).map((r) => r.key)]), kind: "COMPARISON_LIMITED", signalKey: "" });
-  return { mode: AI_MONITOR_MODE, monitorVersion: AI_MONITOR_VERSION, ruleVersion: AI_INTEGRITY_RULE_VERSION,
+  return { mode: connected ? "CONNECTED_MONITOR" : AI_MONITOR_MODE, monitorVersion: connected ? "ai-monitor/connected-v1" : AI_MONITOR_VERSION, ruleVersion,
     baselineWindow: { start: before.windowStart, end: before.windowEnd }, currentWindow: { start: after.windowStart, end: after.windowEnd },
     comparable: !limited, comparisonLimit: limit, movements, alerts, omittedAlerts: Math.max(0, candidates.length - 19),
     counts: { new: movements.filter((r) => r.movement === "NEW").length, persistent: movements.filter((r) => r.movement === "PERSISTENT").length,
       noLongerObserved: movements.filter((r) => r.movement === "RESOLVED").length, suppressed: movements.filter((r) => r.movement === "SUPPRESSED").length },
-    limitations: ["Synthetic rehearsal; no real provider connection or scheduled reads.", "No longer observed describes a comparable later period; it does not prove remediation or recovered money.",
-      "Periods must be adjacent, equal duration and use the same source/bucket scopes. Changed or missing evidence suppresses movement.", "Cost and usage movements remain separate; no monetary conversion of usage or combined at-risk total.", "Alerts are local review prompts, not delivered emails or a monitoring subscription."] };
+    limitations: [connected ? "Connected evidence; comparison is limited to the authorized sources and eligible windows." : "Synthetic rehearsal; no real provider connection or scheduled reads.", "No longer observed describes a comparable later period; it does not prove remediation or recovered money.",
+      "Periods must be adjacent, equal duration and use the same source/bucket scopes. Changed or missing evidence suppresses movement.", "Cost and usage movements remain separate; no monetary conversion of usage or combined at-risk total.", connected ? "A review signal is not proof of loss, remediation or recovery." : "Alerts are local review prompts, not delivered emails or a monitoring subscription."] };
 }
 export type AiMonitorArtifact = ReturnType<typeof compareAiIntegrityPeriods>;
+
+export function initialAiMonitorSignals(input: AiScanInput): AiMonitorSignal[] {
+  const result = reconcileAiIntegrity(input);
+  return [...signals(input, result).values()].filter(row => row.fingerprint).map(row => ({
+    key: row.key, kind: row.kind, scope: row.scope, unit: row.unit,
+    movement: "SUPPRESSED", previous: null, current: row.value, change: null,
+    previousFingerprint: null, currentFingerprint: row.fingerprint, reason: "BASELINE_PENDING",
+  }));
+}

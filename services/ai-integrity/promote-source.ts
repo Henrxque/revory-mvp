@@ -1,4 +1,5 @@
 import "server-only";
+import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
 import { prisma } from "@/db/prisma";
 import { aiDigest } from "@/domain/ai-integrity/reconciliation";
 import { prepareAiIntegrityBatch, type AiIntegrityBatchInput } from "@/domain/ai-integrity/contracts";
@@ -17,6 +18,7 @@ export async function promoteAiCustomerSource(workspaceId: string, actorUserId: 
     const connection = sync.connection;
     if (connection.status !== "ACTIVE" || connection.generation !== sync.generation) throw new Error("This connection was revoked or replaced. Authorize and read it again.");
     const artifact = sync.artifactJson as unknown as Artifact;
+    if (isAiCommercialRuntimeEnabled() && connection.provider === "STRIPE" && !artifact.accountIdentityVerified) throw new Error("Read and verify this Stripe source account again.");
     const channelNames = connection.provider === "STRIPE" ? ["stripe-invoices"] : ["openai-usage", "openai-costs"];
     if (artifact.mode !== AI_CUSTOMER_SOURCE_MODE || artifact.provider !== connection.provider || artifact.organizationId !== connection.organizationId || !artifact.paginationComplete
       || artifact.windowStart !== sync.windowStart.toISOString() || artifact.windowEnd !== sync.windowEnd.toISOString()
@@ -43,7 +45,7 @@ export async function promoteAiCustomerSource(workspaceId: string, actorUserId: 
       fileName: connection.provider === "STRIPE" ? "stripe-invoices-api.json" : "openai-usage-costs-api.json",
       fileSha256: contentHash, mappingSha256: aiDigest("source-promotion/v1"), sourceTimezone: "UTC",
       windowStart: artifact.windowStart, windowEnd: artifact.windowEnd,
-      dataQuality: { mode: CONNECTED_REPORT_MODE, rejectedRows: 0, sourceEvidence: { syncId: sync.id, artifactHash: sync.artifactHash, connectionId: connection.id, generation: sync.generation, provider: artifact.provider, accountId: artifact.organizationId, accountIdentity: connection.provider === "STRIPE" ? "USER_DECLARED_NOT_VERIFIED" : "ORGANIZATION_HEADER", fetchedAt: artifact.fetchedAt, paginationComplete: true, completeness: "PAGINATION_IS_NOT_ACCOUNT_TOTAL_COMPLETENESS", channels: artifact.channels.map((channel) => ({ channel: channel.channel, rowCount: channel.rowCount, limits: channel.batch?.dataQuality.scope ?? "No reported rows; total activity unknown" })) } },
+      dataQuality: { mode: CONNECTED_REPORT_MODE, rejectedRows: 0, sourceEvidence: { syncId: sync.id, artifactHash: sync.artifactHash, connectionId: connection.id, generation: sync.generation, provider: artifact.provider, accountId: artifact.organizationId, accountIdentity: connection.provider === "STRIPE" ? isAiCommercialRuntimeEnabled() ? "ACCOUNT_ENDPOINT_VERIFIED" : "USER_DECLARED_NOT_VERIFIED" : "ORGANIZATION_HEADER", fetchedAt: artifact.fetchedAt, paginationComplete: true, completeness: "PAGINATION_IS_NOT_ACCOUNT_TOTAL_COMPLETENESS", channels: artifact.channels.map((channel) => ({ channel: channel.channel, rowCount: channel.rowCount, limits: channel.batch?.dataQuality.scope ?? "No reported rows; total activity unknown" })) } },
       records: records.map((record, index) => ({ ...record, sourceRowNumber: index + 1 })),
     } as AiIntegrityBatchInput;
     const result = await persistAiIntegrityBatch(batch, actorUserId, tx);

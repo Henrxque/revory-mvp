@@ -73,7 +73,7 @@ async function pages(read: AiSourceRead, transport: AiSourceTransport, checkActi
   throw new Error("Source response exceeds the page limit; no checkpoint was advanced.");
 }
 
-export async function readAiConnectedSource(input: { workspaceId: string; provider: AiSourceProvider; accountId: string; windowStart: string; windowEnd: string; asOf: string; lagHours: number }, transport: AiSourceTransport, checkActive: () => Promise<void> = async () => {}, source: { mode: string; version: string } = { mode: AI_SOURCE_MODE, version: AI_SOURCE_VERSION }) {
+export async function readAiConnectedSource(input: { workspaceId: string; provider: AiSourceProvider; accountId: string; windowStart: string; windowEnd: string; asOf: string; lagHours: number }, transport: AiSourceTransport, checkActive: () => Promise<void> = async () => {}, source: { mode: string; version: string; stripeLiveMode?: boolean; accountIdentityVerified?: boolean } = { mode: AI_SOURCE_MODE, version: AI_SOURCE_VERSION }) {
   if (!AI_SOURCE_PROVIDERS.includes(input.provider)) throw new Error("Unsupported source provider.");
   id(input.accountId); id(input.workspaceId);
   const period = validateAiSourceWindow(input.windowStart, input.windowEnd, input.asOf, input.lagHours);
@@ -91,13 +91,13 @@ export async function readAiConnectedSource(input: { workspaceId: string; provid
     const invoices = await pages({ method: "GET", origin: "https://api.stripe.com", path: "/v1/invoices", query: { "created[gte]": String(period.start), "created[lt]": String(period.end), limit: "100" } }, transport, checkActive);
     const rows = invoices.map((invoice): AiRevenueInput => {
       const externalId = id(invoice.id)!;
-      if (invoice.object !== "invoice" || invoice.livemode !== false || !["draft", "open", "paid", "uncollectible", "void"].includes(String(invoice.status))) throw new Error("Rehearsal expects synthetic test invoice context.");
+      if (invoice.object !== "invoice" || invoice.livemode !== (source.stripeLiveMode === true) || !["draft", "open", "paid", "uncollectible", "void"].includes(String(invoice.status))) throw new Error("Rehearsal expects synthetic test invoice context.");
       const created = integer(invoice.created); if (created < period.start || created >= period.end) throw new Error("Invoice is outside the requested creation window.");
       const currency = String(invoice.currency).toUpperCase();
       const exponent = ({ USD: 2, EUR: 2, GBP: 2, BRL: 2, CAD: 2, AUD: 2, JPY: 0, KWD: 3 } as Record<string, number>)[currency];
       if (exponent === undefined) throw new Error("Currency exponent requires an explicit supported currency contract.");
       const amount = integer(invoice.amount_paid), customer = typeof invoice.customer === "string" ? id(invoice.customer) : invoice.customer == null ? null : id(object(invoice.customer).id);
-      const payload = { id: externalId, object: "invoice", created, status: invoice.status, amount_paid: amount, currency: invoice.currency, customer, livemode: false };
+      const payload = { id: externalId, object: "invoice", created, status: invoice.status, amount_paid: amount, currency: invoice.currency, customer, livemode: source.stripeLiveMode === true };
       return { ...common(externalId, payload), eventKind: "invoice", status: String(invoice.status).toUpperCase(), occurredAt: iso(created), stripeInvoiceId: externalId, stripeCustomerExternalId: customer, amountMinor: String(amount), currency, currencyExponent: exponent };
     });
     make("stripe-invoices", rows);
@@ -132,7 +132,7 @@ export async function readAiConnectedSource(input: { workspaceId: string; provid
     make("openai-usage", rows(usage, "openai-usage")); make("openai-costs", rows(costs, "openai-costs"));
   }
   await checkActive();
-  return { mode: source.mode, connectorVersion: source.version, provider: input.provider, organizationId: input.accountId, windowStart: input.windowStart, windowEnd: input.windowEnd, fetchedAt: input.asOf, paginationComplete: true, activity: channels.some((channel) => channel.rowCount > 0) ? "REPORTED_ROWS" : "NO_REPORTED_ROWS", channels };
+  return { ...(source.accountIdentityVerified === true ? { accountIdentityVerified: true } : {}), mode: source.mode, connectorVersion: source.version, provider: input.provider, organizationId: input.accountId, windowStart: input.windowStart, windowEnd: input.windowEnd, fetchedAt: input.asOf, paginationComplete: true, activity: channels.some((channel) => channel.rowCount > 0) ? "REPORTED_ROWS" : "NO_REPORTED_ROWS", channels };
 }
 
 export function aiSourceSemanticRows(batch: AiIntegrityBatchInput) {

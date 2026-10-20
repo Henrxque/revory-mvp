@@ -39,6 +39,7 @@ export async function buildWorkspaceExport(workspaceId: string) {
     aiReportDraft,
     aiMonitorComparisons,
     aiMonitorAlerts,
+    aiRecurringStates,
   ] = await Promise.all([
     prisma.workspace.findUnique({ where: { id: workspaceId }, select: { id: true, name: true, slug: true, status: true, createdAt: true, updatedAt: true } }),
     prisma.canonicalImportSession.findMany({ where: { workspaceId } }),
@@ -76,6 +77,7 @@ export async function buildWorkspaceExport(workspaceId: string) {
     prisma.aiIntegrityReportDraft.findUnique({ where: { workspaceId } }),
     prisma.aiIntegrityMonitorComparison.findMany({ where: { workspaceId } }),
     prisma.aiIntegrityMonitorAlert.findMany({ where: { workspaceId } }),
+    prisma.aiIntegrityMonitorState.findMany({ where: { workspaceId, kind: { not: "LEDGER_TOKEN" } } }),
   ]);
   if (!workspace) throw new Error("Workspace not found.");
   return {
@@ -94,9 +96,10 @@ export async function buildWorkspaceExport(workspaceId: string) {
     quoteRecoveryRuns,
     records,
     revenueRealizationFindings,
-    schemaVersion: 10,
+    schemaVersion: 11,
     settings,
     connectedSourceRehearsal: { connections: aiSourceConnections, reads: aiSourceSyncs, promotions: aiSourcePromotions, reportDraft: aiReportDraft },
+    recurringMonitoring: aiRecurringStates,
     monitoringRehearsal: { comparisons: aiMonitorComparisons, alerts: aiMonitorAlerts },
     workspace,
   };

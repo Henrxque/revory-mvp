@@ -351,6 +351,7 @@ model Workspace {
   legalAcceptances           LegalAcceptance[]
   aiIntegrityImportBatches   AiIntegrityImportBatch[]
   aiIntegritySources        AiIntegritySourceConnection[]
+  aiRecurringStates         AiIntegrityMonitorState[]
   aiIntegrityReportDraft    AiIntegrityReportDraft?
   aiMonitorComparisons      AiIntegrityMonitorComparison[]
   aiIntegrityMappings        AiIntegrityMapping[]
@@ -659,6 +660,29 @@ model AiIntegritySourceConnection {
   @@unique([workspaceId, provider, mode], map: "ai_source_provider_mode_key")
   @@unique([workspaceId, id], map: "ai_source_workspace_id_key")
   @@map("ai_integrity_source_connections")
+}
+
+// Durable recurring operations. No customer credentials or raw source rows here.
+model AiIntegrityMonitorState {
+  id          String   @id @default(cuid())
+  workspaceId String
+  kind        String
+  key         String
+  status      String
+  dataJson    Json
+  revision    Int      @default(1)
+  attempts    Int      @default(0)
+  availableAt DateTime @default(now())
+  leaseToken  String?
+  leaseUntil  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, kind, key], map: "ai_recurring_identity_key")
+  @@index([kind, status, availableAt], map: "ai_recurring_dispatch_idx")
+  @@index([workspaceId, kind, createdAt], map: "ai_recurring_workspace_idx")
+  @@map("ai_integrity_monitor_states")
 }
 
 // Secret material is kept separate from source metadata and workspace exports.

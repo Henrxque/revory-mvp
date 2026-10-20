@@ -1,3 +1,5 @@
+import { recurringEnabled } from "@/services/ai-integrity/recurring-access";
+import { AiRecurringMonitorPage } from "@/components/ai-integrity/AiRecurringMonitorPage";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/db/prisma";
@@ -11,10 +13,14 @@ import { AiMonitorControls, AiMonitorAcknowledge } from "@/components/ai-integri
 const movementLabels = { NEW: "New difference", PERSISTENT: "Still observed", RESOLVED: "No longer observed", SUPPRESSED: "Comparison limited" };
 const alertLabels: Record<string, string> = { NEW_DIFFERENCE: "New difference to review", DIFFERENCE_INCREASED: "Difference magnitude increased", COMPARISON_LIMITED: "Comparison needs better evidence" };
 export default async function AiMonitoringPage() {
-  if (!isAiMonitorRehearsalEnabled()) notFound();
+  if (!isAiMonitorRehearsalEnabled() && !recurringEnabled()) notFound();
   const context = await getAppContext();
   if (!context) redirect(buildSignInRedirectPath("/app/ai-integrity/monitoring"));
   const workspaceId = context.workspace.id;
+  if (recurringEnabled()) {
+    if (context.workspace.ownerUserId !== context.user.id) notFound();
+    return <AiRecurringMonitorPage workspaceId={workspaceId} />;
+  }
   const [reports, comparisons, alerts] = await Promise.all([
     prisma.aiIntegritySnapshot.findMany({ where: { workspaceId, ruleVersion: AI_INTEGRITY_RULE_VERSION }, orderBy: { windowStart: "desc" }, take: 40, select: { id: true, windowStart: true, windowEnd: true } }),
     prisma.aiIntegrityMonitorComparison.findMany({ where: { workspaceId, mode: AI_MONITOR_MODE }, orderBy: { createdAt: "desc" }, take: 10 }),

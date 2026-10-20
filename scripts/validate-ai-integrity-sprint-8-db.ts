@@ -42,7 +42,7 @@ try {
   const resolved = await compareAiMonitorReports(workspace.id, user.id, { ...input, baselineSnapshotId: b.snapshotId, currentSnapshotId: c.snapshotId, requestKey: "resolved_monitor_003" });
   assert.equal((await getAiMonitorArtifact(workspace.id, resolved.comparison.id))?.artifact.counts.noLongerObserved, 2);
   assert.equal(await prisma.aiIntegrityMonitorAlert.count({ where: { comparisonId: resolved.comparison.id } }), 0);
-  const exported = await buildWorkspaceExport(workspace.id); assert.equal(exported.schemaVersion, 9); assert.equal(exported.monitoringRehearsal.comparisons.length, 2);
+  const exported = await buildWorkspaceExport(workspace.id); assert.equal(exported.schemaVersion, 11); assert.deepEqual(exported.recurringMonitoring, []); assert.equal(exported.monitoringRehearsal.comparisons.length, 2);
   assert.equal(await prisma.aiIntegrityScanOrder.count(), 0); assert.equal(await prisma.aiIntegrityScanGrant.count(), 0); assert.equal(await prisma.aiIntegritySourceConnection.count(), 0);
   await assert.rejects(() => prisma.aiIntegrityMonitorComparison.create({ data: { ...first.comparison, artifactJson: first.comparison.artifactJson as Prisma.InputJsonValue, id: "cross_tenant_monitor", workspaceId: other.id, requestKey: "cross_tenant_monitor_004" } }));
   await prisma.aiIntegrityMonitorComparison.update({ where: { id: first.comparison.id }, data: { artifactHash: "0".repeat(64) } });
@@ -57,5 +57,5 @@ try {
   await prisma.aiIntegritySnapshot.deleteMany({ where: { workspaceId: workspace.id } });
   assert.equal(await prisma.aiIntegrityMonitorComparison.count(), 0);
   await prisma.workspace.delete({ where: { id: workspace.id } });
-  console.log("Sprint 8 DB PASS: synthetic/strict fields, isolation/FKs, concurrent replay and pair dedupe, bounded local alerts, acknowledgment audit, immutable scans/artifact, export v9 and retention/cascade. No subscription/provider connection created.");
+  console.log("Sprint 8 DB PASS: synthetic/strict fields, isolation/FKs, concurrent replay and pair dedupe, bounded local alerts, acknowledgment audit, immutable scans/artifact, export v11 and retention/cascade. No subscription/provider connection created.");
 } finally { await prisma.$disconnect(); }

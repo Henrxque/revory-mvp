@@ -1,4 +1,5 @@
 import "server-only";
+import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
 
 export function isAiIntegrityRemoteSyntheticPreviewEnabled() {
   const expectedDatabase = process.env.REVORY_AI_SAAS_SYNTHETIC_DATABASE ?? "";
@@ -14,7 +15,7 @@ export function isAiIntegrityRemoteSyntheticPreviewEnabled() {
 }
 
 export function isAiIntegrityExperienceEnabled() {
-  return process.env.REVORY_AI_SAAS_PREVIEW === "true"
+  return isAiCommercialRuntimeEnabled() || process.env.REVORY_AI_SAAS_PREVIEW === "true"
     && (process.env.NODE_ENV !== "production" || isAiIntegrityRemoteSyntheticPreviewEnabled());
 }
 

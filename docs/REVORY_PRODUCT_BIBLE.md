@@ -1,5 +1,7 @@
 # REVORY — Bíblia do produto
 
+> Atualização técnica de 2026-10-19: monitoramento conectado e oferta mensal de US$399 implementados sob liberação separada, conforme [entrega](implementation/REVORY_MONITOR_399_2026-10-19.md). Verificação local não é lançamento, faturamento ou renovação. O restante da bíblia preserva a evolução histórica e os limites financeiros.
+
 > Versão 1, criada em 2026-09-29; estado atualizado em 2026-10-01. Documento vivo de produto para a migração completa de nicho. [Source of truth](source-of-truth.md) decide conflitos; [análise dos anexos](REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md) registra hipóteses e [plano de migração](REVORY_AI_SAAS_MIGRATION_PLAN.md) registra dependências técnicas.
 
 ## 1. O produto em uma página

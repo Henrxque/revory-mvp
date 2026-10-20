@@ -98,7 +98,8 @@
     "ops:openai-controlled-read": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/check-openai-controlled-read.ts",
     "qa:ai-customer-source-security": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-ai-customer-source-security.ts",
     "qa:ai-customer-sources:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-customer-sources-db.ts",
-    "qa:ai-connected-report:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-connected-report-db.ts"
+    "qa:ai-connected-report:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-connected-report-db.ts",
+    "qa:ai-monitor:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-monitor-db.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.58.2",

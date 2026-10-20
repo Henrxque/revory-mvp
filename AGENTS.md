@@ -10,6 +10,8 @@ Sprint 08 adds synthetic manual comparison of two immutable scans, temporal move
 
 Sprint 09 adds a local launch-readiness audit and AI SaaS release runbook. Its current decision is `NO_GO`: the production experience is blocked, public home/metadata/limitations still describe contractors, and real purchase, paid buyers, connected sources, recurring beta, operations and activation remain unverified. This is the last numbered sprint, not completion of migration or permission to deploy. See `docs/sprints/SPRINT_09_AI_SAAS_LAUNCH_PREPARATION_2026-10-02.md` and `docs/launch/REVORY_AI_SAAS_RELEASE_RUNBOOK.md`.
 
+2026-10-19 implementation update: customer connections A, connected reports B and recurring Monitor US$399/month are implemented under explicit separate gates. Local fixture/browser proof covers durable scheduled periods, token ledger intake, conservative connected comparisons, investigations, opt-in notices and subscription billing. See `docs/implementation/REVORY_MONITOR_399_2026-10-19.md` and `docs/operations/REVORY_MONITOR_399_RELEASE.md`. No remote configuration, actual sandbox payment, live customer proof or publication was performed by this delivery. Prior sprint descriptions remain historical; the external commercial gate remains open.
+
 Read in this order:
 
 1. [docs/source-of-truth.md](docs/source-of-truth.md)

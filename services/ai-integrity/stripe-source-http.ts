@@ -1,8 +1,15 @@
 import "server-only";
+import Stripe from "stripe";
 import { assertAiSourceRead, type AiSourceTransport } from "@/domain/ai-integrity/connected-sources";
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+
+export async function verifyStripeSourceIdentity(key: string, expectedAccountId: string) {
+  if (!/^rk_(test|live)_[A-Za-z0-9]{12,480}$/.test(key)) throw new Error("A restricted read-only key is required.");
+  const account = await new Stripe(key, { timeout: 8000, maxNetworkRetries: 1 }).accounts.retrieve(null);
+  if (account.id !== expectedAccountId) throw new Error("Stripe source account identity does not match.");
+}
 
 export function createStripeSourceTransport(restrictedKey: string, fetcher: typeof fetch = fetch, pause: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms))): AiSourceTransport {
   if (!/^rk_(test|live)_[A-Za-z0-9]{12,480}$/.test(restrictedKey)) throw new Error("A restricted Stripe source key is required.");

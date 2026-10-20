@@ -1,5 +1,7 @@
 import "server-only";
+import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
 
+import { monitorRunAuthorized } from "./recurring-access";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
@@ -11,7 +13,7 @@ import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_SUPPORTED_RULE
 export type RunAiScanRequest = {
   workspaceId: string; actorUserId: string; batchIds: string[]; asOf: string; lagHours: number;
   sourceReviews: SourceClosureReview[]; syntheticDataConfirmed: boolean; connectedReportAuthorized?: boolean;
-  grantId?: string;
+  grantId?: string; monitorRunId?: string; monitorLeaseToken?: string;
 };
 const MAX_ROWS = 25000;
 const json = <T>(value: unknown): T => JSON.parse(JSON.stringify(value)) as T;
@@ -22,7 +24,7 @@ const bucketSelect = { ...rowSelect, provider: true, organizationId: true, proje
   costAmount: true, costCurrency: true, costBasis: true, adjustmentKind: true, reportedAt: true, usageQuantity: true, usageUnit: true } as const;
 
 export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0): Promise<{ snapshotId: string; replayed: boolean; result: AiScanResult }> {
-  if (process.env.NODE_ENV === "production" && !isAiIntegrityRemoteSyntheticPreviewEnabled()) throw new Error("Internal scan is unavailable in production.");
+  if (process.env.NODE_ENV === "production" && !isAiIntegrityRemoteSyntheticPreviewEnabled() && !isAiCommercialRuntimeEnabled()) throw new Error("Internal scan is unavailable in production.");
   const connected = request.connectedReportAuthorized === true && request.syntheticDataConfirmed === false;
   if (connected ? !isAiConnectedReportsEnabled() : request.syntheticDataConfirmed !== true || request.connectedReportAuthorized === true) throw new Error("Confirm synthetic data or supported connected source authorization.");
   if (!request.workspaceId || !request.actorUserId || request.batchIds.length !== 3 || new Set(request.batchIds).size !== 3) throw new Error("Three source batches and an authenticated actor are required.");
@@ -31,7 +33,13 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
   try {
     return await prisma.$transaction(async (tx) => {
       if (connected) await assertConnectedReportAccess(tx, request.workspaceId, request.actorUserId, false);
-      const requiresPurchase = isAiIntegrityExperienceEnabled();
+      if (request.monitorRunId) {
+        if (!request.monitorLeaseToken) throw new Error("Monitoring lease is required.");
+        if (!connected) throw new Error("Monitoring requires connected evidence.");
+        const authorized = await monitorRunAuthorized(tx, request.workspaceId, request.monitorRunId, request.actorUserId, request.monitorLeaseToken);
+        if (!authorized.data.ledgerBatchId || !request.batchIds.includes(authorized.data.ledgerBatchId)) throw new Error("Monitoring ledger does not match its closed period.");
+      }
+      const requiresPurchase = isAiIntegrityExperienceEnabled() && !request.monitorRunId;
       const orderWhere = connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere();
       if (requiresPurchase && !request.grantId) throw new Error("Select a confirmed one-time test purchase before running a scan.");
       if (requiresPurchase) await tx.$queryRaw`SELECT id FROM ai_integrity_scan_grants WHERE id = ${request.grantId!} AND "workspaceId" = ${request.workspaceId} FOR UPDATE`;
@@ -53,10 +61,11 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
           }
         } else if (mode === CONNECTED_REPORT_MODE || mode === CONNECTED_LEDGER_MODE) throw new Error("Authorized source data cannot be labeled as fictional.");
       }
+      const relevantWindow = batches.find(b => b.sourceKind === "INTERNAL_LEDGER")!;
       // Load workspace evidence once within a repeatable read. Other imports are used only for contradictions, never totals.
       const [usageRows, bucketRows, revenueRows, mappings] = await Promise.all([
-        tx.aiIntegrityUsageRecord.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_LEDGER_MODE } } } : {}) }, select: usageSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
-        tx.aiIntegrityProviderBucket.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_REPORT_MODE } } } : {}) }, select: bucketSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
+        tx.aiIntegrityUsageRecord.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { occurredAt: { gte: relevantWindow.windowStart, lt: relevantWindow.windowEnd }, importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_LEDGER_MODE } } } : {}) }, select: usageSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
+        tx.aiIntegrityProviderBucket.findMany({ where: { workspaceId: request.workspaceId, ...(connected ? { windowStart: { lt: relevantWindow.windowEnd }, windowEnd: { gt: relevantWindow.windowStart }, importBatch: { dataQualityJson: { path: ["mode"], equals: CONNECTED_REPORT_MODE } } } : {}) }, select: bucketSelect, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
         tx.aiIntegrityRevenueRecord.findMany({ where: { workspaceId: request.workspaceId, importBatchId: { in: request.batchIds } },
           select: { ...rowSelect, eventKind: true, status: true, occurredAt: true, amountMinor: true, currency: true, parentExternalId: true }, orderBy: { id: "asc" }, take: MAX_ROWS + 1 }),
         tx.aiIntegrityMapping.findMany({ where: { workspaceId: request.workspaceId }, orderBy: { id: "asc" }, take: MAX_ROWS + 1,
@@ -74,6 +83,10 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
         batches: json(batches.map((batch) => ({ ...batch, sourcePromotion: undefined }))), usage: knownUsage.filter((r) => request.batchIds.includes(r.importBatchId)),
         buckets: knownBuckets.filter((r) => request.batchIds.includes(r.importBatchId)),
         knownUsage, knownBuckets, revenue: json(revenueRows), mappings: json(mappings) };
+      if (request.monitorRunId) {
+        const authorized = await monitorRunAuthorized(tx, request.workspaceId, request.monitorRunId, request.actorUserId, request.monitorLeaseToken);
+        if (batches.some(b => b.windowStart.toISOString() !== authorized.data.start || b.windowEnd.toISOString() !== authorized.data.end)) throw new Error("Monitoring period changed.");
+      }
       const result = reconcileAiIntegrity(input);
       const manifest = { format: "revory-ai-integrity-evidence/v1", syntheticDataConfirmed: !connected,
         ...(connected ? { dataMode: CONNECTED_REPORT_MODE, connectedReportAuthorized: true,
@@ -114,7 +127,8 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
     if (raceKey && error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const snapshot = await prisma.aiIntegritySnapshot.findUnique({ where: { workspaceId_idempotencyKey: { workspaceId: request.workspaceId, idempotencyKey: raceKey } } });
       if (snapshot) {
-        if (isAiIntegrityExperienceEnabled()) {
+        if (request.monitorRunId) await prisma.$transaction(tx => monitorRunAuthorized(tx, request.workspaceId, request.monitorRunId!, request.actorUserId, request.monitorLeaseToken));
+        if (isAiIntegrityExperienceEnabled() && !request.monitorRunId) {
           const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere() } });
           if (!grant || (grant.consumedAt && grant.consumedSnapshotId !== snapshot.id)) throw new Error("Purchase is unavailable for this report.");
         }
