@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-20T14:02:47.395Z",
+  "managedCredentialResync": {
+    "detected": true,
+    "role": "neondb_owner",
+    "projectEnvInjectionDisconnected": true,
+    "neonDatabasePreserved": true,
+    "providerPlanUnchanged": "Free",
+    "managedVariablesRemaining": 0,
+    "manualDatabaseSecrets": 6,
+    "resyncedCredentialRotated": true,
+    "oldDirectAndPooledPasswordRejected": true
+  },
+  "deploymentGuard": {
+    "limitedRuntimeReadOnlyVerification": [
+      "production",
+      "preview10",
+      "preview11"
+    ],
+    "administrativeOwnerRejected": true,
+    "published": true
+  },
+  "environmentHealth": {
+    "production": "ok",
+    "preview10": "ok",
+    "preview11": "ok"
+  },
+  "retention": {
+    "firstNaturalRunObserved": false,
+    "verificationAtUtc": "2026-10-21T06:10:00Z",
+    "oneTimeAutomation": "conferir-primeira-reten-o-do-revory"
+  },
+  "backup": {
+    "policyPrepared": {
+      "frequency": "daily",
+      "hourUtc": 4,
+      "retentionSeconds": 604800
+    },
+    "activated": false,
+    "requiresCostDecision": true,
+    "upgradeScope": "Shared Neon installation including VIDENCE"
+  },
+  "credentialsPrinted": false
+}

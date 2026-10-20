@@ -107,3 +107,13 @@ A autorização explícita do fundador cobriu troca coordenada de credenciais de
 2. **Backup recorrente:** a janela real continua 6h, a agenda consultada estava vazia e o plano tem limite de um snapshot manual. Snapshot temporário e DPAPI local não encerram recuperação operacional. Definir destino, frequência, retenção, responsáveis, RPO/RTO e orçamento antes de mudar plano ou contratar armazenamento. Nenhum upgrade foi feito.
 
 [Prova redigida do rollout](../qa/security-operations/rotation-2026-10-20.json). A prova não contém senhas, URLs autenticadas, conteúdo de clientes ou tokens.
+
+## Correção da sincronização gerenciada — acompanhamento do backup
+
+Ao preparar a ativação do backup, a auditoria posterior encontrou novas variáveis gerenciadas Neon/Vercel com neondb_owner e escopo production/preview/development. Elas foram recriadas automaticamente depois da primeira troca; por isso a auditoria inicial dos aliases não bastava para garantir os próximos deploys.
+
+A conexão de injeção de variáveis entre o recurso Neon e o projeto Vercel foi retirada, preservando o banco, a instalação e o faturamento existentes. Os dois DATABASE_URL de produção foram recriados como Secret com o papel de runtime; os Previews mantiveram as próprias URLs Secret. Variáveis gerenciadas com owner deixaram de ser herdadas por development e novos Previews. Nenhuma credencial Google, Resend ou Stripe foi alterada. Não reconectar a injeção automática sem revisar quais permissões ela distribuirá.
+
+O build agora consulta somente metadados e rejeita owner, criação de banco/papel/schema, BYPASSRLS, replicação, memberships de leitura/escrita globais, tabelas pertencentes ao runtime e escrita no histórico de migrations. Auditoria read-only real aceitou os três runtimes e rejeitou o owner. Essa barreira impede publicar com permissões administrativas mesmo se a configuração voltar a se alterar. A credencial administrativa resincronizada foi rotacionada novamente após o deploy protegido. Conexões direta e pooled com a senha anterior foram rejeitadas; a auditoria posterior encontrou zero variáveis gerenciadas de banco e seis URLs manuais Secret. Os três novos deploys ficaram READY e a saúde foi conferida após a troca. [Prova redigida](../qa/security-operations/backup-preparation-2026-10-20.json).
+
+[Plano e observação do cron](REVORY_BACKUP_AND_RETENTION_ACTIVATION_2026-10-20.md).
