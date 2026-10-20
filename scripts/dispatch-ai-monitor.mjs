@@ -26,7 +26,7 @@ export async function dispatchAiMonitor({ url, token, fetcher = fetch }) {
   }
   let response;
   try {
-    response = await fetcher(target.href, { method: 'GET', redirect: 'error',
+    response = await fetcher(target.href, { method: 'GET', redirect: 'manual',
       headers: { authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(330000) });
   } catch { throw new MonitorDispatchError('NETWORK_OR_REDIRECT_ERROR'); }
   if (!response.ok) throw new MonitorDispatchError('HTTP_ERROR', response.status);
