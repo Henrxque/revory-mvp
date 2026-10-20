@@ -1,0 +1,29 @@
+{
+  "verifiedAt": "2026-10-20T22:42:44.175Z",
+  "base": "https://monitor-hml.revory.app",
+  "scope": "anonymous public HTTPS requests; no deployment-protection token",
+  "results": [
+    {
+      "path": "/api/health",
+      "http": 200
+    },
+    {
+      "path": "/api/jobs/ai-integrity-monitor",
+      "http": 401
+    },
+    {
+      "path": "/api/ai-integrity/recurring",
+      "http": 401
+    },
+    {
+      "path": "/api/ai-integrity/recurring/webhook",
+      "http": 400
+    },
+    {
+      "path": "/api/billing/checkout",
+      "http": 404
+    }
+  ],
+  "applicationAuthenticationPreserved": true,
+  "webhookSignaturePreserved": true
+}

@@ -2,6 +2,6 @@
   "mode": "test",
   "url": "https://monitor-hml.revory.app/api/ai-integrity/recurring/webhook",
   "status": "enabled",
-  "nativeDeliveryVerified": false,
+  "nativeDeliveryVerified": true,
   "existingEndpointsChanged": false
 }
