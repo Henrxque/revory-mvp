@@ -7,7 +7,9 @@ const globalForPrisma = globalThis as typeof globalThis & {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    // Database constraint errors may contain source rows or connection details.
+    // Callers record sanitized operational codes instead.
+    log: [],
   });
 
 if (process.env.NODE_ENV !== "production") {

@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { verifyDeployedMigrations } from "./lib/verify-deployed-migrations.mjs";
 
 function run(command, args, extraEnv = {}) {
   const result = spawnSync(command, args, {
@@ -52,6 +53,10 @@ if (isVercelDeployment) {
     migrationDatabaseUrl = directDatabase.toString();
   }
 
+  if (process.env.REVORY_DATABASE_MIGRATIONS_EXTERNAL === "true") {
+    if (process.env.REVORY_MIGRATION_DATABASE_URL) throw new Error("External migration mode must not carry a migration credential.");
+    await verifyDeployedMigrations(process.env.DATABASE_URL);
+  } else {
   console.log(
     `[revory-release] Applying pending Prisma migrations for the ${vercelEnvironment} environment before building.`,
   );
@@ -61,6 +66,7 @@ if (isVercelDeployment) {
     DATABASE_URL: migrationDatabaseUrl,
     ...(vercelEnvironment === "preview" ? { PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK: "1" } : {}),
   });
+  }
 } else {
   console.log(
     "[revory-release] Non-Vercel build detected; production migration deployment was not requested.",
