@@ -1,0 +1,73 @@
+{
+  "verifiedAt": "2026-10-20T12:58:46.024Z",
+  "credentialRotation": {
+    "ownerOldDirectPasswordRejected": true,
+    "ownerOldPooledPasswordRejected": true,
+    "previewOwnerReset": true,
+    "administrativeSecretsRemovedFromVercel": true,
+    "allRuntimeUrlsSecret": true,
+    "credentialsPrinted": false
+  },
+  "runtimeChecks": [
+    {
+      "environment": "production",
+      "roleFlags": {
+        "rolsuper": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false,
+        "rolbypassrls": false,
+        "rolreplication": false,
+        "can_create": false,
+        "privileged": false
+      },
+      "ownedTables": 0,
+      "publicTables": 30,
+      "retentionCheckpoint": null
+    },
+    {
+      "environment": "preview10",
+      "roleFlags": {
+        "rolsuper": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false,
+        "rolbypassrls": false,
+        "rolreplication": false,
+        "can_create": false,
+        "privileged": false
+      },
+      "ownedTables": 0,
+      "publicTables": 45,
+      "retentionCheckpoint": null
+    },
+    {
+      "environment": "preview11",
+      "roleFlags": {
+        "rolsuper": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false,
+        "rolbypassrls": false,
+        "rolreplication": false,
+        "can_create": false,
+        "privileged": false
+      },
+      "ownedTables": 0,
+      "publicTables": 45,
+      "retentionCheckpoint": null
+    }
+  ],
+  "remaining": [
+    "FIRST_SCHEDULED_RETENTION_SUCCESS",
+    "RECURRING_BACKUP_POLICY"
+  ],
+  "commercialLaunchAuthorized": false,
+  "verification": {
+    "productionHealth": "ok",
+    "preview10Health": "ok",
+    "preview11Health": "ok",
+    "retiredPreview11Database": "unreachable",
+    "authenticatedPreviewReportAfterRotation": "PASS",
+    "crossDatabaseTableReads": "DENIED",
+    "migrationHistoryWrite": "DENIED",
+    "linuxMigrationManifestVerification": "PASS"
+  }
+}
