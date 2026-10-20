@@ -7,6 +7,7 @@ export async function enforceWorkspaceRetention(
   now = new Date(),
 ) {
   const settings = await prisma.workspaceDataSettings.upsert({ where: { workspaceId }, create: { workspaceId, retentionDays: 365 }, update: {} });
+  if (![30, 90, 180, 365].includes(settings.retentionDays)) throw new Error("Unsupported retention policy.");
   const cutoff = new Date(now.getTime() - settings.retentionDays * 24 * 60 * 60 * 1000);
   return prisma.$transaction(async (tx) => {
     const [findings, realizationFindings, runs, snapshots, sessions, evidenceEvents] = await Promise.all([

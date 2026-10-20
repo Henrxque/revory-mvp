@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import { prisma } from "@/db/prisma";
+import { runRetentionJob } from "@/services/data-portability/retention-job";
+import { GET } from "@/src/app/api/jobs/enforce-retention/route";
+const url = new URL(process.env.DATABASE_URL ?? "");
+if (url.hostname !== "127.0.0.1" || !url.pathname.startsWith("/revory_security_")) throw new Error("Disposable local database required.");
+try {
+  const user = await prisma.user.create({ data: { email: "ops-fixture@example.invalid", authProvider: "fixture" } });
+  const workspace = await prisma.workspace.create({ data: { name: "Operations fixture", slug: "ops-fixture", ownerUserId: user.id } });
+  await prisma.workspace.create({ data: { name: "Operations fixture 2", slug: "ops-fixture-2", ownerUserId: user.id } });
+  const partial = await runRetentionJob({ maxWorkspaces: 1 });
+  assert.equal(partial.status, "PARTIAL");
+  assert.equal(partial.complete, false);
+  const success = await runRetentionJob();
+  assert.equal(success.status, "SUCCEEDED");
+  assert.equal(success.workspaces, 2);
+  assert.equal(Object.values(success.totals).every(n => n === 0), true);
+  assert.ok((await prisma.operationalJobState.findUniqueOrThrow({ where: { key: "RETENTION" } })).lastSucceededAt);
+  await prisma.operationalJobState.update({ where: { key: "RETENTION" }, data: { leaseToken: "fixture", leaseUntil: new Date(Date.now() + 60_000) } });
+  assert.equal((await runRetentionJob()).status, "BUSY");
+  await prisma.operationalJobState.update({ where: { key: "RETENTION" }, data: { leaseUntil: null, leaseToken: null } });
+  process.env.CRON_SECRET = "local-fixture-only";
+  assert.equal((await GET(new Request("http://localhost/job"))).status, 401);
+  await prisma.workspaceDataSettings.update({ where: { workspaceId: workspace.id }, data: { retentionDays: 7 } });
+  const failed = await GET(new Request("http://localhost/job", { headers: { authorization: "Bearer local-fixture-only" } }));
+  assert.equal(failed.status, 503);
+  assert.equal((await failed.json()).status, "FAILED");
+  await prisma.workspaceDataSettings.update({ where: { workspaceId: workspace.id }, data: { retentionDays: 30 } });
+  const recovered = await GET(new Request("http://localhost/job", { headers: { authorization: "Bearer local-fixture-only" } }));
+  assert.equal(recovered.status, 200);
+  assert.equal((await recovered.json()).status, "SUCCEEDED");
+  console.log("Security retention integration: PASS (resume, zero-deletion checkpoint, lease, authentication, fail-closed policy, recovery).");
+} finally { await prisma.$disconnect(); }

@@ -920,3 +920,17 @@ model RevenueLeak {
   @@index([relatedLeadBookingOpportunityId])
   @@map("revenue_leaks")
 }
+
+model OperationalJobState {
+  key             String    @id
+  status          String    @default("IDLE")
+  leaseToken      String?
+  leaseUntil      DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  lastSucceededAt DateTime?
+  resultJson      Json      @default("{}")
+  updatedAt       DateTime  @updatedAt
+
+  @@map("operational_job_states")
+}
