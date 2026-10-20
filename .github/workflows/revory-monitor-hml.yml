@@ -1,0 +1,24 @@
+name: REVORY Monitor homologation dispatcher
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: revory-monitor-hml
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: vars.REVORY_MONITOR_HML_DISPATCH_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Dispatch the isolated sandbox only
+        env:
+          REVORY_MONITOR_DISPATCH_URL: https://monitor-hml.revory.app/api/jobs/ai-integrity-monitor
+          REVORY_MONITOR_DISPATCH_SECRET: ${{ secrets.REVORY_MONITOR_HML_DISPATCH_SECRET }}
+        run: node scripts/dispatch-ai-monitor.mjs
