@@ -60,7 +60,7 @@ export function evaluateEntries({ entries, job, marker, window }) {
 
   if (job === "retention") {
     const failedWorkspaces = safeNumber(latest.payload.failedWorkspaces);
-    return { failedWorkspaces, job, markerFound: true, observed: true, passed: failedWorkspaces === 0 && Boolean(latest.timestampUtc), production: true, timestampUtc: latest.timestampUtc, window };
+    return { failedWorkspaces, job, markerFound: true, observed: true, passed: failedWorkspaces === 0 && latest.payload.complete !== false && (!latest.payload.status || latest.payload.status === "SUCCEEDED") && Boolean(latest.timestampUtc), production: true, timestampUtc: latest.timestampUtc, window };
   }
 
   const failed = safeNumber(latest.payload.failed);

@@ -7,6 +7,7 @@ export async function enforceWorkspaceRetention(
   now = new Date(),
 ) {
   const settings = await prisma.workspaceDataSettings.upsert({ where: { workspaceId }, create: { workspaceId, retentionDays: 365 }, update: {} });
+  if (![30, 90, 180, 365].includes(settings.retentionDays)) throw new Error("Unsupported analysis retention period.");
   const cutoff = new Date(now.getTime() - settings.retentionDays * 24 * 60 * 60 * 1000);
   return prisma.$transaction(async (tx) => {
     const [findings, realizationFindings, runs, snapshots, sessions, evidenceEvents] = await Promise.all([
@@ -35,9 +36,21 @@ export async function enforceWorkspaceRetention(
       { createdAt: { lt: cutoff } }, { id: { in: snapshotsWithExpiredInputs.map((item) => item.snapshotId) } },
     ] };
     const expiringSnapshotIds = await tx.aiIntegritySnapshot.findMany({ where: expiredSnapshotWhere, select: { id: true } });
-    const aiMonitorComparisons = await tx.aiIntegrityMonitorComparison.deleteMany({ where: { workspaceId, OR: [
+    const expiredComparisonWhere = { workspaceId, OR: [
       { createdAt: { lt: cutoff } }, { baselineSnapshotId: { in: expiringSnapshotIds.map((s) => s.id) } }, { currentSnapshotId: { in: expiringSnapshotIds.map((s) => s.id) } },
-    ] } });
+    ] };
+    const expiredComparisons = await tx.aiIntegrityMonitorComparison.findMany({ where: expiredComparisonWhere, select: { id: true } });
+    // JSON references are not FKs: a recently edited investigation can otherwise
+    // keep a report link after its evidence was removed by retention.
+    const expiredReferences = [
+      ...expiringSnapshotIds.map(s => ({ dataJson: { path: ["snapshotId"], equals: s.id } })),
+      ...expiredComparisons.map(c => ({ dataJson: { path: ["comparisonId"], equals: c.id } })),
+    ];
+    const retiredMonitorStates = await tx.aiIntegrityMonitorState.deleteMany({ where: {
+      workspaceId, kind: { in: ["RUN", "INVESTIGATION"] }, status: { not: "RUNNING" },
+      OR: [{ updatedAt: { lt: cutoff } }, ...expiredReferences],
+    } });
+    const aiMonitorComparisons = await tx.aiIntegrityMonitorComparison.deleteMany({ where: expiredComparisonWhere });
     // Retiring an artifact never restores a consumed purchase.
     await tx.aiIntegrityScanGrant.updateMany({ where: { workspaceId, consumedSnapshotId: { in: expiringSnapshotIds.map((s) => s.id) } }, data: { consumedSnapshotId: null } });
     const aiSnapshots = await tx.aiIntegritySnapshot.deleteMany({
@@ -51,11 +64,11 @@ export async function enforceWorkspaceRetention(
     const aiMappings = await tx.aiIntegrityMapping.deleteMany({
       where: { workspaceId, validUntil: { lt: cutoff } },
     });
-    await tx.aiIntegrityReportDraft.deleteMany({ where: { workspaceId, updatedAt: { lt: cutoff } } });
-    await tx.aiIntegrityMonitorState.deleteMany({ where: { workspaceId, kind: { in: ["RUN", "NOTICE", "INVESTIGATION", "CHECKOUT"] }, updatedAt: { lt: cutoff }, status: { not: "RUNNING" } } });
+    const aiReportDrafts = await tx.aiIntegrityReportDraft.deleteMany({ where: { workspaceId, updatedAt: { lt: cutoff } } });
+    const expiredMonitorStates = await tx.aiIntegrityMonitorState.deleteMany({ where: { workspaceId, kind: { in: ["RUN", "NOTICE", "INVESTIGATION", "CHECKOUT"] }, updatedAt: { lt: cutoff }, status: { not: "RUNNING" } } });
     const aiSourceSyncs = await tx.aiIntegritySourceSync.deleteMany({ where: { workspaceId, createdAt: { lt: cutoff }, promotions: { none: {} } } });
     const aiRevokedSources = await tx.aiIntegritySourceConnection.deleteMany({ where: { workspaceId, status: "REVOKED", revokedAt: { lt: cutoff }, syncs: { none: { promotions: { some: {} } } } } });
-    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count + aiSourceSyncs.count + aiRevokedSources.count + aiMonitorComparisons.count;
+    const deletedCount = findings.count + realizationFindings.count + runs.count + snapshots.count + sessions.count + evidenceEvents.count + aiSnapshots.count + aiImportBatches.count + aiMappings.count + aiSourceSyncs.count + aiRevokedSources.count + aiMonitorComparisons.count + retiredMonitorStates.count + expiredMonitorStates.count + aiReportDrafts.count;
     if (deletedCount > 0) {
       await tx.workspaceAuditEvent.create({
         data: {
@@ -74,6 +87,8 @@ export async function enforceWorkspaceRetention(
             deletedAiSourceSyncs: aiSourceSyncs.count,
             deletedAiRevokedSources: aiRevokedSources.count,
             deletedAiMonitorComparisons: aiMonitorComparisons.count,
+            deletedAiMonitorStates: retiredMonitorStates.count + expiredMonitorStates.count,
+            deletedAiReportDrafts: aiReportDrafts.count,
             retentionDays: settings.retentionDays,
           },
           workspaceId,
@@ -93,6 +108,8 @@ export async function enforceWorkspaceRetention(
       deletedAiSourceSyncs: aiSourceSyncs.count,
       deletedAiRevokedSources: aiRevokedSources.count,
       deletedAiMonitorComparisons: aiMonitorComparisons.count,
+      deletedAiMonitorStates: retiredMonitorStates.count + expiredMonitorStates.count,
+      deletedAiReportDrafts: aiReportDrafts.count,
       skipped: false,
     };
   });

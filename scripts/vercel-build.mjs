@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { dedicatedMigrationDatasource } from "./lib/migration-datasource.mjs";
 
 function run(command, args, extraEnv = {}) {
   const result = spawnSync(command, args, {
@@ -50,6 +51,12 @@ if (isVercelDeployment) {
       throw new Error("Vercel preview direct migration URL must match the isolated synthetic database and credentials.");
     }
     migrationDatabaseUrl = directDatabase.toString();
+  }
+
+  // Runtime may use a CRUD-only SQL role; migrations use a separate operator
+  // credential. Reject target drift before running any migration.
+  if (process.env.REVORY_MIGRATION_DATABASE_URL) {
+    migrationDatabaseUrl = dedicatedMigrationDatasource(process.env.DATABASE_URL, process.env.REVORY_MIGRATION_DATABASE_URL);
   }
 
   console.log(

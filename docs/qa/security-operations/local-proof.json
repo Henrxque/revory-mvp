@@ -1,0 +1,34 @@
+{
+  "verifiedAt": "2026-10-20T03:34:44.578Z",
+  "fixtureOnly": true,
+  "retention": {
+    "durableZeroDeletionSuccess": true,
+    "failedWorkspaceDoesNotPass": true,
+    "checkpointResume": true,
+    "concurrentLease": true,
+    "expiredLeaseRecovery": true,
+    "endpointAuthentication": true
+  },
+  "credentials": {
+    "dryRunWithoutMutation": true,
+    "rewrapPreservesSecretAndScope": true,
+    "idempotent": true,
+    "missingOldKeyFailsClosed": true
+  },
+  "runtimeRole": {
+    "crud": true,
+    "ddlDenied": true,
+    "createRoleDenied": true,
+    "createDatabaseDenied": true,
+    "roleEscalationDenied": true,
+    "migrationHistoryWriteDenied": true,
+    "migrationTargetDriftDenied": true
+  },
+  "recoveryVerification": {
+    "readOnlyEnforced": true,
+    "pooledEndpointAliasRejected": true,
+    "contentDriftFailsClosed": true
+  },
+  "productionDeletionExecuted": false,
+  "externalCredentialsChanged": false
+}
