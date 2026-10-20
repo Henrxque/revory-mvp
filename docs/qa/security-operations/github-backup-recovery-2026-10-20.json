@@ -1,0 +1,39 @@
+{
+  "verifiedAt": "2026-10-20T14:40:31.000Z",
+  "runId": "39440890191",
+  "event": "workflow_dispatch",
+  "commit": "1ffc6dbee89a716a81e499d29c261f545487e87c",
+  "url": "https://github.com/Henrxque/revory-mvp/actions/runs/39440890191",
+  "artifact": {
+    "id": 12274105989,
+    "createdAt": "2026-10-20T14:37:49Z",
+    "expiresAt": "2026-10-27T14:37:48Z",
+    "encryptedBytes": 133710,
+    "ciphertextSha256Verified": true
+  },
+  "recovery": {
+    "structuralMatch": true,
+    "contentHashesMatch": true,
+    "tablesChecked": 30,
+    "sourceRows": "132",
+    "countMismatches": 0
+  },
+  "sourceBeforeAndAfterUnchanged": true,
+  "productionWritesPerformed": false,
+  "restoreEndpoint": "127.0.0.1:55441",
+  "negativeChecks": {
+    "wrongIdentityRejected": true,
+    "tamperedCiphertextRejected": true,
+    "encryptionDependencyFailureLeavesNoArchive": true,
+    "nullabilityDriftRejected": true
+  },
+  "scheduledFirstRunObserved": false,
+  "privateKeyIndependentEscrowComplete": false,
+  "operatorRecordedAt": "2026-10-20T14:36:48.056Z",
+  "verificationTimeSource": "GitHub API HTTP Date received after recovery; operator clock differs",
+  "productionHealth": {
+    "http": 200,
+    "status": "ok",
+    "database": "reachable"
+  }
+}

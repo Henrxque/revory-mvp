@@ -7,24 +7,17 @@
 - Vercel aponta para o patch operacional publicado, crons habilitados e retenção diária em 05:15 UTC. No Hobby, a execução pode ocorrer durante a hora 05 UTC (02h de Brasília).
 - A tabela operational_job_states ainda não tem linha RETENTION. A primeira janela posterior ao deploy é 21/10/2026. Não foi executada exclusão de produção para antecipar o teste.
 
-## Configuração preparada para aprovação de custo
+## Decisão: backup sem upgrade do Neon
 
-- Provedor: o Neon já utilizado pelo REVORY, sem mover dados para outro serviço.
-- Alvo: a branch de produção ativa, reconfirmada antes da alteração. O snapshot de branch abrange os bancos contidos nela; não afirmar isolamento físico dos Previews.
-- Frequência: diária, 04:00 UTC (01h de Brasília), anterior à janela de retenção do aplicativo.
-- Retenção: 604800 segundos (7 dias).
-- Payload da agenda: [{"frequency":"daily","hour":4,"retention_seconds":604800}].
-- RPO pretendido para os snapshots: 24h. Janela existente de PITR: 6h. São controles distintos. RTO operacional pretendido: até 60 minutos, a validar no ensaio; não é SLA.
-- Alertar se o último snapshot automático tiver mais de 26h, estiver expirado, a agenda mudar, ou a coleta de metadados falhar.
-- O provedor confirma que a agenda requer plano pago. A ativação e qualquer upgrade aguardam limite de gasto autorizado. A configuração acima ainda NÃO foi aplicada.
+O fundador recusou o upgrade da instalação compartilhada. Nenhuma alteração de plano, faturamento, VIDENCE ou outro projeto foi realizada.
 
-## Evidência necessária para encerrar backup recorrente
+Foi implementada a rotina GitHub Actions `REVORY encrypted production backup`: diária às 04:23 UTC (01:23 de Brasília), arquivo pg_dump do schema público de produção criptografado com age antes de sair do runner, retenção de sete dias, limite de 20 MiB por arquivo e guard de 200 MiB no repositório. Role SQL dedicada somente leitura; identidade privada fora do GitHub e do Git. O diretório local tem ACL apenas do usuário e existe cópia DPAPI. Ainda é necessária uma cópia da identidade fora deste computador, sob custódia do fundador.
 
-1. Plano e faturamento reais da integração conferidos; custo aprovado antes de contratar.
-2. Leitura da agenda confirma daily, hour 4 e retenção de pelo menos 7 dias na branch correta.
-3. Provedor criou ao menos um snapshot automático válido; registrar data e expiração sem segredos.
-4. Recuperação conferida em alvo isolado, sempre com finalize:false, sem target de produção e sem promover/finalizar. Verificar vínculo dos computes e branch default antes/depois. O incidente anterior torna esses parâmetros obrigatórios.
-5. Guardar prova redigida; não guardar URLs autenticadas ou chaves no repositório. Backup no mesmo provedor não é uma cópia independente contra perda da conta/provedor.
+Primeiro ensaio real passou: 30 tabelas e 132 registros restaurados exclusivamente em PostgreSQL local descartável, com igualdade de estrutura e hashes de conteúdo no mesmo snapshot READ ONLY exportado. As leituras dos dois bancos de Preview foram negadas. Prova em `docs/qa/security-operations/free-backup-2026-10-20.json`. A rotina foi publicada em main e o run 39440890191 terminou com sucesso. O próprio artefato remoto foi baixado, teve SHA-256 conferido, foi descriptografado e restaurado somente em PostgreSQL local descartável; 30 tabelas e 132 registros conferiram, com manifestos da origem inalterados antes/depois. Prova: `docs/qa/security-operations/github-backup-recovery-2026-10-20.json`. A primeira tentativa falhou antes de acessar o banco porque o runner só tinha cliente PostgreSQL 16; instalação explícita do cliente 17 corrigiu a falha. Nenhum artefato parcial foi publicado.
+
+A janela PITR Neon continua em 6h. RPO alvo do backup diário: 24h quando a rotina executa. Não é um SLA nem um teste de failover completo do serviço. O backup não inclui Previews sintéticos, schema neon_auth não utilizado pela aplicação, roles/senhas ou configuração/secrets externos. Detalhes e recuperação: `docs/operations/REVORY_ENCRYPTED_BACKUPS.md` na branch operacional publicada.
+
+O uso cabe na franquia atual do GitHub: auditoria encontrou zero artefatos em 26 repositórios do proprietário antes da ativação. A franquia é compartilhada com outros artefatos e Packages; não prometer gratuidade ilimitada. Nenhum produto pago foi contratado ou limite de gastos alterado. Falha, arquivo mais antigo que 26h ou limite de capacidade exige revisão.
 
 ## Primeira retenção — observação
 
@@ -38,7 +31,7 @@ WHERE key = 'RETENTION';
 
 Aceite: status SUCCEEDED, resultJson.complete=true, resultJson.failed=0 e lastSucceededAt na janela posterior ao deploy. Nenhum registro, erro, PARTIAL, BUSY ou FAILED não é sucesso. Zero exclusões pode ser sucesso; deve haver checkpoint real criado pelo job. Conferir também saúde pública e ausência de erros do endpoint quando os logs ainda estiverem disponíveis.
 
-A conferência única está agendada neste chat para 21/10/2026 às 03:10 de Brasília, após a janela de execução. Automação: conferir-primeira-reten-o-do-revory. Ela deverá registrar evidência ou apontar falha concreta, sem disparar uma execução destrutiva nem fabricar checkpoint. Esta preparação não fecha os controles e não altera o gate comercial.
+A conferência única está agendada neste chat para 21/10/2026 às 03:10 de Brasília, após a janela de execução. Automação: conferir-primeira-reten-o-do-revory. Ela deverá registrar evidência ou apontar falha concreta, sem disparar uma execução destrutiva nem fabricar checkpoint. A automação também conferirá o primeiro backup criado pelo evento schedule, após 04:23 UTC; a execução manual bem-sucedida de hoje não comprova a agenda. A retenção natural ainda está pendente e o gate comercial não muda.
 
 ## Fontes oficiais consultadas
 
@@ -46,6 +39,6 @@ A conferência única está agendada neste chat para 21/10/2026 às 03:10 de Bra
 - [Neon: preços e limites](https://neon.com/pricing)
 - [Vercel: precisão do cron no Hobby](https://vercel.com/docs/cron-jobs/manage-cron-jobs)
 
-## Escopo de faturamento confirmado
+## Histórico da alternativa paga
 
-A integração atual informa plano Free com scope=installation. Essa instalação contém REVORY, VIDENCE e outro projeto. Qualquer upgrade deve considerar todos esses recursos, não apenas o preço isolado do snapshot do REVORY. A pergunta de orçamento foi enviada ao fundador; nenhuma contratação foi feita. A estimativa pública de aproximadamente US$20/mês para um compute contínuo de 0,25 CU do REVORY não inclui uso adicional dos outros projetos, armazenamento, snapshots, tributos ou câmbio. O valor US$25 proposto é orçamento estimado, não um limite automático garantido do provedor. Antes de ativar, conferir o preço da instalação e interromper se a cobrança ou o escopo não corresponderem à autorização.
+A agenda nativa de snapshots Neon exigia plano pago com scope=installation, incluindo REVORY, VIDENCE e outro projeto. Essa proposta não foi aplicada e foi substituída pela alternativa criptografada acima, conforme escolha explícita do fundador.

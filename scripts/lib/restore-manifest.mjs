@@ -12,10 +12,13 @@ const quote = value => `"${value.replaceAll('"', '""')}"`;
 export async function readRestoreManifest(client) {
   return client.$transaction(async tx => {
     await tx.$executeRawUnsafe("SET TRANSACTION READ ONLY");
+    await tx.$executeRawUnsafe("SET LOCAL TIME ZONE 'UTC'");
     await tx.$executeRawUnsafe("SET LOCAL statement_timeout = '15000ms'");
     const tables = await tx.$queryRawUnsafe("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' ORDER BY table_name");
     const columns = await tx.$queryRawUnsafe("SELECT table_name,column_name,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,ordinal_position");
-    const constraints = await tx.$queryRawUnsafe("SELECT c.relname AS table_name,con.conname,pg_get_constraintdef(con.oid) AS definition FROM pg_constraint con JOIN pg_class c ON con.conrelid=c.oid JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='public' ORDER BY c.relname,con.conname");
+    // PostgreSQL 18 also catalogs table NOT NULL constraints. Nullability is
+    // already compared in columns.is_nullable, consistently on PostgreSQL 17/18.
+    const constraints = await tx.$queryRawUnsafe("SELECT c.relname AS table_name,con.conname,pg_get_constraintdef(con.oid) AS definition FROM pg_constraint con JOIN pg_class c ON con.conrelid=c.oid JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='public' AND con.contype<>'n' ORDER BY c.relname,con.conname");
     const rows = [];
     for (const { table_name: table } of tables) {
       const [row] = await tx.$queryRawUnsafe(`SELECT count(*)::text AS rows, encode(sha256(convert_to(COALESCE(string_agg(encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex'),'' ORDER BY encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex')),''),'UTF8')),'hex') AS digest FROM public.${quote(table)} t`);

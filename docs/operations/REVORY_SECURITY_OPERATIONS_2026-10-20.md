@@ -117,3 +117,10 @@ A conexão de injeção de variáveis entre o recurso Neon e o projeto Vercel fo
 O build agora consulta somente metadados e rejeita owner, criação de banco/papel/schema, BYPASSRLS, replicação, memberships de leitura/escrita globais, tabelas pertencentes ao runtime e escrita no histórico de migrations. Auditoria read-only real aceitou os três runtimes e rejeitou o owner. Essa barreira impede publicar com permissões administrativas mesmo se a configuração voltar a se alterar. A credencial administrativa resincronizada foi rotacionada novamente após o deploy protegido. Conexões direta e pooled com a senha anterior foram rejeitadas; a auditoria posterior encontrou zero variáveis gerenciadas de banco e seis URLs manuais Secret. Os três novos deploys ficaram READY e a saúde foi conferida após a troca. [Prova redigida](../qa/security-operations/backup-preparation-2026-10-20.json).
 
 [Plano e observação do cron](REVORY_BACKUP_AND_RETENTION_ACTIVATION_2026-10-20.md).
+
+
+## Backup sem upgrade — execução concluída
+
+Conforme escolha do fundador, não houve upgrade do Neon nem alteração de faturamento da instalação compartilhada. Rotina diária GitHub/age publicada em main, role de backup SELECT-only, sete dias de retenção e limite de tamanho. Primeiro run manual 39440890191 e recuperação do próprio artefato remoto passaram: 30 tabelas/132 registros com estrutura e conteúdo conferidos. Produção READY e health 200/ok/reachable após publicação. Guia: REVORY_ENCRYPTED_BACKUPS.md; prova: ../qa/security-operations/github-backup-recovery-2026-10-20.json.
+
+A pendência de backup acima fica substituída por: observar o primeiro evento schedule e guardar uma segunda cópia da identidade privada fora deste PC, sob custódia do fundador. Identidade atual em diretório local com ACL só do usuário e cópia DPAPI no mesmo computador. A primeira retenção natural continua pendente; conferência única de ambos em 21/10 às 03:10 Brasília. Não foi disparada exclusão manual para antecipar o cron.

@@ -31,14 +31,28 @@
     "oneTimeAutomation": "conferir-primeira-reten-o-do-revory"
   },
   "backup": {
-    "policyPrepared": {
-      "frequency": "daily",
-      "hourUtc": 4,
-      "retentionSeconds": 604800
+    "provider": "GitHub Actions encrypted artifacts",
+    "neonPlan": "Free",
+    "upgradePerformed": false,
+    "activated": true,
+    "scheduleUtc": "23 4 * * *",
+    "retentionDays": 7,
+    "archiveCapMiB": 20,
+    "repositoryArtifactCapMiB": 200,
+    "firstManualRun": {
+      "id": "39440890191",
+      "conclusion": "success",
+      "artifactExpiresAt": "2026-10-27T14:37:48Z"
     },
-    "activated": false,
-    "requiresCostDecision": true,
-    "upgradeScope": "Shared Neon installation including VIDENCE"
+    "remoteArtifactRecovery": {
+      "structuralMatch": true,
+      "contentHashesMatch": true,
+      "tablesChecked": 30,
+      "sourceRows": "132",
+      "countMismatches": 0
+    },
+    "firstScheduledRunObserved": false,
+    "independentRecoveryIdentityCopyPending": true
   },
   "credentialsPrinted": false
 }
