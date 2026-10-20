@@ -1,0 +1,2 @@
+externalId,provider,windowStart,windowEnd,costBasis,costAmount,costCurrency,usageQuantity,usageUnit,organizationId,projectId,model,reportedAt
+kg-agent-may-2026-unlinked,openai,2026-05-01T00:00:00Z,2026-06-01T00:00:00Z,ESTIMATED,5.9914,USD,469411,tokens,,,,2026-10-13T00:00:00Z

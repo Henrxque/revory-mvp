@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type SourceKind = "STRIPE_REVENUE" | "INTERNAL_LEDGER" | "PROVIDER_REPORT";
 type Review = { headers: string[]; sampleRows: string[][]; suggestedMapping: Record<string, string>; fields: Array<{ name: string; label: string; required: boolean }>; requiredFields: string[]; rowCount: number };
@@ -9,13 +9,20 @@ type Plan = { acceptedCount: number; rejectedCount: number; issueCount: number; 
 type ImportResult = { batchId: string; replayed: boolean; acceptedCount: number; rejectedCount: number; insertedCount: number; duplicateCount: number; issueCount: number; issues: Plan["issues"]; message: string };
 
 const sourceLabels: Record<SourceKind, string> = {
-  STRIPE_REVENUE: "Stripe revenue export",
-  INTERNAL_LEDGER: "Internal usage or credits ledger",
-  PROVIDER_REPORT: "AI provider usage and cost report",
+  STRIPE_REVENUE: "Stripe payments",
+  INTERNAL_LEDGER: "Your product's usage",
+  PROVIDER_REPORT: "AI provider usage & cost",
 };
+const sourceHelp: Record<SourceKind, string> = {
+  STRIPE_REVENUE: "Payments recorded in Stripe. This scan keeps revenue as context; it does not calculate margin.",
+  INTERNAL_LEDGER: "A file from your SaaS showing customer IDs, dates and recorded usage or credits. This is also called your internal ledger.",
+  PROVIDER_REPORT: "Usage and cost reported by your AI provider, such as OpenAI. Estimates remain separate from reported costs.",
+};
+const sampleFiles: Record<SourceKind, string> = { STRIPE_REVENUE: "stripe-revenue.csv", INTERNAL_LEDGER: "internal-ledger.csv", PROVIDER_REPORT: "provider-report.csv" };
 
 export function AiIntegrityImportPanel({ syntheticSamples = false }: { syntheticSamples?: boolean }) {
   const router = useRouter();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [sourceKind, setSourceKind] = useState<SourceKind>("STRIPE_REVENUE");
   const [file, setFile] = useState<File | null>(null);
   const [sourceSystem, setSourceSystem] = useState("stripe-export");
@@ -77,35 +84,46 @@ export function AiIntegrityImportPanel({ syntheticSamples = false }: { synthetic
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Import failed."); }
     finally { setBusy(false); }
   }
+  async function loadSample() {
+    resetReview(); setBusy(true);
+    try {
+      const response = await fetch(`/samples/ai-integrity/${sampleFiles[sourceKind]}`);
+      if (!response.ok) throw new Error("The example file could not be loaded. Try again or download it below.");
+      setFile(new File([await response.blob()], sampleFiles[sourceKind], { type: "text/csv" }));
+      if (fileInput.current) fileInput.current.value = "";
+      setStartDate("2026-08-01"); setEndDate("2026-09-01"); setSourceTimezone("UTC");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load the example."); }
+    finally { setBusy(false); }
+  }
 
   const inputClass = "min-h-11 w-full rounded-xl border border-[color:var(--border-strong)] bg-[color:var(--background-card)] px-3 text-sm text-[color:var(--foreground)] outline-none focus:border-[color:var(--accent)]";
   return <section className="rev-shell-panel rounded-[28px] p-5 md:p-7">
+    <h2 className="text-lg font-semibold">Which data are you adding?</h2>
+    <p className="mt-2 mb-5 text-sm leading-7 text-[color:var(--text-muted)]">Choose one source, then review the file before saving it. Repeat for each of the three sources.</p>
     <div className="grid gap-4 md:grid-cols-2">
-      <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source type
-        <select className={inputClass} value={sourceKind} onChange={(event) => { const kind = event.target.value as SourceKind; setSourceKind(kind); setSourceSystem(kind === "STRIPE_REVENUE" ? "stripe-export" : kind === "INTERNAL_LEDGER" ? "internal-ledger" : "provider-report"); resetReview(); }}>
+      <label className="space-y-2 text-sm font-semibold text-[color:var(--text-muted)]">Data source
+        <select className={inputClass} disabled={busy} value={sourceKind} onChange={(event) => { const kind = event.target.value as SourceKind; setSourceKind(kind); setFile(null); if (fileInput.current) fileInput.current.value = ""; setSourceSystem(kind === "STRIPE_REVENUE" ? "stripe-export" : kind === "INTERNAL_LEDGER" ? "internal-ledger" : "provider-report"); resetReview(); }}>
           {Object.entries(sourceLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
       </label>
       <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">CSV or XLSX file · 8 MB max
-        <input className={`${inputClass} py-2.5`} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setFile(event.target.files?.[0] ?? null); resetReview(); }} />
+        <input ref={fileInput} disabled={busy} className={`${inputClass} py-2.5`} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setFile(event.target.files?.[0] ?? null); resetReview(); }} />
       </label>
-      <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source system
-        <input className={inputClass} value={sourceSystem} onChange={(event) => { setSourceSystem(event.target.value); resetReview(); }} placeholder="e.g. stripe-export" />
-      </label>
-      <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source timezone label
-        <input className={inputClass} value={sourceTimezone} onChange={(event) => { setSourceTimezone(event.target.value); resetReview(); }} placeholder="UTC" />
-      </label>
-      <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Window start · UTC inclusive
+      <p className="text-sm leading-7 text-[color:var(--text-muted)] md:col-span-2">{sourceHelp[sourceKind]}</p>
+      {syntheticSamples ? <div className="rounded-2xl border border-[color:var(--border-accent)] p-4 md:col-span-2"><p className="text-sm font-semibold">Trying the app? Start with an example.</p><p className="mt-2 text-sm leading-6 text-[color:var(--text-muted)]">Load the fictional August file for this source. Its period will be filled in for you. Customer files are not accepted in this preview.</p><button type="button" disabled={busy} onClick={() => void loadSample()} className="rev-action-button mt-4 px-4 py-3 text-sm">Use example: {sourceLabels[sourceKind]}</button></div> : null}
+      {file ? <p role="status" className="break-all text-sm font-semibold text-[color:var(--accent)] md:col-span-2">Selected file: {file.name}</p> : null}
+      <label className="space-y-2 text-sm font-semibold text-[color:var(--text-muted)]">Period starts · UTC
         <input className={inputClass} type="date" value={startDate} onChange={(event) => { setStartDate(event.target.value); resetReview(); }} />
       </label>
-      <label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Window end · UTC exclusive
+      <label className="space-y-2 text-sm font-semibold text-[color:var(--text-muted)]">Period ends · UTC, this day excluded
         <input className={inputClass} type="date" value={endDate} onChange={(event) => { setEndDate(event.target.value); resetReview(); }} />
       </label>
     </div>
-    <p className="mt-4 text-xs leading-6 text-[color:var(--text-subtle)]">Dates inside the file must include their own timezone offset. Revenue amounts use minor units; provider costs use decimal currency units. One file and one source kind per import.</p>
+    <p className="mt-4 text-sm leading-6 text-[color:var(--text-muted)]">Use the same period for all three files. For August, choose August 1 to September 1; September 1 is outside the analysis.</p>
+    <details className="mt-4 rounded-xl border border-[color:var(--border)] p-4"><summary className="cursor-pointer text-sm text-[color:var(--text-muted)]">File settings & format requirements</summary><div className="mt-4 grid gap-4 md:grid-cols-2"><label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source system<input className={inputClass} value={sourceSystem} onChange={(event) => { setSourceSystem(event.target.value); resetReview(); }} /></label><label className="space-y-2 text-xs font-semibold text-[color:var(--text-muted)]">Source timezone label<input className={inputClass} value={sourceTimezone} onChange={(event) => { setSourceTimezone(event.target.value); resetReview(); }} /></label></div><p className="mt-4 text-xs leading-6 text-[color:var(--text-muted)]">Dates inside the file need their own timezone offset. Stripe amounts use minor units, such as cents; provider costs use decimal currency units. Import one source per file.</p></details>
     <div className="mt-3 flex flex-wrap gap-4 text-xs text-[color:var(--accent)]"><a href="/templates/ai-integrity-stripe-revenue.csv" download>Stripe template</a><a href="/templates/ai-integrity-internal-ledger.csv" download>Ledger template</a><a href="/templates/ai-integrity-provider-report.csv" download>Provider template</a></div>
     {syntheticSamples ? <div className="mt-4 rounded-xl border border-[color:var(--border)] p-4"><p className="text-xs leading-6 text-[color:var(--text-muted)]">Test with the synthetic August dataset: use August 1–September 1, 2026 (UTC). Never upload customer data into this preview.</p><div className="mt-2 flex flex-wrap gap-4 text-xs text-[color:var(--accent)]"><a href="/samples/ai-integrity/stripe-revenue.csv" download>Synthetic Stripe</a><a href="/samples/ai-integrity/internal-ledger.csv" download>Synthetic ledger</a><a href="/samples/ai-integrity/provider-report.csv" download>Synthetic provider</a></div></div> : null}
-    <button className="rev-action-button mt-5 px-5 py-3 text-sm" type="button" disabled={busy || !file} onClick={firstReview}>{busy ? "Working…" : "1 · Review file and columns"}</button>
+    <button className="rev-action-button mt-5 px-5 py-3 text-sm" type="button" disabled={busy || !file || !startDate || !endDate} onClick={firstReview}>{busy ? "Working…" : "Next: review this file"}</button>
     {error ? <p role="alert" className="mt-4 rounded-xl border border-[color:var(--danger)] px-4 py-3 text-sm text-[color:var(--danger)]">{error}</p> : null}
     {review ? <div className="mt-7 space-y-5 border-t border-[color:var(--border)] pt-6">
       <div><h2 className="[font-family:var(--font-app)] text-lg font-semibold">Column review</h2><p className="mt-1 text-xs text-[color:var(--text-muted)]">{review.rowCount} rows · Confirm every required field. Suggestions are deterministic and never create customer links.</p></div>

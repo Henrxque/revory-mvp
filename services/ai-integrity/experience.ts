@@ -17,3 +17,9 @@ export function isAiIntegrityExperienceEnabled() {
   return process.env.REVORY_AI_SAAS_PREVIEW === "true"
     && (process.env.NODE_ENV !== "production" || isAiIntegrityRemoteSyntheticPreviewEnabled());
 }
+
+export function aiScanEligibleOrderWhere() {
+  return isAiIntegrityRemoteSyntheticPreviewEnabled()
+    ? { status: { in: ["PAID", "SYNTHETIC_PREVIEW"] } }
+    : { status: "PAID" };
+}

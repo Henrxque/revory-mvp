@@ -1,0 +1,58 @@
+import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import { prisma } from "../db/prisma";
+import { consentOpenAiSource, getOpenAiSourceArtifact, listOpenAiSources, revokeOpenAiSource, syncOpenAiSource } from "../services/ai-integrity/openai-source";
+import { buildWorkspaceExport } from "../services/data-portability/workspace-export";
+
+if (!/^\/revory_sprint1_[a-f0-9]{12}$/.test(new URL(process.env.DATABASE_URL ?? "").pathname)) throw new Error("Use a disposable DB harness.");
+process.env.REVORY_AI_SAAS_PREVIEW = "true";
+process.env.REVORY_AI_OPENAI_CONTROLLED_READ = "true";
+process.env.REVORY_AI_SAAS_SYNTHETIC_ONLY = "false";
+process.env.REVORY_AI_OPENAI_ORG_ID = "org-sprint11_fixture";
+process.env.REVORY_AI_OPENAI_ADMIN_KEY = "sk-admin-sprint11-fixture";
+const day = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10) + "T00:00:00.000Z";
+const windowStart = day(3), windowEnd = day(1);
+const empty = { object: "page", has_more: false, next_page: null, data: [] };
+let reads = 0;
+const transport = async () => { reads++; return empty; };
+
+try {
+  const suffix = randomUUID().slice(0, 8);
+  const user = await prisma.user.create({ data: { email: `sprint11-${suffix}@example.invalid` } });
+  const ws = await prisma.workspace.create({ data: { name: "OpenAI controlled read test", slug: `sprint11-${suffix}`, ownerUserId: user.id } });
+  const other = await prisma.workspace.create({ data: { name: "Other OpenAI workspace", slug: `sprint11-other-${suffix}`, ownerUserId: user.id } });
+  process.env.REVORY_AI_OPENAI_WORKSPACE_ID = ws.id;
+  const consent = { organizationId: process.env.REVORY_AI_OPENAI_ORG_ID, windowStart, windowEnd, consentConfirmed: true };
+  await assert.rejects(() => consentOpenAiSource(ws.id, user.id, { ...consent, apiKey: "do-not-accept" }), /Unsupported/);
+  await assert.rejects(() => consentOpenAiSource(ws.id, user.id, { ...consent, consentConfirmed: false }), /Confirm/);
+  const connection = await consentOpenAiSource(ws.id, user.id, consent);
+  assert.equal((await consentOpenAiSource(ws.id, user.id, consent)).id, connection.id);
+  await assert.rejects(() => consentOpenAiSource(other.id, user.id, consent), /unavailable/);
+  const request = { connectionId: connection.id, requestKey: "read_sprint11_first", windowStart, windowEnd };
+  const first = await syncOpenAiSource(ws.id, user.id, request, transport);
+  assert.equal(first.sync.status, "COMPLETED");
+  assert.equal(reads, 2, "Only the two allowlisted source channels should be read");
+  const artifact = await getOpenAiSourceArtifact(ws.id, first.sync.id);
+  assert.ok(artifact && JSON.stringify(artifact).includes("NO_REPORTED_ROWS"));
+  assert.ok(!JSON.stringify(artifact).includes(process.env.REVORY_AI_OPENAI_ADMIN_KEY));
+  const replay = await syncOpenAiSource(ws.id, user.id, request, transport);
+  assert.equal(replay.sync.id, first.sync.id); assert.equal(replay.replayed, true); assert.equal(reads, 2);
+  await assert.rejects(() => syncOpenAiSource(ws.id, user.id, { ...request, windowStart: day(2) }, transport), /reused/);
+  assert.equal(await getOpenAiSourceArtifact(other.id, first.sync.id), null);
+  await assert.rejects(() => revokeOpenAiSource(other.id, user.id, { connectionId: connection.id }), /unavailable/);
+  assert.ok(JSON.stringify(await buildWorkspaceExport(ws.id)).includes(first.sync.id));
+  assert.equal(await prisma.aiIntegrityImportBatch.count({ where: { workspaceId: ws.id } }), 0);
+  assert.equal(await prisma.aiIntegrityScanGrant.count({ where: { workspaceId: ws.id } }), 0);
+  assert.equal((await listOpenAiSources(ws.id)).length, 1);
+  await revokeOpenAiSource(ws.id, user.id, { connectionId: connection.id });
+  await assert.rejects(() => syncOpenAiSource(ws.id, user.id, { ...request, requestKey: "read_sprint11_after_revoke" }, transport), /revoked|missing/);
+  const reconsented = await consentOpenAiSource(ws.id, user.id, consent);
+  assert.equal(reconsented.generation, 2);
+  await assert.rejects(() => syncOpenAiSource(ws.id, user.id, request, transport), /reused/);
+  await prisma.aiIntegritySourceSync.update({ where: { id: first.sync.id }, data: { artifactHash: "0".repeat(64) } });
+  await assert.rejects(() => getOpenAiSourceArtifact(ws.id, first.sync.id), /integrity/);
+  process.env.REVORY_AI_OPENAI_CONTROLLED_READ = "false";
+  assert.deepEqual(await listOpenAiSources(ws.id), []);
+  await prisma.workspace.delete({ where: { id: ws.id } });
+  console.log("Sprint 11 DB PASS: consent, bounded empty read, checkpoint, replay, workspace isolation, export, revocation, generation, integrity and feature gate.");
+} finally { await prisma.$disconnect(); }

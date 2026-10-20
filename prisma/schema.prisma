@@ -639,6 +639,11 @@ model AiIntegritySourceConnection {
   status           String   @default("ACTIVE")
   generation       Int      @default(1)
   consentVersion   String
+  organizationId   String?
+  projectScope     String?
+  consentPurpose   String?
+  consentStart     DateTime?
+  consentEnd       DateTime?
   consentedBy      String
   consentedAt      DateTime @default(now())
   revokedAt        DateTime?
