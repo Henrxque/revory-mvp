@@ -1,13 +1,13 @@
 {
-  "verifiedAt": "2026-10-20T18:06:32.861Z",
-  "deploymentId": "dpl_BVG5yF4KsNUf3yBLjvTkDbmtvAXi",
+  "verifiedAt": "2026-10-20T18:29:07.231Z",
+  "deploymentId": "dpl_3x69dNuksbtFZybMzBie9KEBaT1Y",
   "scope": "real protected Vercel API reached through authorized CLI; webhook payload is an ignored fixture, not a payment",
   "health": {
     "status": 200,
     "data": {
       "status": "ok",
       "database": "reachable",
-      "durationMs": 5
+      "durationMs": 200
     }
   },
   "unauthorizedJobHttp": 401,

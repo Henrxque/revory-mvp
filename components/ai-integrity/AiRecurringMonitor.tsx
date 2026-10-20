@@ -27,7 +27,7 @@ const reasonLabels: Record<string, string> = {
   COMPARABLE_EVIDENCE_MISSING: "There is not enough matching evidence to compare these periods.",
 };
 const deliveryLabels: Record<string, string> = {
-  SENT: "Email sent", PENDING: "Email queued", RETRY: "Delivery retry scheduled",
+  SENT: "Accepted by email provider", PENDING: "Email queued", RETRY: "Delivery retry scheduled",
   FAILED: "Email delivery failed", NEEDS_ATTENTION: "Delivery needs attention", SENDING: "Sending email", CANCELED: "Email canceled", SKIPPED: "Email not sent", SUPPRESSED: "Email not sent",
 };
 function readable(value: string) {
@@ -121,7 +121,10 @@ export function AiRecurringMonitor({ view }: { view: RecurringView }) {
       if (result.url) { window.location.assign(result.url); return; }
       if (result.token) setToken(result.token);
       if (action === "REVOKE_TOKEN") setToken("");
-      setMessage(action === "TOKEN" ? "Token created. Copy it now; it will not be shown again." : "Saved.");
+      const emailTestMessage = result.status === "SENT"
+        ? "The email provider accepted your test. Check your inbox and spam folder. Repeat requests reuse today's test."
+        : "Your test is queued or needs attention. Check Email activity; repeat requests reuse today's test.";
+      setMessage(action === "TOKEN" ? "Token created. Copy it now; it will not be shown again." : action === "TEST_EMAIL" ? emailTestMessage : "Saved.");
       router.refresh();
     } catch (error) { setFailed(true); setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }

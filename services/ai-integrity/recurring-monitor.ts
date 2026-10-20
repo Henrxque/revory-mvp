@@ -311,12 +311,26 @@ export async function investigateMonitorSignal(workspaceId: string, actorUserId:
     await audit(tx, workspaceId, actorUserId, "AI_RECURRING_INVESTIGATION_UPDATED", { investigationId: input.id, status: input.status, note: input.note.trim(), revision: input.revision + 1 });
   });
 }
-export async function deliverMonitorNotices(sender = sendTransactionalEmail) {
+export async function queueMonitorEmailTest(workspaceId: string, actorUserId: string) {
+  return prisma.$transaction(async tx => {
+    await owner(workspaceId, actorUserId, tx);
+    const user = await tx.user.findUniqueOrThrow({ where: { id: actorUserId }, select: { email: true, emailVerifiedAt: true, status: true } });
+    if (!user.email || !user.emailVerifiedAt || user.status !== "ACTIVE") throw new Error("Verify the owner's email first.");
+    const key = "email-test/" + new Date().toISOString().slice(0, 10);
+    const existing = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "NOTICE", key) });
+    if (existing) return { id: existing.id, status: existing.status };
+    const notice = await tx.aiIntegrityMonitorState.create({ data: { workspaceId, kind: "NOTICE", key, status: "PENDING", dataJson: { kind: "TEST_EMAIL", actorUserId, recipientHash: createHash("sha256").update(user.email).digest("hex") } } });
+    await audit(tx, workspaceId, actorUserId, "AI_MONITOR_EMAIL_TEST_REQUESTED", { noticeId: notice.id, scope: "one explicit test to the verified owner; no recurring-read consent or findings" });
+    return { id: notice.id, status: notice.status };
+  });
+}
+
+export async function deliverMonitorNotices(sender = sendTransactionalEmail, target?: { workspaceId: string; noticeId: string }) {
   if (!recurringEnabled()) return { sent: 0 };
-  const rows = await prisma.aiIntegrityMonitorState.findMany({ where: { kind: "NOTICE", status: { in: ["PENDING", "RETRY"] }, availableAt: { lte: new Date() }, attempts: { lt: 5 } }, take: 3, orderBy: { createdAt: "asc" } });
+  const rows = await prisma.aiIntegrityMonitorState.findMany({ where: { ...(target ? { workspaceId: target.workspaceId, id: target.noticeId } : {}), kind: "NOTICE", status: { in: ["PENDING", "RETRY"] }, availableAt: { lte: new Date() }, attempts: { lt: 5 } }, take: 3, orderBy: { createdAt: "asc" } });
   let sent = 0;
   for (const row of rows) {
-    const payload = row.dataJson as { kind: string; firstAttemptAt?: string };
+    const payload = row.dataJson as { kind: string; firstAttemptAt?: string; actorUserId?: string; recipientHash?: string };
     if (payload.firstAttemptAt && Date.now() - Date.parse(payload.firstAttemptAt) > 23 * 3600000) {
       await prisma.aiIntegrityMonitorState.updateMany({ where: { id: row.id, status: row.status, revision: row.revision }, data: { status: "NEEDS_ATTENTION" } }); continue;
     }
@@ -325,21 +339,26 @@ export async function deliverMonitorNotices(sender = sendTransactionalEmail) {
     if (!claimed.count) continue;
     const schedule = await prisma.aiIntegrityMonitorState.findUnique({ where: stateKey(row.workspaceId, "SCHEDULE") });
     const config = schedule?.dataJson as unknown as MonitorSchedule | undefined;
-    const workspace = await prisma.workspace.findUnique({ where: { id: row.workspaceId }, select: { ownerUserId: true, owner: { select: { email: true } } } });
-    if (!config?.emailEnabled || schedule?.status !== "ACTIVE" || workspace?.ownerUserId !== config.actorUserId || !workspace.owner.email || !await monitorPaid(prisma, row.workspaceId)) {
+    const workspace = await prisma.workspace.findUnique({ where: { id: row.workspaceId }, select: { ownerUserId: true, owner: { select: { email: true, emailVerifiedAt: true, status: true } } } });
+    const isTest = payload.kind === "TEST_EMAIL";
+    const authorized = isTest
+      ? workspace?.ownerUserId === payload.actorUserId && !!workspace?.owner.emailVerifiedAt && workspace.owner.status === "ACTIVE" && !!workspace.owner.email && createHash("sha256").update(workspace.owner.email).digest("hex") === payload.recipientHash
+      : config?.emailEnabled && schedule?.status === "ACTIVE" && workspace?.ownerUserId === config.actorUserId;
+    if (!authorized || !workspace?.owner.email || !await monitorPaid(prisma, row.workspaceId)) {
       await prisma.aiIntegrityMonitorState.update({ where: { id: row.id }, data: { status: "CANCELED", leaseToken: null, leaseUntil: null } }); continue;
     }
     const kind = (row.dataJson as { kind: string }).kind;
     const messages: Record<string, string> = { DIFFERENCES_CHANGED: "New or changed differences are ready for review.", COMPARISON_LIMITED: "The latest comparison needs better evidence.", MONITORING_FAILED: "A monitoring period did not complete. Review source access, consent and data readiness.", LEDGER_REQUIRED: "Your next closed period needs its internal usage ledger." };
     const appLink = process.env.NEXTAUTH_URL?.startsWith("https://") ? new URL("/app/ai-integrity/monitoring", process.env.NEXTAUTH_URL).href : "";
-    const text = (messages[kind] ?? "Monitoring needs your review.") + " Open REVORY and choose Monitoring. No financial loss or recovery is inferred." + (appLink ? " " + appLink : "");
+    const text = (isTest ? "This is the test email you requested in REVORY. It checks email delivery only. It does not start recurring reads or report a finding." : (messages[kind] ?? "Monitoring needs your review.") + " Open REVORY and choose Monitoring. No financial loss or recovery is inferred.") + (appLink ? " " + appLink : "");
     let ok = false;
-    try { ok = (await sender({ to: workspace.owner.email, subject: "REVORY monitoring update", text, html: "<p>" + escapeEmailHtml(text) + "</p>", idempotencyKey: "revory-monitor/" + row.id })).sent; } catch { /* Retry only within the provider idempotency window. */ }
-    await prisma.aiIntegrityMonitorState.updateMany({ where: { id: row.id, leaseToken: token }, data: { status: ok ? "SENT" : row.attempts >= 4 ? "NEEDS_ATTENTION" : "RETRY", leaseToken: null, leaseUntil: null, availableAt: new Date(Date.now() + 3600000) } });
+    let providerId: string | undefined;
+    try { const result = await sender({ to: workspace.owner.email, subject: isTest ? "REVORY monitoring email test" : "REVORY monitoring update", text, html: "<p>" + escapeEmailHtml(text) + "</p>", idempotencyKey: "revory-monitor/" + row.id }); ok = result.sent; providerId = result.providerId; } catch { /* Retry only within the provider idempotency window. */ }
+    await prisma.aiIntegrityMonitorState.updateMany({ where: { id: row.id, leaseToken: token }, data: { status: ok ? "SENT" : row.attempts >= 4 ? "NEEDS_ATTENTION" : "RETRY", ...(ok && providerId ? { dataJson: { ...payload, firstAttemptAt: payload.firstAttemptAt ?? new Date().toISOString(), providerId } } : {}), leaseToken: null, leaseUntil: null, availableAt: new Date(Date.now() + 3600000) } });
     if (ok) sent++;
   }
   // An ambiguous delivery older than the idempotency window requires manual
   // review; it must never silently create a second email.
-  await prisma.aiIntegrityMonitorState.updateMany({ where: { kind: "NOTICE", status: "SENDING", leaseUntil: { lt: new Date() } }, data: { status: "NEEDS_ATTENTION", leaseToken: null, leaseUntil: null } });
+  await prisma.aiIntegrityMonitorState.updateMany({ where: { ...(target ? { workspaceId: target.workspaceId, id: target.noticeId } : {}), kind: "NOTICE", status: "SENDING", leaseUntil: { lt: new Date() } }, data: { status: "NEEDS_ATTENTION", leaseToken: null, leaseUntil: null } });
   return { sent };
 }

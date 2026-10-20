@@ -1,16 +1,17 @@
 {
   "verifiedAt": "2026-10-20T18:03:11.116Z",
-  "deploymentId": "dpl_BVG5yF4KsNUf3yBLjvTkDbmtvAXi",
-  "url": "https://revory-o1jh6iqpl-henrxques-projects.vercel.app",
+  "deploymentId": "dpl_3x69dNuksbtFZybMzBie9KEBaT1Y",
+  "url": "https://revory-hv5zm47jj-henrxques-projects.vercel.app",
   "alias": "https://revory-mvp-git-release-monitor-hml-henrxques-projects.vercel.app",
   "branch": "release/monitor-hml",
-  "gitSha": "d7e63fa46fbc21f5603a0f95aedf5029d70a62be",
+  "gitSha": "02b432ed67738d0313a53403212e78801be29380",
   "database": "revory_monitor_hml_afb8e4b745ce",
   "neonBranchId": "br-sweet-bread-adg2a9ty",
   "runtimeRole": "revory_runtime_monitor_afb8e4b745ce",
   "migrations": 38,
   "productionChanged": false,
   "billingMode": "test",
-  "webhookEnabled": false,
-  "remoteScheduleEnabled": false
+  "webhookEnabled": true,
+  "remoteScheduleEnabled": true,
+  "customDomain": "https://monitor-hml.revory.app"
 }

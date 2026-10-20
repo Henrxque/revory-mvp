@@ -35,6 +35,11 @@ export function AiRecurringMonitorControls({ view, section, busy, token, act, se
           <button disabled={busy || view.subscription?.status !== "ACTIVE"} className={buttonClass}>Save monitoring schedule</button>
         </form>}
     </section>
+    {view.subscription?.status === "ACTIVE" ? <section className="rev-shell-panel rounded-[22px] p-5 md:p-6">
+      <p className="rev-kicker">Email delivery</p><h2 className="mt-2 text-xl font-semibold">Check your monitoring emails</h2>
+      <p className="mt-3 text-sm leading-7 text-[color:var(--text-muted)]">Send a test to your verified account email. This does not enable recurring reads or change your email preferences. One test per UTC day.</p>
+      <button disabled={busy} className={`${buttonClass} mt-4`} onClick={() => act("TEST_EMAIL")}>Send test email</button>
+    </section> : null}
     <section style={{ order: view.subscription?.status === "ACTIVE" ? 0 : -1 }} className="rev-shell-panel rounded-[22px] p-5 md:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="rev-kicker">Billing</p><h2 className="mt-2 text-xl font-semibold">Monitor · US$399/month</h2><p className="mt-2 text-sm text-[color:var(--text-muted)]">One workspace. Daily or weekly closed periods. Up to 10,000 ledger rows per period, subject to source read limits.</p></div><span className="text-sm text-[color:var(--accent)]">{view.subscription ? labels[view.subscription.status] ?? view.subscription.status.toLowerCase().replaceAll("_", " ") : "Not subscribed"}</span></div>
       {view.subscription ? <div className="mt-4 space-y-3"><p className="text-sm text-[color:var(--text-muted)]">{view.subscription.status === "ACTIVE" ? "Paid access through" : "Last verified period ends"} {view.subscription.paidThrough?.slice(0, 10) ?? "not verified"} UTC.</p>{view.subscription.status === "ACTIVE" && view.subscription.cancelAt ? <p className="text-sm text-[color:var(--text-muted)]">Cancellation scheduled for {view.subscription.cancelAt.slice(0, 10)} UTC. This subscription will not renew.</p> : null}<p className="text-sm text-[color:var(--text-muted)]">Cancellation does not create a new scan purchase.</p><button disabled={busy} className={`${buttonClass} ${styles.quietButton}`} onClick={() => act("PORTAL")}>Manage subscription or cancel</button></div>

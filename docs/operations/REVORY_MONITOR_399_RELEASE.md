@@ -62,6 +62,7 @@ Na organização OpenAI verificada em 20/10/2026, uma Admin key em `Restricted`,
 - Lease de 10 minutos, até cinco tentativas, retry com atraso. Replay não duplica o período. Fila e assinaturas precisam de observação operacional; não há SLA customizado.
 - Fonte completa sem linhas registra período LIMITED e avança o acompanhamento, sem relatório ou zero inventado. Falha de coleta recebe retry e permanece pendente. O proprietário pode pular um período incompleto com nota auditada; comparações posteriores preservam a lacuna. `WAITING_LEDGER` requer arquivo/API; após erro, revisar fontes e reenviar o ledger para a mesma janela. Ao pausar, jobs em andamento não podem confirmar novo resultado.
 - Avisos usam o Resend existente, opt-in, outbox e chave de idempotência. Entrega ambígua/fora da janela de idempotência fica `NEEDS_ATTENTION` para revisão, sem reenvio silencioso.
+- Em Settings, `Send test email` permite ao proprietário com e-mail verificado e acesso pago testar a entrega para a própria conta. Um teste por dia UTC, com deduplicação/lease e vínculo ao destinatário; não autoriza leituras, não altera opt-in nem cria finding. Perda do acesso pago, troca de dono ou mudança de e-mail cancela a entrega pendente. O envio imediato processa somente esse aviso, com os mesmos controles de outbox. Aceite pelo Resend é distinto de entrega à caixa postal.
 
 ## Endpoint do ledger
 

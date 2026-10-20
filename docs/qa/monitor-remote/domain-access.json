@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-10-20T18:34:54.440Z",
+  "domain": "monitor-hml.revory.app",
+  "branch": "release/monitor-hml",
+  "projectId": "prj_WFsAkBOFKbhVbp0edmhRRmWxi4Tu",
+  "exceptionScope": "exact alias only",
+  "exceptionVerified": true,
+  "applicationAuthenticationPreserved": true,
+  "webhookSignaturesPreserved": true,
+  "otherPreviewProtectionChanged": false,
+  "productionDomainChanged": false,
+  "reason": "Native Stripe webhooks and GitHub scheduler require public reachability; external run 39476147745 returned HTTP 302 while authenticated app boundary returned 200."
+}

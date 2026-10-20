@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-20T18:40:05.965Z",
+  "scope": "native remote sandbox Checkout, no CLI webhook relay, no manually seeded paid access",
+  "workspaceId": "cmvgzkpke0002bmrwunk62lj3",
+  "subscriptionStatus": "ACTIVE",
+  "stripeSubscriptionStatus": "active",
+  "invoiceStatus": "paid",
+  "checkoutStatus": "complete",
+  "paymentStatus": "paid",
+  "amountTotal": 39900,
+  "currency": "usd",
+  "livemode": false,
+  "nativeEventId": "evt_1UShxPRiSOuAN93TjYoHV3xz",
+  "pendingWebhooks": 0,
+  "firstAppVerificationAt": "2026-10-20T18:40:19.906Z",
+  "subscriptionId": "sub_1UShxNRiSOuAN93Te2xRczeY",
+  "invoiceId": "in_1UShxLRiSOuAN93TRH0idW2S",
+  "nativeWebhookVerified": true,
+  "realBuyer": false,
+  "realMoney": false
+}

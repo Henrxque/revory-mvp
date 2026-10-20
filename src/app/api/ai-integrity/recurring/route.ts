@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getAppContext } from "@/services/app/get-app-context";
 import { prisma } from "@/db/prisma";
 import { recurringEnabled } from "@/services/ai-integrity/recurring-access";
-import { configureMonitor, skipMonitorPeriod, changeMonitorStatus, rotateLedgerToken, submitMonitorLedger, investigateMonitorSignal } from "@/services/ai-integrity/recurring-monitor";
+import { configureMonitor, skipMonitorPeriod, changeMonitorStatus, rotateLedgerToken, submitMonitorLedger, investigateMonitorSignal, queueMonitorEmailTest, deliverMonitorNotices } from "@/services/ai-integrity/recurring-monitor";
 import { createMonitorCheckout, monitorPortal } from "@/services/ai-integrity/monitor-billing";
 import { readAiBoundedText } from "@/services/ai-integrity/request-text";
 import { checkRateLimit } from "@/services/security/rate-limit";
@@ -26,6 +26,12 @@ export async function POST(request: Request) {
     const workspaceId = context.workspace.id, actor = context.user.id;
     if (!["PAUSE", "REVOKE_TOKEN", "REVIEW", "PORTAL"].includes(action) && !await hasCurrentAccountLegalAcceptance(actor)) return NextResponse.json({ error: "Review the current account terms first." }, { status: 403, headers });
     if (action === "CONFIGURE") return NextResponse.json(await configureMonitor(workspaceId, actor, input), { headers });
+    if (action === "TEST_EMAIL") {
+      const notice = await queueMonitorEmailTest(workspaceId, actor);
+      await deliverMonitorNotices(undefined, { workspaceId, noticeId: notice.id });
+      const current = await prisma.aiIntegrityMonitorState.findFirstOrThrow({ where: { id: notice.id, workspaceId, kind: "NOTICE" }, select: { status: true } });
+      return NextResponse.json(current, { headers });
+    }
     if (action === "PAUSE") await changeMonitorStatus(workspaceId, actor, "PAUSED");
     else if (action === "RESUME") {
       if (input.consentConfirmed !== true || input.scopeReviewed !== true) throw new Error();
