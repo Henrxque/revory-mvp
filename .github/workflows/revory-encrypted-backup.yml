@@ -1,0 +1,71 @@
+name: REVORY encrypted production backup
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: revory-production-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Guard retained storage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          const pages = JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/artifacts.json','utf8'));
+          const artifacts = pages.flatMap(p=>p.artifacts).filter(a=>!a.expired);
+          const bytes = artifacts.reduce((sum,a)=>sum+a.size_in_bytes,0);
+          if (bytes + 21*1024*1024 > 200*1024*1024 || artifacts.filter(a=>a.name.startsWith('revory-production-')).length >= 8) {
+            throw new Error('Retained storage cap reached; review before uploading.');
+          }
+          JS
+      - name: Install verified encryption binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz -o "$RUNNER_TEMP/age.tar.gz"
+          echo "cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10  $RUNNER_TEMP/age.tar.gz" | sha256sum --check --status
+          tar -xzf "$RUNNER_TEMP/age.tar.gz" -C "$RUNNER_TEMP"
+          test -x /usr/lib/postgresql/17/bin/pg_dump
+          /usr/lib/postgresql/17/bin/pg_dump --version
+      - name: Create bounded encrypted archive
+        env:
+          REVORY_BACKUP_DATABASE_URL: ${{ secrets.REVORY_BACKUP_DATABASE_URL }}
+          REVORY_BACKUP_RECIPIENT: ${{ vars.REVORY_BACKUP_RECIPIENT }}
+          REVORY_BACKUP_OUTPUT: ${{ runner.temp }}/revory-backup
+          PG_BIN: /usr/lib/postgresql/17/bin
+          AGE_BIN: ${{ runner.temp }}/age/age
+        run: node scripts/backup-production.mjs
+      - name: Store ciphertext only for seven days
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: revory-production-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/revory-backup/production.dump.age
+            ${{ runner.temp }}/revory-backup/manifest.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Remove runner files
+        if: always()
+        shell: bash
+        run: rm -f -- "$RUNNER_TEMP/revory-backup/production.dump.age" "$RUNNER_TEMP/revory-backup/production.dump.age.partial" "$RUNNER_TEMP/revory-backup/manifest.json"
