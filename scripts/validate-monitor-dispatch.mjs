@@ -11,7 +11,7 @@ const fetcher = async (target, options) => {
   return new Response(JSON.stringify({ processed: 1, sent: 0 }));
 };
 assert.deepEqual(await dispatchAiMonitor({ url, token, fetcher }), { processed: 1, sent: 0 });
-for (const target of [url.replace('revory.app', 'attacker.example'), url + '?secret=bad', url.replace('https:', 'http:'), 'https://revory.app/api/health']) {
+for (const target of [url.replace('revory.app', 'attacker.example'), url + '?secret=bad', url.replace('https:', 'http:'), 'https://revory.app/api/health', url.replace('revory.app','monitor-hml.revory.app.attacker.example')]) {
   await assert.rejects(dispatchAiMonitor({ url: target, token, fetcher }));
 }
 assert.equal(requests, 1, 'Unapproved destinations receive no credential or request.');

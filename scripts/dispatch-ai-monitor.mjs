@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 export async function dispatchAiMonitor({ url, token, fetcher = fetch }) {
   const target = new URL(url);
-  const approved = target.hostname === 'revory.app' ||
+  const approved = ['revory.app', 'monitor-hml.revory.app'].includes(target.hostname) ||
     /^revory-[a-z0-9-]+-henrxques-projects\.vercel\.app$/.test(target.hostname);
   if (target.protocol !== 'https:' || !approved || target.port || target.username || target.password || target.search || target.hash ||
       target.pathname !== '/api/jobs/ai-integrity-monitor' || typeof token !== 'string' || token.length < 32 || /\s/.test(token)) {

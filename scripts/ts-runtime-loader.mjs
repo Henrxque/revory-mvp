@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const projectRoot = process.cwd();
 
 export async function resolve(specifier, context, nextResolve) {
+  if (specifier === "next/server") return nextResolve("next/server.js", context);
   if (specifier === "server-only") {
     return {
       shortCircuit: true,

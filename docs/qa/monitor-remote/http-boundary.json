@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-10-20T18:06:32.861Z",
+  "deploymentId": "dpl_BVG5yF4KsNUf3yBLjvTkDbmtvAXi",
+  "scope": "real protected Vercel API reached through authorized CLI; webhook payload is an ignored fixture, not a payment",
+  "health": {
+    "status": 200,
+    "data": {
+      "status": "ok",
+      "database": "reachable",
+      "durationMs": 5
+    }
+  },
+  "unauthorizedJobHttp": 401,
+  "authorizedManualJob": {
+    "http": 200,
+    "processed": 0,
+    "results": [],
+    "sent": 0
+  },
+  "legacyBillingHttp": 404,
+  "anonymousRecurringHttp": 401,
+  "webhookInvalidSignatureHttp": 400,
+  "webhookSignedIgnoredFixtureHttp": 200,
+  "nativeStripeDeliveryVerified": false,
+  "naturalScheduleObserved": false,
+  "productionChanged": false
+}
