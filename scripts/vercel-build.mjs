@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { dedicatedMigrationDatasource } from "./lib/migration-datasource.mjs";
 import { verifyDeployedMigrations } from "./lib/verify-deployed-migrations.mjs";
+import { previewDatabaseTarget } from "./lib/preview-database-target.mjs";
 
 function run(command, args, extraEnv = {}) {
   const result = spawnSync(command, args, {
@@ -33,25 +34,7 @@ if (isVercelDeployment) {
   // A project-wide Preview DATABASE_URL must never be trusted implicitly.
   let migrationDatabaseUrl = process.env.DATABASE_URL;
   if (vercelEnvironment === "preview") {
-    const expectedDatabase = process.env.REVORY_AI_SAAS_SYNTHETIC_DATABASE ?? "";
-    let actualDatabase = "";
-    let directDatabase;
-    try { actualDatabase = new URL(process.env.DATABASE_URL).pathname.slice(1); }
-    catch { throw new Error("AI SaaS preview requires a valid isolated DATABASE_URL before migrations."); }
-    if (!/^revory_ai_(sandbox|homolog)_[a-f0-9]{12}$/.test(expectedDatabase)
-      || actualDatabase !== expectedDatabase) {
-      throw new Error("Vercel preview requires its exact isolated synthetic database before migrations.");
-    }
-    try { directDatabase = new URL(process.env.DATABASE_URL_UNPOOLED ?? ""); }
-    catch { throw new Error("AI SaaS preview requires a direct isolated DATABASE_URL_UNPOOLED before migrations."); }
-    const pooledDatabase = new URL(process.env.DATABASE_URL);
-    if (directDatabase.pathname.slice(1) !== expectedDatabase
-      || directDatabase.hostname !== pooledDatabase.hostname.replace("-pooler.", ".")
-      || directDatabase.username !== pooledDatabase.username
-      || directDatabase.password !== pooledDatabase.password) {
-      throw new Error("Vercel preview direct migration URL must match the isolated synthetic database and credentials.");
-    }
-    migrationDatabaseUrl = directDatabase.toString();
+    migrationDatabaseUrl = previewDatabaseTarget(process.env);
   }
 
   // Runtime may use a CRUD-only SQL role; migrations use a separate operator
