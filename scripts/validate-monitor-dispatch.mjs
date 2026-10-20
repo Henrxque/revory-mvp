@@ -6,7 +6,7 @@ let requests = 0;
 const fetcher = async (target, options) => {
   requests++;
   assert.equal(target, url);
-  assert.equal(options.redirect, 'error');
+  assert.equal(options.redirect, 'manual');
   assert.equal(options.headers.authorization, 'Bearer ' + token);
   return new Response(JSON.stringify({ processed: 1, sent: 0 }));
 };
@@ -27,4 +27,8 @@ await assert.rejects(dispatchAiMonitor({ url, token, fetcher: async () => { thro
   return true;
 });
 assert.equal(JSON.stringify(monitorDispatchFailureDetails(Error('secret='+token))).includes(token), false);
+await assert.rejects(dispatchAiMonitor({ url, token, fetcher: async () => new Response(null, { status: 302, headers: { location: 'https://attacker.example' } }) }), error => {
+  assert.equal(monitorDispatchFailureDetails(error).httpStatus, 302);
+  return true;
+});
 console.log('PASS: dispatcher target, credential, redirect and disabled-runtime guards.');
