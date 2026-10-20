@@ -14,7 +14,7 @@ Confirmar primeiro as fontes e seus vínculos. O consentimento recorrente reutil
 
 1. Encerrar a pendência conhecida da credencial owner Neon com rotação coordenada e verificar consumidores. Guardar registro sem credenciais. Confirmar cofre/keyring, retenção, suporte, termos da assinatura e política de refund.
 2. Aplicar migrations aditivas em banco aprovado e verificar backup/restore. A apresentação sintética atual continua isolada. Não ativar coleta real no banco reservado da demo.
-3. Criar produto e Price próprios no Stripe: USD 39900, mensal, intervalo 1, licensed; metadata do Price `revory_offer=revory-monitor-399/v1`. Configurar portal para cancelamento e atualização de pagamento, sem oferecer planos incompatíveis.
+3. Criar produto e Price próprios no Stripe: USD 39900, mensal, intervalo 1, licensed; metadata do Price `revory_offer=revory-monitor-399/v1`. Criar configuração dedicada de portal com a mesma metadata, cancelamento e atualização de pagamento habilitados e `subscription_update.enabled=false`; fornecer seu `bpc_` no ambiente. O portal histórico não é alterado.
 4. Verificar o percurso em sandbox real: checkout, webhook, pagamento, falha, replay, cancelamento, refund, fontes não vazias, ledger e relatório. Fixture/assinatura simulada não substituem essa prova.
 5. Configurar live apenas depois desse percurso, com autorização de publicação e smoke no alvo. A necessidade de registros tributários deve ser revisada; este código não ativa Stripe Tax automaticamente.
 
@@ -35,11 +35,14 @@ Preservar Google OAuth, NextAuth, Resend e seus recursos/callbacks. Não colocar
 | `REVORY_AI_MONITOR_STRIPE_KEY` | Chave do REVORY separada das credenciais de fonte; ambiente deve corresponder ao billing mode |
 | `REVORY_AI_MONITOR_PRICE_ID` | Price novo com o contrato acima |
 | `REVORY_AI_MONITOR_WEBHOOK_SECRET` | Segredo do destino novo |
+| `REVORY_AI_MONITOR_PORTAL_CONFIGURATION_ID` | Configuração `bpc_` dedicada, ativa e do mesmo modo test/live; metadata `revory_offer=revory-monitor-399/v1` |
 | `REVORY_AI_CONNECTION_ACTIVE_KEY`, `REVORY_AI_CONNECTION_KEYRING` | Envelope criptográfico existente, fora do banco; manter versões antigas durante rotação |
 | `NEXTAUTH_URL` | Origem HTTPS do ambiente aprovado |
 | `CRON_SECRET` | Autenticação do dispatcher |
 
 Credenciais de fontes continuam restritas ao workspace. Stripe exige restricted key `rk_` com leitura de invoices e conta; o endpoint de identidade verifica a conta declarada antes da coleta comercial. OpenAI exige acesso administrativo a Usage/Costs com o menor escopo disponível. Uma chave de geração não equivale a esse acesso.
+
+Na organização OpenAI verificada em 20/10/2026, uma Admin key em `Restricted`, somente `Usage API Scope: Read` e os demais escopos em `None` leu Usage/Costs. Usar esse escopo quando disponível, com expiração e revogação; não solicitar administração ampla por padrão. A homologação usou uma chave de um dia e a revogou logo após os GETs.
 
 ## Webhook e agendador
 
@@ -47,8 +50,13 @@ Credenciais de fontes continuam restritas ao workspace. Stripe exige restricted 
 - Eventos: `checkout.session.completed`; `customer.subscription.created/updated/deleted/paused/resumed`; `invoice.paid/payment_failed/payment_action_required`; `charge.refunded`, `charge.dispute.created`, `radar.early_fraud_warning.created`.
 - Assinatura do webhook verificada pelo SDK. Leitura canônica da assinatura e invoice após lock por workspace reduz reordenação. Browser return sozinho não libera acesso.
 - Acesso requer assinatura ativa, Price correto e linha de invoice paga correspondente ao período. Trial, invoice não paga, preço incompatível ou mistura test/live não concedem análise.
+- Cancelamento agendado preserva acesso até a menor data entre período pago e `cancel_at`. O portal pode usar `cancel_at` sem marcar `cancel_at_period_end`; a tela mostra a data canônica e informa que não haverá renovação.
+- Checkout expira após uma hora para preservar margem sobre o mínimo de 30 minutos do Stripe. Uma nova tentativa do mesmo proprietário reutiliza o checkout pendente, mesmo após recarregar a página; não cria uma segunda assinatura.
 - Refund/disputa/fraude bloqueiam acesso; não reativar automaticamente após evento antigo de assinatura. Revisar o caso operacionalmente antes de encerrar o bloqueio.
-- `GET /api/jobs/ai-integrity-monitor`, Bearer `CRON_SECRET`; cron a cada cinco minutos em `vercel.json`. Verificar plano Vercel compatível. O dispatcher processa uma renovação de estado Stripe, um período e até três avisos por chamada, com limites persistidos.
+- `GET /api/jobs/ai-integrity-monitor`, Bearer `CRON_SECRET`. O dispatcher processa uma renovação de estado Stripe, um período e até três avisos por chamada, com limites persistidos.
+- Vercel Hobby não suporta cron a cada cinco minutos. O job de monitoramento foi retirado de `vercel.json`; retenção e digest existentes foram preservados. O workflow `.github/workflows/revory-ai-monitor.yml` prepara a chamada externa pelo GitHub Actions, desabilitada por padrão. Não há garantia de pontualidade ou SLA de cinco minutos.
+- Para ativação explicitamente aprovada: definir a repository variable `REVORY_MONITOR_DISPATCH_URL` como a URL HTTPS exata do endpoint no alvo aprovado e o Actions secret `REVORY_MONITOR_DISPATCH_SECRET` com seu `CRON_SECRET`; executar manualmente e observar sucesso antes de definir `REVORY_MONITOR_DISPATCH_ENABLED=true`. O workflow somente executa em `main`. Não adicionar segredos à URL nem desligar proteção de Preview para contornar 401/403.
+- O cliente recusa host fora de `revory.app`/Previews da equipe, redirecionamentos, paths alternativos, credencial curta e resposta de monitoramento desabilitado. Logs contêm somente contagens, sem corpo de fonte ou credencial. Teste local: `node scripts/validate-monitor-dispatch.mjs`.
 - Lease de 10 minutos, até cinco tentativas, retry com atraso. Replay não duplica o período. Fila e assinaturas precisam de observação operacional; não há SLA customizado.
 - Fonte completa sem linhas registra período LIMITED e avança o acompanhamento, sem relatório ou zero inventado. Falha de coleta recebe retry e permanece pendente. O proprietário pode pular um período incompleto com nota auditada; comparações posteriores preservam a lacuna. `WAITING_LEDGER` requer arquivo/API; após erro, revisar fontes e reenviar o ledger para a mesma janela. Ao pausar, jobs em andamento não podem confirmar novo resultado.
 - Avisos usam o Resend existente, opt-in, outbox e chave de idempotência. Entrega ambígua/fora da janela de idempotência fica `NEEDS_ATTENTION` para revisão, sem reenvio silencioso.
@@ -89,4 +97,4 @@ Também aceita o contrato canônico `{batch, exportedAt, completeThrough}` para 
 - Provas em `docs/qa/recurring-monitor/`: desktop, mobile, autenticação, origem, consentimento, investigação, export e ingestão HTTP.
 - Para interromper leituras: pausar schedule/revogar fonte ou desligar `REVORY_AI_RECURRING_MONITOR`. Isso não cancela a cobrança: usar Stripe Portal/cancelamento para encerrar a assinatura.
 - Não remover tabelas/evidências em rollback. Preservar snapshots e aplicar retenção/exclusão conforme política.
-- Nenhuma conta real, e-mail real, pagamento real, alteração de domínio ou deploy é demonstrado pelos testes locais.
+- A homologação adicional de 20/10 está registrada em `docs/qa/monitor-homologation/`: usa transporte real do Stripe em sandbox, webhook assinado encaminhado pelo CLI e banco local isolado. Os relatórios dessa prova usam fontes controladas; não equivalem a dados reais de clientes, lançamento ou deploy remoto. Consultar o registro dessa homologação para os cenários efetivamente concluídos.

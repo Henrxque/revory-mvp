@@ -53,5 +53,5 @@ export async function GET() {
   const context = await getAppContext();
   if (!context || context.workspace.ownerUserId !== context.user.id) return NextResponse.json({ error: "Owner access required." }, { status: 403, headers });
   const rows = await prisma.aiIntegrityMonitorState.findMany({ where: { workspaceId: context.workspace.id, kind: { in: ["RUN", "INVESTIGATION", "SCHEDULE", "SUBSCRIPTION", "NOTICE"] } }, orderBy: { createdAt: "desc" }, take: 100, select: { id: true, kind: true, key: true, status: true, revision: true, dataJson: true, updatedAt: true } });
-  return NextResponse.json({ rows: rows.map(row => row.kind === "SUBSCRIPTION" ? { ...row, dataJson: { paidThrough: (row.dataJson as { paidThrough?: string }).paidThrough } } : row) }, { headers });
+  return NextResponse.json({ rows: rows.map(row => { if (row.kind !== "SUBSCRIPTION") return row; const data = row.dataJson as { paidThrough?: string; cancelAt?: string | null }; return { ...row, dataJson: { paidThrough: data.paidThrough, cancelAt: data.cancelAt } }; }) }, { headers });
 }

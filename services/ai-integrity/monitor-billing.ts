@@ -32,8 +32,11 @@ export async function createMonitorCheckout(workspaceId: string, actorUserId: st
     const existing = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "SUBSCRIPTION") });
     if (existing && existing.status !== "CANCELED") throw new Error("Review the existing subscription or checkout first.");
     const pending = await tx.aiIntegrityMonitorState.findFirst({ where: { workspaceId, kind: "CHECKOUT", status: "PENDING", availableAt: { gt: new Date() } } });
-    if (pending && pending.key !== requestKey) throw new Error("An existing checkout is still open.");
-    const checkout = await tx.aiIntegrityMonitorState.upsert({ where: stateKey(workspaceId, "CHECKOUT", requestKey), create: { workspaceId, kind: "CHECKOUT", key: requestKey, status: "PENDING", availableAt: new Date(Date.now() + 1800000), dataJson: { actorUserId, offer: MONITOR_OFFER.version } }, update: {} });
+    const pendingBinding = pending?.dataJson as { actorUserId?: string; offer?: string } | undefined;
+    if (pending && (pendingBinding?.actorUserId !== actorUserId || pendingBinding.offer !== MONITOR_OFFER.version)) throw new Error("Review the existing checkout first.");
+    // Stripe requires at least 30 minutes remaining at receipt. One hour leaves
+    // room for network latency and small differences between server clocks.
+    const checkout = pending ?? await tx.aiIntegrityMonitorState.upsert({ where: stateKey(workspaceId, "CHECKOUT", requestKey), create: { workspaceId, kind: "CHECKOUT", key: requestKey, status: "PENDING", availableAt: new Date(Date.now() + 3600000), dataJson: { actorUserId, offer: MONITOR_OFFER.version } }, update: {} });
     if (checkout.availableAt < new Date() || checkout.status !== "PENDING") throw new Error("Begin a new checkout request.");
     const stored = checkout.dataJson as { url?: string };
     if (stored.url?.startsWith("https://checkout.stripe.com/")) return { url: stored.url };
@@ -71,9 +74,13 @@ export async function reconcileMonitorSubscription(workspaceId: string, subscrip
     const paidLine = !!item && invoice?.lines.data.some(line => line.pricing?.price_details?.price === item?.price.id && line.period.end >= item.current_period_end && line.amount >= MONITOR_OFFER.amountMinor);
     const paid = validPrice && paidLine && subscription.status === "active" && !subscription.pause_collection && invoice?.status === "paid" && invoice.currency === "usd"
       && invoice.amount_paid >= MONITOR_OFFER.amountMinor && item.current_period_end * 1000 > Date.now() && !risk;
-    const data: MonitorSubscription = { customerId, subscriptionId, priceId: item?.price.id ?? "", paidThrough: new Date((item?.current_period_end ?? 0) * 1000).toISOString(), verifiedAt: new Date().toISOString(), livemode: monitorLiveMode() };
+    // The portal can set cancel_at without cancel_at_period_end. Preserve the
+    // canonical date and never let cached access extend past cancellation.
+    const cancellation = subscription.cancel_at ?? (subscription.cancel_at_period_end ? item?.current_period_end : null);
+    const paidThrough = Math.min(item?.current_period_end ?? 0, cancellation ?? Infinity);
+    const data: MonitorSubscription = { customerId, subscriptionId, priceId: item?.price.id ?? "", paidThrough: new Date(paidThrough * 1000).toISOString(), verifiedAt: new Date().toISOString(), livemode: monitorLiveMode(), cancelAt: cancellation ? new Date(cancellation * 1000).toISOString() : null, cancelAtPeriodEnd: subscription.cancel_at_period_end || cancellation === item?.current_period_end };
     const status = risk ? "BLOCKED" : paid ? "ACTIVE" : ["canceled", "incomplete_expired"].includes(subscription.status) ? "CANCELED" : subscription.status === "past_due" ? "PAST_DUE" : "INACTIVE";
-    await tx.aiIntegrityMonitorState.upsert({ where: stateKey(workspaceId, "SUBSCRIPTION"), create: { workspaceId, kind: "SUBSCRIPTION", key: "primary", status, dataJson: { ...data, cancelAtPeriodEnd: subscription.cancel_at_period_end } }, update: { status, dataJson: { ...data, cancelAtPeriodEnd: subscription.cancel_at_period_end }, revision: { increment: 1 } } });
+    await tx.aiIntegrityMonitorState.upsert({ where: stateKey(workspaceId, "SUBSCRIPTION"), create: { workspaceId, kind: "SUBSCRIPTION", key: "primary", status, dataJson: { ...data } }, update: { status, dataJson: { ...data }, revision: { increment: 1 } } });
     await tx.aiIntegrityMonitorState.update({ where: { id: checkout.id }, data: { status: "COMPLETED" } });
     await tx.workspaceAuditEvent.create({ data: { workspaceId, actorUserId: metadata.actorUserId, action: "AI_MONITOR_SUBSCRIPTION_VERIFIED", metadataJson: { subscriptionId, status, paidThrough: data.paidThrough, offer: MONITOR_OFFER.version, testMode: !monitorLiveMode() } } });
     return { status };
@@ -116,13 +123,20 @@ export async function handleMonitorWebhook(raw: string, signature: string, strip
     }
   }
 }
-export async function monitorPortal(workspaceId: string, actorUserId: string) {
-  const stripe = monitorStripe();
+export async function monitorPortal(workspaceId: string, actorUserId: string, stripe = monitorStripe()) {
   await prisma.$transaction(tx => assertMonitorOwner(workspaceId, actorUserId, tx));
+  const configurationId = process.env.REVORY_AI_MONITOR_PORTAL_CONFIGURATION_ID ?? "";
+  if (!/^bpc_/.test(configurationId)) throw new Error("Configure the dedicated monitoring customer portal.");
+  const configuration = await stripe.billingPortal.configurations.retrieve(configurationId);
+  if (!configuration.active || configuration.livemode !== monitorLiveMode()
+    || configuration.metadata?.revory_offer !== MONITOR_OFFER.version
+    || !configuration.features.subscription_cancel.enabled || !configuration.features.payment_method_update.enabled
+    || configuration.features.subscription_update.enabled) throw new Error("The monitoring customer portal does not match this offer.");
   const sub = await prisma.aiIntegrityMonitorState.findUniqueOrThrow({ where: stateKey(workspaceId, "SUBSCRIPTION") });
   const data = sub.dataJson as unknown as MonitorSubscription;
   if (!data.customerId) throw new Error("No subscription customer is associated.");
-  const session = await stripe.billingPortal.sessions.create({ customer: data.customerId, return_url: origin() + "/app/ai-integrity/monitoring" });
+  const session = await stripe.billingPortal.sessions.create({ customer: data.customerId, configuration: configuration.id, return_url: origin() + "/app/ai-integrity/monitoring" });
+  if (!session.url.startsWith("https://billing.stripe.com/")) throw new Error("Stripe did not return a valid customer portal URL.");
   return { url: session.url };
 }
 export async function refreshMonitorSubscriptions() {

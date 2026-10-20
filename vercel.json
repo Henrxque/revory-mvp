@@ -9,10 +9,6 @@
     {
       "path": "/api/jobs/weekly-digest",
       "schedule": "0 13 * * 1"
-    },
-    {
-      "path": "/api/jobs/ai-integrity-monitor",
-      "schedule": "*/5 * * * *"
     }
   ]
 }

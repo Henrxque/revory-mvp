@@ -1,0 +1,20 @@
+{
+  "verifiedAt": "2026-10-20T17:17:24.367Z",
+  "scope": "real Stripe sandbox invoice and signed CLI webhook; same customer from checkout",
+  "liveCharges": 0,
+  "subscriptionId": "sub_1USerERiSOuAN93TmOGVLpG1",
+  "invoiceId": "in_1USgh7RiSOuAN93TuIqmYhRb",
+  "failed": {
+    "providerStatus": "past_due",
+    "invoiceStatus": "open",
+    "paidMinor": 0,
+    "applicationStatus": "PAST_DUE",
+    "monitorPaid": false
+  },
+  "recovered": {
+    "invoiceStatus": "paid",
+    "paidMinor": 39900,
+    "applicationStatus": "ACTIVE",
+    "monitorPaid": true
+  }
+}

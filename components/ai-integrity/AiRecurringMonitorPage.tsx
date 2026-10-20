@@ -14,8 +14,9 @@ export async function AiRecurringMonitorPage({ workspaceId }: { workspaceId: str
   const states = [...configuration, ...history];
   const schedule = states.find(s => s.kind === "SCHEDULE"), subscription = states.find(s => s.kind === "SUBSCRIPTION");
   const config = schedule?.dataJson as unknown as MonitorSchedule | undefined;
+  const billing = subscription?.dataJson as { paidThrough?: string; cancelAt?: string | null } | undefined;
   const view: RecurringView = {
-    runtime: isAiCommercialRuntimeEnabled() ? monitorLiveMode() ? "LIVE" : "SANDBOX" : "LOCAL", workspaceId, subscription: subscription ? { status: subscription.status, paidThrough: (subscription.dataJson as { paidThrough?: string }).paidThrough } : null,
+    runtime: isAiCommercialRuntimeEnabled() ? monitorLiveMode() ? "LIVE" : "SANDBOX" : "LOCAL", workspaceId, subscription: subscription ? { status: subscription.status, paidThrough: billing?.paidThrough, cancelAt: billing?.cancelAt } : null,
     schedule: schedule && config ? { status: schedule.status, nextStart: config.nextStart, consentUntil: config.consentUntil, lagHours: config.lagHours, periodDays: config.periodDays, emailEnabled: config.emailEnabled } : null,
     ledgers: ledgers.map(b => ({ id: b.id, label: b.windowStart.toISOString().slice(0, 10) + " to " + b.windowEnd.toISOString().slice(0, 10) + " UTC" })),
     runs: states.filter(s => s.kind === "RUN").slice(0, 30).map(s => { const data = s.dataJson as unknown as MonitorRun; return { id: s.id, status: s.status, start: data.start, end: data.end, snapshotId: data.snapshotId, comparisonId: data.comparisonId, errorCode: data.errorCode }; }),

@@ -56,3 +56,9 @@ Feedback do fundador: a primeira tela parecia um painel técnico, extensa e sem 
 - Identidade REVORY preservada: canvas #141516, superfícies derivadas de #252729, accent #43B39B, Sora/DM Sans, sem setas decorativas. Layout verificado em 1440 px e 390 px, inclusive investigação expandida e configurações móveis.
 
 Prova de navegador atualizada em [verification.json](../qa/recurring-monitor/verification.json), [desktop](../qa/recurring-monitor/desktop.png), [mobile](../qa/recurring-monitor/mobile.png), [investigação](../qa/recurring-monitor/investigation.png) e [configurações móveis](../qa/recurring-monitor/mobile-settings.png). Fixture local em banco descartável: pausa/retomada, nota, exportação, navegação/filtros, ingestão HTTP com token e revogação passaram. Não houve cobrança, e-mail, leitura real de provedor ou alteração de ambiente externo.
+
+## Homologação com provedores reais — 2026-10-20
+
+O registro de 19/10 acima descreve a entrega inicial. Em 20/10, a cobrança foi exercitada no Stripe sandbox real: Checkout hospedado, webhook assinado, renovação por test clock, falha/recuperação, portal, cancelamento no término, refund e replay passaram. A mesma assinatura autorizou quatro relatórios com fontes controladas e ledger CSV/API. Leituras reais com chaves temporárias restritas de Stripe e OpenAI passaram nas contas vazias; ausência foi preservada e não virou relatório zero. As duas chaves foram revogadas e removidas do cofre do app.
+
+Foram corrigidos prazo e retomada de Checkout, isolamento da configuração de portal e cancelamento por `cancel_at`. O cron incompatível com Hobby foi substituído no código por dispatcher GitHub desligado por padrão. Esse trabalho não foi publicado, não ativou jobs remotos e não realizou cobrança live. Fontes não vazias/equivalência, entrega real de avisos, homologação remota e renovação comercial continuam pendentes. Ver [evidências e limites](../qa/monitor-homologation/README.md).

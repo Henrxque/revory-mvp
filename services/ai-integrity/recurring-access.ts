@@ -6,7 +6,7 @@ import { isAiIntegrityExperienceEnabled } from "./experience";
 
 export const MONITOR_OFFER = { version: "revory-monitor-399/v1", amountMinor: 39900, currency: "usd", interval: "month", maxPeriodDays: 7, maxLedgerRows: 10000 } as const;
 export const RECURRING_MODE = "CONNECTED_MONITOR";
-export type MonitorSubscription = { customerId: string; subscriptionId: string; priceId: string; paidThrough: string; verifiedAt: string; livemode: boolean };
+export type MonitorSubscription = { customerId: string; subscriptionId: string; priceId: string; paidThrough: string; verifiedAt: string; livemode: boolean; cancelAt?: string | null; cancelAtPeriodEnd?: boolean };
 export type MonitorSchedule = { actorUserId: string; periodDays: number; lagHours: number; consentUntil: string; nextStart: string; connections: Array<{ id: string; generation: number }>; emailEnabled: boolean; minimumUsageDelta: string; projectLinks: Array<{ mappingId: string; projectId: string; customerId: string; provider: string; organizationId: string | null }> };
 export type MonitorRun = { scheduleId: string; start: string; end: string; ledgerBatchId?: string; exportedAt?: string; completeThrough?: string; snapshotId?: string; comparisonId?: string; errorCode?: string };
 export const stateKey = (workspaceId: string, kind: string, key = "primary") => ({ workspaceId_kind_key: { workspaceId, kind, key } });
