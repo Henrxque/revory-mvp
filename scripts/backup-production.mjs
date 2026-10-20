@@ -23,6 +23,7 @@ export function connectionEnvironment(value) {
 }
 function child(binary, args, env) {
   const p = spawn(binary, args, { env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  p.stdin.on('error', () => {}); // Pipeline/done reports the failure without raw diagnostics.
   // Never forward PostgreSQL diagnostics: they may contain customer rows or credentials.
   p.stderr.resume();
   const done = new Promise((ok, fail) => {
