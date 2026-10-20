@@ -3,7 +3,7 @@
   "realPayments": 0,
   "realEmails": 0,
   "realProviderReads": 0,
-  "verifiedAt": "2026-10-20T00:25:22.473Z",
+  "verifiedAt": "2026-10-20T01:12:51.979Z",
   "flows": [
     "workspace session",
     "pause",
@@ -12,7 +12,10 @@
     "comparison export",
     "origin rejection",
     "ledger authentication and real HTTP ingestion",
-    "desktop and mobile"
+    "overview hierarchy and section navigation",
+    "investigation filters and progressive disclosure",
+    "period history disclosure",
+    "desktop and mobile overview, expanded review and settings"
   ],
   "horizontalOverflow": false,
   "pageErrors": []

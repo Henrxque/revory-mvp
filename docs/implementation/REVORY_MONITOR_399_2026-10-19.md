@@ -41,3 +41,18 @@ Períodos sem linhas são registrados como limitados, sem relatório zero, e o h
 - `npm run build`: PASS, compilação otimizada e 67 páginas estáticas geradas, usando segredo efêmero de QA somente no processo.
 
 Rotas de login e integrações horizontais são keep. `/app/ai-integrity/monitoring`, conexões, navegação e dashboard são adapt; endpoints novos são aditivos. Nenhuma rota histórica foi excluída.
+
+
+## Revisão de UX — 2026-10-19
+
+Feedback do fundador: a primeira tela parecia um painel técnico, extensa e sem orientação clara. A rota foi adaptada mantendo contratos, permissões, endpoints e evidências.
+
+- Visão geral começa pela próxima ação: ativação/setup, revisão de permissões, falha de coleta, ledger ausente ou diferenças para revisar. O estado vem dos registros existentes; não há indicadores fictícios de saúde ou receita.
+- Resumo mostra investigações recentes que precisam de revisão, último relatório e próximo período. Contagens são do conjunto recente carregado, sem somar unidades e moedas.
+- Diferenças têm filtros e revisão expandida por seleção. Evidência, quantidades exatas, notas auditadas e verificação no período seguinte permanecem acessíveis. Listas mostram até cinco itens antes da expansão.
+- Histórico usa linhas compactas expansíveis, preservando relatório, export e skip com nota/consentimento explícitos. Ausência de dados continua sem inferência de zero ou resolução.
+- Envio do ledger fica em “Send usage data”; API/token em disclosure avançado. Assinatura, consentimento e agenda ficam em “Settings”. Nenhum consentimento passou a ser implícito.
+- Avisos operacionais usam linguagem legível, separados dos findings. Falhas de leitura têm prioridade na próxima ação.
+- Identidade REVORY preservada: canvas #141516, superfícies derivadas de #252729, accent #43B39B, Sora/DM Sans, sem setas decorativas. Layout verificado em 1440 px e 390 px, inclusive investigação expandida e configurações móveis.
+
+Prova de navegador atualizada em [verification.json](../qa/recurring-monitor/verification.json), [desktop](../qa/recurring-monitor/desktop.png), [mobile](../qa/recurring-monitor/mobile.png), [investigação](../qa/recurring-monitor/investigation.png) e [configurações móveis](../qa/recurring-monitor/mobile-settings.png). Fixture local em banco descartável: pausa/retomada, nota, exportação, navegação/filtros, ingestão HTTP com token e revogação passaram. Não houve cobrança, e-mail, leitura real de provedor ou alteração de ambiente externo.
