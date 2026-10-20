@@ -1,0 +1,25 @@
+{
+  "verifiedAt": "2026-10-20T14:27:01.402Z",
+  "archive": {
+    "format": "pg_dump-custom+age-v1",
+    "createdAt": "2026-10-20T14:26:40.199Z",
+    "database": "neondb",
+    "encryptedBytes": 133680,
+    "sha256": "7b6d8871f2fa433f4d90dd27870682c967178f7e110ff6b5d2cabb89c0324803",
+    "retentionDays": 7,
+    "scope": "production public schema including NextAuth; excludes unused managed neon_auth, provider roles and Vercel secrets"
+  },
+  "recovery": {
+    "structuralMatch": true,
+    "contentHashesMatch": true,
+    "tablesChecked": 30,
+    "sourceRows": "132",
+    "countMismatches": 0
+  },
+  "negativeChecks": {
+    "ownerUrlRejected": true,
+    "previewUrlRejected": true,
+    "crossDatabaseReadsDenied": 2
+  },
+  "scope": "production database only; source snapshot exported under READ ONLY; restored exclusively on 127.0.0.1:55441"
+}
