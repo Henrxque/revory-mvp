@@ -17,20 +17,20 @@ export function AuthOptionsPanel({
   switchHref,
 }: AuthOptionsPanelProps) {
   const isSignIn = mode === "sign-in";
-  const switchLabel = isSignIn ? "Create workspace" : "Already have a workspace?";
+  const switchLabel = isSignIn ? "Create account" : "Already have an account?";
 
   return (
     <section className="rev-accent-mist-soft rounded-[36px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(37,39,41,0.98),rgba(20,21,22,0.98))] p-6 shadow-[0_26px_80px_rgba(0,0,0,0.22)] md:p-8">
       <div className="space-y-5">
         <div className="space-y-2.5">
-          <p className="rev-kicker">{isSignIn ? "Workspace access" : "Workspace creation"}</p>
+          <p className="rev-kicker">{isSignIn ? "Workspace access" : "Account creation"}</p>
           <h2 className="rev-display-panel max-w-[22rem]">
             {isSignIn ? "Access REVORY securely." : "Create REVORY securely."}
           </h2>
           <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
             {isSignIn
               ? "Use Google or confirmed email/password to return to the same workspace."
-              : "Use Google or confirm your email/password account to start REVORY setup."}
+              : "Use Google or confirm your email/password account for private access."}
           </p>
         </div>
 
@@ -49,7 +49,7 @@ export function AuthOptionsPanel({
             {googleConfigured ? (
               <AuthGoogleButton
                 callbackUrl={callbackUrl}
-                label={isSignIn ? "Continue with Google" : "Create workspace with Google"}
+                label={isSignIn ? "Continue with Google" : "Create account with Google"}
               />
             ) : (
               <button

@@ -13,6 +13,12 @@ import {
 } from "@/services/auth/redirects";
 
 export const metadata = {
+  title: "REVORY — Create account",
+  description: "Create your private REVORY account. Subscription and source permissions are confirmed separately.",
+  openGraph: {
+    title: "REVORY — Create account",
+    description: "Create a private REVORY account for your workspace.",
+  },
   robots: {
     follow: false,
     index: false,
@@ -27,8 +33,8 @@ const signUpSteps = [
   },
   {
     label: "02",
-    title: "Keep company data separate",
-    text: "REVORY creates a private workspace for your company and its imported evidence.",
+    title: "Review your next step",
+    text: "Explore the synthetic example or review your setup. A subscription requires separate confirmation.",
   },
 ];
 
@@ -74,11 +80,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
               <h1 className="rev-display-hero max-w-[32rem]">
                 Create your{" "}
                 <span className="italic text-[color:var(--accent-light)]">
-                  REVORY workspace.
+                  REVORY account.
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Create secure access to a private REVORY workspace. Google or confirmed email/password keeps the account and workspace isolated from the start.
+                Create secure access to REVORY. Your account and workspace stay private. Signing up does not start a paid subscription.
               </p>
             </div>
           </div>

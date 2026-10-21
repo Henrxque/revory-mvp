@@ -87,7 +87,7 @@ function RunDetail({ run, busy, act }: { run: Run; busy: boolean; act: (action: 
 
 export function AiRecurringMonitor({ view }: { view: RecurringView }) {
   const router = useRouter();
-  const [section, setSection] = useState<Section>("overview");
+  const [section, setSection] = useState<Section>(view.subscription ? "overview" : "settings");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [failed, setFailed] = useState(false);

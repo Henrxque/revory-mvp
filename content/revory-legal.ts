@@ -7,7 +7,7 @@ export const REVORY_LEGAL = {
   effectiveDatePtBr: "22 de julho de 2026",
   legalName:
     "AMETRINE LABS DESENVOLVIMENTO DE SOFTWARE NAO CUSTOMIZAVEL LTDA",
-  legalRevision: "2026.07.22",
+  legalRevision: "2026.10.21",
   linkedinUrl: "https://www.linkedin.com/company/revory-app",
   privacyEmail: "support@revory.app",
   securityEmail: "security@revory.app",
@@ -18,16 +18,16 @@ export const REVORY_LEGAL = {
 
 export const REVORY_LEGAL_DOCUMENTS = {
   cookies: { path: "/cookies", version: "2026.07.22" },
-  dpa: { path: "/dpa", version: "2026.07.22-draft" },
-  privacy: { path: "/privacy", version: "2026.07.22" },
+  dpa: { path: "/dpa", version: "2026.10.21-draft" },
+  privacy: { path: "/privacy", version: "2026.10.21" },
   refunds: { path: "/refunds", version: "2026.07.22" },
   responsibleDisclosure: {
     path: "/responsible-disclosure",
     version: "2026.07.22",
   },
-  security: { path: "/security", version: "2026.07.22" },
-  subprocessors: { path: "/subprocessors", version: "2026.07.22" },
-  terms: { path: "/terms", version: "2026.07.22" },
+  security: { path: "/security", version: "2026.10.21" },
+  subprocessors: { path: "/subprocessors", version: "2026.10.21" },
+  terms: { path: "/terms", version: "2026.10.21" },
 } as const;
 
 export type RevoryLegalDocumentKey = keyof typeof REVORY_LEGAL_DOCUMENTS;

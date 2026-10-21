@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 
 function isSyntheticPreview() {
   let database = "";
@@ -23,6 +24,12 @@ function isCommercialHomologation() {
 }
 
 export function proxy(request: NextRequest) {
+  // Old bookmarked app routes must not render Quote Recovery inside the new shell.
+  // Legacy APIs/webhooks remain intact for historical billing and retention.
+  if (process.env.VERCEL_ENV === "production" && isAiCommercialRuntimeEnabled() && request.nextUrl.pathname.startsWith("/app/")
+    && !request.nextUrl.pathname.startsWith("/app/ai-integrity/")) {
+    return NextResponse.redirect(new URL("/app/ai-integrity/dashboard", request.url), 303);
+  }
   const commercialHomologation = isCommercialHomologation();
   if (!isSyntheticPreview() && !commercialHomologation) return NextResponse.next();
   const pathname = request.nextUrl.pathname;

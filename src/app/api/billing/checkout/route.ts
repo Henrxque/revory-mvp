@@ -8,6 +8,7 @@ import { getRevoryOffer, getRevoryOfferPriceId, isRevoryOfferConfigured, parseRe
 import { getWorkspaceEntitlements } from "@/services/billing/entitlements";
 import { buildSignUpRedirectPath } from "@/services/auth/redirects";
 import { syncAuthenticatedUser } from "@/services/auth/sync-user";
+import { hasHistoricalBillingAccess } from "@/services/app/historical-billing-access";
 import { getOrCreateWorkspace } from "@/services/workspaces/get-or-create-workspace";
 import { prisma } from "@/db/prisma";
 import { CHECKOUT_LEGAL_VERSIONS } from "@/content/revory-legal";
@@ -21,7 +22,9 @@ export async function POST(request: NextRequest) {
   const session = await getAuthSession(); if (!session?.user?.id) return NextResponse.redirect(new URL(buildSignUpRedirectPath(`/start?offer=${offerKey}`), request.url), { status: 303 });
   if (!isRevoryOfferConfigured(offerKey)) return NextResponse.redirect(new URL(`/start?billing=unavailable&offer=${offerKey}`, request.url), { status: 303 });
   const user = await syncAuthenticatedUser(); if (!user) return NextResponse.redirect(new URL("/sign-in?redirect_url=%2Fstart", request.url), { status: 303 });
-  const workspace = await getOrCreateWorkspace(user); const existing = await getWorkspaceEntitlements(workspace.id);
+  const workspace = await getOrCreateWorkspace(user);
+  if (!(await hasHistoricalBillingAccess(user, workspace))) return NextResponse.redirect(new URL("/ai-integrity/account-preview", request.url), { status: 303 });
+  const existing = await getWorkspaceEntitlements(workspace.id);
   if (existing.some((entitlement) => entitlement.offerKey === offerKey)) return NextResponse.redirect(new URL("/app/dashboard", request.url), { status: 303 });
   const activeRecurringEntitlement = existing.find(
     (entitlement) => getRevoryOffer(entitlement.offerKey).mode === "subscription",

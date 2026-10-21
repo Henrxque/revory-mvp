@@ -23,6 +23,7 @@
     "qa:canonical-assisted-intake": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-canonical-assisted-intake.ts",
     "qa:launch-readiness": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-launch-readiness.ts",
     "qa:public-demo": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-public-demo.ts",
+    "qa:production-onboarding": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-production-onboarding.ts",
     "qa:public-demo:browser": "node scripts/verify-public-demo-browser.mjs",
     "qa:active-copy": "node scripts/validate-active-copy.mjs",
     "qa:retention": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-retention-job.ts",

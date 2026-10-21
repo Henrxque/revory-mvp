@@ -14,6 +14,12 @@ import {
 } from "@/services/auth/redirects";
 
 export const metadata = {
+  title: "REVORY — Sign in",
+  description: "Sign in to your private REVORY workspace.",
+  openGraph: {
+    title: "REVORY — Sign in",
+    description: "Access your REVORY workspace, evidence and saved reports.",
+  },
   robots: {
     follow: false,
     index: false,
@@ -29,7 +35,7 @@ const signInSteps = [
   {
     label: "02",
     title: "Resume your review",
-    text: "REVORY returns you to the same imported evidence and current recovery list.",
+    text: "REVORY returns you to your saved workspace and evidence.",
   },
 ];
 
@@ -80,6 +86,9 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
                 {isAiIntegrityExperienceEnabled() ? "Return to your private AI integrity workspace, imported evidence and saved reports." : "Secure access returns existing users to the same private Quote Recovery workspace and its imported evidence."}
+              </p>
+              <p className="max-w-xl text-xs leading-6 text-[color:var(--text-subtle)]">
+                Google and email/password return to the same account. Signing in does not start a paid subscription.
               </p>
             </div>
           </div>

@@ -2,12 +2,22 @@ import Link from "next/link";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
 import { aiIntegrityDemoResult } from "@/domain/ai-integrity/demo";
 import { isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
+import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 import { aiMoney } from "./report-copy";
 
 export function AiMarketingNav() {
-  return <header className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-5 py-5 md:px-8"><Link href="/" aria-label="REVORY home"><RevoryLogo compact /></Link><nav className="flex items-center gap-5 text-xs font-semibold text-[color:var(--text-muted)]"><Link className="hover:text-[color:var(--accent)]" href="/demo">Explore demo</Link><Link className="rev-button-secondary text-xs" href="/start">{isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Open rehearsal" : "Start a scan"}</Link></nav></header>;
+  return <header className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-5 py-5 md:px-8"><Link href="/" aria-label="REVORY home"><RevoryLogo compact /></Link><nav className="flex items-center gap-5 text-xs font-semibold text-[color:var(--text-muted)]"><Link className="hover:text-[color:var(--accent)]" href="/demo">Explore demo</Link><Link className="rev-button-secondary text-xs" href="/start">{isAiCommercialRuntimeEnabled() ? "Set up monitoring" : isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Open rehearsal" : "Start a scan"}</Link></nav></header>;
 }
-export function AiMarketingFooter() { const remote = isAiIntegrityRemoteSyntheticPreviewEnabled(); return <footer className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-t border-[color:var(--border)] px-5 py-8 text-xs text-[color:var(--text-subtle)] md:px-8"><p>REVORY · Revenue & AI Margin Integrity</p><div className="flex gap-5"><Link href="/ai-integrity-preview-policy#security">Security</Link><Link href="/ai-integrity-preview-policy#privacy">Privacy</Link><Link href="/ai-integrity-preview-policy#offer">{remote ? "Preview limits" : "Test offer"}</Link></div><p className="w-full text-[10px]">{remote ? "Protected rehearsal · Fictional data only · No purchase or customer upload." : "Development preview · Synthetic data · Test checkout · Customer beta requires its release gates."}</p></footer>; }
+export function AiMarketingFooter() {
+  const commercial = isAiCommercialRuntimeEnabled();
+  const remote = isAiIntegrityRemoteSyntheticPreviewEnabled();
+  return <footer className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-t border-[color:var(--border)] px-5 py-8 text-xs text-[color:var(--text-subtle)] md:px-8">
+    <p>REVORY · Revenue &amp; AI Margin Integrity</p>
+    <div className="flex flex-wrap gap-5"><Link href={commercial ? "/security" : "/ai-integrity-preview-policy#security"}>Security</Link><Link href={commercial ? "/privacy" : "/ai-integrity-preview-policy#privacy"}>Privacy</Link><Link href={commercial ? "/terms" : "/ai-integrity-preview-policy#offer"}>{commercial ? "Terms" : remote ? "Preview limits" : "Test offer"}</Link>{commercial ? <Link href="/refunds">Cancellation &amp; refunds</Link> : null}</div>
+    {commercial ? <div className="flex w-full flex-wrap gap-5"><Link href="/dpa">Data processing</Link><Link href="/subprocessors">Subprocessors</Link><Link href="/cookies">Cookies</Link><Link href="/responsible-disclosure">Report a vulnerability</Link></div> : null}
+    <p className="w-full text-[10px]">{commercial ? "Early access · Read-only sources · Evidence and coverage limits stay visible." : remote ? "Protected rehearsal · Fictional data only · No purchase or customer upload." : "Development preview · Synthetic data · Test checkout · Customer beta requires its release gates."}</p>
+  </footer>;
+}
 
 export function AiIntegrityLanding() {
   const result = aiIntegrityDemoResult(), group = result.coverage.groups[0];
