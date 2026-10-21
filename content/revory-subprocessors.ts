@@ -10,7 +10,7 @@ export type RevorySubprocessor = {
   role: Record<LegalLocale, string>;
 };
 
-export const REVORY_SUBPROCESSORS_UPDATED = "July 22, 2026";
+export const REVORY_SUBPROCESSORS_UPDATED = "October 21, 2026";
 
 export const REVORY_SUBPROCESSORS: readonly RevorySubprocessor[] = [
   {
@@ -61,10 +61,19 @@ export const REVORY_SUBPROCESSORS: readonly RevorySubprocessor[] = [
   {
     provider: "OpenAI",
     conditional: true,
-    purpose: { en: "Optional bounded mapping, classification, explanation and narrowly scoped text assistance.", "pt-BR": "Assistência opcional e limitada de mapeamento, classificação, explicação e texto restrito." },
-    data: { en: "Sanitized mapping metadata or limited feature context as described in the Privacy Notice; not full canonical CSV rows for mapping assistance.", "pt-BR": "Metadados de mapeamento sanitizados ou contexto limitado do recurso conforme o Aviso; não linhas canônicas completas no auxílio de mapeamento." },
+    purpose: { en: "Authorized read-only Usage/Costs collection for integrity comparisons; separately, optional bounded mapping, classification and text assistance.", "pt-BR": "Leitura autorizada de Usage/Costs para comparação de integridade; separadamente, assistência opcional e limitada de mapeamento, classificação e texto." },
+    data: { en: "For source reads: provider credential, authorized organization/project scope and period parameters; usage/cost evidence is received from the customer’s organization. For optional AI assistance: sanitized mapping metadata or limited feature context under the Privacy Notice, not full canonical CSV rows for mapping assistance.", "pt-BR": "Na leitura: credencial, escopo autorizado de organização/projeto e parâmetros do período; evidências de uso/custo são recebidas da organização do Cliente. Na assistência opcional: metadados sanitizados ou contexto limitado conforme o Aviso, sem linhas canônicas completas no auxílio de mapeamento." },
     role: { en: "Conditional AI subprocessor", "pt-BR": "Suboperador condicional de IA" },
     geography: { en: "Cross-border processing under OpenAI’s business data terms when the feature is enabled.", "pt-BR": "Tratamento transfronteiriço conforme termos de dados empresariais da OpenAI quando habilitado." },
     links: [{ label: "Privacy", href: "https://openai.com/policies/privacy-policy/" }, { label: "DPA", href: "https://openai.com/policies/data-processing-addendum/" }],
+  },
+  {
+    provider: "GitHub",
+    conditional: false,
+    purpose: { en: "Scheduled operations and storage of encrypted production backup artifacts for seven days.", "pt-BR": "Operações agendadas e armazenamento de artefatos criptografados de backup de produção por sete dias." },
+    data: { en: "Client-side encrypted database archives and operational counts. The decryption identity and application keyring are not stored in GitHub backup artifacts.", "pt-BR": "Arquivos do banco criptografados antes do envio e contagens operacionais. A identidade de decriptação e o keyring da aplicação não ficam nos artefatos de backup do GitHub." },
+    role: { en: "Operational automation and encrypted storage provider", "pt-BR": "Provedor de automação operacional e armazenamento criptografado" },
+    geography: { en: "Processing under GitHub’s published service and data-protection terms.", "pt-BR": "Tratamento conforme os termos de serviço e proteção de dados publicados pelo GitHub." },
+    links: [{ label: "Privacy", href: "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" }],
   },
 ] as const;

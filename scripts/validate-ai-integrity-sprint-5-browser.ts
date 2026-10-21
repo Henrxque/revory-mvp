@@ -1,0 +1,193 @@
+import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
+import { spawn, execFileSync } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { chromium, type Browser } from "playwright";
+import { encode } from "next-auth/jwt";
+import { prisma } from "../db/prisma";
+import { ACCOUNT_CREATION_LEGAL_VERSIONS } from "../content/revory-legal";
+import { startAiScanStripeSimulation } from "./fixtures/ai-saas/stripe-test-server";
+
+const database = new URL(process.env.DATABASE_URL!);
+if (!/^\/revory_sprint1_[a-f0-9]{12}$/.test(database.pathname) || !["localhost", "127.0.0.1", "::1"].includes(database.hostname)) throw new Error("Use the disposable DB harness.");
+const reviewRehearsal = process.env.REVORY_QA_VALIDATION_REVIEW === "true";
+const baseUrl = "http://localhost:3145", outputDir = reviewRehearsal ? "docs/qa/ai-integrity-sprint6" : "docs/qa/ai-integrity-sprint5";
+await mkdir(outputDir, { recursive: true });
+const authSecret = randomBytes(32).toString("hex"), webhookSecret = `whsec_${randomBytes(24).toString("hex")}`;
+const simulation = await startAiScanStripeSimulation(baseUrl, webhookSecret);
+const user = await prisma.user.create({ data: { email: "sprint5-browser@example.invalid", fullName: "Synthetic QA", status: "ACTIVE", authSubject: "sprint5-browser", authProvider: "google", emailVerifiedAt: new Date() } });
+const workspace = await prisma.workspace.create({ data: { name: "Aster AI · Synthetic", slug: "sprint5-browser", ownerUserId: user.id } });
+await prisma.legalAcceptance.create({ data: { userId: user.id, workspaceId: workspace.id, event: "ACCOUNT_CREATED", documentVersionsJson: ACCOUNT_CREATION_LEGAL_VERSIONS, contextJson: { synthetic: true } } });
+const originalNextEnv = await readFile("next-env.d.ts", "utf8");
+let log = "";
+const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "dev", "--port", "3145", "--hostname", "127.0.0.1"], { windowsHide: true, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NODE_ENV: "development", AUTH_SECRET: authSecret, NEXTAUTH_URL: baseUrl, NEXT_PUBLIC_APP_URL: baseUrl, REVORY_AI_SAAS_PREVIEW: "true", REVORY_INTERNAL_PREVIEW_MODE: "false", REVORY_QA_DIST_DIR: ".tmp/ai-integrity-sprint5-next", REVORY_AI_SCAN_TEST_SECRET_KEY: "sk_test_local_simulation", REVORY_AI_SCAN_TEST_PRICE_ID: "price_ai_scan_local", REVORY_AI_SCAN_TEST_WEBHOOK_SECRET: webhookSecret, REVORY_AI_SCAN_TEST_API_ORIGIN: simulation.origin, AUTH_GOOGLE_CLIENT_ID: "", AUTH_GOOGLE_CLIENT_SECRET: "", RESEND_API_KEY: "", STRIPE_SECRET_KEY: "", OPENAI_API_KEY: "" } });
+server.stdout.on("data", (v) => { log += String(v); }); server.stderr.on("data", (v) => { log += String(v); });
+let browser: Browser | undefined;
+try {
+  browser = await chromium.launch({ headless: true });
+  for (let attempt = 0; attempt < 60; attempt++) {
+    if (server.exitCode !== null) throw new Error("Isolated Next server exited.");
+    try { if ((await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(2000) })).ok) break; } catch { /* initial compile */ }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  const context = await browser.newContext({ baseURL: baseUrl, viewport: { width: 1280, height: 800 } });
+  const page = await context.newPage(), errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  async function capture(name: string) {
+    await page.screenshot({ path: `${outputDir}/${name}-desktop.png`, fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${name}: mobile overflow`);
+    await page.screenshot({ path: `${outputDir}/${name}-mobile.png`, fullPage: true });
+    await page.setViewportSize({ width: 1280, height: 800 });
+  }
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: /Understand your AI spend/ }).waitFor();
+  await page.evaluate(() => document.fonts.ready);
+  assert.ok((await page.getByRole("heading", { level: 1 }).evaluate((element) => getComputedStyle(element).fontFamily)).includes("Instrument Serif"), "Marketing typography contract");
+  assert.equal(await page.getByText(/Quote Recovery|MedSpa|contractor/i).count(), 0);
+  await capture("landing");
+  await page.goto(`${baseUrl}/demo`, { waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: "A clearer picture of your AI spend." }).waitFor();
+  await page.getByText("Explore the evidence", { exact: true }).first().click();
+  await capture("demo");
+  assert.equal((await context.request.get("/ai-integrity-preview-policy")).status(), 200);
+  await page.goto(`${baseUrl}/start`, { waitUntil: "networkidle" });
+  assert.ok(page.url().includes("/sign-in"));
+  assert.equal(await page.getByText(/Quote Recovery|current recovery list/i).count(), 0);
+  const token = await encode({ secret: authSecret, token: { sub: "sprint5-browser", email: user.email, name: user.fullName, authProvider: "google" } });
+  await context.addCookies([{ name: "next-auth.session-token", value: token, domain: "localhost", path: "/", httpOnly: true, sameSite: "Lax" }]);
+  await page.goto(`${baseUrl}/app/ai-integrity/imports`, { waitUntil: "networkidle" });
+  assert.ok(page.url().endsWith("/start"), "Preparation needs a confirmed purchase");
+  await capture("start");
+  assert.equal((await context.request.post("/api/ai-integrity/review", { multipart: { sourceKind: "STRIPE_REVENUE" } })).status(), 400);
+  await page.getByRole("checkbox").nth(0).check(); await page.getByRole("checkbox").nth(1).check();
+  await page.getByRole("button", { name: "Open simulated test checkout ↗" }).click();
+  await page.getByRole("heading", { name: "Local Stripe test simulation" }).waitFor();
+  await page.getByRole("link", { name: "Cancel simulation" }).click();
+  await page.getByText(/Checkout was left before confirmation/).waitFor();
+  await page.waitForLoadState("networkidle");
+  assert.equal(await prisma.aiIntegrityScanGrant.count({ where: { workspaceId: workspace.id } }), 0, "Cancellation must not grant a scan");
+  await page.getByRole("checkbox").nth(0).check(); await page.getByRole("checkbox").nth(1).check();
+  await page.getByRole("button", { name: "Open simulated test checkout ↗" }).click();
+  await page.getByRole("heading", { name: "Local Stripe test simulation" }).waitFor();
+  const pendingOrder = await prisma.aiIntegrityScanOrder.findFirstOrThrow({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" } });
+  const replayCheckout = await context.request.post("/api/ai-integrity/checkout", { data: { requestKey: pendingOrder.requestKey, termsAccepted: true, testModeConfirmed: true } });
+  assert.equal(replayCheckout.status(), 200); assert.equal((await replayCheckout.json()).orderId, pendingOrder.id);
+  await page.getByRole("button", { name: "Simulate paid test purchase" }).click();
+  await page.getByText("Test purchase confirmed", { exact: true }).waitFor();
+  assert.equal(await prisma.aiIntegrityScanGrant.count({ where: { workspaceId: workspace.id, consumedAt: null } }), 1);
+  await page.getByRole("link", { name: "Open your workspace →" }).click();
+  await page.getByRole("heading", { name: /Prepare your first evidence-led read/ }).waitFor();
+  await capture("onboarding");
+  await page.goto(`${baseUrl}/app/ai-integrity/imports`, { waitUntil: "networkidle" });
+  for (const [kind, file] of [["STRIPE_REVENUE", "stripe-revenue"], ["INTERNAL_LEDGER", "internal-ledger"], ["PROVIDER_REPORT", "provider-report"]]) {
+    await page.getByLabel("Source type").selectOption(kind);
+    await page.locator('input[type="file"]').setInputFiles(`public/samples/ai-integrity/${file}.csv`);
+    await page.getByLabel("Window start · UTC inclusive", { exact: true }).fill("2026-08-01");
+    await page.getByLabel("Window end · UTC exclusive", { exact: true }).fill("2026-09-01");
+    await page.getByRole("button", { name: "1 · Review file and columns" }).click();
+    await page.getByRole("heading", { name: "Column review" }).waitFor();
+    await page.getByRole("button", { name: "2 · Validate rows and Data Quality" }).click();
+    await page.getByRole("heading", { name: "Data Quality preview" }).waitFor();
+    await page.getByRole("checkbox").check();
+    const stored = page.waitForResponse((r) => r.url().endsWith("/api/ai-integrity/import") && r.request().method() === "POST");
+    await page.getByRole("button", { name: "3 · Store reviewed evidence" }).click();
+    const response = await stored; assert.equal(response.status(), 200, await response.text());
+    await page.getByText("Evidence stored", { exact: true }).waitFor();
+  }
+  await capture("imports");
+  await page.goto(`${baseUrl}/app/ai-integrity/attribution`, { waitUntil: "networkidle" });
+  await page.getByLabel("Link type").selectOption("PROVIDER_PROJECT");
+  await page.getByLabel("Provider project ID", { exact: true }).fill("proj_aster");
+  await page.getByLabel("Internal customer ID", { exact: true }).fill("workspace_aster");
+  await page.getByLabel("Provider", { exact: true }).fill("openai");
+  await page.getByLabel("Organization ID, if present", { exact: true }).fill("org_sample");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Confirm reviewed link" }).click();
+  await page.getByText("Mapping confirmed.", { exact: true }).waitFor();
+  await capture("identity");
+  await page.goto(`${baseUrl}/app/ai-integrity/scans`, { waitUntil: "networkidle" });
+  const batches = await prisma.aiIntegrityImportBatch.findMany({ where: { workspaceId: workspace.id } });
+  const grant = await prisma.aiIntegrityScanGrant.findFirstOrThrow({ where: { workspaceId: workspace.id } });
+  await page.locator('select[name="grantId"]').selectOption(grant.id);
+  for (const [index, kind] of ["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"].entries()) {
+    await page.locator("fieldset").nth(index).getByRole("combobox").selectOption(batches.find((b) => b.sourceKind === kind)!.id);
+    await page.locator(`input[name="${kind}-exportedAt"]`).fill("2026-09-03T00:00:00Z");
+    await page.locator(`input[name="${kind}-completeThrough"]`).fill("2026-09-01T00:00:00Z");
+  }
+  await page.locator('input[name="asOf"]').fill("2026-09-04T00:00:00Z");
+  await page.locator('input[name="lagHours"]').fill("24");
+  await page.locator('input[name="closure"]').check(); await page.locator('input[name="synthetic"]').check();
+  const scanned = page.waitForResponse((r) => r.url().endsWith("/api/ai-integrity/scans") && r.request().method() === "POST");
+  await page.getByRole("button", { name: "Create my test report" }).click();
+  const response = await scanned; assert.equal(response.status(), 200, await response.text());
+  const { snapshotId } = await response.json();
+  await page.getByRole("heading", { name: "A clearer picture of your AI spend." }).waitFor();
+  await page.getByRole("heading", { name: "Usage that doesn't reconcile" }).waitFor();
+  assert.equal(await prisma.aiIntegrityFinding.count({ where: { snapshotId } }), 2);
+  await capture("report");
+  await page.getByRole("link", { name: "Review evidence →" }).first().click();
+  await page.getByRole("heading", { name: "The calculation" }).count();
+  await capture("finding");
+  if (reviewRehearsal) {
+    const beforeEvidence = await (await context.request.get(`/api/ai-integrity/scans/${snapshotId}/export`)).text();
+    await page.getByLabel("Review conclusion").selectOption("FALSE_POSITIVE");
+    await page.getByRole("checkbox").check();
+    await page.getByLabel("Review explanation").fill("Synthetic comparison needs further source verification.");
+    await page.getByRole("button", { name: "Save synthetic review" }).click();
+    await page.getByText("Current conclusion: False positive", { exact: true }).waitFor();
+    await page.getByLabel("Review conclusion").selectOption("EXPECTED_DIFFERENCE");
+    await page.getByLabel("Review explanation").fill("Synthetic source semantics explain the difference after review.");
+    await page.getByRole("button", { name: "Save synthetic review" }).click();
+    await page.getByText("Current conclusion: Expected difference", { exact: true }).waitFor();
+    await capture("review-finding");
+    await page.getByRole("link", { name: "← Back to report" }).click();
+    await page.getByRole("heading", { name: "How useful was this report?" }).waitFor();
+    await page.getByLabel("Report usefulness").selectOption("PARTLY_USEFUL");
+    await page.getByLabel("Human assistance needed").selectOption("yes");
+    await page.getByLabel("Preparation time · minutes").fill("23");
+    await page.getByLabel("Review explanation").fill("Synthetic rehearsal needed assistance during mapping.");
+    await page.getByRole("button", { name: "Save synthetic review" }).click();
+    await page.getByText(/Report usefulness: Partly useful/).waitFor();
+    await capture("review-report");
+    const review = await context.request.get(`/api/ai-integrity/scans/${snapshotId}/reviews`);
+    assert.equal(review.status(), 200);
+    const json = await review.json(); assert.equal(json.events.length, 3); assert.equal(json.summary.falsePositives, 0);
+    assert.equal(json.summary.unreviewedFindings, 1); assert.equal(json.summary.realPaidParticipants, 0);
+    assert.equal(json.summary.reportReview.preparationMinutes, 23);
+    assert.equal(await (await context.request.get(`/api/ai-integrity/scans/${snapshotId}/export`)).text(), beforeEvidence, "Review must preserve immutable JSON");
+    assert.equal((await context.request.post("/api/ai-integrity/reviews", { headers: { Origin: "https://example.invalid" }, data: {} })).status(), 403);
+    assert.equal((await context.request.get("/api/ai-integrity/scans/foreign_report/reviews")).status(), 404);
+  }
+  const exported = await context.request.get(`/api/ai-integrity/scans/${snapshotId}/export`);
+  assert.equal(exported.status(), 200); assert.equal((await exported.json()).result.findings.length, 2);
+  const csv = await context.request.get(`/api/ai-integrity/scans/${snapshotId}/export?format=csv`);
+  assert.equal(csv.status(), 200); assert.ok((await csv.text()).includes("LEDGER_PROVIDER_USAGE_MISMATCH"));
+  assert.ok((await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: grant.id } })).consumedAt);
+  assert.equal((await context.request.post("/api/ai-integrity/checkout", { headers: { Origin: "https://example.invalid" }, data: {} })).status(), 403);
+  assert.equal((await context.request.post("/api/ai-integrity/checkout/webhook", { data: {} })).status(), 400);
+  const unauth = await browser.newContext();
+  assert.equal((await unauth.request.post(`${baseUrl}/api/ai-integrity/checkout`, { data: {} })).status(), 401);
+  if (reviewRehearsal) assert.equal((await unauth.request.post(`${baseUrl}/api/ai-integrity/reviews`, { data: {} })).status(), 401);
+  await unauth.close();
+  assert.deepEqual(errors, []);
+  console.log("Sprint 5 browser PASS: real SDK → loopback checkout simulation → signed webhook → one grant → actual CSV review/import → exclusive mapping → persisted report/detail → JSON/CSV; 8 desktop/mobile screens; no overflow or console errors. Real Stripe sandbox remains unverified.");
+  if (reviewRehearsal) console.log("Sprint 6 rehearsal browser PASS: source review → correction with history → report usefulness/effort → immutable evidence → scoped review export; synthetic records count as zero real paid participants.");
+  await writeFile(`${outputDir}/verification.json`, JSON.stringify({ verifiedAt: new Date().toISOString(), checkout: "real SDK against local simulation; NOT Stripe sandbox", flow: "landing/demo → auth gate → purchase → signed webhook → three CSV reviews/imports → exclusive mapping → scan → finding detail → JSON/CSV", reviewRehearsal, realPaidParticipants: 0, screenshots: reviewRehearsal ? 20 : 16, consoleErrors: errors, horizontalOverflow: false, marketingHeadlineFont: "Instrument Serif" }, null, 2));
+} catch (error) {
+  await writeFile(".tmp/ai-integrity-sprint5-browser-error.txt", String(error));
+  throw error;
+} finally {
+  await browser?.close();
+  if (server.pid && server.exitCode === null) {
+    if (process.platform === "win32") execFileSync("taskkill", ["/PID", String(server.pid), "/T", "/F"], { windowsHide: true, stdio: "ignore" }); else server.kill("SIGTERM");
+  }
+  await simulation.close();
+  await mkdir(".tmp", { recursive: true }); await writeFile(".tmp/ai-integrity-sprint5-browser.log", log);
+  const tsconfig = await readFile("tsconfig.json", "utf8");
+  await writeFile("tsconfig.json", tsconfig.replace(/,\r?\n\s*"\.tmp\/ai-integrity-sprint5-next\/(?:dev\/)?types\/\*\*\/\*\.ts"/g, ""));
+  const nextEnv = await readFile("next-env.d.ts", "utf8"), originalImport = originalNextEnv.match(/^import .*routes\.d\.ts.*;$/m)?.[0];
+  if (originalImport) await writeFile("next-env.d.ts", nextEnv.replace(/^import "\.\/\.tmp\/ai-integrity-sprint5-next\/dev\/types\/routes\.d\.ts";$/m, originalImport));
+  await prisma.$disconnect();
+}

@@ -14,10 +14,10 @@ import {
 
 export const metadata = {
   title: "REVORY — Create account",
-  description: "Create a REVORY account to explore the AI SaaS product preview and its synthetic demo.",
+  description: "Create your private REVORY account. Subscription and source permissions are confirmed separately.",
   openGraph: {
     title: "REVORY — Create account",
-    description: "Create an account for the current REVORY AI SaaS preview.",
+    description: "Create a private REVORY account for your workspace.",
   },
   robots: {
     follow: false,
@@ -33,8 +33,8 @@ const signUpSteps = [
   },
   {
     label: "02",
-    title: "Explore the current preview",
-    text: "New AI SaaS workspaces are still in preparation. The public demo uses fictional data only.",
+    title: "Review your next step",
+    text: "Explore the synthetic example or review your setup. A subscription requires separate confirmation.",
   },
 ];
 
@@ -84,7 +84,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                 </span>
               </h1>
               <p className="max-w-xl text-base leading-8 text-[#c0b8cc]">
-                Create secure access to REVORY. The new AI SaaS workspace is still in preparation; your account currently opens the public preview and synthetic demo.
+                Create secure access to REVORY. Your account and workspace stay private. Signing up does not start a paid subscription.
               </p>
             </div>
           </div>

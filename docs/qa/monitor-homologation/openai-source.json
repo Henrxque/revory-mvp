@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-10-20T17:26:19.627Z",
+  "scope": "real organization Usage/Costs GETs through the app encrypted credential and default HTTP transport",
+  "organizationId": "org-jYWj6YLmIkTTCeuR5NtAOvNa",
+  "credentialScope": "Usage API Scope: Read; all other admin permissions None; custom expiration 1 day",
+  "connectionId": "06794209-6369-48e5-be3f-2743693663e1",
+  "syncId": "cmvgyg2dj0005bmwkyonxqlpp",
+  "sourceWindow": {
+    "start": "2026-10-12T00:00:00.000Z",
+    "end": "2026-10-19T00:00:00.000Z"
+  },
+  "status": "COMPLETED",
+  "activity": "NO_REPORTED_ROWS",
+  "paginationComplete": true,
+  "channels": [
+    {
+      "name": "openai-usage",
+      "rows": 0
+    },
+    {
+      "name": "openai-costs",
+      "rows": 0
+    }
+  ],
+  "emptyPromotionBlocked": true,
+  "newReportsFromEmptySource": 0,
+  "generationCalls": 0,
+  "creditsPurchased": 0,
+  "temporaryKeyRevoked": true,
+  "providerAfterRevocationHttp": 401,
+  "encryptedAppCredentialRemoved": true,
+  "localTls": "Node --use-system-ca; certificate validation remained enabled"
+}

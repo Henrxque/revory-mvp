@@ -1,0 +1,2 @@
+externalId,eventKind,status,occurredAt,amountMinor,currency,currencyExponent,stripeCustomerExternalId
+ch_sample,CHARGE,paid,2026-08-12T00:00:00Z,224900,USD,2,cus_aster

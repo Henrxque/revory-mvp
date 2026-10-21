@@ -1,0 +1,34 @@
+{
+  "verifiedAt": "2026-10-21T00:59:48.583Z",
+  "mode": "live",
+  "accountId": "acct_1Ttu8IRiSOuAN93T",
+  "offer": "revory-monitor-399/v1",
+  "productId": "prod_VTlRybGhsVgtz6",
+  "priceId": "price_1USnurRiSOuAN93TWO0b7Mje",
+  "amountMinor": 39900,
+  "currency": "usd",
+  "interval": "month",
+  "portalId": "bpc_1USnusRiSOuAN93THNhU4MUZ",
+  "webhookId": "we_1USnuvRiSOuAN93TTAaF4zi0",
+  "webhookApiVersion": "2026-03-25.dahlia",
+  "eventCount": 12,
+  "productActive": false,
+  "priceActive": false,
+  "portalActive": false,
+  "webhookStatus": "disabled",
+  "livePayments": 0,
+  "applicationPublished": false,
+  "temporaryConfigurationKey": {
+    "id": "mk_1USnuJRiSOuAN93TMgyOPBfk",
+    "verifiedAt": "2026-10-21T01:04:12.797Z",
+    "revoked": true,
+    "http": 401,
+    "type": "StripeAuthenticationError",
+    "removedFromLocalVault": true
+  },
+  "replacedUncapturedKey": {
+    "id": "mk_1USnsjRiSOuAN93T3AzdkkiW",
+    "revokedInDashboard": true,
+    "neverUsedByAgent": true
+  }
+}

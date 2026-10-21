@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-10-20T22:36:42.601Z",
+  "hourlyScheduleEnabled": true,
+  "domain": "monitor-hml.revory.app",
+  "runs": [
+    {
+      "conclusion": "success",
+      "createdAt": "2026-10-20T18:37:27Z",
+      "databaseId": 39476373537,
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "url": "https://github.com/Henrxque/revory-mvp/actions/runs/39476373537"
+    },
+    {
+      "conclusion": "success",
+      "createdAt": "2026-10-20T22:26:33Z",
+      "databaseId": 39508129704,
+      "event": "schedule",
+      "status": "completed",
+      "url": "https://github.com/Henrxque/revory-mvp/actions/runs/39508129704"
+    }
+  ],
+  "sourceReadAuthorized": false,
+  "deliveredNoticeVerified": false,
+  "punctualityGuaranteed": false
+}

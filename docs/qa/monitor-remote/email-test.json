@@ -1,0 +1,27 @@
+{
+  "scope": "real remote application UI -> authenticated TEST_EMAIL action -> paid verified owner -> outbox -> existing Resend sender",
+  "recipient": "henry@revory.app",
+  "id": "cmvh9r1rg0001il07zzmnwpg1",
+  "status": "SENT",
+  "attempts": 1,
+  "notice_kind": "TEST_EMAIL",
+  "provider_id": "01a15b7b-3f08-7ea4-b429-0fb7b51f89fd",
+  "createdAt": "2026-10-20T22:42:46.061Z",
+  "updatedAt": "2026-10-20T22:42:46.217Z",
+  "providerAccepted": true,
+  "recipientDeliveryVerified": true,
+  "recurringReadConsentGranted": false,
+  "sourceReadsExecuted": false,
+  "financialFindingCreated": false,
+  "realEmailsSent": 1,
+  "repeatedUiRequest": {
+    "notices": 1,
+    "attempts": 1,
+    "status": "SENT"
+  },
+  "providerDeliveryStatus": "delivered",
+  "inboxPlacementVerified": false,
+  "deliveryEvidenceUrl": "https://resend.com/emails/01a15b7b-3f08-7ea4-b429-0fb7b51f89fd",
+  "providerUiTime": "Oct 20, 7:42 PM",
+  "deliveryScreenshot": "resend-delivered.png"
+}

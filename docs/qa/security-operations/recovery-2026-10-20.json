@@ -1,0 +1,55 @@
+{
+  "verifiedAt": "2026-10-20 03:13:08 UTC",
+  "productionHealth": {
+    "httpStatus": 200,
+    "status": "ok",
+    "database": "reachable"
+  },
+  "incident": {
+    "startedAt": "2026-10-20T03:08:35Z",
+    "dataRestoredAt": "2026-10-20T03:11:47Z",
+    "cause": "restore_snapshot omitted finalize:false; provider finalized against source unexpectedly",
+    "originalBranchPreserved": true,
+    "incidentCopyPreserved": true,
+    "originalEndpointPreserved": true,
+    "productionBranchIdentityChanged": true,
+    "allComparedTablesMatched": true
+  },
+  "databases": [
+    {
+      "scope": "production",
+      "tables": 29,
+      "sourceAndRestoredMatch": true,
+      "sourceAndIncidentCopyMatch": true,
+      "mismatchedTables": [],
+      "incidentMismatchedTables": []
+    },
+    {
+      "scope": "preview-10",
+      "tables": 44,
+      "sourceAndRestoredMatch": true,
+      "sourceAndIncidentCopyMatch": true,
+      "mismatchedTables": [],
+      "incidentMismatchedTables": []
+    },
+    {
+      "scope": "unused-synthetic-database",
+      "tables": 0,
+      "sourceAndRestoredMatch": true,
+      "sourceAndIncidentCopyMatch": true,
+      "mismatchedTables": [],
+      "incidentMismatchedTables": []
+    },
+    {
+      "scope": "preview-11",
+      "tables": 44,
+      "sourceAndRestoredMatch": true,
+      "sourceAndIncidentCopyMatch": true,
+      "mismatchedTables": [],
+      "incidentMismatchedTables": []
+    }
+  ],
+  "totalTablesCompared": 117,
+  "credentialsIncluded": false,
+  "providerReferencesIncluded": false
+}

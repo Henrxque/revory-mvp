@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-21T00:36:34.417Z",
+  "mode": "test",
+  "accountId": "acct_1Ttu8IRiSOuAN93T",
+  "offer": "revory-monitor-399/v1",
+  "productId": "prod_VTl3kywU0zoH18",
+  "priceId": "price_1USnWxRiSOuAN93TtIc2rC3d",
+  "amountMinor": 39900,
+  "currency": "usd",
+  "interval": "month",
+  "portalId": "bpc_1USnWzRiSOuAN93T6Z7FGOh1",
+  "webhookId": "we_1USnX2RiSOuAN93TFMODxYtc",
+  "webhookApiVersion": "2026-03-25.dahlia",
+  "eventCount": 12,
+  "productActive": false,
+  "priceActive": false,
+  "portalActive": false,
+  "webhookStatus": "disabled",
+  "livePayments": 0,
+  "applicationPublished": false
+}

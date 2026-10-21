@@ -1,0 +1,3 @@
+externalId,occurredAt,quantity,unit,internalCustomerExternalId,provider,providerRequestId,creditsDelta
+evt_sample_001,2026-08-10T12:01:00Z,1000,tokens,customer_sample_001,openai,req_sample_001,-0.25
+evt_sample_002,2026-08-10T12:02:00Z,500,tokens,customer_sample_002,openai,,

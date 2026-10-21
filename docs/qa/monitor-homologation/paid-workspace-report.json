@@ -1,0 +1,35 @@
+{
+  "verifiedAt": "2026-10-20T17:19:38.559Z",
+  "scope": "real paid Stripe sandbox subscription authorizes local controlled source transports and CSV ledger; not real provider usage",
+  "sourceTransport": "INJECTED_CONTROLLED_FIXTURE",
+  "workspaceId": "cmvgtlnh00002bmvgmnrsm0w1",
+  "subscriptionNotFabricated": true,
+  "scanOrders": 0,
+  "httpLedger": {
+    "status": 202,
+    "replaySameRun": true
+  },
+  "periods": 4,
+  "reports": [
+    "cmvgy7g5t001nbmxs9fbaieqh",
+    "cmvgy7gn30032bmxs5y3brv5k",
+    "cmvgy7h3e004lbmxs5pig0388",
+    "cmvgy7hgk0063bmxspj4yj9o9"
+  ],
+  "expectedInputUsageDeltas": [
+    20,
+    20,
+    0,
+    20
+  ],
+  "movements": [
+    "NEW",
+    "PERSISTENT",
+    "RESOLVED",
+    "NEW"
+  ],
+  "investigationVerification": true,
+  "exportsExcludeLedgerToken": true,
+  "financialLossInferred": false,
+  "realBuyers": 0
+}

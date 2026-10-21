@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+Object.assign(process.env, { DATABASE_URL: "postgresql://fixture:fixture@127.0.0.1:55441/fixture", REVORY_AI_RECURRING_MONITOR: "false" });
+const { GET } = await import("../src/app/api/jobs/ai-integrity-monitor/route");
+const call=(value?: string) => GET(new Request("https://revory.app/api/jobs/ai-integrity-monitor", { headers: value ? { authorization: "Bearer " + value } : {} }));
+delete process.env.CRON_SECRET; delete process.env.REVORY_AI_MONITOR_DISPATCH_SECRET;
+assert.equal((await call()).status,503);
+process.env.CRON_SECRET="fixture-existing-cron-secret";
+assert.equal((await call()).status,401);
+assert.equal((await call(process.env.CRON_SECRET)).status,200);
+process.env.REVORY_AI_MONITOR_DISPATCH_SECRET="fixture-dedicated-monitor-secret";
+assert.equal((await call(process.env.CRON_SECRET)).status,401);
+assert.equal((await call("wrong")).status,401);
+const result=await call(process.env.REVORY_AI_MONITOR_DISPATCH_SECRET);
+assert.equal(result.status,200); assert.equal((await result.json()).enabled,false);
+console.log("PASS: dedicated monitor auth, no legacy-token fallback when configured, unchanged legacy fallback when absent.");

@@ -1,0 +1,49 @@
+{
+  "scope": "real Stripe sandbox, local isolated application and database",
+  "verifiedAt": "2026-10-20T15:21:02.866Z",
+  "liveCharges": 0,
+  "realCustomers": 0,
+  "checkout": {
+    "status": "complete",
+    "paymentStatus": "paid",
+    "mode": "subscription",
+    "amountMinor": 39900,
+    "currency": "usd"
+  },
+  "invoice": {
+    "status": "paid",
+    "amountPaidMinor": 39900
+  },
+  "applicationSubscriptionStatus": "ACTIVE",
+  "monitorAccess": true,
+  "signedCliWebhookDelivered": true,
+  "manualReplaysOfRealEvent": 2,
+  "subscriptionRows": 1,
+  "oneTimeScanGrants": 0,
+  "dedicatedPortalSessionCreated": true,
+  "stripeObjects": {
+    "productId": "prod_VTbw853f50ak7a",
+    "priceId": "price_1USeirRiSOuAN93TWeswyIIx",
+    "sessionId": "cs_test_a1EBsB2aTTYGa5XyvTtwTCHjNAK2JjugpaJfcBWW72FRct4yebDu0tETJm",
+    "subscriptionId": "sub_1USerERiSOuAN93TmOGVLpG1",
+    "invoiceId": "in_1USerCRiSOuAN93TuzftWnPx",
+    "portalConfigurationId": "bpc_1USeirRiSOuAN93TRxKpwZvk"
+  },
+  "deliveries": [
+    {
+      "type": "customer.subscription.created",
+      "http": 200,
+      "livemode": false
+    },
+    {
+      "type": "checkout.session.completed",
+      "http": 200,
+      "livemode": false
+    },
+    {
+      "type": "invoice.paid",
+      "http": 200,
+      "livemode": false
+    }
+  ]
+}

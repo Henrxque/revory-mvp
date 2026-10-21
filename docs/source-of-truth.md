@@ -1,19 +1,111 @@
-# REVORY — Source of truth
+> Acompanhamento de backup em 20/10/2026: [plano de ativação](operations/REVORY_BACKUP_AND_RETENTION_ACTIVATION_2026-10-20.md) preparado, sem contratação. Observação única da retenção agendada para 21/10 às 03:10 de Brasília. Auditoria detectou ressincronização gerenciada com owner; injeção de variáveis da conexão Neon/Vercel retirada, runtime Secret restaurado, owner rotacionado novamente e build publicado passa a rejeitar acessos administrativos. Saúde dos três ambientes confirmada. Fundador escolheu backup sem upgrade: rotina diária GitHub/age preparada, role de leitura e recuperação local de 30 tabelas/132 registros verificadas; execução manual GitHub e recuperação do artefato remoto concluídas com estrutura e conteúdo idênticos; primeiro evento schedule e retenção natural serão conferidos em 21/10. Chave de recuperação ainda precisa de cópia independente fora do PC. Plano Neon e faturamento preservados.
 
-Updated 2026-10-02. The current intended product is **Revenue & AI Margin Integrity for AI SaaS**: a premium, self-service, read-only layer for founders and CTOs. Its intended three-source read compares Stripe billing context, the customer's internal usage/credit ledger, and AI provider usage/cost. It must show provenance, explicit identity links, coverage and data-quality limits before making financial claims.
+# REVORY — Source of Truth
 
-## Public state
+> Preparação antecipada autorizada em 20/10 e concluída: catálogo live próprio de US$399/mês criado inativo, portal inativo e webhook disabled. Chaves de billing restritas test/live criadas; os sete escopos passaram no Stripe test real, sem pagamento ou assinatura nova. Segredos Sensitive nos alvos Vercel aprovados; production com `REVORY_AI_COMMERCIAL_ENABLED=false`, sem deploy/ativação comercial. Chave temporária de configuração revogada, rejeição401 e remoção do cofre verificadas. Saúde de produção 200/ok/reachable após staging. Ver [plano e evidências](operations/REVORY_MONITOR_LIVE_PREPARATION_2026-10-20.md). A prova OpenAI e a publicação/ativação comercial permanecem gates próprios.
 
-`revory.app` is authorized to present the new direction with a **static synthetic demo only**. The public pages do not collect customer data, run an AI SaaS scan, connect Stripe/OpenAI accounts, charge for the new offer or start monitoring. No real paid AI SaaS buyers have been verified. The first scan price and monthly plans remain hypotheses; do not publish them as available offers. The production app, login, legacy checkout, user/workspace data and existing customer routes still serve the historical Quote Recovery product. See the [public-presentation release record](launch/REVORY_AI_SAAS_PUBLIC_PRESENTATION_2026-10-02.md).
+> Chave mínima test também publicada e verificada no Preview: deploy `dpl_AV9PFmkNkkpvy8nWPQdzWR6HBE39` READY, alias de homologação confirmado, job autenticado e fronteiras HTTP passaram. Portal aberto pelo app com a mesma assinatura sandbox, sem pagamento/cancelamento. Esta preparação não publica o checkout live em revory.app.
 
-The full AI SaaS implementation lives on the separate `migration/ai-saas-sprints-0-6` branch and [draft PR #2](https://github.com/Henrxque/revory-mvp/pull/2). Its Sprints 0–9 contain local contracts, intake, mapping, deterministic scans, synthetic review/source/monitoring rehearsals and launch preparation. Their external gates remain open. **Do not merge that branch into production merely to expose the new landing page**: its Vercel build applies pending Prisma migrations before Next.js builds. Code and verified environment behavior, not this roadmap, prove capability.
+> Atualização de 20/10/2026 — [auditoria live](operations/REVORY_MONITOR_LIVE_PREPARATION_2026-10-20.md): proprietário recuperou a conta Stripe histórica Revory. GETs autenticados com chave temporária mínima confirmaram pagamentos/repasses habilitados e nenhum requisito pendente; o novo Monitor ainda não possui Product/Price/portal/webhook próprios em live. Chave revogada, rejeição 401 confirmada e segredo removido do cofre. Checkout, webhook, agendador e entrega Resend da homologação remota têm [evidências separadas](qa/monitor-remote/README.md). Nenhuma oferta live publicada, cobrança live ou cliente real validado. Comparação de fontes reais não vazias e promoção comercial continuam abertas.
 
-## Product and brand boundaries
+> Segurança em 2026-10-20: [rollout operacional](operations/REVORY_SECURITY_OPERATIONS_2026-10-20.md) publicado em produção e Previews 10/11. Runtime SQL por banco sem administração/DDL, URLs Secret e senhas administrativas antigas rotacionadas; senha owner anterior rejeitada em direct/pooled. Saúde e relatório autenticado passaram após a troca. Migrações futuras são externas ao runtime, com manifest read-only no build. Ainda faltam primeiro sucesso natural de retenção e backup recorrente; janela Neon continua 6h. Incidente anterior de restore e comparação de 117 tabelas permanecem documentados. Não fecha o gate comercial.
 
-- No real free scans. A synthetic public demo is allowed; customer-data analysis requires an explicit paid purchase after its commercial/data gates pass.
-- Never label unattributed provider spend as lost revenue, or a usage difference as a priced exposure without a defensible link and rate. No customer-level margin from aggregate provider data.
-- Preserve Google OAuth/NextAuth, e-mail/password, reset/verification, sessions, workspace isolation, Resend and existing billing/entitlement contracts during migration. Existing contractor customers keep their access and records.
-- Preserve background `#141516`, elevated anchor `#252729`, accent/logo `#43B39B`, transparent `public/brand/revory-logo-43b39b-transparent.png`, Instrument Serif marketing headlines, DM Sans marketing copy and Sora app typography.
-- VIDENCE remains separate. Stripe/usage scope overlap needs an explicit portfolio decision.
+> Homologação Monitor em 2026-10-20: [provas e limites](qa/monitor-homologation/README.md). Stripe sandbox real passou por Checkout/webhook, renovação, falha/recuperação, portal/cancelamento, término, refund e replay; a mesma assinatura autorizou quatro relatórios com fontes controladas. GETs reais Stripe/OpenAI com chaves mínimas e temporárias passaram nas contas vazias, sem promover ausência a zero. As chaves foram revogadas. Correções locais de Checkout, portal/cancelamento e dispatcher Hobby estão verificadas; sem deploy ou ativação comercial/remota. Fontes reais não vazias/equivalência, entrega real Resend, primeiro job remoto e renovação por clientes continuam pendentes. Zero cobranças live e compradores reais.
 
-The previous contractor source of truth is preserved as [historical migration evidence](historical/REVORY_CONTRACTOR_SOURCE_OF_TRUTH_2026-10-02.md). Contractor, QuoteSignal and MedSpa language must not be presented as the new AI SaaS offer. Preserve legacy code and route behavior until each replacement passes its gate.
+> Direção e implementação em 2026-10-19: [Monitor US$399/mês](implementation/REVORY_MONITOR_399_2026-10-19.md) acrescenta jobs duráveis, ledger recorrente por token/arquivo, comparações conectadas, investigação auditada, avisos e assinatura mensal própria. Prova local com quatro períodos e navegador; configuração comercial separada com defaults desligados. Não houve deploy, configuração Stripe/Neon/Vercel, pagamento/e-mail real ou renovação de clientes. Gate comercial externo continua aberto; ver [runbook](operations/REVORY_MONITOR_399_RELEASE.md).
+
+> Entrega B local em 2026-10-19: [APIs + ledger no relatório](implementation/REVORY_CONNECTED_REPORT_FLOW_2026-10-19.md) liga evidências Stripe/OpenAI ao intake, arquivo interno autorizado, revisão, preparação persistente, scan e exports. Prova em Postgres com fixtures encontra 20 input tokens de diferença, sem monetização indevida e com um único grant. Regra conectada 4.2 separa unidades; versão 4.1 permanece reproduzível. Flags continuam locais, sem ativação remota ou pagamento real. Parte C e `NO_GO` comercial permanecem abertos.
+
+> Entrega local em 2026-10-19: [base de conexões por workspace](implementation/REVORY_CUSTOMER_CONNECTIONS_FOUNDATION_2026-10-19.md) implementada com armazenamento criptografado, cadastro/revogação, transporte Stripe restrito de teste, OpenAI por conexão e evidências isoladas. Testes locais com dados fictícios passaram; ainda não há promoção dessas evidências ao scan, checkout comercial ou ativação remota. Esta entrega não altera o `NO_GO` comercial.
+
+> Direção do fundador em 2026-10-19: implementar o percurso comercial conectado self-service para empresas compatíveis antes de recrutar o primeiro cliente. A validação com empresas reais vem depois da verificação técnica; não bloqueia a construção dos conectores, credenciais por workspace, integração API + ledger e compra. O [plano de implementação comercial](implementation/REVORY_SELF_SERVICE_COMMERCIAL_2026-10-19.md) registra lacunas verificadas e aceites. A experiência publicada na branch da Sprint 11 continua sintética: não é capacidade comercial live. US$99 permanece hipótese e a implantação/configuração comercial requer evidência própria.
+
+> Decisão de 2026-09-29; estado atualizado em 2026-10-02. Substitui a definição contractor. Detalhes em [REVORY_PRODUCT_BIBLE.md](REVORY_PRODUCT_BIBLE.md). Estado: **Sprints 0–4 implementados localmente. Sprint 05 adiciona experiência AI SaaS e compra pontual com simulação local; gate pendente de Stripe sandbox real. Sprint 06 tem preparação e ensaio de revisão sintética; coorte paga real não iniciada. Sprint 07 tem preparação local de fontes com fixtures, sem conexões reais. Sprint 08 tem comparação e alertas locais sintéticos, sem recorrência real. Sprint 09 prepara o lançamento, com decisão NO_GO. Sem oferta pública ou validação com clientes**.
+
+> Atualização de planejamento em 2026-10-05: o fundador pediu cinco novas sprints executáveis, [10 — homologação remota](sprints/SPRINT_10_AI_SAAS_REMOTE_HOMOLOGATION_2026-10-05.md), [11 — OpenAI](sprints/SPRINT_11_AI_SAAS_OPENAI_SOURCE_2026-10-05.md), [12 — Stripe](sprints/SPRINT_12_AI_SAAS_STRIPE_DATA_AND_PURCHASE_2026-10-05.md), [13 — pilotos pagos](sprints/SPRINT_13_AI_SAAS_PAID_SELF_SERVICE_PILOTS_2026-10-05.md) e [14 — liberação](sprints/SPRINT_14_AI_SAAS_OFFICIAL_RELEASE_2026-10-05.md). Todas estão **planejadas, não concluídas**; `NO_GO` permanece. A apresentação e demo sintética já estão públicas em `revory.app`, mas a experiência AI SaaS autenticada não está publicada. A Sprint 09 foi a última do plano original 0–9, não o fim da migração.
+
+> Atualização técnica em 2026-10-13: a [Sprint 11](operations/SPRINT_11_OPENAI_CONTROLLED_READ_2026-10-13.md) tem um caminho local controlado para OpenAI Usage/Costs. Dois GETs reais na organização pessoal retornaram `NO_REPORTED_ROWS`; a chave temporária foi revogada. Persistência e isolamento passaram em Postgres descartável. Ainda falta equivalência com export não vazio e validação da UI. Uma [prova separada com datasets sintéticos do Kaggle](qa/kaggle-proof/README.md) exercitou CSV → scan sem produzir claim financeiro indevido. A flag permanece indisponível em Vercel/produção e no Preview sintético. Esta nota não altera a decisão `NO_GO`.
+
+## Identidade
+
+**REVORY** é uma camada independente, read-only e self-service de **Revenue & AI Margin Integrity para AI SaaS**. Reconcilia três verdades: receita/estado de cobrança, uso ou créditos registrados pelo produto do cliente e uso/custo reportado pelos provedores de IA. Expõe diferenças explicáveis, cobertura de atribuição e exposição financeira limitada pela evidência.
+
+Promessa de trabalho: “Reconcile what customers paid, what your product recorded, and what your AI providers consumed.” Copy pública é hipótese até a experiência correspondente existir e ser testada.
+
+Comprador inicial: founder/CTO de AI SaaS com Stripe, gasto variável relevante em IA e capacidade de exportar um ledger de uso. Faixas de MRR e AI spend nos relatórios são hipóteses de segmentação. Compra e primeiro resultado devem funcionar sem call obrigatória, com feedback assíncrono e suporte viável para fundador solo.
+
+## Sequência de produto
+
+1. **Primeira prova — CSV Integrity Scan:** importar exports de Stripe, ledger interno e custo/uso do provider para um período fechado; confirmar mappings; mostrar cobertura, dados insuficientes, diferenças determinísticas e evidência. Dados insuficientes nunca viram valor financeiro inventado.
+2. **Primeiro caminho conectado:** Stripe com acesso mínimo de leitura e OpenAI Usage/Costs, após validar viabilidade e segurança. Sem atribuição interna, Stripe + provider só permite visão agregada; não promete margem ou vazamento por customer.
+3. **Recorrência:** leituras incrementais, histórico e alertas após precisão do scan, onboarding, billing e operação passarem seus gates.
+4. **Expansão:** Anthropic, Gemini, Postgres SELECT-only, SDK, créditos, entitlements, Stripe Marketplace e outras fontes entram conforme demanda e pré-requisitos. A tabela ampla de V1 no relatório solo founder é visão de produto; CSV-first e a validação estreita definem a sequência inicial.
+
+Não criar no V1: billing engine, observabilidade de prompts/traces, gateway, enforcement de entitlements, escrita no Stripe ou banco do cliente, remediação automática, agente autônomo, BI genérico ou contabilidade completa.
+
+## Verdade financeira
+
+- Separar receita observada, custo de provider observado, uso interno observado, diferença calculada, custo estimado, exposição potencial e qualidade/cobertura de dados.
+- Usar **AI contribution margin** ou “margem após custo dos provedores de IA” somente com receita líquida e custos atribuíveis comparáveis, explicitando outros custos excluídos. Não chamar de margem bruta contábil.
+- “Unattributed provider spend” é custo sem vínculo confiável a customer. Não é automaticamente receita perdida, desperdício ou defeito de metering.
+- Não equiparar custo interno estimado a cobrança efetiva do provider. Guardar fonte, moeda, período, timezone, versão de preços, descontos/créditos, status de invoice e frescor dos dados.
+- Matching financeiro exige external IDs ou vínculo confirmado. Nome, e-mail ou valor aproximado não vinculam silenciosamente records. Atrasos de consolidação, refunds, créditos e múltiplas assinaturas podem suprimir ou reclassificar um finding.
+- Cada finding contém IDs/origem, período, regra/fórmula, entradas, elegibilidade, confiança, limites e ação de revisão. O mesmo valor não entra duas vezes em “at risk”. “Confirmed leak” exige validação apropriada do cliente.
+- Motor determinístico. IA pode explicar ou sugerir mapping para confirmação, nunca criar vínculo, valor ou conclusão financeira.
+
+## Marca: contrato imutável nesta migração
+
+- Fundo da aplicação `#141516`; superfície/alternância `#252729`; logo e accent `#43B39B`.
+- Logo transparente `public/brand/revory-logo-43b39b-transparent.png`, sem bloco preto ou branco.
+- `#252729` é âncora máxima de elevação. Cards normais usam mistura aproximada de 32% com `#141516`; hover/ênfase podem ser mais fortes. Derivar variantes dos tokens, sem segundo turquesa.
+- Marketing: Instrument Serif nos grandes títulos/impacto; DM Sans em corpo, botões, labels, navegação e títulos de card em negrito. App/dashboard: Sora, com DM Sans em leitura densa.
+- Preservar sensação premium, hierarquia visual e demo somente leitura com dados sintéticos.
+
+## Estado atual e migração
+
+Em 2026-09-30, as superfícies públicas ainda implementam o produto contractor: landing, demo, importação de estimates, Quote Recovery, Revenue Realization, ofertas Audit/Starter/Growth e schema misto com registros MedSpa históricos. Os Sprints 1–3 adicionaram contratos, persistência, intake CSV/XLSX interno, vínculos temporais e cobertura de atribuição. O Sprint 4 adicionou **scan interno de custo observado sem atribuição e divergência comparável de uso ledger ↔ provider**, com fechamento/lag explicitamente revisados, Data Quality, evidência imutável e export JSON/CSV reproduzível. Só projeto exclusivo confirmado e corroborado recebe Strong. Relatório somente de uso pode gerar delta de quantidade, sem custo inventado. Não calcula receita líquida, margem, exposição monetizada de uso ou saldo de créditos. [Evidência e limites do Sprint 4](sprints/SPRINT_04_AI_INTEGRITY_ENGINE_2026-09-30.md).
+
+O scan exige confirmação de dados sintéticos; as rotas AI SaaS permanecem indisponíveis em produção. Testes locais não autorizam oferta paga ou análise real gratuita. Produção e checkout live não foram auditados nesta decisão. Preços US$399/US$599 são contratos antigos, não preços do novo REVORY.
+
+Em 2026-10-01, o [Sprint 05](sprints/SPRINT_05_AI_INTEGRITY_EXPERIENCE_2026-10-01.md) adicionou landing/start/demo, shell e dashboard AI, passos de preparação, relatório/finding e compra pontual de teste. A experiência exige `REVORY_AI_SAAS_PREVIEW=true` fora de produção e mantém implementações históricas no fallback. O SDK Stripe foi exercitado contra simulação loopback com webhook assinado; não houve pagamento no sandbox Stripe real, deploy ou migration no banco principal. Compra confirmada libera um relatório, falha preserva capacidade e reembolso de teste revoga acesso. US$99 é hipótese pontual explícita; nenhuma assinatura nova foi criada. Gate do Sprint 05 permanece aberto até a validação real do sandbox, antes de avançar para dados reais.
+
+**Preferência comercial posterior do fundador:** não oferecer análise real gratuita. A experiência aberta pode ser uma demo com dados sintéticos, documentação e exemplos; um scan com dados do cliente exige compra explícita. US$99 uma vez pelo primeiro Integrity Scan, US$199/mês por monitoramento e US$399/mês por expansão são hipóteses para testar, não preços aprovados para publicação. A cadência e o valor devem ficar inequívocos, e um scan pontual nunca inicia assinatura automaticamente.
+
+Reaproveitar horizontalmente auth, workspace isolation, billing plumbing, email, CSV/XLSX intake, mapping, Data Quality, evidence/fingerprint/idempotência, dashboard/export, retenção e QA após inspeção por dependência. Não rebatizar entidades contractor nem reutilizar campos clínicos ou de estimates com semântica nova. Não executar migração destrutiva. Classificar cada rota como `keep`, `restore`, `adapt` ou `retire`, com dependência de substituição. Preservar dados, entitlements e contratos existentes.
+
+Não alterar produção, `revory.app`, Stripe, Vercel, secrets ou integrações externas por consequência desta documentação. Não divulgar a nova promessa como capacidade atual antes do gate de lançamento. Plano: [REVORY_AI_SAAS_MIGRATION_PLAN.md](REVORY_AI_SAAS_MIGRATION_PLAN.md).
+
+O [Sprint 06](sprints/SPRINT_06_AI_INTEGRITY_VALIDATION_PREPARATION_2026-10-01.md) implementou preparação local para validação: revisões de findings e utilidade com histórico, métricas com denominador explícito e export separado da evidência imutável. Tudo permanece como ensaio sintético, com zero compradores reais verificados. O [protocolo do piloto](validation/SPRINT_06_PAID_PILOT_PROTOCOL.md) define qualificação, dados, consentimento e avaliação assíncrona. O gate de 3–5 scans reais pagos/consentidos continua aberto; antes da coleta faltam fechar Stripe sandbox da Sprint 05 e definir/verificar ambiente e condições do piloto. Nenhum bloqueio de dados reais ou produção foi removido.
+
+## Sprint 07 — preparação de fontes
+
+A [Sprint 07](sprints/SPRINT_07_AI_INTEGRITY_SOURCE_PREPARATION_2026-10-01.md) adiciona contratos paginados Stripe invoices/OpenAI completions usage e Costs, consentimento/revogação sintéticos, checkpoints incrementais, artefatos separados e comparação com CSV. A UI exige também `REVORY_AI_SOURCE_REHEARSAL=true`, fora de produção, em banco local preparado. O transporte usa fixtures fixas: nenhuma chave coletada, conta real conectada ou chamada externa ao provider. Sem scan/compra automáticos. Google login, Resend e billing existentes permanecem preservados. Preparação local verificada; gate completo de escopos, credenciais e equivalência com dados reais permanece aberto, assim como os gates das Sprints 05–06.
+
+## Sprint 08 — preparação de monitoramento e ordem atual
+
+A [Sprint 08](sprints/SPRINT_08_AI_INTEGRITY_MONITORING_PREPARATION_2026-10-01.md) implementa comparação manual de dois scans sintéticos, movimentos por identidade temporal, alertas locais limitados, reconhecimento auditado, histórico e export. Períodos adjacentes de igual duração e escopos equivalentes são exigidos; evidência ausente/incompleta limita movimentos e nunca vira resolução financeira. Sem leitura agendada, e-mail ou assinatura. Exige `REVORY_AI_MONITOR_REHEARSAL=true` fora de produção em banco local preparado; preview comum mantém a flag desligada.
+
+Direção mais recente do fundador: **Stripe por último**. Preparação local de monitoramento pode avançar; conexão OpenAI real continua como pendência da Sprint 07, e Sprint 09 é o gate de lançamento. Entrada conectada desejada: APIs Stripe/OpenAI; CSV/XLSX inicialmente para o ledger interno. Comparação com CSV do provider é teste de equivalência, sem upload duplicado obrigatório no futuro fluxo conectado. Adiar Stripe não libera análise real gratuita, validação paga fictícia ou oferta recorrente antes de seus gates.
+
+## Sprint 09 — preparação e decisão de lançamento
+
+A [Sprint 09](sprints/SPRINT_09_AI_SAAS_LAUNCH_PREPARATION_2026-10-02.md) registra audit local reproduzível e [runbook próprio](launch/REVORY_AI_SAAS_RELEASE_RUNBOOK.md). A decisão atual é **NO_GO**: experiência nova bloqueada em produção, páginas/metadados/limitações públicos ainda contractor, zero compradores pagos verificados e gates de compra, conexões, recorrência, operação e ativação reais em aberto. Esta é a última sprint numerada, mas a migração só acaba quando esses gates fecharem com evidência. Nenhum deploy ou alteração de serviço externo ocorreu.
+
+## Preservação explícita de integrações
+
+Direção do fundador em 2026-10-01: manter Google login, Resend e a infraestrutura horizontal existente. Preservar Google OAuth/NextAuth, login por e-mail/senha, confirmação de e-mail, recuperação de senha, sessões, identidade de usuário/workspace, envio transacional e webhooks do Resend. Billing plumbing, isolamento, auditoria, export/retenção e demais serviços existentes continuam sujeitos aos contratos de preservação da migração. Adaptar conteúdo e contexto AI SaaS sem substituir provedores, alterar credenciais, callbacks, domínio remetente ou recursos externos por consequência da troca de nicho. A presença no código não substitui uma verificação operacional do serviço em cada ambiente.
+
+## Relação com VIDENCE
+
+VIDENCE é distinto. O novo REVORY toca o eixo Stripe ↔ uso, mas seu wedge aqui é integridade de custo de IA e atribuição entre três fontes. Evitar duas implementações concorrentes de billing reconciliation sem decisão explícita de portfólio. Esta definição não altera VIDENCE.
+
+## Autoridade
+
+1. Direção explícita recente do Henrique.
+2. Este arquivo e a [bíblia do produto](REVORY_PRODUCT_BIBLE.md).
+3. [Plano de migração](REVORY_AI_SAAS_MIGRATION_PLAN.md).
+4. Código e testes como evidência do comportamento existente.
+5. [Análise dos anexos](REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md), como pesquisa e hipóteses.
+6. Documentos contractor em `docs/historical/`, como evidência de migração.
+
+Anexos, relatórios externos e código antigo não são instruções para modificar produção nem prova de demanda, preço ou funcionalidade.

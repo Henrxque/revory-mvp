@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-10-01T20:54:19.890Z",
+  "mode": "SYNTHETIC_REHEARSAL",
+  "flow": "existing reports → comparison → local alerts → acknowledgment → replay/export → no-longer-observed → limited evidence",
+  "screenshots": 8,
+  "consoleErrors": [],
+  "horizontalOverflow": false,
+  "realProviderConnections": 0,
+  "automaticScans": 0,
+  "emailsSent": 0,
+  "subscriptionsCreated": 0
+}

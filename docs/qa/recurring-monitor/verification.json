@@ -1,0 +1,22 @@
+{
+  "fixtureOnly": true,
+  "realPayments": 0,
+  "realEmails": 0,
+  "realProviderReads": 0,
+  "verifiedAt": "2026-10-20T15:04:36.374Z",
+  "flows": [
+    "workspace session",
+    "pause",
+    "renew consent",
+    "investigation note",
+    "comparison export",
+    "origin rejection",
+    "ledger authentication and real HTTP ingestion",
+    "overview hierarchy and section navigation",
+    "investigation filters and progressive disclosure",
+    "period history disclosure",
+    "desktop and mobile overview, expanded review and settings"
+  ],
+  "horizontalOverflow": false,
+  "pageErrors": []
+}

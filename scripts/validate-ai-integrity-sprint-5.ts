@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import type Stripe from "stripe";
+import { AI_SCAN_OFFER, aiScanPriceMatches, assertAiScanPaidSession, buildAiScanCheckout } from "../domain/ai-integrity/scan-offer";
+import { aiIntegrityDemoResult } from "../domain/ai-integrity/demo";
+
+const checkout = buildAiScanCheckout({ orderId: "order_test", workspaceId: "ws_test", priceId: "price_ai_test", email: "synthetic@example.invalid", appUrl: "http://localhost:3145", integrationIdentifier: "revory_ai_scan_abcdefgh" });
+assert.equal(checkout.mode, "payment"); assert.equal(checkout.line_items?.[0].quantity, 1);
+assert.equal(checkout.subscription_data, undefined); assert.equal(checkout.payment_method_types, undefined);
+assert.equal(checkout.metadata?.workspaceId, "ws_test");
+const price = { active: true, livemode: false, currency: "usd", unit_amount: 9900, recurring: null };
+assert.ok(aiScanPriceMatches(price));
+for (const override of [{ active: false }, { livemode: true }, { currency: "brl" }, { unit_amount: 19900 }, { recurring: { interval: "month" } }]) assert.ok(!aiScanPriceMatches({ ...price, ...override }));
+const order = { id: "order_test", workspaceId: "ws_test", stripeCheckoutSessionId: "cs_test_ai", amountMinor: 9900, currency: "usd" };
+const paid = { id: "cs_test_ai", livemode: false, mode: "payment", status: "complete", payment_status: "paid", subscription: null, amount_total: 9900, currency: "usd", client_reference_id: order.id, metadata: checkout.metadata } as Stripe.Checkout.Session;
+assert.doesNotThrow(() => assertAiScanPaidSession(paid, order));
+for (const override of [{ livemode: true }, { mode: "subscription" }, { subscription: "sub_test" }, { payment_status: "unpaid" }, { status: "open" }, { amount_total: 0 }, { currency: "eur" }, { id: "cs_foreign" }, { metadata: { ...paid.metadata, workspaceId: "other" } }]) assert.throws(() => assertAiScanPaidSession({ ...paid, ...override } as Stripe.Checkout.Session, order));
+const demo = aiIntegrityDemoResult();
+assert.equal(demo.findings.length, 2); assert.equal(demo.coverage.groups[0].reportedComparableCost, "2455.75");
+assert.equal(demo.coverage.groups[0].unattributedCost, "615.25");
+assert.equal(demo.findings.find((f) => f.findingType === "LEDGER_PROVIDER_USAGE_MISMATCH")?.evidence.delta, "380000");
+assert.equal(AI_SCAN_OFFER.amountMinor, 9900);
+console.log("Sprint 5 offer PASS: one-time only, test price isolation, paid session contract, foreign/live/unpaid rejection and real-engine synthetic demo.");

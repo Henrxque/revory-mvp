@@ -32,6 +32,7 @@ import { syncQuoteRecoveryFindingsForWorkspace } from "@/services/quote-recovery
 import { syncRevenueRealizationFindingsForWorkspace } from "@/services/revenue-realization/sync-findings";
 import { checkRateLimit } from "@/services/security/rate-limit";
 import { captureGrowthIntelligenceSnapshot } from "@/services/growth-intelligence/snapshots";
+import { isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 
 export type CanonicalReviewFile = CanonicalMappingReview & {
   aiProviderUsed: boolean;
@@ -103,6 +104,7 @@ async function readSubmittedFiles(formData: FormData, policy: CanonicalVolumePol
 export async function reviewCanonicalFiles(
   formData: FormData,
 ): Promise<CanonicalReviewActionState> {
+  if (isAiIntegrityRemoteSyntheticPreviewEnabled()) return { files: [], message: "Legacy imports are unavailable in this synthetic preview.", sourceDetection: emptySourceDetection, status: "error" };
   const context = await getAppContext();
   if (!context) return { files: [], message: "Sign in again before reviewing data.", sourceDetection: emptySourceDetection, status: "error" };
   if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { files: [], message: "An active REVORY entitlement is required.", sourceDetection: emptySourceDetection, status: "error" };
@@ -232,6 +234,7 @@ export async function importCanonicalFiles(
   _state: CanonicalImportActionState,
   formData: FormData,
 ): Promise<CanonicalImportActionState> {
+  if (isAiIntegrityRemoteSyntheticPreviewEnabled()) return { status: "error", message: "Legacy imports are unavailable in this synthetic preview." };
   const context = await getAppContext();
   if (!context) return { status: "error", message: "Sign in again before importing data." };
   if (!(await getCapabilityAccess(context.workspace.id, "QUOTE_RECOVERY")).allowed) return { status: "error", message: "An active REVORY entitlement is required." };

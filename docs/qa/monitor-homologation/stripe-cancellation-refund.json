@@ -1,0 +1,28 @@
+{
+  "verifiedAt": "2026-10-20T17:30:55.507Z",
+  "scope": "real Stripe sandbox dedicated customer portal, test-clock period end and fake-funds refund",
+  "liveCharges": 0,
+  "subscriptionId": "sub_1USerERiSOuAN93TmOGVLpG1",
+  "portalCancellation": {
+    "stripeCancelAtPeriodEnd": false,
+    "stripeCancelAt": 1800458502,
+    "applicationRecognizedPeriodEndCancellation": true,
+    "applicationPaidUntilPeriodEnd": true
+  },
+  "periodEnd": {
+    "stripeStatus": "canceled",
+    "applicationStatus": "CANCELED",
+    "monitorPaid": false
+  },
+  "refund": {
+    "id": "re_3USghARiSOuAN93T10jLLsxt",
+    "status": "succeeded",
+    "amountMinor": 39900,
+    "invoiceId": "in_1USgh7RiSOuAN93TuIqmYhRb",
+    "applicationStatus": "BLOCKED",
+    "monitorPaid": false
+  },
+  "olderActiveEventReplays": 2,
+  "refundBlockSurvivedReplay": true,
+  "ownedSandboxObjectsRetired": true
+}

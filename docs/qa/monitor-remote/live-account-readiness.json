@@ -1,0 +1,77 @@
+{
+  "verifiedAt": "2026-10-21T00:10:14.928Z",
+  "requestedMode": "live",
+  "operations": "GET only",
+  "liveObjectsCreated": 0,
+  "liveCharges": 0,
+  "commercialRuntimePublished": false,
+  "account": {
+    "id": "acct_1Ttu8IRiSOuAN93T",
+    "chargesEnabled": true,
+    "payoutsEnabled": true,
+    "detailsSubmitted": true,
+    "currentlyDue": [],
+    "pastDue": [],
+    "disabledReason": null
+  },
+  "products": {
+    "ok": true,
+    "complete": true,
+    "total": 5,
+    "monitor": []
+  },
+  "prices": {
+    "ok": true,
+    "complete": true,
+    "total": 7,
+    "monitor": []
+  },
+  "portals": {
+    "ok": true,
+    "complete": true,
+    "total": 1,
+    "monitor": []
+  },
+  "webhooks": {
+    "ok": true,
+    "complete": true,
+    "total": 1,
+    "endpoints": [
+      {
+        "id": "we_1TuDMrRiSOuAN93TEpMSpmDd",
+        "origin": "https://revory.app",
+        "pathname": "/api/billing/webhook",
+        "status": "enabled",
+        "livemode": true,
+        "apiVersion": "2026-06-24.dahlia",
+        "events": [
+          "checkout.session.completed",
+          "customer.subscription.created",
+          "customer.subscription.updated",
+          "customer.subscription.deleted",
+          "invoice.paid",
+          "invoice.payment_failed"
+        ],
+        "monitorOffer": false
+      }
+    ]
+  },
+  "temporaryAuditKey": {
+    "id": "mk_1USn8YRiSOuAN93TjUjzjeHH",
+    "createdAt": "2026-10-21T00:10:09.526Z",
+    "verifiedAt": "2026-10-21T00:11:56.105Z",
+    "revoked": true,
+    "http": 401,
+    "type": "StripeAuthenticationError",
+    "removedFromLocalVault": true,
+    "initialPostRevokeProbe": "Accepted during propagation before final 401"
+  },
+  "configurationDelta": {
+    "newMonitorProduct": true,
+    "newMonthlyUsd399Price": true,
+    "newDedicatedPortal": true,
+    "newDedicatedLiveWebhook": true,
+    "newRestrictedRuntimeCredential": true,
+    "productionReleaseConfiguration": true
+  }
+}

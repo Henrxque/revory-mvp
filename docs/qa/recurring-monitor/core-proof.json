@@ -1,0 +1,168 @@
+{
+  "fixtureOnly": true,
+  "realCustomers": 0,
+  "realPayments": 0,
+  "realEmails": 0,
+  "verifiedAt": "2026-10-21T04:00:33.566Z",
+  "immutableReports": 4,
+  "firstDelta": "20",
+  "resolvedDelta": "0",
+  "reappearedDelta": "20",
+  "unit": "input_tokens",
+  "financialMismatchAmount": null,
+  "billingRiskBlocksAccess": true,
+  "emptySourceCreatesZeroReport": false,
+  "ownerCanPreservePeriodGap": true,
+  "comparisons": [
+    {
+      "artifactHash": "72a194203092c6713b45cdd00deef4dd70be4cfcac38f10a4443a8d2dcc724e7",
+      "artifactJson": {
+        "mode": "CONNECTED_MONITOR",
+        "alerts": [],
+        "counts": {
+          "new": 0,
+          "persistent": 1,
+          "suppressed": 0,
+          "noLongerObserved": 0
+        },
+        "movements": [
+          {
+            "key": "d3414a8cce47cc85034d82fa08dc6f9cb837015e0c1284d27391ebedb266f980",
+            "kind": "LEDGER_PROVIDER_USAGE_MISMATCH",
+            "unit": "input_tokens",
+            "scope": "openai / proj_fixture / gpt-fixture",
+            "change": "0",
+            "reason": null,
+            "current": "20",
+            "movement": "PERSISTENT",
+            "previous": "20",
+            "currentFingerprint": "d9e86eef28883a806971a8c239e251616681732ed1d70ced2d1dc56ac17cec85",
+            "previousFingerprint": "966f11ac7f473b1162233c486085c1d91bf14301fd0d38bb70b391abf11866dd"
+          }
+        ],
+        "comparable": true,
+        "limitations": [
+          "Connected evidence; comparison is limited to the authorized sources and eligible windows.",
+          "No longer observed describes a comparable later period; it does not prove remediation or recovered money.",
+          "Periods must be adjacent, equal duration and use the same source/bucket scopes. Changed or missing evidence suppresses movement.",
+          "Cost and usage movements remain separate; no monetary conversion of usage or combined at-risk total.",
+          "A review signal is not proof of loss, remediation or recovery."
+        ],
+        "ruleVersion": "ai-integrity/4.2.0",
+        "currentWindow": {
+          "end": "2026-10-14T00:00:00.000Z",
+          "start": "2026-10-13T00:00:00.000Z"
+        },
+        "omittedAlerts": 0,
+        "baselineWindow": {
+          "end": "2026-10-13T00:00:00.000Z",
+          "start": "2026-10-12T00:00:00.000Z"
+        },
+        "monitorVersion": "ai-monitor/connected-v1",
+        "comparisonLimit": null
+      }
+    },
+    {
+      "artifactHash": "6cc8257a50bff8ef448c18b19fb27232d5c8e75d21bab475814f49d6c1f3d6cf",
+      "artifactJson": {
+        "mode": "CONNECTED_MONITOR",
+        "alerts": [],
+        "counts": {
+          "new": 0,
+          "persistent": 0,
+          "suppressed": 0,
+          "noLongerObserved": 1
+        },
+        "movements": [
+          {
+            "key": "d3414a8cce47cc85034d82fa08dc6f9cb837015e0c1284d27391ebedb266f980",
+            "kind": "LEDGER_PROVIDER_USAGE_MISMATCH",
+            "unit": "input_tokens",
+            "scope": "openai / proj_fixture / gpt-fixture",
+            "change": "-20",
+            "reason": null,
+            "current": "0",
+            "movement": "RESOLVED",
+            "previous": "20",
+            "currentFingerprint": null,
+            "previousFingerprint": "d9e86eef28883a806971a8c239e251616681732ed1d70ced2d1dc56ac17cec85"
+          }
+        ],
+        "comparable": true,
+        "limitations": [
+          "Connected evidence; comparison is limited to the authorized sources and eligible windows.",
+          "No longer observed describes a comparable later period; it does not prove remediation or recovered money.",
+          "Periods must be adjacent, equal duration and use the same source/bucket scopes. Changed or missing evidence suppresses movement.",
+          "Cost and usage movements remain separate; no monetary conversion of usage or combined at-risk total.",
+          "A review signal is not proof of loss, remediation or recovery."
+        ],
+        "ruleVersion": "ai-integrity/4.2.0",
+        "currentWindow": {
+          "end": "2026-10-15T00:00:00.000Z",
+          "start": "2026-10-14T00:00:00.000Z"
+        },
+        "omittedAlerts": 0,
+        "baselineWindow": {
+          "end": "2026-10-14T00:00:00.000Z",
+          "start": "2026-10-13T00:00:00.000Z"
+        },
+        "monitorVersion": "ai-monitor/connected-v1",
+        "comparisonLimit": null
+      }
+    },
+    {
+      "artifactHash": "81e8fb66ac29345e65432afff3b5652090c8165f95f5a0f8cc7d477ab781a694",
+      "artifactJson": {
+        "mode": "CONNECTED_MONITOR",
+        "alerts": [
+          {
+            "key": "d3414a8cce47cc85034d82fa08dc6f9cb837015e0c1284d27391ebedb266f980",
+            "kind": "NEW_DIFFERENCE",
+            "signalKey": "d3414a8cce47cc85034d82fa08dc6f9cb837015e0c1284d27391ebedb266f980"
+          }
+        ],
+        "counts": {
+          "new": 1,
+          "persistent": 0,
+          "suppressed": 0,
+          "noLongerObserved": 0
+        },
+        "movements": [
+          {
+            "key": "d3414a8cce47cc85034d82fa08dc6f9cb837015e0c1284d27391ebedb266f980",
+            "kind": "LEDGER_PROVIDER_USAGE_MISMATCH",
+            "unit": "input_tokens",
+            "scope": "openai / proj_fixture / gpt-fixture",
+            "change": "20",
+            "reason": null,
+            "current": "20",
+            "movement": "NEW",
+            "previous": "0",
+            "currentFingerprint": "7858434f494d6a45ff7105c5cd24323072d27745ce85f099e46c6063f0fb36aa",
+            "previousFingerprint": null
+          }
+        ],
+        "comparable": true,
+        "limitations": [
+          "Connected evidence; comparison is limited to the authorized sources and eligible windows.",
+          "No longer observed describes a comparable later period; it does not prove remediation or recovered money.",
+          "Periods must be adjacent, equal duration and use the same source/bucket scopes. Changed or missing evidence suppresses movement.",
+          "Cost and usage movements remain separate; no monetary conversion of usage or combined at-risk total.",
+          "A review signal is not proof of loss, remediation or recovery."
+        ],
+        "ruleVersion": "ai-integrity/4.2.0",
+        "currentWindow": {
+          "end": "2026-10-16T00:00:00.000Z",
+          "start": "2026-10-15T00:00:00.000Z"
+        },
+        "omittedAlerts": 0,
+        "baselineWindow": {
+          "end": "2026-10-15T00:00:00.000Z",
+          "start": "2026-10-14T00:00:00.000Z"
+        },
+        "monitorVersion": "ai-monitor/connected-v1",
+        "comparisonLimit": null
+      }
+    }
+  ]
+}

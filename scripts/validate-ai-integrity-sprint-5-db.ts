@@ -1,0 +1,82 @@
+import assert from "node:assert/strict";
+import type Stripe from "stripe";
+import { prisma } from "../db/prisma";
+import { AI_SCAN_OFFER } from "../domain/ai-integrity/scan-offer";
+import { aiIntegrityDemoInput } from "../domain/ai-integrity/demo";
+import type { AiIntegrityBatchInput } from "../domain/ai-integrity/contracts";
+import { persistAiIntegrityBatch } from "../services/ai-integrity/persist-batch";
+import { createAiIdentityMapping } from "../services/ai-integrity/identity";
+import { fulfillAiScanSession, hasAiScanPreparationAccess, processAiScanWebhook } from "../services/ai-integrity/purchase";
+import { runAiIntegrityScan, getAiIntegrityScan } from "../services/ai-integrity/scan";
+import { buildWorkspaceExport } from "../services/data-portability/workspace-export";
+import { enforceWorkspaceRetention } from "../services/data-portability/enforce-retention";
+
+const database = new URL(process.env.DATABASE_URL!);
+if (!/^\/revory_sprint1_[a-f0-9]{12}$/.test(database.pathname)) throw new Error("Use the disposable DB harness.");
+process.env.REVORY_AI_SAAS_PREVIEW = "true";
+try {
+  const user = await prisma.user.create({ data: { email: "sprint5@example.invalid" } });
+  const ws = await prisma.workspace.create({ data: { name: "Synthetic purchase", slug: "sprint5", ownerUserId: user.id } });
+  const other = await prisma.workspace.create({ data: { name: "Foreign workspace", slug: "sprint5-other", ownerUserId: user.id } });
+  assert.equal(await hasAiScanPreparationAccess(ws.id), false);
+  async function pending(key: string) {
+    const order = await prisma.aiIntegrityScanOrder.create({ data: { workspaceId: ws.id, actorUserId: user.id, requestKey: key, offerVersion: AI_SCAN_OFFER.version, amountMinor: 9900, currency: "usd", checkoutDriver: "simulation", stripeCheckoutSessionId: `cs_test_${key}` } });
+    const session = { id: order.stripeCheckoutSessionId!, object: "checkout.session", livemode: false, mode: "payment", status: "complete", payment_status: "paid", subscription: null, amount_total: 9900, currency: "usd", payment_intent: `pi_${key}`, client_reference_id: order.id, metadata: { aiScanOrderId: order.id, workspaceId: ws.id, offerKey: AI_SCAN_OFFER.key, offerVersion: AI_SCAN_OFFER.version } } as unknown as Stripe.Checkout.Session;
+    return { order, session };
+  }
+  const { order, session } = await pending("first_test_purchase");
+  await assert.rejects(() => fulfillAiScanSession({ ...session, payment_status: "unpaid" }), /contract/);
+  await assert.rejects(() => fulfillAiScanSession(session, other.id), /workspace/);
+  assert.equal(await prisma.aiIntegrityScanGrant.count(), 0);
+  const event = { id: "evt_test_paid", type: "checkout.session.completed", livemode: false, data: { object: session } } as Stripe.Event;
+  const payload = JSON.stringify(event);
+  const results = await Promise.all([processAiScanWebhook(event, payload), processAiScanWebhook(event, payload)]);
+  assert.equal(results.filter((r) => r.replayed).length, 1);
+  await assert.rejects(() => processAiScanWebhook(event, `${payload} `), /changed/);
+  assert.equal(await prisma.aiIntegrityScanGrant.count(), 1);
+  assert.equal(await prisma.workspaceAuditEvent.count({ where: { action: "AI_SCAN_TEST_PURCHASE_CONFIRMED" } }), 1);
+  assert.equal(await hasAiScanPreparationAccess(ws.id), true);
+  const grant = await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { orderId: order.id } });
+  const input = aiIntegrityDemoInput(), batches: Record<string, string> = {};
+  for (const [index, batch] of input.batches.entries()) {
+    const records = batch.sourceKind === "STRIPE_REVENUE" ? input.revenue.map((r) => ({ ...r, currencyExponent: 2 })) : batch.sourceKind === "INTERNAL_LEDGER" ? input.usage : input.buckets;
+    const normalized = { workspaceId: ws.id, sourceKind: batch.sourceKind, sourceSystem: batch.sourceSystem, fileName: `${batch.id}.csv`, fileSha256: String(index + 1).repeat(64), mappingSha256: batch.mappingSha256, windowStart: batch.windowStart, windowEnd: batch.windowEnd, sourceTimezone: "UTC", dataQuality: {}, records: records.map((r, index) => ({ ...r, workspaceId: ws.id, sourceRowNumber: index + 2, sourcePayload: { synthetic: true }, provenance: { synthetic: true } })) } as AiIntegrityBatchInput;
+    batches[batch.sourceKind] = (await persistAiIntegrityBatch(normalized)).batch.id;
+  }
+  await createAiIdentityMapping({ workspaceId: ws.id, actorUserId: user.id, kind: "PROVIDER_PROJECT", externalId: "proj_aster", provider: "openai", organizationId: "org_sample", internalCustomerExternalId: "workspace_aster", sourceBatchId: batches.PROVIDER_REPORT, ledgerBatchId: batches.INTERNAL_LEDGER, validFrom: input.batches[0].windowStart, validUntil: input.batches[0].windowEnd, exclusiveProjectConfirmed: true });
+  const request = { workspaceId: ws.id, actorUserId: user.id, grantId: grant.id, batchIds: Object.values(batches), asOf: input.asOf, lagHours: 24, syntheticDataConfirmed: true, sourceReviews: Object.values(batches).map((batchId) => ({ batchId, exportedAt: "2026-09-03T00:00:00Z", completeThrough: input.batches[0].windowEnd })) };
+  await assert.rejects(() => runAiIntegrityScan({ ...request, grantId: undefined }), /purchase/);
+  await assert.rejects(() => runAiIntegrityScan({ ...request, workspaceId: other.id }), /workspace/);
+  await assert.rejects(() => runAiIntegrityScan({ ...request, batchIds: ["missing_a", "missing_b", "missing_c"] }), /batch/);
+  assert.equal((await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: grant.id } })).consumedAt, null);
+  const [first, replay] = await Promise.all([runAiIntegrityScan(request), runAiIntegrityScan(request)]);
+  assert.equal(first.snapshotId, replay.snapshotId); assert.equal(first.result.findings.length, 2);
+  assert.equal(await prisma.aiIntegritySnapshot.count(), 1);
+  assert.ok((await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: grant.id } })).consumedAt);
+  assert.equal(await hasAiScanPreparationAccess(ws.id), false);
+  await assert.rejects(() => runAiIntegrityScan({ ...request, asOf: "2026-09-05T00:00:00Z" }), /already delivered/);
+  assert.equal(await getAiIntegrityScan(other.id, first.snapshotId), null);
+  const extra = await pending("second_test_purchase");
+  const extraGrant = await fulfillAiScanSession(extra.session);
+  assert.equal((await runAiIntegrityScan({ ...request, grantId: extraGrant.id })).replayed, true);
+  assert.equal((await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: extraGrant.id } })).consumedAt, null, "Same report must not consume another purchase");
+  const earlyRefund = { id: "evt_early_refund", type: "charge.refunded", livemode: false, data: { object: { payment_intent: "pi_unknown", amount_refunded: 9900 } } } as Stripe.Event;
+  await assert.rejects(() => processAiScanWebhook(earlyRefund, JSON.stringify(earlyRefund)), /retry/);
+  assert.equal(await prisma.stripeWebhookEvent.findUnique({ where: { id: "ai-scan:evt_early_refund" } }), null);
+  const refund = { id: "evt_test_refund", type: "charge.refunded", livemode: false, data: { object: { payment_intent: extra.session.payment_intent, amount_refunded: 9900 } } } as Stripe.Event;
+  await processAiScanWebhook(refund, JSON.stringify(refund));
+  assert.equal(await hasAiScanPreparationAccess(ws.id), false);
+  await assert.rejects(() => fulfillAiScanSession(extra.session), /Refunded/);
+  await assert.rejects(() => runAiIntegrityScan({ ...request, grantId: extraGrant.id }), /purchase/);
+  const laterPaid = { ...event, id: "evt_test_delayed_paid", data: { object: extra.session } } as Stripe.Event;
+  await processAiScanWebhook(laterPaid, JSON.stringify(laterPaid));
+  assert.equal((await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: extraGrant.id } })).status, "REVOKED");
+  assert.ok(JSON.stringify(await buildWorkspaceExport(ws.id)).includes(grant.id));
+  await prisma.aiIntegrityImportBatch.update({ where: { id: batches.INTERNAL_LEDGER }, data: { createdAt: new Date("2024-01-01T00:00:00Z") } });
+  await enforceWorkspaceRetention(ws.id, new Date("2026-09-30T00:00:00Z"));
+  assert.equal(await prisma.aiIntegritySnapshot.count(), 0);
+  const retainedGrant = await prisma.aiIntegrityScanGrant.findUniqueOrThrow({ where: { id: grant.id } });
+  assert.ok(retainedGrant.consumedAt); assert.equal(retainedGrant.consumedSnapshotId, null);
+  assert.equal(await hasAiScanPreparationAccess(ws.id), false);
+  console.log("Sprint 5 DB PASS: atomic signed-event fulfillment contract, replay/conflicting payload, tenant isolation, failed attempt preserved, concurrent report consumes once, extra purchase conserved, refund/reordered event, portability and retention.");
+} finally { await prisma.$disconnect(); }

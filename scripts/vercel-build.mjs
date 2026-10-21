@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { dedicatedMigrationDatasource } from "./lib/migration-datasource.mjs";
 import { verifyDeployedMigrations } from "./lib/verify-deployed-migrations.mjs";
+import { previewDatabaseTarget } from "./lib/preview-database-target.mjs";
 
 function run(command, args, extraEnv = {}) {
   const result = spawnSync(command, args, {
@@ -29,17 +30,32 @@ if (isVercelDeployment) {
     );
   }
 
+  // Fail before migrate deploy whenever this branch is built as a Vercel preview.
+  // A project-wide Preview DATABASE_URL must never be trusted implicitly.
+  let migrationDatabaseUrl = process.env.DATABASE_URL;
+  if (vercelEnvironment === "preview") {
+    migrationDatabaseUrl = previewDatabaseTarget(process.env);
+  }
+
+  // Runtime may use a CRUD-only SQL role; migrations use a separate operator
+  // credential. Reject target drift before running any migration.
+  if (process.env.REVORY_MIGRATION_DATABASE_URL) {
+    migrationDatabaseUrl = dedicatedMigrationDatasource(process.env.DATABASE_URL, process.env.REVORY_MIGRATION_DATABASE_URL);
+  }
+
   if (process.env.REVORY_DATABASE_MIGRATIONS_EXTERNAL === "true") {
     if (process.env.REVORY_MIGRATION_DATABASE_URL) throw new Error("External migration mode must not carry a migration credential.");
     await verifyDeployedMigrations(process.env.DATABASE_URL);
   } else {
-  const migrationUrl = process.env.REVORY_MIGRATION_DATABASE_URL
-    ? dedicatedMigrationDatasource(process.env.DATABASE_URL, process.env.REVORY_MIGRATION_DATABASE_URL)
-    : process.env.DATABASE_URL;
   console.log(
     `[revory-release] Applying pending Prisma migrations for the ${vercelEnvironment} environment before building.`,
   );
-  run("npx", ["prisma", "migrate", "deploy"], { DATABASE_URL: migrationUrl });
+  // Neon rejected Prisma's session advisory lock even on the direct endpoint.
+  // This exception is limited to the isolated Preview database; deploys stay serial.
+  run("npx", ["prisma", "migrate", "deploy"], {
+    DATABASE_URL: migrationDatabaseUrl,
+    ...(vercelEnvironment === "preview" ? { PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK: "1" } : {}),
+  });
   }
 } else {
   console.log(

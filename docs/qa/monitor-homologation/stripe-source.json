@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-10-20T17:22:47.022Z",
+  "scope": "real Stripe sandbox HTTP transport; restricted key stored encrypted by the app and read from its vault",
+  "accountId": "acct_1USetdGVimDnwa8i",
+  "identityGetVerified": true,
+  "connectionId": "5dc7a35c-b18c-4ada-aa3a-82d3126dc786",
+  "syncId": "cmvgybiw50007bmtoeqqit8ik",
+  "sourceWindow": {
+    "start": "2026-10-12T00:00:00.000Z",
+    "end": "2026-10-19T00:00:00.000Z"
+  },
+  "status": "COMPLETED",
+  "activity": "NO_REPORTED_ROWS",
+  "paginationComplete": true,
+  "channels": [
+    {
+      "name": "stripe-invoices",
+      "rows": 0
+    }
+  ],
+  "emptyPromotionBlocked": true,
+  "newReportsFromEmptySource": 0,
+  "realCharges": 0,
+  "temporaryKeyRevoked": true,
+  "providerAfterRevocationHttp": 401,
+  "encryptedAppCredentialRemoved": true
+}

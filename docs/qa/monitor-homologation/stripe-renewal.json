@@ -1,0 +1,15 @@
+{
+  "scope": "same customer and subscription as real sandbox checkout; Stripe test clock advanced one billing period",
+  "verifiedAt": "2026-10-20T15:25:11.903Z",
+  "liveCharges": 0,
+  "testClockId": "clock_1USevDRiSOuAN93TC6Up3AkI",
+  "subscriptionId": "sub_1USerERiSOuAN93TmOGVLpG1",
+  "previousInvoiceId": "in_1USerCRiSOuAN93TuzftWnPx",
+  "renewalInvoiceId": "in_1USewiRiSOuAN93TqieQ7YRa",
+  "renewalAmountMinor": 39900,
+  "invoiceStatus": "paid",
+  "previousPeriodEnd": 1795188102,
+  "renewedPeriodEnd": 1797780102,
+  "applicationPaidThroughMatches": true,
+  "subscriptionRows": 1
+}

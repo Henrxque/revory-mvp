@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { AI_REVIEW_MODE, parseAiReviewInput, summarizeAiReviews, type AiReviewRecord } from "../domain/ai-integrity/validation-review";
+
+const finding = { kind: "FINDING", snapshotId: "snapshot_test", requestKey: "request_synthetic_001", fingerprint: "a".repeat(64), disposition: "CONFIRMED_DIFFERENCE", sourceEvidenceChecked: true, comment: "Synthetic provider and ledger records checked." };
+assert.equal(parseAiReviewInput(finding).kind, "FINDING");
+for (const invalid of [{ ...finding, disposition: "CONFIRMED_LOSS" }, { ...finding, sourceEvidenceChecked: false }, { ...finding, mode: "REAL_PAID" }, { ...finding, comment: "short" }, { ...finding, comment: "x".repeat(1201) }, { ...finding, actorUserId: "foreign" }]) assert.throws(() => parseAiReviewInput(invalid));
+const report = { kind: "REPORT", snapshotId: "snapshot_test", requestKey: "request_synthetic_002", usefulness: "PARTLY_USEFUL", assistanceRequired: false, preparationMinutes: 17, comment: "The mapping step needed clearer instructions." };
+assert.equal(parseAiReviewInput(report).kind, "REPORT");
+for (const value of [-1, 1.5, 10081, "17", null]) assert.throws(() => parseAiReviewInput({ ...report, preparationMinutes: value }));
+assert.throws(() => parseAiReviewInput({ ...report, assistanceRequired: "false" }));
+const row = (revision: number, fingerprint: string, disposition: string): AiReviewRecord => ({ revision, fingerprint, disposition, kind: "FINDING", mode: AI_REVIEW_MODE, usefulness: null, assistanceRequired: null, preparationMinutes: null, comment: "Synthetic evidence reviewed." });
+const fps = ["a".repeat(64), "b".repeat(64), "c".repeat(64), "d".repeat(64)];
+const empty = summarizeAiReviews(fps, []);
+assert.equal(empty.falsePositiveRateBps, null); assert.equal(empty.unreviewedFindings, 4); assert.equal(empty.realPaidParticipants, 0);
+const records = [row(1, fps[0], "FALSE_POSITIVE"), row(2, fps[1], "INSUFFICIENT_EVIDENCE"), row(3, fps[2], "CONFIRMED_DIFFERENCE")];
+const summary = summarizeAiReviews(fps, records);
+assert.equal(summary.conclusivelyReviewed, 2); assert.equal(summary.falsePositiveRateBps, 5000); assert.equal(summary.unreviewedFindings, 1);
+const corrected = summarizeAiReviews(fps, [row(4, fps[0], "EXPECTED_DIFFERENCE"), ...records]);
+assert.equal(corrected.falsePositives, 0); assert.equal(corrected.falsePositiveRateBps, 0); assert.equal(corrected.eventCount, 4);
+assert.throws(() => summarizeAiReviews(fps, [row(1, "e".repeat(64), "FALSE_POSITIVE")]));
+assert.throws(() => summarizeAiReviews(fps, [records[0], records[0]]));
+assert.throws(() => summarizeAiReviews(fps, [{ ...records[0], mode: "REAL_PAID" }]));
+console.log("Sprint 6 review contract PASS: unknown/real-mode rejection, evidence confirmation, bounded comments/time, missing review is not zero FP, explicit conclusive denominator, corrections preserve history, synthetic records never count as paid participants.");

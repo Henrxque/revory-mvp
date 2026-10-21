@@ -52,7 +52,7 @@ assert(checkout.includes("legalTermsVersion"));
 assert(checkout.includes("CHECKOUT_STARTED"));
 assert(read("services/data-portability/workspace-export.ts").includes("legalAcceptances"), "Workspace export must include workspace-scoped legal acceptance evidence.");
 
-const footer = read("src/app/page.tsx");
+const footer = read("components/ai-integrity/AiMarketing.tsx");
 for (const href of ["/dpa", "/cookies", "/responsible-disclosure"]) {
   assert(footer.includes(`href="${href}"`), `Landing footer is missing ${href}`);
 }

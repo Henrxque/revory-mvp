@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-10-20T17:33:37.478Z",
+  "decision": "SANDBOX_BILLING_AND_EMPTY_REAL_SOURCE_READS_PASS_REMOTE_COMMERCIAL_GATE_OPEN",
+  "stripeLifecycle": true,
+  "samePaidWorkspaceControlledReports": 4,
+  "realSourceReads": {
+    "stripe": "EMPTY_READ_VERIFIED",
+    "openaiUsage": "EMPTY_READ_VERIFIED",
+    "openaiCosts": "EMPTY_READ_VERIFIED"
+  },
+  "realNonemptySourceEquivalence": false,
+  "realResendDelivery": false,
+  "remoteSchedulerEnabled": false,
+  "remoteDeployment": false,
+  "liveCharges": 0,
+  "realBuyers": 0,
+  "cleanup": {
+    "temporarySourceKeysRevoked": true,
+    "appSourceCredentials": 0,
+    "ledgerTokenRevoked": true,
+    "schedulePaused": true,
+    "pausedNoticeDeliveryAttempts": 0,
+    "ownedStripeTestObjectsRetired": true,
+    "extraBillingKeyCopyRemoved": true
+  },
+  "checks": {
+    "localMonitorDb": "PASS_37_MIGRATIONS",
+    "browser": "PASS_LOCAL_CONTROLLED_FLOW_AND_DATED_CANCELLATION",
+    "typescript": "PASS",
+    "eslintAffected": "PASS",
+    "dispatcherGuards": "PASS"
+  }
+}

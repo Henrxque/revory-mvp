@@ -1,0 +1,39 @@
+{
+  "purpose": "Local synthetic proof only; no customer analysis or financial validation",
+  "sourceArchives": [
+    {
+      "url": "https://www.kaggle.com/datasets/generaterealdata/synthetic-saas-subscriptions-churn",
+      "version": 1,
+      "sha256": "57e674f75ec8ac9ced3e46e66731adcfe7ef134b4f4596985e629b783bc93b6f",
+      "license": "CC BY 4.0",
+      "attribution": "Synthetic SaaS Subscriptions and Churn, GenerateRealData (https://generaterealdata.com)"
+    },
+    {
+      "url": "https://www.kaggle.com/datasets/hamzaabbasai/ai-agent-observability-dataset",
+      "version": 1,
+      "sha256": "1fa861897d5ec6440b5a11231487e063f03869c11e341953cec0ee16b4246d52",
+      "license": "Apache 2.0"
+    }
+  ],
+  "period": {
+    "start": "2026-05-01T00:00:00Z",
+    "end": "2026-06-01T00:00:00Z"
+  },
+  "selection": {
+    "paidInvoices": 12,
+    "gptIncidents": 20
+  },
+  "knownLimitations": [
+    "Neither dataset is a Stripe or AI-provider export; CSVs are adapted to the REVORY contract.",
+    "Agent cost_usd is an estimate, not reported provider spend.",
+    "Agent timestamps lack timezone; this fixture explicitly assumes UTC.",
+    "Revenue and AI incidents have no common customer IDs; no revenue or margin reconciliation is valid.",
+    "The linked scenario adds fictional project/customer IDs and subtracts 1000 ledger tokens from one row to test a known fault.",
+    "No source proves that a project is exclusive to a customer; the linked mapping is a test assumption only."
+  ],
+  "expected": {
+    "providerTokens": 469411,
+    "estimatedCostUsd": "5.9914",
+    "injectedTokenDelta": 1000
+  }
+}

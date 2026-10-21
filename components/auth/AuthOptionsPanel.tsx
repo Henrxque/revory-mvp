@@ -30,7 +30,7 @@ export function AuthOptionsPanel({
           <p className="max-w-[22rem] text-sm leading-6 text-[#beb7ca]">
             {isSignIn
               ? "Use Google or confirmed email/password to return to the same workspace."
-              : "Use Google or confirm your email/password account to explore the current preview."}
+              : "Use Google or confirm your email/password account for private access."}
           </p>
         </div>
 

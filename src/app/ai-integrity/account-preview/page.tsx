@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getAuthSession } from "@/auth";
 import { AuthSignOutButton } from "@/components/auth/AuthSignOutButton";
 import { RevoryLogo } from "@/components/brand/RevoryLogo";
+import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 
 export const metadata: Metadata = {
   title: "REVORY — Account preview",
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AccountPreviewPage() {
+  if (isAiCommercialRuntimeEnabled()) redirect("/app/ai-integrity/dashboard");
   const session = await getAuthSession();
   if (!session?.user?.id) redirect("/sign-in?redirect_url=%2Fai-integrity%2Faccount-preview");
 
@@ -36,7 +38,7 @@ export default async function AccountPreviewPage() {
             The new REVORY is being built for AI SaaS founders. For now, you can explore a fictional example of its evidence-based read. Customer-data scans, source connections and purchases for the new product are not available here yet.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link className="rev-button-primary" href="/ai-integrity/demo">Explore the synthetic demo ↗</Link>
+            <Link className="rev-button-primary" href="/ai-integrity/demo">Explore the synthetic demo</Link>
             <Link className="rev-button-secondary" href="/ai-integrity/preview-policy">See preview scope</Link>
           </div>
           <p className="mt-6 text-xs leading-6 text-[color:var(--text-subtle)]">Please do not upload real financial, personal or confidential data for this preview.</p>
