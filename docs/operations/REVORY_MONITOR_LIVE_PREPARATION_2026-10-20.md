@@ -2,6 +2,16 @@
 
 ## Direção mais recente: antecipar preparação, preservar o gate de ativação
 
+### Preparação externa concluída — oferta ainda desativada
+
+- **Live:** Product `prod_VTlRybGhsVgtz6`, Price `price_1USnurRiSOuAN93TWO0b7Mje` (USD399/mês), portal `bpc_1USnusRiSOuAN93THNhU4MUZ` e webhook `we_1USnuvRiSOuAN93TTAaF4zi0`, todos inativos/desabilitados. Painel Stripe confirma REVORY Monitor arquivado, US$399/mês e zero assinaturas ativas desse preço. Não é produto removido: está preparado para ativação posterior.
+- **Billing com menor privilégio:** chave test criada e validada nos sete escopos aprovados contra o Stripe real. Price, subscription com latest_invoice expandida, invoice e charges lidos; sessão de portal criada; Checkout test criado e expirado sem pagamento ou nova assinatura. Chave live equivalente criada depois dessa prova.
+- **Vercel:** sete variáveis próprias de billing preparadas em production, com key/signing secret do tipo Sensitive. `REVORY_AI_COMMERCIAL_ENABLED=false` confirmado pela API. Chave test Sensitive somente no Preview `release/monitor-hml`, sem alterar a produção atual, banco, OAuth, Resend ou domínios. A substituição no Preview requer novo deploy para aplicar a nova chave.
+- **Credenciais temporárias:** a primeira janela de valor único foi fechada antes da captura; essa chave sem uso foi revogada. A substituta foi usada para preparar o catálogo, revogada e rejeitada por HTTP401; removida do cofre local. As duas chaves de billing permanecem no cofre protegido e nos alvos Vercel aprovados.
+- **Saúde de produção:** HTTPS 200, status ok e banco reachable após o staging. Nenhuma cobrança live e nenhuma publicação/ativação comercial foram executadas.
+
+Evidências: `prepared-live-catalog.json`, `restricted-billing-scope-proof.json`, `staged-live-billing.json` e `stripe-monitor-live-prepared.png` em `docs/qa/monitor-remote/`.
+
 Após a auditoria abaixo, o fundador pediu deixar a cobrança pronta para a futura venda. Isso autoriza antecipar catálogo e configuração isolada/inativa; substitui a espera da seção histórica para preparar recursos live. Não autoriza contar a prova OpenAI como concluída, efetuar pagamento do próprio fundador ou anunciar receita/repasse garantidos.
 
 Implementada a rotina `scripts/prepare-monitor-stripe-catalog.mjs`, com teste em `scripts/validate-monitor-catalog-preparation.mjs`. Ela verifica a conta exata, inventário e ownership antes de escrever; cria Product/Price inativos, portal dedicado inativo e webhook desabilitado com 12 eventos e versão de API igual ao SDK em uso. O Stripe não permite desabilitar portal/webhook no create: eles são desabilitados imediatamente em seguida. Checkpoints criptografados e idempotência permitem retomar falhas sem duplicação; recursos históricos são preservados. A rotina nunca escreve customers, Checkouts, invoices, subscriptions ou charges.
@@ -10,7 +20,7 @@ Prova real em sandbox concluída, repetida sem trocar IDs: `docs/qa/monitor-remo
 
 ### Credenciais a criar — confirmação específica recebida
 
-O fundador aprovou explicitamente as três chaves, teste de escopos sem pagamento e armazenamento Secret no Vercel nos alvos abaixo, mantendo a oferta live desativada. Ao solicitar a primeira chave, o Stripe exigiu nova verificação por e-mail; o envio foi acionado, e a criação ainda aguarda a conclusão pelo proprietário. Não há chave de configuração nova emitida nem recursos live preparados nesta etapa até essa liberação.
+O fundador aprovou explicitamente as três chaves, teste de escopos sem pagamento e armazenamento Secret no Vercel nos alvos abaixo, mantendo a oferta live desativada. O proprietário concluiu a verificação por e-mail e autenticador; criação, prova de escopos e staging foram executados conforme o resultado atual acima.
 
 | Chave | Escopos Stripe | Destino e ciclo de vida |
 | --- | --- | --- |

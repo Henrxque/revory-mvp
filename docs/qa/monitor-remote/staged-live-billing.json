@@ -1,0 +1,89 @@
+{
+  "stagedAt": "2026-10-21T01:04:30.599Z",
+  "productionKeys": [
+    "REVORY_AI_MONITOR_STRIPE_KEY",
+    "REVORY_AI_MONITOR_PRICE_ID",
+    "REVORY_AI_MONITOR_PORTAL_CONFIGURATION_ID",
+    "REVORY_AI_MONITOR_WEBHOOK_SECRET",
+    "REVORY_AI_MONITOR_BILLING_MODE",
+    "REVORY_AI_COMMERCIAL_RELEASE",
+    "REVORY_AI_COMMERCIAL_ENABLED"
+  ],
+  "productionSecretKeys": [
+    "REVORY_AI_MONITOR_STRIPE_KEY",
+    "REVORY_AI_MONITOR_WEBHOOK_SECRET"
+  ],
+  "commercialEnabled": false,
+  "productionDeployed": false,
+  "catalogPriceActive": false,
+  "catalogPortalActive": false,
+  "homologationBranch": "release/monitor-hml",
+  "homologationRuntimeKeyReplaced": true,
+  "homologationDeploymentRequired": true,
+  "databaseAuthResendDomainsUnchanged": true,
+  "verifiedAt": "2026-10-21T01:05:19.859Z",
+  "environmentMetadataVerified": true,
+  "productionVariableScopes": [
+    {
+      "key": "REVORY_AI_MONITOR_STRIPE_KEY",
+      "target": [
+        "production"
+      ],
+      "type": "sensitive",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_MONITOR_PRICE_ID",
+      "target": [
+        "production"
+      ],
+      "type": "plain",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_MONITOR_PORTAL_CONFIGURATION_ID",
+      "target": [
+        "production"
+      ],
+      "type": "plain",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_MONITOR_WEBHOOK_SECRET",
+      "target": [
+        "production"
+      ],
+      "type": "sensitive",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_MONITOR_BILLING_MODE",
+      "target": [
+        "production"
+      ],
+      "type": "plain",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_COMMERCIAL_RELEASE",
+      "target": [
+        "production"
+      ],
+      "type": "plain",
+      "gitBranch": null
+    },
+    {
+      "key": "REVORY_AI_COMMERCIAL_ENABLED",
+      "target": [
+        "production"
+      ],
+      "type": "plain",
+      "gitBranch": null
+    }
+  ],
+  "productionHealth": {
+    "http": 200,
+    "status": "ok",
+    "database": "reachable"
+  }
+}
