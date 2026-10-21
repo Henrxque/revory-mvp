@@ -15,13 +15,14 @@ Este registro descreve testes técnicos do proprietário. Não representa client
 - Agendador próprio integrado por PR #9, com diagnósticos sem segredos nos PRs #10/#11. Chamada manual 39476373537 passou e evento natural `schedule` 39508129704 passou. Agenda habilitada, no máximo uma chamada programada por hora; o horário real do GitHub pode atrasar. Nenhuma leitura de fonte foi autorizada ainda.
 - Botão `Send test email` publicado e usado no app remoto: Resend aceitou um e-mail para `henry@revory.app`, outbox `SENT`, uma tentativa e ID do provedor preservado. Repetição pelo navegador manteve um aviso/uma tentativa. Após login/MFA do proprietário, o painel confirmou **Delivered**, com o mesmo ID registrado no outbox. Não criou schedule, leitura ou finding. O app informa aceite pelo provedor; posicionamento na caixa de entrada não foi comprovado.
 - Teste descartável específico de e-mail e regressão do Monitor passaram, além de tipos/lint e fronteiras HTTPS públicas. Login e saúde de produção permaneceram preservados; a conferência mais recente de produção retornou 200/ok/reachable.
+- Conta Stripe live correta recuperada e consultada com chave temporária restrita, após autorização e verificação pelo proprietário: API confirma charges/payouts ativos, dados submetidos e nenhum requisito pendente. Inventário completo de Products, Prices, Customer Portal e Webhook Endpoints não encontrou recursos dedicados à nova oferta. A chave foi encerrada no Dashboard, sua rejeição 401 foi confirmada após propagação e ela foi removida do cofre local; nenhum recurso de cobrança foi criado ou alterado. Evidência em `live-account-readiness.json`.
 - OpenAI: uma chamada real Chat Completions, 11 tokens de entrada e 1 de saída, sem retry, sem compra de créditos ou mudança de recarga. Estimativa de custo US$0,0000015 conforme tarifa do modelo. Chave de um dia, somente Chat Completions: Request, revogada imediatamente após a chamada e removida do cofre de operação. Demais chaves existentes preservadas.
 
 ## Pendências — não contar como concluídas
 
 - O percurso de alerta disparado por dados reais de uma comparação continua dependente da prova de fontes abaixo. O teste de transporte/entrega pelo Resend passou; não equivale a esse percurso completo.
 - Usage/Costs OpenAI não vazios comparados com ledger equivalente: a geração não substitui esse teste. Janela UTC de 20/10–21/10, mais lag mínimo de 24h, só fica elegível em 22/10 às 00:00 UTC; a publicação da fonte ainda pode atrasar.
-- Stripe live bloqueado: credencial anterior rejeitada; proprietário está localizando a conta correta. Não configurar a sessão “New business” como a conta comercial do REVORY sem verificação.
+- Conta Stripe correta localizada pelo proprietário em 20/10: painel **Revory**, `acct_1Ttu8IRiSOuAN93T`, igual à identidade da integração histórica. A página Status da conta não apresenta tarefas ativas e lista Payments/Payouts como ativos. A sessão anterior “New business” tem outro ID. Login no painel não valida a credencial API anterior (rejeitada), o catálogo Monitor live ou seu webhook. Ver [preparação live](../../operations/REVORY_MONITOR_LIVE_PREPARATION_2026-10-20.md).
 
 ## Artefatos
 
@@ -37,6 +38,8 @@ Este registro descreve testes técnicos do proprietário. Não representa client
 - `email-test.json`: envio real, ID do provedor e repetição sem duplicação; estado final de entrega separado.
 - `resend-delivered.png`: evento Delivered do mesmo e-mail no painel autenticado do provedor.
 - `public-http-boundary.json`: saúde pública e rejeição de job sem Bearer, e-mail sem sessão, cobrança antiga e assinatura de webhook inválida.
+- `live-account-readiness.json`: identidade e estado live pela API, catálogo, portal e webhook históricos, delta de configuração e revogação da chave de auditoria.
+- `stripe-live-account-status.png` e `stripe-live-audit-key-revoked.png`: estado da conta e inventário de chaves após o encerramento da chave temporária; sem segredos.
 
 Com lag de 24h, a janela OpenAI fica elegível em **21/10 às 21h de Brasília** (22/10 00:00 UTC), sujeita ao atraso de publicação da fonte. Criar a próxima chave temporária de leitura apenas quando a janela estiver elegível; a chave de geração já foi revogada. Não declarar exclusividade do projeto padrão ou completude do ledger sem revisar os dados efetivamente retornados.
 
