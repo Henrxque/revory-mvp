@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-10-21T01:13:59.394Z",
+  "accountId": "acct_1Ttu8IRiSOuAN93T",
+  "chargesEnabled": true,
+  "payoutsEnabled": true,
+  "defaultCurrency": "brl",
+  "bankConfigurationVisible": false,
+  "bankCount": null,
+  "defaultBankConfigured": null,
+  "bankStatuses": null,
+  "payoutExecuted": false,
+  "settlementVerified": false,
+  "dashboardObservedAt": "2026-10-21T01:15:39.465Z",
+  "dashboardDefaultBrlBankLinked": true,
+  "bankDetailsChanged": false
+}

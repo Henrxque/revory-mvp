@@ -19,7 +19,7 @@
   "catalogPortalActive": false,
   "homologationBranch": "release/monitor-hml",
   "homologationRuntimeKeyReplaced": true,
-  "homologationDeploymentRequired": true,
+  "homologationDeploymentRequired": false,
   "databaseAuthResendDomainsUnchanged": true,
   "verifiedAt": "2026-10-21T01:05:19.859Z",
   "environmentMetadataVerified": true,
@@ -85,5 +85,7 @@
     "http": 200,
     "status": "ok",
     "database": "reachable"
-  }
+  },
+  "homologationDeploymentId": "dpl_AV9PFmkNkkpvy8nWPQdzWR6HBE39",
+  "homologationApplicationPortalVerified": true
 }

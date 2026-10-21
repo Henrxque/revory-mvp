@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-21T01:11:25.099Z",
+  "deploymentId": "dpl_AV9PFmkNkkpvy8nWPQdzWR6HBE39",
+  "gitSha": "82d4c59759b9e64eaa160eefd6fb5855771d9498",
+  "branch": "release/monitor-hml",
+  "alias": "https://monitor-hml.revory.app",
+  "ready": true,
+  "restrictedBillingKeyDeployed": true,
+  "authenticatedJob": {
+    "http": 200,
+    "processed": 0,
+    "sent": 0
+  },
+  "productionDeployed": false,
+  "applicationPortalVerifiedAt": "2026-10-21T01:12:42.673Z",
+  "portalOpenedThroughApplication": true,
+  "sandboxBannerObserved": true,
+  "existingActiveSubscriptionObserved": true,
+  "subscriptionUnchanged": true,
+  "realPayment": false
+}
