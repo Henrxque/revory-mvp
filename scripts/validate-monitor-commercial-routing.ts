@@ -20,7 +20,7 @@ for (const path of ["/app/dashboard", "/app/imports", "/app/settings"]) {
   assert.equal(response(path).status, 303);
   assert.equal(response(path).headers.get("location"), "https://revory.app/app/ai-integrity/dashboard");
 }
-for (const path of ["/app/ai-integrity/dashboard", "/api/auth/session", "/api/billing/webhook", "/api/health"]) {
+for (const path of ["/app/ai-integrity/dashboard", "/app/settings/data-export", "/api/auth/session", "/api/billing/webhook", "/api/health"]) {
   assert.equal(response(path).headers.get("x-middleware-next"), "1");
 }
 for (const [key, bad] of Object.entries({

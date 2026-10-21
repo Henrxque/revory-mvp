@@ -1,0 +1,144 @@
+{
+  "verifiedAt": "2026-10-21T04:19:26.220Z",
+  "status": "LIVE_EARLY_ACCESS",
+  "founderApproval": "Explicit: Sim, publicar e ativar acesso antecipado",
+  "base": "https://revory.app",
+  "productionDeployment": {
+    "id": "dpl_7N8w1F1whnZtZxXKaYNeYeZk5CYh",
+    "url": "https://revory-794msmgh1-henrxques-projects.vercel.app",
+    "gitSha": "0adb9caf954097b5a35793bf3bcb285d0822a4e9",
+    "pullRequest": "https://github.com/Henrxque/revory-mvp/pull/12",
+    "state": "READY"
+  },
+  "database": {
+    "database": "neondb",
+    "at": "2026-10-21T04:08:04.025Z",
+    "migrations": 38,
+    "tables": 49,
+    "oldTablesCompared": 28,
+    "oldTableDrift": 0,
+    "limitedRuntime": true,
+    "backupReadAccess": true
+  },
+  "backup": {
+    "encrypted": true,
+    "createdAt": "2026-10-21T04:06:21.776Z",
+    "encryptedBytes": 133680,
+    "sha256": "63300f01cd0dd18fb292796b2d3578d92eb9cac621c0005f09095e08961b473c"
+  },
+  "keyring": {
+    "productionOnly": true,
+    "encryptedRecoveryCopy": true,
+    "plaintextInRepository": false
+  },
+  "catalog": {
+    "at": "2026-10-21T04:08:13.930Z",
+    "account": "acct_1Ttu8IRiSOuAN93T",
+    "price": "price_1USnurRiSOuAN93TWO0b7Mje",
+    "priceActive": true,
+    "amountMinor": 39900,
+    "currency": "usd",
+    "portal": "bpc_1USnusRiSOuAN93THNhU4MUZ",
+    "portalActive": true,
+    "chargesEnabled": true,
+    "payoutsEnabled": true,
+    "paymentPerformed": false,
+    "webhook": "we_1USnuvRiSOuAN93TTAaF4zi0",
+    "webhookEnabled": true,
+    "webhookEventCount": 12
+  },
+  "http": {
+    "verifiedAt": "2026-10-21T04:15:40.099Z",
+    "base": "https://revory.app",
+    "checks": [
+      {
+        "path": "/api/health",
+        "http": 200,
+        "database": "reachable"
+      },
+      {
+        "path": "/",
+        "http": 200,
+        "commercialMonitorOffer": true,
+        "earlyAccess": true
+      },
+      {
+        "path": "/api/auth/providers",
+        "http": 200,
+        "googleAndPasswordPreserved": true
+      },
+      {
+        "path": "/start",
+        "http": 307,
+        "monitorDestination": true
+      },
+      {
+        "path": "/api/jobs/ai-integrity-monitor",
+        "http": 401
+      },
+      {
+        "path": "/api/ai-integrity/recurring",
+        "http": 401
+      },
+      {
+        "path": "/api/ai-integrity/recurring/webhook",
+        "http": 400
+      },
+      {
+        "path": "/api/billing/webhook",
+        "http": 400
+      },
+      {
+        "path": "/terms",
+        "http": 200,
+        "currentMonitorScope": true
+      },
+      {
+        "path": "/privacy",
+        "http": 200,
+        "currentMonitorScope": true
+      }
+    ],
+    "dispatch": {
+      "http": 200,
+      "processed": 0,
+      "sent": 0
+    }
+  },
+  "checkoutSmoke": {
+    "live": true,
+    "mode": "subscription",
+    "amountMinor": 39900,
+    "currency": "usd",
+    "status": "expired",
+    "paymentStatus": "unpaid",
+    "subscriptionCreated": false,
+    "paymentPerformed": false,
+    "expiredAt": "2026-10-21T04:17:39.959Z",
+    "checkoutIdDigest": "dc43f1c0e787e5ad92d2c4a203e5f0464be720b2e8787a25fa5a31a2cf7e32dd",
+    "source": "Direct Stripe SDK using the dedicated production runtime key; hosted Checkout observed in browser; not an authenticated app purchase or paid buyer.",
+    "browserVerified": true,
+    "merchant": "Ametrine Labs",
+    "product": "REVORY Monitor"
+  },
+  "dispatcher": {
+    "runId": 39543397080,
+    "url": "https://github.com/Henrxque/revory-mvp/actions/runs/39543397080",
+    "conclusion": "success",
+    "scheduleEnabled": true,
+    "processed": 0,
+    "sent": 0,
+    "sourceReadProvenByThisRun": false,
+    "dedicatedSecret": true,
+    "legacyCronSecretUnchanged": true
+  },
+  "limitations": {
+    "productionPaidPurchaseVerified": false,
+    "paidBuyers": 0,
+    "renewalsVerified": 0,
+    "openAiNonemptyApiLedgerReport": "PENDING",
+    "controlledOpenAiWindowEligibleAt": "2026-10-22T00:00:00.000Z",
+    "earlyAccessIsNotFullCustomerValidation": true,
+    "independentOffPcRecoveryKeyCustody": "PENDING founder action"
+  }
+}

@@ -4,7 +4,9 @@
 
 O fundador aprovou explicitamente **“Sim, publicar e ativar acesso antecipado”**, ciente da prova OpenAI não vazia pendente. Essa autorização substitui a restrição anterior a staging inativo para esta oferta e este alvo. Publicação, 12 migrations aditivas e ativação dos recursos Monitor estão autorizadas; nenhum pagamento com a conta do fundador foi autorizado ou executado.
 
-Execução em andamento: backup criptografado atualizado concluído; 38 migrations verificadas com runtime limitado, 49 tabelas e zero alterações de conteúdo nas 28 tabelas históricas comparadas (fora manifesto de migrations e checkpoint operacional). Usuários/workspaces preservados. Secret próprio do dispatcher Monitor evita rotacionar o CRON_SECRET histórico. Consultar o registro final para o resultado da ativação.
+**Publicação concluída em acesso antecipado:** PR #12 incorporado em main; deploy de produção READY `dpl_7N8w1F1whnZtZxXKaYNeYeZk5CYh`, alias revory.app confirmado; catálogo/portal/webhook live ativos e gate comercial habilitado. Checkout live US$399/mês aberto no navegador e expirado sem pagamento/assinatura. Primeira execução do dispatcher de produção #39543397080 passou, com 0 períodos e 0 avisos; agendamento habilitado após esse sucesso. Evidência segura: `docs/qa/monitor-remote/production-activation.json`. Isso não comprova compra paga pelo app, liquidação bancária, relatório de cliente ou renovação.
+
+Execução registrada: backup criptografado atualizado concluído; 38 migrations verificadas com runtime limitado, 49 tabelas e zero alterações de conteúdo nas 28 tabelas históricas comparadas (fora manifesto de migrations e checkpoint operacional). Usuários/workspaces preservados. Secret próprio do dispatcher Monitor evita rotacionar o CRON_SECRET histórico. A exportação horizontal `/app/settings/data-export` é classificada **keep**, preservada sob autenticação na navegação AI; rotas de dashboard/importação/configuração antigas são **adapt**, substituídas pelo dashboard AI. Implementações e webhooks históricos permanecem preservados.
 
 ## Diagnóstico verificado
 

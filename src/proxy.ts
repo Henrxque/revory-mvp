@@ -27,7 +27,8 @@ export function proxy(request: NextRequest) {
   // Old bookmarked app routes must not render Quote Recovery inside the new shell.
   // Legacy APIs/webhooks remain intact for historical billing and retention.
   if (process.env.VERCEL_ENV === "production" && isAiCommercialRuntimeEnabled() && request.nextUrl.pathname.startsWith("/app/")
-    && !request.nextUrl.pathname.startsWith("/app/ai-integrity/")) {
+    && !request.nextUrl.pathname.startsWith("/app/ai-integrity/")
+    && request.nextUrl.pathname !== "/app/settings/data-export") {
     return NextResponse.redirect(new URL("/app/ai-integrity/dashboard", request.url), 303);
   }
   const commercialHomologation = isCommercialHomologation();

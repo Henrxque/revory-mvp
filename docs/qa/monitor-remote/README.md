@@ -1,3 +1,5 @@
+> Produção ativada em acesso antecipado em 21/10, após autorização explícita do fundador. Ver [evidência separada](production-activation.json); as provas de sandbox abaixo não são compradores reais.
+
 # Monitor — homologação remota de 20/10/2026
 
 Este registro descreve testes técnicos do proprietário. Não representa cliente pago, renovação validada ou liberação comercial live.
