@@ -40,6 +40,7 @@ Preservar Google OAuth, NextAuth, Resend e seus recursos/callbacks. Não colocar
 | `REVORY_AI_CONNECTION_ACTIVE_KEY`, `REVORY_AI_CONNECTION_KEYRING` | Envelope criptográfico existente, fora do banco; manter versões antigas durante rotação |
 | `NEXTAUTH_URL` | Origem HTTPS do ambiente aprovado |
 | `CRON_SECRET` | Autenticação do dispatcher |
+| `REVORY_AI_MONITOR_DISPATCH_SECRET` | Segredo dedicado preferencial do Monitor; quando configurado, não aceita o CRON_SECRET histórico nessa rota. Preserva os demais jobs. |
 
 Credenciais de fontes continuam restritas ao workspace. Stripe exige restricted key `rk_` com leitura de invoices e conta; o endpoint de identidade verifica a conta declarada antes da coleta comercial. OpenAI exige acesso administrativo a Usage/Costs com o menor escopo disponível. Uma chave de geração não equivale a esse acesso.
 

@@ -5,7 +5,8 @@ import { refreshMonitorSubscriptions } from "@/services/ai-integrity/monitor-bil
 import { recurringEnabled } from "@/services/ai-integrity/recurring-access";
 export const maxDuration = 300;
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET, auth = request.headers.get("authorization") ?? "";
+  // A dedicated dispatcher secret avoids rotating auth for existing retention/digest jobs.
+  const secret = process.env.REVORY_AI_MONITOR_DISPATCH_SECRET || process.env.CRON_SECRET, auth = request.headers.get("authorization") ?? "";
   if (!secret) return NextResponse.json({ error: "Job not configured." }, { status: 503 });
   const expected = Buffer.from("Bearer " + secret), supplied = Buffer.from(auth);
   if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
