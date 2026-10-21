@@ -7,13 +7,18 @@ import { aiScanCheckoutDriver } from "@/services/ai-integrity/purchase";
 import { aiScanEligibleOrderWhere, isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 import { MONITOR_OFFER, usdPrice } from "@/domain/ai-integrity/commercial-offers";
+import { hasCurrentAccountLegalAcceptance } from "@/services/legal/acceptance";
+import { LegalReacceptGate } from "@/components/legal/LegalReacceptGate";
 import { AiMarketingFooter, AiMarketingNav } from "./AiMarketing";
 import { AiScanPurchasePanel } from "./AiScanPurchasePanel";
 
 export async function AiIntegrityStart({ searchParams }: { searchParams: Promise<{ order?: string; checkout?: string }> }) {
-  const context = await getAppContext();
-  if (!context) redirect(buildSignInRedirectPath("/start"));
   const params = await searchParams;
+  const query = new URLSearchParams({ plan: "scan", ...(params.order ? { order: params.order } : {}), ...(params.checkout ? { checkout: params.checkout } : {}) });
+  const returnTo = `/start?${query}`;
+  const context = await getAppContext();
+  if (!context) redirect(buildSignInRedirectPath(returnTo));
+  if (!(await hasCurrentAccountLegalAcceptance(context.user.id))) return <LegalReacceptGate userEmail={context.user.email} returnTo={returnTo} />;
   const remoteSyntheticPreview = isAiIntegrityRemoteSyntheticPreviewEnabled();
   const commercial = isAiCommercialRuntimeEnabled();
   const [available, order] = await Promise.all([

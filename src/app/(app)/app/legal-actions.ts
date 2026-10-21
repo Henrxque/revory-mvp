@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { getAppContext } from "@/services/app/get-app-context";
 import { recordLegalAcceptance } from "@/services/legal/acceptance";
+import { normalizeAuthRedirectTarget } from "@/services/auth/redirects";
 
 export async function acceptCurrentLegalDocuments(formData: FormData) {
   const context = await getAppContext();
@@ -19,5 +20,7 @@ export async function acceptCurrentLegalDocuments(formData: FormData) {
     workspaceId: context.workspace.id,
   });
   revalidatePath("/app", "layout");
-  redirect("/app/dashboard");
+  revalidatePath("/start");
+  const returnTo = formData.get("returnTo");
+  redirect(normalizeAuthRedirectTarget(typeof returnTo === "string" ? returnTo : undefined, "/app/dashboard"));
 }
