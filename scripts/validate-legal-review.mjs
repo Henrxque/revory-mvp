@@ -54,7 +54,7 @@ assert(read("services/data-portability/workspace-export.ts").includes("legalAcce
 
 const footer = read("components/ai-integrity/AiMarketing.tsx");
 for (const href of ["/dpa", "/cookies", "/responsible-disclosure"]) {
-  assert(footer.includes(`href="${href}"`), `Landing footer is missing ${href}`);
+  assert(footer.includes(`"${href}"`), `Landing footer is missing ${href}`);
 }
 assert(!footer.includes("/pt-br/"), "Landing must not expose retired pt-BR legal routes.");
 const nextConfig = read("next.config.ts");

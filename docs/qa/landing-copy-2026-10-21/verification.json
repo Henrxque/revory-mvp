@@ -1,0 +1,54 @@
+{
+  "at": "2026-10-21T17:47:55.025Z",
+  "environment": "Local production build, fictional demo data; no real customer, provider or payment access",
+  "checks": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "pricesCorrect": true,
+      "syntheticEvidenceMatchesDemo": true,
+      "institutionalIdentityVisible": true,
+      "legalLinks": 9,
+      "legalRoutesAccessible": true,
+      "faqKeyboardToggle": true,
+      "stickyNavigation": true,
+      "reducedMotionRespected": true,
+      "horizontalOverflow": false,
+      "pageErrors": 0,
+      "contractorCopyAbsent": true,
+      "arrowsAbsent": true
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "pricesCorrect": true,
+      "syntheticEvidenceMatchesDemo": true,
+      "institutionalIdentityVisible": true,
+      "legalLinks": 9,
+      "legalRoutesAccessible": true,
+      "faqKeyboardToggle": true,
+      "stickyNavigation": true,
+      "reducedMotionRespected": true,
+      "horizontalOverflow": false,
+      "pageErrors": 0,
+      "contractorCopyAbsent": true,
+      "arrowsAbsent": true
+    },
+    {
+      "name": "small-mobile",
+      "width": 320,
+      "pricesCorrect": true,
+      "syntheticEvidenceMatchesDemo": true,
+      "institutionalIdentityVisible": true,
+      "legalLinks": 9,
+      "legalRoutesAccessible": true,
+      "faqKeyboardToggle": true,
+      "stickyNavigation": true,
+      "reducedMotionRespected": true,
+      "horizontalOverflow": false,
+      "pageErrors": 0,
+      "contractorCopyAbsent": true,
+      "arrowsAbsent": true
+    }
+  ]
+}

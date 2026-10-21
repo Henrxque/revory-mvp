@@ -4,18 +4,40 @@ import { aiIntegrityDemoResult } from "@/domain/ai-integrity/demo";
 import { isAiIntegrityRemoteSyntheticPreviewEnabled } from "@/services/ai-integrity/experience";
 import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 import { aiMoney } from "./report-copy";
+import { REVORY_LEGAL } from "@/content/revory-legal";
 
-export function AiMarketingNav() {
-  return <header className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-5 py-5 md:px-8"><Link href="/" aria-label="REVORY home"><RevoryLogo compact /></Link><nav className="flex items-center gap-5 text-xs font-semibold text-[color:var(--text-muted)]"><Link className="hover:text-[color:var(--accent)]" href="/demo">Explore demo</Link><Link className="rev-button-secondary text-xs" href="/start">{isAiCommercialRuntimeEnabled() ? "Set up monitoring" : isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Open rehearsal" : "Start a scan"}</Link></nav></header>;
+export function AiMarketingNav({ landing = false }: { landing?: boolean }) {
+  const commercial = isAiCommercialRuntimeEnabled();
+  return <header className="rev-ai-marketing-nav border-b border-[color:var(--border)] bg-[color:var(--background)]/90 backdrop-blur-xl">
+    <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-5 py-3 md:px-8">
+      <Link href="/" aria-label="REVORY home"><RevoryLogo compact /></Link>
+      {landing ? <nav aria-label="Page sections" className="hidden items-center gap-6 text-xs font-semibold text-[color:var(--text-muted)] lg:flex">{[["How it works", "how"], ["What you get", "evidence"], ["Pricing", "pricing"], ["FAQ", "faq"]].map(([label, id]) => <a className="rev-nav-link" key={id} href={`#${id}`}>{label}</a>)}</nav> : null}
+      <nav aria-label="Account navigation" className="flex shrink-0 items-center gap-3 text-xs font-semibold text-[color:var(--text-muted)] sm:gap-5">
+        <Link className="rev-nav-link hidden sm:inline-block" href="/sign-in">Sign in</Link>
+        <Link className="rev-button-secondary !min-h-10 !px-4 !py-2 !text-xs" href={landing ? "#pricing" : commercial ? "/start?plan=scan" : "/start"}>{landing ? "See plans" : isAiIntegrityRemoteSyntheticPreviewEnabled() ? "Open rehearsal" : "Start a scan"}</Link>
+      </nav>
+    </div>
+  </header>;
 }
 export function AiMarketingFooter() {
   const commercial = isAiCommercialRuntimeEnabled();
   const remote = isAiIntegrityRemoteSyntheticPreviewEnabled();
-  return <footer className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-t border-[color:var(--border)] px-5 py-8 text-xs text-[color:var(--text-subtle)] md:px-8">
-    <p>REVORY · Revenue &amp; AI Margin Integrity</p>
-    <div className="flex flex-wrap gap-5"><Link href={commercial ? "/security" : "/ai-integrity-preview-policy#security"}>Security</Link><Link href={commercial ? "/privacy" : "/ai-integrity-preview-policy#privacy"}>Privacy</Link><Link href={commercial ? "/terms" : "/ai-integrity-preview-policy#offer"}>{commercial ? "Terms" : remote ? "Preview limits" : "Test offer"}</Link>{commercial ? <Link href="/refunds">Cancellation &amp; refunds</Link> : null}</div>
-    {commercial ? <div className="flex w-full flex-wrap gap-5"><Link href="/dpa">Data processing</Link><Link href="/subprocessors">Subprocessors</Link><Link href="/cookies">Cookies</Link><Link href="/responsible-disclosure">Report a vulnerability</Link></div> : null}
-    <p className="w-full text-[10px]">{commercial ? "Early access · Read-only sources · Evidence and coverage limits stay visible." : remote ? "Protected rehearsal · Fictional data only · No purchase or customer upload." : "Development preview · Synthetic data · Test checkout · Customer beta requires its release gates."}</p>
+  const groups = [
+    { title: "Product", links: commercial ? [["How it works", "/#how"], ["Example report", "/demo"], ["Plans & pricing", "/#pricing"], ["Product limitations", "/limitations"], ["Sign in", "/sign-in"]] : [["Example report", "/demo"], ["Preview policy", "/ai-integrity-preview-policy"], ["Sign in", "/sign-in"]] },
+    { title: "Legal", links: [["Terms of service", "/terms"], ["Privacy notice", "/privacy"], ["Cancellation & refunds", "/refunds"], ["Data processing", "/dpa"], ["Cookies", "/cookies"]] },
+    { title: "Trust & contact", links: [["Security", "/security"], ["Subprocessors", "/subprocessors"], ["Report a vulnerability", "/responsible-disclosure"], ["Contact support", `mailto:${REVORY_LEGAL.supportEmail}`]] },
+  ];
+  return <footer className="border-t border-[color:var(--border)] bg-[color:var(--background)] px-5 pb-7 pt-14 md:px-8 md:pt-16">
+    <div className="mx-auto max-w-[1176px]">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
+        <div><Link href="/" aria-label="REVORY home"><RevoryLogo compact /></Link><p className="mt-5 max-w-xs text-sm leading-7 text-[color:var(--text-muted)]">Independent evidence for the way your AI SaaS records usage and spends on AI.</p><p className="mt-5 text-xs text-[color:var(--text-subtle)]">Built and operated by {REVORY_LEGAL.shortLegalName}.</p><a href={REVORY_LEGAL.linkedinUrl} rel="noopener noreferrer" target="_blank" className="rev-nav-link mt-3 inline-block text-xs font-semibold text-[color:var(--text-muted)]">REVORY on LinkedIn</a></div>
+        {groups.map(group => <nav key={group.title} aria-label={`${group.title} links`}><h2 className="text-xs font-bold text-[color:var(--foreground)]">{group.title}</h2><ul className="mt-5 space-y-3.5 text-xs leading-6 text-[color:var(--text-muted)]">{group.links.map(([label, href]) => <li key={label}><Link className="rev-ai-footer-link" href={href}>{label}</Link></li>)}</ul></nav>)}
+      </div>
+      <div className="mt-12 grid gap-5 border-t border-[color:var(--border)] pt-6 text-[11px] leading-6 text-[color:var(--text-subtle)] md:grid-cols-[1.4fr_1fr] md:gap-12">
+        <div><p>© 2026 REVORY · {REVORY_LEGAL.legalName}</p><p>CNPJ {REVORY_LEGAL.taxId}</p><address className="mt-2 max-w-lg not-italic">{REVORY_LEGAL.address}</address></div>
+        <div className="md:text-right"><p>{commercial ? "Early access · Revenue & AI Margin Integrity" : remote ? "Protected rehearsal · Fictional data only" : "Development preview · Synthetic data and test checkout"}</p><p className="mt-2">{commercial ? "Read-only sources. Results depend on data coverage and confirmed identity links. No guaranteed savings or recovery." : "Preview access does not establish a paid customer result or authorize analysis of real customer data."}</p><a className="rev-ai-footer-link mt-2 inline-block" href={`mailto:${REVORY_LEGAL.supportEmail}`}>{REVORY_LEGAL.supportEmail}</a></div>
+      </div>
+    </div>
   </footer>;
 }
 

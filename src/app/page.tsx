@@ -20,7 +20,7 @@ const previewMetadata: Metadata = {
 
 export function generateMetadata(): Metadata {
   if (!isAiCommercialRuntimeEnabled()) return previewMetadata;
-  return { title: "REVORY — AI spend integrity monitoring", description: "Compare Stripe billing context, your internal usage ledger and OpenAI usage. Track explainable differences with evidence.", alternates: { canonical: "/" }, robots: { index: false, follow: false } };
+  return { title: "REVORY — AI usage integrity | Scans & monitoring", description: "Compare your product's usage ledger with OpenAI usage and reported cost, alongside Stripe billing context. Investigate differences with traceable evidence.", alternates: { canonical: "/" }, robots: { index: false, follow: false } };
 }
 
 export default function HomePage() {
