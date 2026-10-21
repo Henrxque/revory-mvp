@@ -2,6 +2,12 @@
 
 # REVORY — Source of Truth
 
+## Estado atual — acesso antecipado publicado em 21/10/2026
+
+**Monitor publicado em acesso antecipado em 21/10/2026, com autorização explícita do fundador.** `revory.app` serve o novo app; assinatura própria US$399/mês e webhook live estão ativos. Banco de produção tem 38 migrations verificadas, com contas/dados históricos preservados; Google OAuth, senha/reset e Resend foram mantidos. Checkout live foi aberto e expirado sem pagamento; não equivale a compra real pelo app. Agendador de produção teve execução manual bem-sucedida e foi habilitado, sem períodos de clientes processados. Prova OpenAI não vazia → ledger → relatório permanece pendente até a janela elegível de 21/10 às 21h de Brasília. Zero compradores/renovações reais verificados. Evidência: [ativação de produção](qa/monitor-remote/production-activation.json).
+
+Os registros anteriores de NO_GO descrevem suas respectivas entregas; não são o estado atual de produção. Acesso antecipado não encerra a validação de valor ou renovação por clientes.
+
 > Preparação antecipada autorizada em 20/10 e concluída: catálogo live próprio de US$399/mês criado inativo, portal inativo e webhook disabled. Chaves de billing restritas test/live criadas; os sete escopos passaram no Stripe test real, sem pagamento ou assinatura nova. Segredos Sensitive nos alvos Vercel aprovados; production com `REVORY_AI_COMMERCIAL_ENABLED=false`, sem deploy/ativação comercial. Chave temporária de configuração revogada, rejeição401 e remoção do cofre verificadas. Saúde de produção 200/ok/reachable após staging. Ver [plano e evidências](operations/REVORY_MONITOR_LIVE_PREPARATION_2026-10-20.md). A prova OpenAI e a publicação/ativação comercial permanecem gates próprios.
 
 > Chave mínima test também publicada e verificada no Preview: deploy `dpl_AV9PFmkNkkpvy8nWPQdzWR6HBE39` READY, alias de homologação confirmado, job autenticado e fronteiras HTTP passaram. Portal aberto pelo app com a mesma assinatura sandbox, sem pagamento/cancelamento. Esta preparação não publica o checkout live em revory.app.

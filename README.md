@@ -2,7 +2,11 @@
 
 REVORY is being rebuilt as **Revenue & AI Margin Integrity for AI SaaS**. The intended product reconciles Stripe revenue, the customer's internal usage ledger and AI provider usage/cost to surface explainable discrepancies. It is read-only in customer systems and evidence-first.
 
-## Migration status
+## Current release — 2026-10-21
+
+**Monitor publicado em acesso antecipado em 21/10/2026, com autorização explícita do fundador.** `revory.app` serve o novo app; assinatura própria US$399/mês e webhook live estão ativos. Banco de produção tem 38 migrations verificadas, com contas/dados históricos preservados; Google OAuth, senha/reset e Resend foram mantidos. Checkout live foi aberto e expirado sem pagamento; não equivale a compra real pelo app. Agendador de produção teve execução manual bem-sucedida e foi habilitado, sem períodos de clientes processados. Prova OpenAI não vazia → ledger → relatório permanece pendente até a janela elegível de 21/10 às 21h de Brasília. Zero compradores/renovações reais verificados. Evidência: [ativação de produção](docs/qa/monitor-remote/production-activation.json).
+
+## Historical migration delivery records
 
 The deployed/default surfaces still implement the previous contractor product, with some MedSpa-era schema and routes. Sprints 1–4 added local AI SaaS contracts, persistence, CSV/XLSX intake, explicit identity/coverage and a deterministic internal scan. It produces unattributed reported spend and comparable usage differences, immutable snapshots and JSON/CSV exports. Sprint 05 adds AI SaaS landing/demo/start, app navigation/dashboard, report/finding detail and one-time test purchase under `REVORY_AI_SAAS_PREVIEW=true` in development. The complete flow uses synthetic files, disposable PostgreSQL and the real Stripe SDK against a clearly labeled loopback simulation. **Real Stripe sandbox verification is pending; Sprint 05's complete gate remains open.** No deployment or main database migration. Revenue/margin/credit-balance rules, connectors and commercial release remain unavailable. Existing horizontal infrastructure is migration substrate; the visual identity is the brand contract.
 

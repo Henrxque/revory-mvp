@@ -1,5 +1,7 @@
 # REVORY Monitor — preparação live de 20/10/2026
 
+> Atualização de 21/10: a preparação abaixo é histórica. O fundador autorizou e foi executada a publicação em acesso antecipado, com recursos Monitor live ativos. Ver [cutover](REVORY_MONITOR_PRODUCTION_CUTOVER_2026-10-21.md) e [evidência](../qa/monitor-remote/production-activation.json). Prova OpenAI não vazia e compradores/renovações reais continuam pendentes.
+
 ## Direção mais recente: antecipar preparação, preservar o gate de ativação
 
 ### Preparação externa concluída — oferta ainda desativada
