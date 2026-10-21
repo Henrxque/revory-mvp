@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-21T17:26:17.599Z",
+  "phase": "production",
+  "migrations": 39,
+  "newMigration": "20261021000100_ai_scan_live_purchase",
+  "existingTablesCompared": 47,
+  "existingTableDrift": 0,
+  "limitedRuntime": true,
+  "encryptedPreMigrationBackup": true,
+  "customerSubscriptionUpdates": 0
+}

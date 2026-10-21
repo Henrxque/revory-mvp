@@ -33,10 +33,10 @@ export async function verifyMonitorBrowser(workspaceId: string, user: { email: s
     await page.getByRole("heading", { name: "Monitoring", exact: true }).waitFor();
     await page.getByRole("heading", { name: "A reading needs your attention", exact: true }).waitFor();
     await page.getByRole("link", { name: "Review reading", exact: true }).waitFor();
-    assert.equal(await page.getByRole("heading", { name: "Monitor · US$399/month" }).count(), 0, "Billing does not crowd the monitoring overview.");
+    assert.equal(await page.getByRole("heading", { name: "Monitor · US$199/month" }).count(), 0, "Billing does not crowd the monitoring overview.");
     assert.equal(await page.getByLabel("Reviewed ledger").count(), 0, "Ledger form is shown when requested.");
     await page.getByRole("button", { name: "Settings", exact: true }).click();
-    await page.getByRole("heading", { name: "Monitor · US$399/month" }).waitFor();
+    await page.getByRole("heading", { name: "Monitor · US$199/month" }).waitFor();
     await page.getByRole("button", { name: "Pause monitoring", exact: true }).click();
     await page.getByRole("status").filter({ hasText: "Saved." }).waitFor();
     await page.getByText(/Paused · 1-day periods/).waitFor();
@@ -91,7 +91,7 @@ export async function verifyMonitorBrowser(workspaceId: string, user: { email: s
     await page.getByLabel("What did you check?", { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, "Expanded mobile investigation stays within the viewport.");
     await page.getByRole("button", { name: "Settings", exact: true }).click();
-    await page.getByRole("heading", { name: "Monitor · US$399/month" }).waitFor();
+    await page.getByRole("heading", { name: "Monitor · US$199/month" }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, "Mobile settings stay within the viewport.");
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await page.screenshot({ path: output + "/mobile-settings.png", fullPage: true });

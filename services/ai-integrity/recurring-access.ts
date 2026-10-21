@@ -3,10 +3,17 @@ import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "./commercial-runt
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { isAiIntegrityExperienceEnabled } from "./experience";
+import { MONITOR_OFFER, LEGACY_MONITOR_OFFER } from "@/domain/ai-integrity/commercial-offers";
 
-export const MONITOR_OFFER = { version: "revory-monitor-399/v1", amountMinor: 39900, currency: "usd", interval: "month", maxPeriodDays: 7, maxLedgerRows: 10000 } as const;
+export { MONITOR_OFFER } from "@/domain/ai-integrity/commercial-offers";
+export function monitorPriceOffer(priceId: string) {
+  if (priceId && priceId === process.env.REVORY_AI_MONITOR_PRICE_ID) return MONITOR_OFFER;
+  const legacyIds = (process.env.REVORY_AI_MONITOR_LEGACY_PRICE_IDS ?? "").split(/[,;\s]+/).filter(id => /^price_/.test(id));
+  return legacyIds.includes(priceId) ? LEGACY_MONITOR_OFFER : null;
+}
+export function isKnownMonitorOffer(version: string | undefined) { return version === MONITOR_OFFER.version || version === LEGACY_MONITOR_OFFER.version; }
 export const RECURRING_MODE = "CONNECTED_MONITOR";
-export type MonitorSubscription = { customerId: string; subscriptionId: string; priceId: string; paidThrough: string; verifiedAt: string; livemode: boolean; cancelAt?: string | null; cancelAtPeriodEnd?: boolean };
+export type MonitorSubscription = { customerId: string; subscriptionId: string; priceId: string; paidThrough: string; verifiedAt: string; livemode: boolean; amountMinor?: number; offerVersion?: string; cancelAt?: string | null; cancelAtPeriodEnd?: boolean };
 export type MonitorSchedule = { actorUserId: string; periodDays: number; lagHours: number; consentUntil: string; nextStart: string; connections: Array<{ id: string; generation: number }>; emailEnabled: boolean; minimumUsageDelta: string; projectLinks: Array<{ mappingId: string; projectId: string; customerId: string; provider: string; organizationId: string | null }> };
 export type MonitorRun = { scheduleId: string; start: string; end: string; ledgerBatchId?: string; exportedAt?: string; completeThrough?: string; snapshotId?: string; comparisonId?: string; errorCode?: string };
 export const stateKey = (workspaceId: string, kind: string, key = "primary") => ({ workspaceId_kind_key: { workspaceId, kind, key } });
@@ -21,7 +28,8 @@ export async function monitorPaid(tx: Prisma.TransactionClient, workspaceId: str
   if (!recurringEnabled()) return false;
   const row = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "SUBSCRIPTION") });
   const data = row?.dataJson as unknown as MonitorSubscription | undefined;
-  return row?.status === "ACTIVE" && !!data && data.livemode === monitorLiveMode() && data.priceId === process.env.REVORY_AI_MONITOR_PRICE_ID && new Date(data.paidThrough) > now
+  const offer = data ? monitorPriceOffer(data.priceId) : null;
+  return row?.status === "ACTIVE" && !!data && !!offer && (!data.offerVersion || data.offerVersion === offer.version) && data.livemode === monitorLiveMode() && new Date(data.paidThrough) > now
     && new Date(data.verifiedAt).valueOf() > now.valueOf() - 86400000;
 }
 export async function assertMonitorOwner(workspaceId: string, actorUserId: string, tx: Prisma.TransactionClient = prisma) {

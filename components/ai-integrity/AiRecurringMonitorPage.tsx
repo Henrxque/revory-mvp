@@ -1,7 +1,7 @@
 import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "@/services/ai-integrity/commercial-runtime";
 import { prisma } from "@/db/prisma";
 import { AiRecurringMonitor, type RecurringView } from "./AiRecurringMonitor";
-import { getMonitorDateSuggestions, type MonitorRun, type MonitorSchedule } from "@/services/ai-integrity/recurring-access";
+import { getMonitorDateSuggestions, monitorPriceOffer, type MonitorRun, type MonitorSchedule } from "@/services/ai-integrity/recurring-access";
 import type { AiMonitorSignal } from "@/domain/ai-integrity/monitoring";
 
 export async function AiRecurringMonitorPage({ workspaceId }: { workspaceId: string }) {
@@ -14,9 +14,9 @@ export async function AiRecurringMonitorPage({ workspaceId }: { workspaceId: str
   const states = [...configuration, ...history];
   const schedule = states.find(s => s.kind === "SCHEDULE"), subscription = states.find(s => s.kind === "SUBSCRIPTION");
   const config = schedule?.dataJson as unknown as MonitorSchedule | undefined;
-  const billing = subscription?.dataJson as { paidThrough?: string; cancelAt?: string | null } | undefined;
+  const billing = subscription?.dataJson as { paidThrough?: string; priceId?: string; amountMinor?: number; cancelAt?: string | null } | undefined;
   const view: RecurringView = {
-    runtime: isAiCommercialRuntimeEnabled() ? monitorLiveMode() ? "LIVE" : "SANDBOX" : "LOCAL", workspaceId, subscription: subscription ? { status: subscription.status, paidThrough: billing?.paidThrough, cancelAt: billing?.cancelAt } : null,
+    runtime: isAiCommercialRuntimeEnabled() ? monitorLiveMode() ? "LIVE" : "SANDBOX" : "LOCAL", workspaceId, subscription: subscription ? { status: subscription.status, paidThrough: billing?.paidThrough, amountMinor: billing?.amountMinor ?? (billing?.priceId ? monitorPriceOffer(billing.priceId)?.amountMinor : undefined), cancelAt: billing?.cancelAt } : null,
     schedule: schedule && config ? { status: schedule.status, nextStart: config.nextStart, consentUntil: config.consentUntil, lagHours: config.lagHours, periodDays: config.periodDays, emailEnabled: config.emailEnabled } : null,
     ledgers: ledgers.map(b => ({ id: b.id, label: b.windowStart.toISOString().slice(0, 10) + " to " + b.windowEnd.toISOString().slice(0, 10) + " UTC" })),
     runs: states.filter(s => s.kind === "RUN").slice(0, 30).map(s => { const data = s.dataJson as unknown as MonitorRun; return { id: s.id, status: s.status, start: data.start, end: data.end, snapshotId: data.snapshotId, comparisonId: data.comparisonId, errorCode: data.errorCode }; }),

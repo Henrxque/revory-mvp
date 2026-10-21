@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-21T17:24:46.229Z",
+  "phase": "hml",
+  "migrations": 39,
+  "newMigration": "20261021000100_ai_scan_live_purchase",
+  "existingTablesCompared": 47,
+  "existingTableDrift": 0,
+  "limitedRuntime": true,
+  "customerSubscriptionUpdates": 0
+}

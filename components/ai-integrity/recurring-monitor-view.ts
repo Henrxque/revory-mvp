@@ -1,5 +1,5 @@
 export type RecurringView = {
-  runtime: "LOCAL" | "SANDBOX" | "LIVE"; workspaceId: string; subscription: { status: string; paidThrough?: string; cancelAt?: string | null } | null;
+  runtime: "LOCAL" | "SANDBOX" | "LIVE"; workspaceId: string; subscription: { status: string; paidThrough?: string; amountMinor?: number; cancelAt?: string | null } | null;
   schedule: { status: string; nextStart: string; consentUntil: string; periodDays: number; lagHours: number; emailEnabled: boolean } | null;
   ledgers: { id: string; label: string }[];
   runs: { id: string; status: string; start: string; end: string; snapshotId?: string; comparisonId?: string; errorCode?: string }[];

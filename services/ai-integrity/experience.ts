@@ -1,5 +1,6 @@
 import "server-only";
-import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
+import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "./commercial-runtime";
+import { SCAN_LIVE_OFFER_VERSION } from "@/domain/ai-integrity/commercial-offers";
 
 export function isAiIntegrityRemoteSyntheticPreviewEnabled() {
   const expectedDatabase = process.env.REVORY_AI_SAAS_SYNTHETIC_DATABASE ?? "";
@@ -20,7 +21,11 @@ export function isAiIntegrityExperienceEnabled() {
 }
 
 export function aiScanEligibleOrderWhere() {
+  if (monitorLiveMode()) return { status: "PAID", checkoutDriver: "stripe-live", offerVersion: SCAN_LIVE_OFFER_VERSION };
   return isAiIntegrityRemoteSyntheticPreviewEnabled()
     ? { status: { in: ["PAID", "SYNTHETIC_PREVIEW"] } }
     : { status: "PAID" };
+}
+export function aiConnectedScanOrderWhere() {
+  return monitorLiveMode() ? { status: "PAID", checkoutDriver: "stripe-live", offerVersion: SCAN_LIVE_OFFER_VERSION } : { status: "PAID", checkoutDriver: "stripe-test" };
 }

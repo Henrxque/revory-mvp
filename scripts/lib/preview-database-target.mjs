@@ -12,7 +12,7 @@ export function previewDatabaseTarget(env) {
   if (commercial && (env.REVORY_DATABASE_MIGRATIONS_EXTERNAL !== 'true' || env.REVORY_MIGRATION_DATABASE_URL
     || !/^revory_runtime_/.test(pooled.username) || !['require', 'verify-ca', 'verify-full'].includes(pooled.searchParams.get('sslmode'))
     || !['require', 'verify-ca', 'verify-full'].includes(direct.searchParams.get('sslmode'))
-    || env.REVORY_AI_COMMERCIAL_RELEASE !== 'monitor-399/v1' || env.REVORY_AI_COMMERCIAL_SECURITY_REVIEWED !== 'true'
+    || !['monitor-399/v1', 'integrity-99-monitor-199/v1'].includes(env.REVORY_AI_COMMERCIAL_RELEASE) || env.REVORY_AI_COMMERCIAL_SECURITY_REVIEWED !== 'true'
     || env.REVORY_AI_SAAS_SYNTHETIC_ONLY !== 'false' || env.REVORY_AI_MONITOR_BILLING_MODE !== 'test'
     || env.REVORY_AI_CUSTOMER_STRIPE_MODE !== 'test'
     || !env.REVORY_AI_COMMERCIAL_BRANCH || env.VERCEL_GIT_COMMIT_REF !== env.REVORY_AI_COMMERCIAL_BRANCH)) {

@@ -3,7 +3,7 @@ import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "./commercial-runt
 import Stripe from "stripe";
 import { createHash } from "node:crypto";
 import { prisma } from "@/db/prisma";
-import { MONITOR_OFFER, assertMonitorOwner, recurringEnabled, stateKey, type MonitorSubscription } from "./recurring-access";
+import { MONITOR_OFFER, monitorPriceOffer, isKnownMonitorOffer, assertMonitorOwner, recurringEnabled, stateKey, type MonitorSubscription } from "./recurring-access";
 import { CHECKOUT_LEGAL_VERSIONS } from "@/content/revory-legal";
 
 export function monitorStripe() {
@@ -41,7 +41,7 @@ export async function createMonitorCheckout(workspaceId: string, actorUserId: st
     const stored = checkout.dataJson as { url?: string };
     if (stored.url?.startsWith("https://checkout.stripe.com/")) return { url: stored.url };
     const metadata = { workspaceId, actorUserId, revory_offer: MONITOR_OFFER.version, monitorCheckoutId: checkout.id, ...CHECKOUT_LEGAL_VERSIONS };
-    await tx.legalAcceptance.create({ data: { workspaceId, userId: actorUserId, event: "CHECKOUT_STARTED", documentVersionsJson: CHECKOUT_LEGAL_VERSIONS, contextJson: { offer: MONITOR_OFFER.version, amountMinor: 39900, currency: "usd", cadence: "monthly", testMode: !monitorLiveMode(), checkoutId: checkout.id } } });
+    await tx.legalAcceptance.create({ data: { workspaceId, userId: actorUserId, event: "CHECKOUT_STARTED", documentVersionsJson: CHECKOUT_LEGAL_VERSIONS, contextJson: { offer: MONITOR_OFFER.version, amountMinor: MONITOR_OFFER.amountMinor, currency: "usd", cadence: "monthly", testMode: !monitorLiveMode(), checkoutId: checkout.id } } });
     const session = await stripe.checkout.sessions.create({
       mode: "subscription", line_items: [{ price: price.id, quantity: 1 }], customer_email: email,
       client_reference_id: workspaceId, metadata, subscription_data: { metadata },
@@ -58,31 +58,32 @@ export async function reconcileMonitorSubscription(workspaceId: string, subscrip
     await tx.$queryRaw`SELECT id FROM workspaces WHERE id = ${workspaceId} FOR UPDATE`;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
     const metadata = subscription.metadata;
-    if (subscription.id !== subscriptionId || !metadata.monitorCheckoutId || !metadata.actorUserId || metadata.workspaceId !== workspaceId || metadata.revory_offer !== MONITOR_OFFER.version || subscription.livemode !== monitorLiveMode()) throw new Error("Subscription scope mismatch.");
+    if (subscription.id !== subscriptionId || !metadata.monitorCheckoutId || !metadata.actorUserId || metadata.workspaceId !== workspaceId || !isKnownMonitorOffer(metadata.revory_offer) || subscription.livemode !== monitorLiveMode()) throw new Error("Subscription scope mismatch.");
     const checkout = await tx.aiIntegrityMonitorState.findFirst({ where: { id: metadata.monitorCheckoutId, workspaceId, kind: "CHECKOUT" } });
     const checkoutBinding = checkout?.dataJson as { actorUserId?: string; offer?: string } | undefined;
-    if (!checkout || checkoutBinding?.actorUserId !== metadata.actorUserId || checkoutBinding.offer !== MONITOR_OFFER.version) throw new Error("Subscription checkout is unknown.");
+    if (!checkout || checkoutBinding?.actorUserId !== metadata.actorUserId || checkoutBinding.offer !== metadata.revory_offer) throw new Error("Subscription checkout is unknown.");
     const saved = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "SUBSCRIPTION") });
     const previous = saved?.dataJson as unknown as MonitorSubscription | undefined;
     if (previous?.subscriptionId && previous.subscriptionId !== subscription.id && saved?.status !== "CANCELED") throw new Error("A different subscription is already associated.");
     const item = subscription.items.data[0], invoice = typeof subscription.latest_invoice === "object" ? subscription.latest_invoice : null;
     const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
     const risk = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "BILLING_RISK", customerId) });
-    const validPrice = subscription.items.data.length === 1 && item.quantity === 1 && item.price.id === process.env.REVORY_AI_MONITOR_PRICE_ID
-      && item.price.unit_amount === 39900 && item.price.currency === "usd" && item.price.recurring?.interval === "month" && item.price.recurring.interval_count === 1
-      && item.price.metadata.revory_offer === MONITOR_OFFER.version;
-    const paidLine = !!item && invoice?.lines.data.some(line => line.pricing?.price_details?.price === item?.price.id && line.period.end >= item.current_period_end && line.amount >= MONITOR_OFFER.amountMinor);
+    const offer = item ? monitorPriceOffer(item.price.id) : null;
+    const validPrice = !!offer && subscription.items.data.length === 1 && item.quantity === 1
+      && item.price.unit_amount === offer.amountMinor && item.price.currency === "usd" && item.price.recurring?.interval === "month" && item.price.recurring.interval_count === 1
+      && item.price.metadata.revory_offer === offer.version && metadata.revory_offer === offer.version;
+    const paidLine = !!item && !!offer && invoice?.lines.data.some(line => line.pricing?.price_details?.price === item?.price.id && line.period.end >= item.current_period_end && line.amount >= offer.amountMinor);
     const paid = validPrice && paidLine && subscription.status === "active" && !subscription.pause_collection && invoice?.status === "paid" && invoice.currency === "usd"
-      && invoice.amount_paid >= MONITOR_OFFER.amountMinor && item.current_period_end * 1000 > Date.now() && !risk;
+      && !!offer && invoice.amount_paid >= offer.amountMinor && item.current_period_end * 1000 > Date.now() && !risk;
     // The portal can set cancel_at without cancel_at_period_end. Preserve the
     // canonical date and never let cached access extend past cancellation.
     const cancellation = subscription.cancel_at ?? (subscription.cancel_at_period_end ? item?.current_period_end : null);
     const paidThrough = Math.min(item?.current_period_end ?? 0, cancellation ?? Infinity);
-    const data: MonitorSubscription = { customerId, subscriptionId, priceId: item?.price.id ?? "", paidThrough: new Date(paidThrough * 1000).toISOString(), verifiedAt: new Date().toISOString(), livemode: monitorLiveMode(), cancelAt: cancellation ? new Date(cancellation * 1000).toISOString() : null, cancelAtPeriodEnd: subscription.cancel_at_period_end || cancellation === item?.current_period_end };
+    const data: MonitorSubscription = { customerId, subscriptionId, priceId: item?.price.id ?? "", amountMinor: item?.price.unit_amount ?? undefined, offerVersion: metadata.revory_offer, paidThrough: new Date(paidThrough * 1000).toISOString(), verifiedAt: new Date().toISOString(), livemode: monitorLiveMode(), cancelAt: cancellation ? new Date(cancellation * 1000).toISOString() : null, cancelAtPeriodEnd: subscription.cancel_at_period_end || cancellation === item?.current_period_end };
     const status = risk ? "BLOCKED" : paid ? "ACTIVE" : ["canceled", "incomplete_expired"].includes(subscription.status) ? "CANCELED" : subscription.status === "past_due" ? "PAST_DUE" : "INACTIVE";
     await tx.aiIntegrityMonitorState.upsert({ where: stateKey(workspaceId, "SUBSCRIPTION"), create: { workspaceId, kind: "SUBSCRIPTION", key: "primary", status, dataJson: { ...data } }, update: { status, dataJson: { ...data }, revision: { increment: 1 } } });
     await tx.aiIntegrityMonitorState.update({ where: { id: checkout.id }, data: { status: "COMPLETED" } });
-    await tx.workspaceAuditEvent.create({ data: { workspaceId, actorUserId: metadata.actorUserId, action: "AI_MONITOR_SUBSCRIPTION_VERIFIED", metadataJson: { subscriptionId, status, paidThrough: data.paidThrough, offer: MONITOR_OFFER.version, testMode: !monitorLiveMode() } } });
+    await tx.workspaceAuditEvent.create({ data: { workspaceId, actorUserId: metadata.actorUserId, action: "AI_MONITOR_SUBSCRIPTION_VERIFIED", metadataJson: { subscriptionId, status, paidThrough: data.paidThrough, offer: metadata.revory_offer, testMode: !monitorLiveMode() } } });
     return { status };
   }, { timeout: 30000 });
 }
@@ -91,7 +92,7 @@ export async function handleMonitorWebhook(raw: string, signature: string, strip
   if (event.livemode !== monitorLiveMode()) throw new Error("Live events are not enabled in this environment.");
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    if (session.metadata?.revory_offer !== MONITOR_OFFER.version) return;
+    if (!isKnownMonitorOffer(session.metadata?.revory_offer)) return;
     if (session.mode !== "subscription" || session.client_reference_id !== session.metadata.workspaceId) throw new Error("Invalid checkout.");
     const checkout = await prisma.aiIntegrityMonitorState.findFirst({ where: { id: session.metadata.monitorCheckoutId, workspaceId: session.metadata.workspaceId, kind: "CHECKOUT" } });
     if (!checkout || (checkout.dataJson as { sessionId?: string }).sessionId !== session.id) throw new Error("Checkout binding failed.");
@@ -100,7 +101,7 @@ export async function handleMonitorWebhook(raw: string, signature: string, strip
     await reconcileMonitorSubscription(session.metadata.workspaceId, id, stripe);
   } else if (event.type.startsWith("customer.subscription.")) {
     const sub = event.data.object as Stripe.Subscription;
-    if (sub.metadata.revory_offer === MONITOR_OFFER.version && sub.metadata.workspaceId) await reconcileMonitorSubscription(sub.metadata.workspaceId, sub.id, stripe);
+    if (isKnownMonitorOffer(sub.metadata.revory_offer) && sub.metadata.workspaceId) await reconcileMonitorSubscription(sub.metadata.workspaceId, sub.id, stripe);
   } else if (["charge.refunded", "charge.dispute.created", "radar.early_fraud_warning.created"].includes(event.type)) {
     const object = event.data.object as unknown as { customer?: string; charge?: string };
     const charge = object.charge ? await stripe.charges.retrieve(object.charge) : object;
@@ -119,7 +120,7 @@ export async function handleMonitorWebhook(raw: string, signature: string, strip
     const subscriptionId = typeof id === "string" ? id : id?.id;
     if (subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      if (subscription.metadata.revory_offer === MONITOR_OFFER.version && subscription.metadata.workspaceId) await reconcileMonitorSubscription(subscription.metadata.workspaceId, subscriptionId, stripe);
+      if (isKnownMonitorOffer(subscription.metadata.revory_offer) && subscription.metadata.workspaceId) await reconcileMonitorSubscription(subscription.metadata.workspaceId, subscriptionId, stripe);
     }
   }
 }

@@ -16,6 +16,8 @@ Object.assign(process.env, {
 });
 const response = (path: string) => proxy(new NextRequest("https://revory.app" + path));
 assert.equal(isAiCommercialRuntimeEnabled(), true);
+process.env.REVORY_AI_COMMERCIAL_RELEASE = "integrity-99-monitor-199/v1";
+assert.equal(isAiCommercialRuntimeEnabled(), true);
 for (const path of ["/app/dashboard", "/app/imports", "/app/settings"]) {
   assert.equal(response(path).status, 303);
   assert.equal(response(path).headers.get("location"), "https://revory.app/app/ai-integrity/dashboard");

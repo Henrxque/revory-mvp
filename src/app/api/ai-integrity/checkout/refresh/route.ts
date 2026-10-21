@@ -17,5 +17,5 @@ export async function POST(request: Request) {
     if (typeof body?.orderId !== "string") throw new Error("Order ID required.");
     const order = await refreshAiScanOrder(context.workspace.id, body.orderId);
     return NextResponse.json({ status: order.status, grantId: order.grant?.status === "ACTIVE" ? order.grant.id : null }, { headers: { "Cache-Control": "private, no-store" } });
-  } catch { return NextResponse.json({ error: "Unable to verify this test purchase." }, { status: 400 }); }
+  } catch { return NextResponse.json({ error: "Unable to verify this scan purchase." }, { status: 400 }); }
 }
