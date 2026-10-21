@@ -1,5 +1,29 @@
 # REVORY Monitor — preparação live de 20/10/2026
 
+## Direção mais recente: antecipar preparação, preservar o gate de ativação
+
+Após a auditoria abaixo, o fundador pediu deixar a cobrança pronta para a futura venda. Isso autoriza antecipar catálogo e configuração isolada/inativa; substitui a espera da seção histórica para preparar recursos live. Não autoriza contar a prova OpenAI como concluída, efetuar pagamento do próprio fundador ou anunciar receita/repasse garantidos.
+
+Implementada a rotina `scripts/prepare-monitor-stripe-catalog.mjs`, com teste em `scripts/validate-monitor-catalog-preparation.mjs`. Ela verifica a conta exata, inventário e ownership antes de escrever; cria Product/Price inativos, portal dedicado inativo e webhook desabilitado com 12 eventos e versão de API igual ao SDK em uso. O Stripe não permite desabilitar portal/webhook no create: eles são desabilitados imediatamente em seguida. Checkpoints criptografados e idempotência permitem retomar falhas sem duplicação; recursos históricos são preservados. A rotina nunca escreve customers, Checkouts, invoices, subscriptions ou charges.
+
+Prova real em sandbox concluída, repetida sem trocar IDs: `docs/qa/monitor-remote/prepared-test-catalog.json`. Price USD39900/month, Product/Price/portal inativos, webhook disabled. Nenhuma publicação ou pagamento live.
+
+### Credenciais a criar — confirmação específica recebida
+
+O fundador aprovou explicitamente as três chaves, teste de escopos sem pagamento e armazenamento Secret no Vercel nos alvos abaixo, mantendo a oferta live desativada. Ao solicitar a primeira chave, o Stripe exigiu nova verificação por e-mail; o envio foi acionado, e a criação ainda aguarda a conclusão pelo proprietário. Não há chave de configuração nova emitida nem recursos live preparados nesta etapa até essa liberação.
+
+| Chave | Escopos Stripe | Destino e ciclo de vida |
+| --- | --- | --- |
+| Configuração live temporária | Accounts Read; Products, Prices, Customer Portal e Webhook Endpoints Write; demais None | Cofre DPAPI local; usar somente para o catálogo próprio e revogar após a preparação |
+| Billing sandbox | Accounts, Prices, Subscriptions, Invoices e Charges Read; Checkout Sessions e Customer Portal Write; demais None | Validar contra o sandbox real; cofre local e Secret Vercel apenas em `release/monitor-hml` |
+| Billing live | Os mesmos escopos mínimos que passarem no sandbox | Cofre local e Secret Vercel production; `REVORY_AI_COMMERCIAL_ENABLED=false`, sem publicar/ativar a oferta nesta preparação |
+
+A chave de billing permite abrir Checkout e sessões do portal; não é uma chave read-only de fonte. O contrato do plano e a autorização de acesso pago continuam sendo verificados pelo servidor. Sem escrita direta em Charges, Invoices ou Subscriptions. Não colocar valores no Git, chat, logs ou screenshots.
+
+O probe preparado cria e expira um Checkout **test não pago**, abre uma sessão do portal test e lê Price/assinatura/invoice/charges para verificar os escopos reais. Não paga invoice nem cria assinatura. Se o Stripe exigir algum escopo adicional, registrar o erro e revisar o menor ajuste antes de criar a chave live equivalente. O produto e a assinatura sandbox remotos existentes permanecem preservados.
+
+As variáveis preparatórias de produção ficam limitadas à chave de billing, Price/portal IDs, signing secret, billing mode live e a flag comercial false. Não substituir banco, credenciais OAuth, Resend, secrets históricos, preços antigos ou domínio nesta etapa.
+
 ## Evidências verificadas nesta sessão
 
 - O proprietário entrou no painel Stripe Revory, conta `acct_1Ttu8IRiSOuAN93T`. O ID coincide com a configuração histórica local, independentemente do nome comercial exibido no Checkout.
@@ -36,7 +60,7 @@ Resultado da leitura (20/10, horário de Brasília; registro JSON em UTC):
 5. Preparar o patch de variáveis Secret e IDs de recursos para o alvo aprovado, migrations aditivas e runtime sem DDL, deploy, smoke e dispatcher. As variáveis comerciais ainda não estão em production. O banco QA e sua assinatura test não são promoção de dados nem autorização live.
 6. Conferir o catálogo pelo SDK, HTTPS, rejeição de assinatura inválida, Checkout de produção sem concluir pagamento e novo portal; habilitar o endpoint somente com o alvo pronto. Qualquer pagamento live ou compra do próprio fundador exige seu percurso financeiro separado.
 
-Este delta não é uma execução autorizada de mudanças Stripe/produção. Sua aplicação fica depois do gate de fontes reais não vazias e da aprovação específica do alvo/recursos/credencial/Secret.
+A orientação mais recente no início deste documento autoriza antecipar estes recursos inativos. A criação das credenciais ainda depende da confirmação específica descrita acima. Ativação do plano e publicação continuam separadas da preparação.
 
 ## Resultado que a auditoria deve produzir
 
@@ -48,8 +72,8 @@ Este delta não é uma execução autorizada de mudanças Stripe/produção. Sua
 
 ## Ordem para ativação posterior
 
-O runbook `REVORY_MONITOR_399_RELEASE.md` exige fechar a comparação de fontes reais não vazias antes da configuração live. Para o uso OpenAI de 20/10, a janela UTC termina em 21/10 00:00; com lag mínimo de 24h, só fica elegível em **21/10 às 21h de Brasília (22/10 00:00 UTC)**. O provedor ainda pode publicar depois. A geração e o recibo de tokens não comprovam Usage/Costs conciliados com ledger.
+O runbook `REVORY_MONITOR_399_RELEASE.md` exige fechar a comparação de fontes reais não vazias antes da ativação comercial. A preparação inativa pode ser antecipada pela orientação mais recente. Para o uso OpenAI de 20/10, a janela UTC termina em 21/10 00:00; com lag mínimo de 24h, só fica elegível em **21/10 às 21h de Brasília (22/10 00:00 UTC)**. O provedor ainda pode publicar depois. A geração e o recibo de tokens não comprovam Usage/Costs conciliados com ledger.
 
-Após essa prova, preparar os recursos live ausentes, chave restrita de runtime, armazenamento Secret, banco/runtime/migrações aprovados, dispatcher e smoke do alvo. Pedir aprovação específica do delta de produção antes de aplicar; não substituir o banco de produção pelo banco QA e não promover a assinatura sandbox como acesso live.
+Após essa prova, conferir os recursos live preparados, armazenamento Secret, banco/runtime/migrações aprovados, dispatcher e smoke do alvo. Obter aprovação específica da publicação/ativação antes de aplicar; não substituir o banco de produção pelo banco QA e não promover a assinatura sandbox como acesso live.
 
 Nenhum cliente real, pagamento live, repasse, renovação ou consentimento de coleta de cliente foi validado por este registro. O gate comercial permanece aberto. Também continuam separados o backup/retention natural e a custódia da chave de recuperação fora do PC.

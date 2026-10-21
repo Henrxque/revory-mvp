@@ -16,7 +16,7 @@ Confirmar primeiro as fontes e seus vínculos. O consentimento recorrente reutil
 2. Aplicar migrations aditivas em banco aprovado e verificar backup/restore. A apresentação sintética atual continua isolada. Não ativar coleta real no banco reservado da demo.
 3. Criar produto e Price próprios no Stripe: USD 39900, mensal, intervalo 1, licensed; metadata do Price `revory_offer=revory-monitor-399/v1`. Criar configuração dedicada de portal com a mesma metadata, cancelamento e atualização de pagamento habilitados e `subscription_update.enabled=false`; fornecer seu `bpc_` no ambiente. O portal histórico não é alterado.
 4. Verificar o percurso em sandbox real: checkout, webhook, pagamento, falha, replay, cancelamento, refund, fontes não vazias, ledger e relatório. Fixture/assinatura simulada não substituem essa prova.
-5. Configurar live apenas depois desse percurso, com autorização de publicação e smoke no alvo. A necessidade de registros tributários deve ser revisada; este código não ativa Stripe Tax automaticamente.
+5. Direção posterior do fundador em 20/10: antecipar a preparação de recursos live **inativos**, sem esperar a consolidação da fonte OpenAI. Produto/Price e portal ficam inativos e o webhook fica desabilitado; o SDK cria portal/webhook habilitados e a preparação os desabilita imediatamente, antes da liberação. Credenciais novas ainda exigem confirmação específica conforme a política do navegador. Publicar a experiência comercial, ativar a oferta/endpoint e receber compras permanecem depois da prova completa, aprovação do alvo e smoke. A necessidade de registros tributários deve ser revisada; este código não ativa Stripe Tax automaticamente.
 
 ## Configuração no servidor
 
