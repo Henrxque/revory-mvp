@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   dispatch:
-    if: vars.REVORY_MONITOR_DISPATCH_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.REVORY_MONITOR_DISPATCH_ENABLED == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
