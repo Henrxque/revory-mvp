@@ -1,5 +1,8 @@
 # REVORY — Bíblia do produto
 
+> Pricing aprovado em 21/10/2026: Integrity Scan US$99 uma vez e Monitor US$199/mês para novas compras, sem conversão automática. Implementação e homologação no [PR #14](https://github.com/Henrxque/revory-mvp/pull/14); migration 39 já verificada em produção e no banco isolado, com backup criptografado prévio. Checkout Stripe test real abriu/expirou as duas ofertas sem pagamento. **Publicação dos novos preços ainda depende da permissão de escrita no catálogo Stripe live e da configuração/deploy final**; a oferta live anterior não foi substituída. Contratos existentes US$399 e históricos contractor preservados. Detalhes: [runbook de preços](operations/REVORY_PRICING_99_199_2026-10-21.md).
+
+
 > Atualização técnica de 2026-10-19: monitoramento conectado e oferta mensal de US$399 implementados sob liberação separada, conforme [entrega](implementation/REVORY_MONITOR_399_2026-10-19.md). Verificação local não é lançamento, faturamento ou renovação. O restante da bíblia preserva a evolução histórica e os limites financeiros.
 
 > Versão 1, criada em 2026-09-29; estado atualizado em 2026-10-01. Documento vivo de produto para a migração completa de nicho. [Source of truth](source-of-truth.md) decide conflitos; [análise dos anexos](REVORY_RESEARCH_DECISION_RECORD_2026-09-29.md) registra hipóteses e [plano de migração](REVORY_AI_SAAS_MIGRATION_PLAN.md) registra dependências técnicas.

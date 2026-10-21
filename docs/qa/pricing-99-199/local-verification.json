@@ -6,7 +6,9 @@
   "suites": {
     "oneTimeTestRegression": {
       "passed": true,
-      "lastPassLines": []
+      "lastPassLines": [
+        "Sprint 5 DB PASS: atomic signed-event fulfillment contract, replay/conflicting payload, tenant isolation, failed attempt preserved, concurrent report consumes once, extra purchase conserved, refund/reordered event, portability and retention."
+      ]
     },
     "monitorPeriodsAndBrowser": {
       "passed": true,

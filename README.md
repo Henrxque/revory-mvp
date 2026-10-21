@@ -1,10 +1,13 @@
 # REVORY
 
+> Pricing aprovado em 21/10/2026: Integrity Scan US$99 uma vez e Monitor US$199/mês para novas compras, sem conversão automática. Implementação e homologação no [PR #14](https://github.com/Henrxque/revory-mvp/pull/14); migration 39 já verificada em produção e no banco isolado, com backup criptografado prévio. Checkout Stripe test real abriu/expirou as duas ofertas sem pagamento. **Publicação dos novos preços ainda depende da permissão de escrita no catálogo Stripe live e da configuração/deploy final**; a oferta live anterior não foi substituída. Contratos existentes US$399 e históricos contractor preservados. Detalhes: [runbook de preços](docs/operations/REVORY_PRICING_99_199_2026-10-21.md).
+
+
 REVORY is being rebuilt as **Revenue & AI Margin Integrity for AI SaaS**. The intended product reconciles Stripe revenue, the customer's internal usage ledger and AI provider usage/cost to surface explainable discrepancies. It is read-only in customer systems and evidence-first.
 
 ## Current release — 2026-10-21
 
-**Monitor publicado em acesso antecipado em 21/10/2026, com autorização explícita do fundador.** `revory.app` serve o novo app; assinatura própria US$399/mês e webhook live estão ativos. Banco de produção tem 38 migrations verificadas, com contas/dados históricos preservados; Google OAuth, senha/reset e Resend foram mantidos. Checkout live foi aberto e expirado sem pagamento; não equivale a compra real pelo app. Agendador de produção teve execução manual bem-sucedida e foi habilitado, sem períodos de clientes processados. Prova OpenAI não vazia → ledger → relatório permanece pendente até a janela elegível de 21/10 às 21h de Brasília. Zero compradores/renovações reais verificados. Evidência: [ativação de produção](docs/qa/monitor-remote/production-activation.json).
+**Monitor publicado em acesso antecipado em 21/10/2026, com autorização explícita do fundador.** `revory.app` serve o novo app; assinatura própria US$399/mês e webhook live estão ativos. Banco de produção tem 39 migrations verificadas, com contas/dados históricos preservados; Google OAuth, senha/reset e Resend foram mantidos. Checkout live foi aberto e expirado sem pagamento; não equivale a compra real pelo app. Agendador de produção teve execução manual bem-sucedida e foi habilitado, sem períodos de clientes processados. Prova OpenAI não vazia → ledger → relatório permanece pendente até a janela elegível de 21/10 às 21h de Brasília. Zero compradores/renovações reais verificados. Evidência: [ativação de produção](docs/qa/monitor-remote/production-activation.json).
 
 ## Historical migration delivery records
 
