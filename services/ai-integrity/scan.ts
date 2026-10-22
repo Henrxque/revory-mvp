@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
 import { assertConnectedReportAccess, CONNECTED_LEDGER_MODE, CONNECTED_REPORT_MODE, isAiConnectedReportsEnabled } from "./connected-report-access";
-import { aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
+import { aiConnectedScanOrderWhere, aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
 import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_SUPPORTED_RULE_VERSIONS, aiDigest, aiTimestamp, reconcileAiIntegrity,
   type AiScanInput, type AiScanResult, type ScanBucket, type ScanUsage, type SourceClosureReview } from "@/domain/ai-integrity/reconciliation";
 
@@ -40,12 +40,12 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
         if (!authorized.data.ledgerBatchId || !request.batchIds.includes(authorized.data.ledgerBatchId)) throw new Error("Monitoring ledger does not match its closed period.");
       }
       const requiresPurchase = isAiIntegrityExperienceEnabled() && !request.monitorRunId;
-      const orderWhere = connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere();
-      if (requiresPurchase && !request.grantId) throw new Error("Select a confirmed one-time test purchase before running a scan.");
+      const orderWhere = connected ? aiConnectedScanOrderWhere() : aiScanEligibleOrderWhere();
+      if (requiresPurchase && !request.grantId) throw new Error("Select a confirmed one-time scan purchase before running a scan.");
       if (requiresPurchase) await tx.$queryRaw`SELECT id FROM ai_integrity_scan_grants WHERE id = ${request.grantId!} AND "workspaceId" = ${request.workspaceId} FOR UPDATE`;
       const grant = requiresPurchase ? await tx.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId,
         status: "ACTIVE", order: orderWhere } }) : null;
-      if (requiresPurchase && !grant) throw new Error("A confirmed test purchase is required in this workspace.");
+      if (requiresPurchase && !grant) throw new Error("A confirmed scan purchase is required in this workspace.");
       const batches = await tx.aiIntegrityImportBatch.findMany({ where: { workspaceId: request.workspaceId, id: { in: request.batchIds } }, orderBy: { id: "asc" },
         select: { id: true, sourceKind: true, sourceSystem: true, windowStart: true, windowEnd: true, sourceTimezone: true,
           fileSha256: true, mappingSha256: true, rowCount: true, insertedCount: true, duplicateCount: true, dataQualityJson: true,
@@ -129,7 +129,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       if (snapshot) {
         if (request.monitorRunId) await prisma.$transaction(tx => monitorRunAuthorized(tx, request.workspaceId, request.monitorRunId!, request.actorUserId, request.monitorLeaseToken));
         if (isAiIntegrityExperienceEnabled() && !request.monitorRunId) {
-          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: connected ? { status: "PAID", checkoutDriver: "stripe-test" } : aiScanEligibleOrderWhere() } });
+          const grant = await prisma.aiIntegrityScanGrant.findFirst({ where: { id: request.grantId, workspaceId: request.workspaceId, status: "ACTIVE", order: connected ? aiConnectedScanOrderWhere() : aiScanEligibleOrderWhere() } });
           if (!grant || (grant.consumedAt && grant.consumedSnapshotId !== snapshot.id)) throw new Error("Purchase is unavailable for this report.");
         }
         const manifest = snapshot.inputManifestJson as unknown as { input: AiScanInput }; return { snapshotId: snapshot.id, replayed: true, result: reconcileAiIntegrity(manifest.input) };

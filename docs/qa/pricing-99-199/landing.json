@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-21T17:23:04.229Z",
+  "environment": "local production build; no provider or production database access",
+  "checks": [
+    {
+      "device": "desktop",
+      "width": 1440,
+      "scan99": true,
+      "monitor199": true,
+      "old399Absent": true,
+      "noHorizontalOverflow": true,
+      "pageErrors": 0
+    },
+    {
+      "device": "mobile",
+      "width": 390,
+      "scan99": true,
+      "monitor199": true,
+      "old399Absent": true,
+      "noHorizontalOverflow": true,
+      "pageErrors": 0
+    }
+  ]
+}

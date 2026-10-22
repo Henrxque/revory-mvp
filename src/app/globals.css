@@ -104,6 +104,50 @@ body::before {
   z-index: 1;
 }
 
+.rev-ai-landing > .rev-ai-marketing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.rev-ai-landing > .rev-ai-skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 60;
+  transform: translateY(-180%);
+  border-radius: 0.75rem;
+  background: var(--accent);
+  padding: 0.75rem 1rem;
+  color: var(--background);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.rev-ai-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--foreground);
+  outline-offset: 3px;
+}
+
+.rev-ai-footer-link:hover {
+  color: var(--accent-light);
+}
+
+.rev-ai-footer-link:focus-visible,
+.rev-ai-faq-summary:focus-visible {
+  border-radius: 0.25rem;
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+
+.rev-ai-faq-summary::after {
+  flex-shrink: 0;
+  color: var(--accent-light);
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
 .rev-nav-link {
   position: relative;
   padding-block: 0.55rem;
@@ -403,6 +447,10 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .rev-marketing-card,
   .rev-card-hover,
   .rev-signal-icon,

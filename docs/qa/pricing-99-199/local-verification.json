@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-21T17:28:42.575310+00:00",
+  "environment": "local disposable Postgres; simulated provider/payment payloads",
+  "externalPaymentsPerformed": 0,
+  "realBuyersVerified": 0,
+  "suites": {
+    "oneTimeTestRegression": {
+      "passed": true,
+      "lastPassLines": [
+        "Sprint 5 DB PASS: atomic signed-event fulfillment contract, replay/conflicting payload, tenant isolation, failed attempt preserved, concurrent report consumes once, extra purchase conserved, refund/reordered event, portability and retention."
+      ]
+    },
+    "monitorPeriodsAndBrowser": {
+      "passed": true,
+      "lastPassLines": [
+        "PASS: recurring browser flow, pause/resume, investigation, comparison download, auth/origin and mobile.",
+        "PASS: paid recurring fixture flow; four immutable periods; new/persistent/resolved evidence; lease dedupe; consent, token rotation, tenant isolation, failure suppression, review revision, notices, signed webhook and export."
+      ]
+    },
+    "commercialModeFixture": {
+      "passed": true,
+      "lastPassLines": [
+        "PASS pricing: live-mode fixture Checkout/verified signature, one grant, replay, unpaid/test/foreign rejection, refund revocation, database USD99 constraint and explicit legacy USD399 access. No external payment."
+      ]
+    }
+  },
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "touchedFilesLint": "passed",
+  "webhookSignature": "real Stripe SDK verifies fixture HMAC; not a Stripe-generated paid event"
+}

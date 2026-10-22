@@ -4,7 +4,7 @@ import { isAiIntegrityExperienceEnabled } from "@/services/ai-integrity/experien
 import { isAiCommercialRuntimeEnabled } from "@/services/ai-integrity/commercial-runtime";
 import { redirect } from "next/navigation";
 
-export default function StartPage({ searchParams }: { searchParams: Promise<{ billing?: string; order?: string; checkout?: string }> }) {
-  if (isAiCommercialRuntimeEnabled()) redirect("/app/ai-integrity/monitoring?tab=settings");
+export default async function StartPage({ searchParams }: { searchParams: Promise<{ billing?: string; order?: string; checkout?: string; plan?: string }> }) {
+  if (isAiCommercialRuntimeEnabled() && (await searchParams).plan === "monitor") redirect("/app/ai-integrity/monitoring?tab=settings");
   return isAiIntegrityExperienceEnabled() ? <AiIntegrityStart searchParams={searchParams} /> : <ContractorStartPage searchParams={searchParams} />;
 }

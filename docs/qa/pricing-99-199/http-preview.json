@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-21T17:36:04.463Z",
+  "mode": "preview",
+  "base": "https://revory-9eozu51uq-henrxques-projects.vercel.app",
+  "results": [
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "path": "/start?plan=scan",
+      "method": "GET",
+      "status": 307,
+      "passed": true
+    },
+    {
+      "path": "/start?plan=monitor",
+      "method": "GET",
+      "status": 307,
+      "passed": true
+    },
+    {
+      "path": "/api/ai-integrity/checkout",
+      "method": "POST",
+      "status": 401,
+      "passed": true
+    },
+    {
+      "path": "/api/ai-integrity/checkout/webhook",
+      "method": "POST",
+      "status": 400,
+      "passed": true
+    },
+    {
+      "path": "/api/ai-integrity/recurring/webhook",
+      "method": "POST",
+      "status": 400,
+      "passed": true
+    }
+  ],
+  "noCustomerDataRead": true,
+  "paymentsPerformed": 0,
+  "configurationWrites": false
+}

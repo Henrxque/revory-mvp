@@ -3,7 +3,7 @@
   "realCustomers": 0,
   "realPayments": 0,
   "realEmails": 0,
-  "verifiedAt": "2026-10-21T04:00:33.566Z",
+  "verifiedAt": "2026-10-21T17:22:24.914Z",
   "immutableReports": 4,
   "firstDelta": "20",
   "resolvedDelta": "0",
@@ -15,7 +15,7 @@
   "ownerCanPreservePeriodGap": true,
   "comparisons": [
     {
-      "artifactHash": "72a194203092c6713b45cdd00deef4dd70be4cfcac38f10a4443a8d2dcc724e7",
+      "artifactHash": "7fc53a5828a1f38faadc890a0ef92879594eae138558e887220dfe4bd0cbdd66",
       "artifactJson": {
         "mode": "CONNECTED_MONITOR",
         "alerts": [],
@@ -36,8 +36,8 @@
             "current": "20",
             "movement": "PERSISTENT",
             "previous": "20",
-            "currentFingerprint": "d9e86eef28883a806971a8c239e251616681732ed1d70ced2d1dc56ac17cec85",
-            "previousFingerprint": "966f11ac7f473b1162233c486085c1d91bf14301fd0d38bb70b391abf11866dd"
+            "currentFingerprint": "7f99e6bf0a3c6350ea2d75076c8ad281119df55050799f0656e6da6b3bb12463",
+            "previousFingerprint": "ed6d16bf1d2d70fc58df576b2aa6d363fda207d26c9b7de919ecca5ed650ed90"
           }
         ],
         "comparable": true,
@@ -63,7 +63,7 @@
       }
     },
     {
-      "artifactHash": "6cc8257a50bff8ef448c18b19fb27232d5c8e75d21bab475814f49d6c1f3d6cf",
+      "artifactHash": "4454f2e164f0acb990105110557298e0526d84e8f1a6ede4eaaac130b3c7c05d",
       "artifactJson": {
         "mode": "CONNECTED_MONITOR",
         "alerts": [],
@@ -85,7 +85,7 @@
             "movement": "RESOLVED",
             "previous": "20",
             "currentFingerprint": null,
-            "previousFingerprint": "d9e86eef28883a806971a8c239e251616681732ed1d70ced2d1dc56ac17cec85"
+            "previousFingerprint": "7f99e6bf0a3c6350ea2d75076c8ad281119df55050799f0656e6da6b3bb12463"
           }
         ],
         "comparable": true,
@@ -111,7 +111,7 @@
       }
     },
     {
-      "artifactHash": "81e8fb66ac29345e65432afff3b5652090c8165f95f5a0f8cc7d477ab781a694",
+      "artifactHash": "7b4d93962f37ac3fd73cd1de09a92ea819800aac09ff561f2690c43cd69c4aa2",
       "artifactJson": {
         "mode": "CONNECTED_MONITOR",
         "alerts": [
@@ -138,7 +138,7 @@
             "current": "20",
             "movement": "NEW",
             "previous": "0",
-            "currentFingerprint": "7858434f494d6a45ff7105c5cd24323072d27745ce85f099e46c6063f0fb36aa",
+            "currentFingerprint": "433a4633c2612172de4c89ff6c8d9c35cc080ad8c4ff0a2623b750403a8a0b33",
             "previousFingerprint": null
           }
         ],

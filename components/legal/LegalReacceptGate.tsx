@@ -5,7 +5,7 @@ import { LegalAcceptanceSubmitButton } from "@/components/legal/LegalAcceptanceS
 import { REVORY_LEGAL, REVORY_LEGAL_DOCUMENTS } from "@/content/revory-legal";
 import { acceptCurrentLegalDocuments } from "@/src/app/(app)/app/legal-actions";
 
-export function LegalReacceptGate({ userEmail }: { userEmail: string }) {
+export function LegalReacceptGate({ userEmail, returnTo }: { userEmail: string; returnTo?: string }) {
   return (
     <main className="min-h-screen bg-[color:var(--background)] px-4 py-8 font-[family:var(--font-app)] text-[color:var(--foreground)] md:py-14">
       <section className="rev-card-premium rev-accent-mist mx-auto max-w-2xl rounded-[32px] p-6 md:p-9">
@@ -24,6 +24,7 @@ export function LegalReacceptGate({ userEmail }: { userEmail: string }) {
           <Link className="rev-button-ghost justify-center" href="/privacy" target="_blank">Read Privacy Notice</Link>
         </div>
         <form action={acceptCurrentLegalDocuments} className="mt-7">
+          {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
           <label className="flex cursor-pointer items-start gap-3 rounded-[20px] border border-[color:var(--border)] bg-[rgba(20,21,22,.58)] p-4 text-sm leading-6 text-[color:var(--text-muted)]">
             <input className="mt-1 h-4 w-4 accent-[#43B39B]" name="legalAccepted" required type="checkbox" value="yes" />
             <span>I agree to the Terms of Service and acknowledge the Privacy Notice for the REVORY account registered to <strong className="text-[color:var(--foreground)]">{userEmail}</strong>.</span>

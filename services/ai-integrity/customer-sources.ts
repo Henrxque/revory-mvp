@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
 import { readAiConnectedSource, validateAiSourceWindow, type AiSourceProvider, type AiSourceTransport } from "@/domain/ai-integrity/connected-sources";
 import { aiDigest } from "@/domain/ai-integrity/reconciliation";
-import { isAiIntegrityExperienceEnabled } from "./experience";
+import { aiConnectedScanOrderWhere, isAiIntegrityExperienceEnabled } from "./experience";
 import { isSourceCredentialStorageConfigured, openSourceCredential, sealSourceCredential } from "./credential-vault";
 import { createOpenAiReadTransport } from "./openai-http";
 import { createStripeSourceTransport, verifyStripeSourceIdentity } from "./stripe-source-http";
@@ -42,8 +42,8 @@ async function access(workspaceId: string, actorUserId: string) {
   if (!workspace) throw new Error("Only the workspace owner can manage these connections.");
 }
 async function paidAccess(tx: Prisma.TransactionClient, workspaceId: string) {
-  const grant = await tx.aiIntegrityScanGrant.findFirst({ where: { workspaceId, status: "ACTIVE", consumedAt: null, order: { status: "PAID", checkoutDriver: "stripe-test" } }, select: { id: true } });
-  if (!grant && !await monitorPaid(tx, workspaceId)) throw new Error("A confirmed test purchase is required before reading source data.");
+  const grant = await tx.aiIntegrityScanGrant.findFirst({ where: { workspaceId, status: "ACTIVE", consumedAt: null, order: aiConnectedScanOrderWhere() }, select: { id: true } });
+  if (!grant && !await monitorPaid(tx, workspaceId)) throw new Error("A confirmed scan purchase is required before reading source data.");
 }
 async function lockOwner(tx: Prisma.TransactionClient, workspaceId: string, actorUserId: string) {
   const rows = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM workspaces WHERE id = ${workspaceId} AND "ownerUserId" = ${actorUserId} FOR UPDATE`;
