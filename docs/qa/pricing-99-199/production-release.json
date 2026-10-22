@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-22T16:25:03.595Z",
+  "projectId": "prj_WFsAkBOFKbhVbp0edmhRRmWxi4Tu",
+  "teamId": "team_GrLf8copeZHSOh1trAiAtG6U",
+  "commit": "7a5532e6ce5f03893ad28f703c3aea7d09e20380",
+  "deploymentId": "dpl_BE6miHkB5Nk1gUiwAjAauAByFjAU",
+  "url": "revory-8rqzgt70e-henrxques-projects.vercel.app",
+  "state": "READY",
+  "target": "production",
+  "aliases": [
+    "revory.app",
+    "revory-mvp.vercel.app",
+    "www.revory.app",
+    "revory-mvp-henrxques-projects.vercel.app",
+    "revory-mvp-git-main-henrxques-projects.vercel.app"
+  ],
+  "commercialRelease": "integrity-99-monitor-199/v1",
+  "scanUsd": 99,
+  "monitorMonthlyUsd": 199,
+  "customerSubscriptionsChanged": 0,
+  "paymentsPerformed": 0
+}

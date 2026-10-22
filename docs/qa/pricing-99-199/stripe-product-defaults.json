@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-22T16:23:51.626Z",
+  "mode": "live",
+  "results": [
+    {
+      "offer": "scan",
+      "productId": "prod_VU3LPcCaMPKyCs",
+      "defaultPrice": "price_1UTOkiRiSOuAN93TlY5havgP",
+      "active": true,
+      "description": "One report for one closed period. Authorized Stripe and OpenAI evidence with your internal usage ledger. US$99 once; no subscription."
+    },
+    {
+      "offer": "monitor",
+      "productId": "prod_VTlRybGhsVgtz6",
+      "defaultPrice": "price_1UTOksRiSOuAN93Th24hcHaw",
+      "active": true,
+      "description": null
+    }
+  ],
+  "customerSubscriptionsChanged": 0,
+  "historicalPricesDeleted": 0
+}

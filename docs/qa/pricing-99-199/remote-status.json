@@ -1,15 +1,21 @@
 {
-  "at": "2026-10-21T17:37:38.965724+00:00",
+  "at": "2026-10-22T16:26:56.293Z",
   "pullRequest": "https://github.com/Henrxque/revory-mvp/pull/14",
-  "branch": "release/pricing-99-199",
-  "verifiedPreviewCommit": "177564c3ce5b249b11015394ab3df295173b2245",
-  "previewDeployment": "dpl_76jPdcCBm1ZopqkiBsiHT9o61Dgb",
-  "previewUrl": "https://revory-9eozu51uq-henrxques-projects.vercel.app",
-  "previewStatus": "READY",
+  "productionCommit": "7a5532e6ce5f03893ad28f703c3aea7d09e20380",
+  "productionDeployment": "dpl_BE6miHkB5Nk1gUiwAjAauAByFjAU",
+  "productionStatus": "READY",
+  "productionUrl": "https://revory.app",
   "databaseMigrations": 39,
-  "productionPricingChanged": false,
-  "liveCatalogStatus": "BLOCKED: CLI restricted key requires Products/Prices/Customer Portal/Webhook Endpoints write permission",
-  "testCheckout": "Both USD99 payment and USD199 subscription sessions created, retrieved and expired; unpaid",
+  "productionPricingChanged": true,
+  "liveCatalogStatus": "ACTIVE: USD99 once and USD199 monthly for new purchases",
+  "liveCheckout": "Both sessions created, retrieved and expired UNPAID using the restricted runtime billing key",
+  "health": {
+    "status": "ok",
+    "database": "reachable",
+    "durationMs": 5
+  },
+  "legalAcceptancePerformed": false,
   "paymentsPerformed": 0,
-  "customerSubscriptionsChanged": 0
+  "customerSubscriptionsChanged": 0,
+  "limitations": "Proves price, mode, key permissions and Checkout availability; not payment completion or webhook fulfillment by Stripe."
 }
