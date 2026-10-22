@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-22T16:26:15.865Z",
+  "base": "https://revory.app",
+  "health": {
+    "status": "ok",
+    "database": "reachable",
+    "durationMs": 5
+  },
+  "scanUsd": 99,
+  "monitorMonthlyUsd": 199,
+  "old399PriceVisible": false,
+  "institutionalFooterVerified": true,
+  "scanRoute": "/start?plan=scan",
+  "monitorRoute": "/app/ai-integrity/monitoring?tab=settings",
+  "existingAccountLegalReviewVersion": "2026.10.21.1",
+  "legalAcceptancePerformed": false,
+  "checkoutCompleted": false,
+  "paymentsPerformed": 0,
+  "limitations": "Browser verifies public pricing, health and legal boundary; real Stripe SDK separately verifies unpaid live Checkout availability. No completed customer purchase or authenticated fulfillment is claimed."
+}

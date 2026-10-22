@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-22T16:21:31.186Z",
+  "mode": "live",
+  "method": "Real Stripe SDK creates, retrieves and expires unpaid Checkout sessions using the restricted runtime billing key",
+  "results": [
+    {
+      "offer": "scan",
+      "priceId": "price_1UTOkiRiSOuAN93TlY5havgP",
+      "sessionId": "cs_live_a1XqCTwWq9uYO2m7XGuvIkr0vDSmx2Gcnz50BJBWuElGnOScWVf5dhhker",
+      "mode": "payment",
+      "amountTotal": 9900,
+      "currency": "usd",
+      "livemode": true,
+      "paymentStatus": "unpaid",
+      "expired": true
+    },
+    {
+      "offer": "monitor",
+      "priceId": "price_1UTOksRiSOuAN93Th24hcHaw",
+      "sessionId": "cs_live_a1OQIKaHCyJvHWE2IVRvcskBD2Nxm7dbhUnuY6By821cuHFTwaptX3EIAD",
+      "mode": "subscription",
+      "amountTotal": 19900,
+      "currency": "usd",
+      "livemode": true,
+      "paymentStatus": "unpaid",
+      "expired": true
+    }
+  ],
+  "paymentsPerformed": 0,
+  "subscriptionsCreated": 0,
+  "appEntitlementsGranted": 0,
+  "limitations": "Proves price, mode, key permissions and Checkout availability; not payment completion or webhook fulfillment by Stripe."
+}
