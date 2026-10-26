@@ -1,4 +1,5 @@
 import "server-only";
+import { providerChannels } from "@/domain/ai-integrity/provider-registry";
 import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
 import { prisma } from "@/db/prisma";
 import { aiDigest } from "@/domain/ai-integrity/reconciliation";
@@ -19,7 +20,8 @@ export async function promoteAiCustomerSource(workspaceId: string, actorUserId: 
     if (connection.status !== "ACTIVE" || connection.generation !== sync.generation) throw new Error("This connection was revoked or replaced. Authorize and read it again.");
     const artifact = sync.artifactJson as unknown as Artifact;
     if (isAiCommercialRuntimeEnabled() && connection.provider === "STRIPE" && !artifact.accountIdentityVerified) throw new Error("Read and verify this Stripe source account again.");
-    const channelNames = connection.provider === "STRIPE" ? ["stripe-invoices"] : ["openai-usage", "openai-costs"];
+    const channelNames = providerChannels(connection.provider);
+    if (["ANTHROPIC", "GEMINI"].includes(connection.provider) && !artifact.accountIdentityVerified) throw new Error("Verify the provider account before preparing a report.");
     if (artifact.mode !== AI_CUSTOMER_SOURCE_MODE || artifact.provider !== connection.provider || artifact.organizationId !== connection.organizationId || !artifact.paginationComplete
       || artifact.windowStart !== sync.windowStart.toISOString() || artifact.windowEnd !== sync.windowEnd.toISOString()
       || !Array.isArray(artifact.channels) || artifact.channels.length !== channelNames.length
@@ -42,10 +44,10 @@ export async function promoteAiCustomerSource(workspaceId: string, actorUserId: 
     const batch = {
       workspaceId, sourceKind: connection.provider === "STRIPE" ? "STRIPE_REVENUE" : "PROVIDER_REPORT",
       sourceSystem: `${connection.provider.toLowerCase()}-connected-${aiDigest(artifact.organizationId).slice(0, 12)}`,
-      fileName: connection.provider === "STRIPE" ? "stripe-invoices-api.json" : "openai-usage-costs-api.json",
+      fileName: connection.provider === "STRIPE" ? "stripe-invoices-api.json" : `${connection.provider.toLowerCase()}-usage-costs-api.json`,
       fileSha256: contentHash, mappingSha256: aiDigest("source-promotion/v1"), sourceTimezone: "UTC",
       windowStart: artifact.windowStart, windowEnd: artifact.windowEnd,
-      dataQuality: { mode: CONNECTED_REPORT_MODE, rejectedRows: 0, sourceEvidence: { syncId: sync.id, artifactHash: sync.artifactHash, connectionId: connection.id, generation: sync.generation, provider: artifact.provider, accountId: artifact.organizationId, accountIdentity: connection.provider === "STRIPE" ? isAiCommercialRuntimeEnabled() ? "ACCOUNT_ENDPOINT_VERIFIED" : "USER_DECLARED_NOT_VERIFIED" : "ORGANIZATION_HEADER", fetchedAt: artifact.fetchedAt, paginationComplete: true, completeness: "PAGINATION_IS_NOT_ACCOUNT_TOTAL_COMPLETENESS", channels: artifact.channels.map((channel) => ({ channel: channel.channel, rowCount: channel.rowCount, limits: channel.batch?.dataQuality.scope ?? "No reported rows; total activity unknown" })) } },
+      dataQuality: { mode: CONNECTED_REPORT_MODE, rejectedRows: 0, sourceEvidence: { syncId: sync.id, artifactHash: sync.artifactHash, connectionId: connection.id, generation: sync.generation, provider: artifact.provider, accountId: artifact.organizationId, accountIdentity: connection.provider === "STRIPE" ? isAiCommercialRuntimeEnabled() ? "ACCOUNT_ENDPOINT_VERIFIED" : "USER_DECLARED_NOT_VERIFIED" : connection.provider === "OPENAI" ? "ORGANIZATION_HEADER" : "PROVIDER_ACCOUNT_ENDPOINT_VERIFIED", fetchedAt: artifact.fetchedAt, paginationComplete: true, completeness: "PAGINATION_IS_NOT_ACCOUNT_TOTAL_COMPLETENESS", channels: artifact.channels.map((channel) => ({ channel: channel.channel, rowCount: channel.rowCount, limits: channel.scope ?? channel.batch?.dataQuality.scope ?? "No reported rows; total activity unknown" })) } },
       records: records.map((record, index) => ({ ...record, sourceRowNumber: index + 1 })),
     } as AiIntegrityBatchInput;
     const result = await persistAiIntegrityBatch(batch, actorUserId, tx);

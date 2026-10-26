@@ -1,0 +1,19 @@
+{
+  "fixtureOnly": true,
+  "desktop": 1440,
+  "mobile": 390,
+  "connections": [
+    "Anthropic",
+    "Gemini Developer API",
+    "Gemini Vertex AI"
+  ],
+  "sourcesSubmitted": 5,
+  "reportCreatedThroughAuthenticatedApi": true,
+  "providerScopeVisible": true,
+  "unknownProviderVisible": true,
+  "googleQueryConsentRequired": true,
+  "accountTermsAcceptedByAgent": false,
+  "pageErrors": [],
+  "realProviderReads": 0,
+  "livePayments": 0
+}

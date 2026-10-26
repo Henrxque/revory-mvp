@@ -1,3 +1,4 @@
+import { isAiMultiProviderEnabled } from "@/services/ai-integrity/customer-sources";
 import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "@/services/ai-integrity/commercial-runtime";
 import { prisma } from "@/db/prisma";
 import { AiRecurringMonitor, type RecurringView } from "./AiRecurringMonitor";
@@ -15,7 +16,9 @@ export async function AiRecurringMonitorPage({ workspaceId }: { workspaceId: str
   const schedule = states.find(s => s.kind === "SCHEDULE"), subscription = states.find(s => s.kind === "SUBSCRIPTION");
   const config = schedule?.dataJson as unknown as MonitorSchedule | undefined;
   const billing = subscription?.dataJson as { paidThrough?: string; priceId?: string; amountMinor?: number; cancelAt?: string | null } | undefined;
+  const sources = isAiMultiProviderEnabled() ? await prisma.aiIntegritySourceConnection.findMany({where:{workspaceId,mode:"CUSTOMER_API_PREVIEW"},select:{id:true,provider:true,status:true,generation:true}}) : [];
   const view: RecurringView = {
+    multiProvider:isAiMultiProviderEnabled(), minimumLagHours:sources.some(source=>source.provider === "GEMINI" && source.status === "ACTIVE")?48:24, sources:sources.map(source=>({provider:source.provider,active:source.status === "ACTIVE",authorized:Boolean(config?.connections.some(connection=>connection.id === source.id && connection.generation === source.generation))})),
     runtime: isAiCommercialRuntimeEnabled() ? monitorLiveMode() ? "LIVE" : "SANDBOX" : "LOCAL", workspaceId, subscription: subscription ? { status: subscription.status, paidThrough: billing?.paidThrough, amountMinor: billing?.amountMinor ?? (billing?.priceId ? monitorPriceOffer(billing.priceId)?.amountMinor : undefined), cancelAt: billing?.cancelAt } : null,
     schedule: schedule && config ? { status: schedule.status, nextStart: config.nextStart, consentUntil: config.consentUntil, lagHours: config.lagHours, periodDays: config.periodDays, emailEnabled: config.emailEnabled } : null,
     ledgers: ledgers.map(b => ({ id: b.id, label: b.windowStart.toISOString().slice(0, 10) + " to " + b.windowEnd.toISOString().slice(0, 10) + " UTC" })),

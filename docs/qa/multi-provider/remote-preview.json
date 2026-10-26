@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-26",
+  "deploymentId": "dpl_4CKHxDJ8PHwTyL7p9PFYxjQNmth2",
+  "commit": "412ae37f6ccd9c627baaa0f0ba91d7047a7aedbb",
+  "environment": "preview",
+  "state": "ERROR",
+  "stage": "scripts/vercel-build.mjs:28",
+  "error": "DATABASE_URL is required before a Vercel deployment can verify and apply Prisma migrations.",
+  "remoteMigrationExecuted": false,
+  "environmentChangedToBypassGuard": false,
+  "productionChanged": false,
+  "requiredNextGate": "Configure and review an isolated staging database and branch-specific environment before a new authorized deployment."
+}

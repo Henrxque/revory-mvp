@@ -23,8 +23,8 @@ export async function readScanRequest(request: Request): Promise<Omit<RunAiScanR
   if (!body || Array.isArray(body) || body.closureReviewed !== true) throw new Error("Confirm source closure review.");
   const connected = body.connectedReportAuthorized === true && body.syntheticDataConfirmed === false;
   if (connected ? !isAiConnectedReportsEnabled() : body.syntheticDataConfirmed !== true || body.connectedReportAuthorized === true) throw new Error("Confirm the supported data mode and source authorization.");
-  if (!Array.isArray(body.batchIds) || body.batchIds.length !== 3 || body.batchIds.some((id) => typeof id !== "string" || !id || id.length > 200)) throw new Error("Select three source batches.");
-  if (typeof body.asOf !== "string" || typeof body.lagHours !== "number" || !Array.isArray(body.sourceReviews) || body.sourceReviews.length !== 3) throw new Error("Complete analysis time, consolidation lag and source reviews.");
+  if (!Array.isArray(body.batchIds) || (body.batchIds.length < 3 || body.batchIds.length > (connected ? 5 : 3)) || body.batchIds.some((id) => typeof id !== "string" || !id || id.length > 200)) throw new Error("Select Stripe, ledger and one to three provider sources.");
+  if (typeof body.asOf !== "string" || typeof body.lagHours !== "number" || !Array.isArray(body.sourceReviews) || body.sourceReviews.length !== body.batchIds.length) throw new Error("Complete analysis time, consolidation lag and source reviews.");
   const sourceReviews = body.sourceReviews.map((value: unknown) => {
     if (!value || typeof value !== "object") throw new Error("Invalid source review.");
     const r = value as Record<string, unknown>;

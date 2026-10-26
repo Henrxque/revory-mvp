@@ -1,4 +1,9 @@
 import "server-only";
+import { customerProvider, type AiCustomerProvider } from "@/domain/ai-integrity/provider-registry";
+import { readAnthropicSource } from "@/domain/ai-integrity/anthropic-source";
+import { readGeminiSource } from "@/domain/ai-integrity/gemini-source";
+import { createAnthropicReadTransport, verifyAnthropicIdentity } from "./anthropic-http";
+import { createGeminiReadTransport, parseGeminiCredential, verifyGeminiProject } from "./gemini-http";
 import { isAiCommercialRuntimeEnabled } from "./commercial-runtime";
 import { monitorPaid, monitorRunAuthorized } from "./recurring-access";
 import { randomUUID } from "node:crypto";
@@ -19,6 +24,7 @@ export function getAiCustomerSourceSuggestedPeriod(asOf = new Date()) {
   return { start: utcDayAgo(8), end: utcDayAgo(1) };
 }
 const VERSION = "customer-source-consent/v1";
+export function isAiMultiProviderEnabled() { return isAiCustomerSourcesEnabled() && process.env.REVORY_AI_MULTI_PROVIDER_ENABLED === "true"; }
 const PURPOSE = "Read the authorized closed period for source integrity; no automatic scan, payment or customer attribution.";
 const ID = /^[A-Za-z0-9_-]{1,160}$/;
 
@@ -68,20 +74,26 @@ export async function listAiCustomerSources(workspaceId: string, actorUserId: st
   return connections.map((connection) => ({ ...connection, syncs: connection.syncs.map((sync) => ({ ...sync, activity: markers.find((marker) => marker.id === sync.id)?.activity ?? null })) }));
 }
 
-export async function registerAiCustomerSource(workspaceId: string, actorUserId: string, raw: unknown) {
+export async function registerAiCustomerSource(workspaceId: string, actorUserId: string, raw: unknown, identityTransport?: AiSourceTransport) {
   await access(workspaceId, actorUserId);
   storageReady();
-  const input = fields(raw, ["provider", "accountId", "secret", "windowStart", "windowEnd", "consentConfirmed"]);
-  if (!["STRIPE", "OPENAI"].includes(String(input.provider)) || input.consentConfirmed !== true) throw new Error("Choose a source and confirm its read-only consent.");
-  const provider = input.provider as AiSourceProvider, accountId = identity(input.accountId);
+  const input = fields(raw, ["provider", "accountId", "secret", "windowStart", "windowEnd", "consentConfirmed", "googleQueryConsentConfirmed"]);
+  if (!customerProvider(input.provider) || input.consentConfirmed !== true || (!["STRIPE", "OPENAI"].includes(input.provider) && !isAiMultiProviderEnabled())) throw new Error("Choose a source and confirm its read-only consent.");
+  const provider = input.provider as AiCustomerProvider, accountId = identity(input.accountId);
   const start = windowValue(input.windowStart), end = windowValue(input.windowEnd);
-  validateAiSourceWindow(start, end, new Date().toISOString(), 24);
+  validateAiSourceWindow(start, end, new Date().toISOString(), provider === "GEMINI" ? 48 : 24);
   const secret = input.secret;
   // Local preview accepts Stripe test credentials. Commercial activation binds
   // the restricted key mode and verifies the account before source reads.
-  if (typeof secret !== "string" || (provider === "STRIPE" ? !new RegExp("^rk_" + (isAiCommercialRuntimeEnabled() ? process.env.REVORY_AI_CUSTOMER_STRIPE_MODE : "test") + "_[A-Za-z0-9]{12,480}$").test(secret) || !/^acct_[A-Za-z0-9]+$/.test(accountId) : !/^sk-[A-Za-z0-9_-]{12,480}$/.test(secret) || !/^org-[A-Za-z0-9_-]{3,100}$/.test(accountId))) throw new Error("Use a restricted Stripe test key or the authorized OpenAI administrative credential.");
+  if (typeof secret !== "string" || secret.length > (provider === "GEMINI" ? 16000 : 512)) throw new Error("Invalid source credential.");
+  if (provider === "STRIPE" && (!new RegExp("^rk_" + (isAiCommercialRuntimeEnabled() ? process.env.REVORY_AI_CUSTOMER_STRIPE_MODE : "test") + "_[A-Za-z0-9]{12,480}$").test(secret) || !/^acct_[A-Za-z0-9]+$/.test(accountId))) throw new Error("Use a restricted Stripe credential for the configured mode.");
+  if (provider === "OPENAI" && (!/^sk-[A-Za-z0-9_-]{12,480}$/.test(secret) || !/^org-[A-Za-z0-9_-]{3,100}$/.test(accountId))) throw new Error("Use an authorized OpenAI organization credential.");
+  if (provider === "ANTHROPIC" && !/^sk-ant-admin[A-Za-z0-9_-]{8,480}$/.test(secret)) throw new Error("Use an Anthropic organization Admin API credential.");
+  if (provider === "GEMINI") { parseGeminiCredential(secret, accountId); if (input.googleQueryConsentConfirmed !== true) throw new Error("Authorize bounded Google billing queries and review possible Google Cloud charges."); }
   await paidAccess(prisma, workspaceId);
   if (provider === "STRIPE" && isAiCommercialRuntimeEnabled()) await verifyStripeSourceIdentity(secret, accountId);
+  if (provider === "ANTHROPIC") await verifyAnthropicIdentity(identityTransport ?? createAnthropicReadTransport(secret), accountId);
+  if (provider === "GEMINI") await verifyGeminiProject(identityTransport ?? createGeminiReadTransport(secret,accountId),accountId);
   return prisma.$transaction(async (tx) => {
     await lockOwner(tx, workspaceId, actorUserId);
     await paidAccess(tx, workspaceId);
@@ -89,7 +101,7 @@ export async function registerAiCustomerSource(workspaceId: string, actorUserId:
     const old = await tx.aiIntegritySourceConnection.findUnique({ where: { workspaceId_provider_mode: { workspaceId, provider, mode: AI_CUSTOMER_SOURCE_MODE } } });
     const connectionId = old?.id ?? randomUUID(), generation = (old?.generation ?? 0) + 1;
     const envelope = sealSourceCredential(secret, { workspaceId, connectionId, provider, generation });
-    const data = { status: "ACTIVE", generation, organizationId: accountId, projectScope: "ALL_PROJECTS", consentPurpose: PURPOSE, consentVersion: VERSION, consentedBy: actorUserId, consentedAt: new Date(), consentStart: new Date(start), consentEnd: new Date(end), revokedAt: null, coverageStart: null, completeThrough: null };
+    const data = { status: "ACTIVE", generation, organizationId: accountId, projectScope: "ALL_PROJECTS", consentPurpose: provider === "GEMINI" ? PURPOSE + " Dedicated Google project; fixed SELECT billing-export query, maximum 100 MiB billed per read; Google Cloud charges may apply." : PURPOSE, consentVersion: VERSION, consentedBy: actorUserId, consentedAt: new Date(), consentStart: new Date(start), consentEnd: new Date(end), revokedAt: null, coverageStart: null, completeThrough: null };
     if (old) {
       await tx.$queryRaw`SELECT id FROM ai_integrity_source_connections WHERE id = ${connectionId} AND "workspaceId" = ${workspaceId} FOR UPDATE`;
       await tx.aiIntegritySourceConnection.update({ where: { id: connectionId }, data });
@@ -150,9 +162,10 @@ export async function syncAiCustomerSource(workspaceId: string, actorUserId: str
   const { connection } = reservation;
   const deadline = Date.now() + 45000;
   try {
-    const provider = connection.provider as AiSourceProvider;
+    const provider = connection.provider as AiCustomerProvider;
+    if (!customerProvider(provider) || (!["STRIPE", "OPENAI"].includes(provider) && !isAiMultiProviderEnabled())) throw new Error("Source provider is unavailable.");
     const secret = openSourceCredential(connection.credential!, { workspaceId, connectionId: id, provider, generation: connection.generation });
-    const transport = injectedTransport ?? (provider === "OPENAI" ? createOpenAiReadTransport(secret, connection.organizationId!) : createStripeSourceTransport(secret));
+    const transport = injectedTransport ?? (provider === "OPENAI" ? createOpenAiReadTransport(secret, connection.organizationId!) : provider === "ANTHROPIC" ? createAnthropicReadTransport(secret) : provider === "GEMINI" ? createGeminiReadTransport(secret,connection.organizationId!) : createStripeSourceTransport(secret));
     const checkActive = async () => {
       if (Date.now() >= deadline) throw new Error("Source read time limit reached.");
       await access(workspaceId, actorUserId);
@@ -166,7 +179,13 @@ export async function syncAiCustomerSource(workspaceId: string, actorUserId: str
     if (provider === "STRIPE" && isAiCommercialRuntimeEnabled()) await verifyStripeSourceIdentity(secret, connection.organizationId!);
     await checkActive();
     const asOf = new Date().toISOString();
-    const artifact = await readAiConnectedSource({ workspaceId, provider, accountId: connection.organizationId!, windowStart: connection.consentStart!.toISOString(), windowEnd: connection.consentEnd!.toISOString(), asOf, lagHours: 24 }, transport, checkActive, { mode: AI_CUSTOMER_SOURCE_MODE, version: "customer-source-api/v1", stripeLiveMode: provider === "STRIPE" && secret.startsWith("rk_live_"), accountIdentityVerified: provider === "STRIPE" && isAiCommercialRuntimeEnabled() });
+    const context = { workspaceId, accountId: connection.organizationId!, windowStart: connection.consentStart!.toISOString(), windowEnd: connection.consentEnd!.toISOString(), asOf, lagHours: provider === "GEMINI" ? 48 : 24 };
+    if (provider === "ANTHROPIC") await verifyAnthropicIdentity(transport, context.accountId);
+    const googleProject = provider === "GEMINI" ? await verifyGeminiProject(transport, context.accountId) : null;
+    await checkActive();
+    const artifact = provider === "ANTHROPIC" ? await readAnthropicSource(context,transport,checkActive)
+      : provider === "GEMINI" ? await readGeminiSource(context,parseGeminiCredential(secret,context.accountId),transport,checkActive,googleProject!)
+      : await readAiConnectedSource({ ...context, provider: provider as AiSourceProvider }, transport, checkActive, { mode: AI_CUSTOMER_SOURCE_MODE, version: "customer-source-api/v1", stripeLiveMode: provider === "STRIPE" && secret.startsWith("rk_live_"), accountIdentityVerified: provider === "STRIPE" && isAiCommercialRuntimeEnabled() });
     if (Buffer.byteLength(JSON.stringify(artifact)) > 8 * 1024 * 1024) throw new Error("Source artifact exceeds the configured limit.");
     await prisma.$transaction(async (tx) => {
       await lockOwner(tx, workspaceId, actorUserId);

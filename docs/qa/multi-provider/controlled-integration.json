@@ -1,0 +1,41 @@
+{
+  "fixtureOnly": true,
+  "providers": [
+    "OpenAI",
+    "Anthropic",
+    "Gemini"
+  ],
+  "scanRule": "ai-integrity/4.3.0",
+  "providerReports": 3,
+  "batches": 5,
+  "usageDifferences": [
+    {
+      "provider": "anthropic",
+      "unit": "output_tokens",
+      "delta": "5"
+    },
+    {
+      "provider": "gemini",
+      "unit": "gemini_reported_output_tokens",
+      "delta": "20"
+    },
+    {
+      "provider": "anthropic",
+      "unit": "input_tokens_uncached",
+      "delta": "20"
+    },
+    {
+      "provider": "openai",
+      "unit": "input_tokens",
+      "delta": "20"
+    }
+  ],
+  "scanGrantsConsumed": 1,
+  "monitorPeriods": 3,
+  "scopeChangeSuppressed": true,
+  "historicalReplayAfterRevocation": true,
+  "credentialsExported": false,
+  "realAccountsValidated": false,
+  "externalReads": 0,
+  "providerGenerationRequests": 0
+}

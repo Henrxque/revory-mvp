@@ -104,7 +104,10 @@
     "qa:ai-monitor-email:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-monitor-email-test-db.ts",
     "qa:security-operations:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-security-operations-db.ts",
     "ops:data-security": "node scripts/check-data-security.mjs",
-    "ops:rewrap-source-credentials": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/rotate-source-credentials.ts"
+    "ops:rewrap-source-credentials": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/rotate-source-credentials.ts",
+    "qa:ai-multi-provider": "node --experimental-transform-types --loader ./scripts/ts-runtime-loader.mjs scripts/validate-ai-multi-provider.ts",
+    "qa:ai-multi-provider:db": "node scripts/validate-ai-integrity-sprint-1-db.mjs scripts/validate-ai-multi-provider-db.ts",
+    "qa:ai-multi-provider:browser": "node scripts/run-ai-multi-provider-browser.mjs"
   },
   "dependencies": {
     "@playwright/test": "^1.58.2",

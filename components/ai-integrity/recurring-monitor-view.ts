@@ -1,4 +1,5 @@
 export type RecurringView = {
+  multiProvider?: boolean; minimumLagHours?: number; sources?: Array<{provider:string;active:boolean;authorized:boolean}>;
   runtime: "LOCAL" | "SANDBOX" | "LIVE"; workspaceId: string; subscription: { status: string; paidThrough?: string; amountMinor?: number; cancelAt?: string | null } | null;
   schedule: { status: string; nextStart: string; consentUntil: string; periodDays: number; lagHours: number; emailEnabled: boolean } | null;
   ledgers: { id: string; label: string }[];

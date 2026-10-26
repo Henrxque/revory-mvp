@@ -6,7 +6,8 @@ import { providerProjectMappingKey } from "./mapping-key";
 
 export const AI_INTEGRITY_RULE_VERSION = "ai-integrity/4.1.0";
 export const AI_CONNECTED_RULE_VERSION = "ai-integrity/4.2.0";
-export const AI_SUPPORTED_RULE_VERSIONS = [AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION];
+export const AI_MULTI_PROVIDER_RULE_VERSION = "ai-integrity/4.3.0";
+export const AI_SUPPORTED_RULE_VERSIONS = [AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_MULTI_PROVIDER_RULE_VERSION];
 const ZERO = BigInt(0);
 const SCALE = BigInt(10) ** BigInt(12);
 export function aiDecimal(value: string): bigint {
@@ -43,7 +44,7 @@ export type ScanBatch = {
 };
 export type SourceClosureReview = { batchId: string; exportedAt: string; completeThrough: string };
 export type AiScanInput = {
-  ruleVersion: typeof AI_INTEGRITY_RULE_VERSION | typeof AI_CONNECTED_RULE_VERSION; workspaceId: string; asOf: string; lagHours: number;
+  ruleVersion: typeof AI_INTEGRITY_RULE_VERSION | typeof AI_CONNECTED_RULE_VERSION | typeof AI_MULTI_PROVIDER_RULE_VERSION; workspaceId: string; asOf: string; lagHours: number;
   sourceReviews: SourceClosureReview[]; batches: ScanBatch[];
   buckets: ScanBucket[]; usage: ScanUsage[]; knownBuckets: ScanBucket[]; knownUsage: ScanUsage[];
   mappings: ScanMapping[];
@@ -99,7 +100,8 @@ export function reconcileAiIntegrity(input: AiScanInput) {
     knownUsage: byId(input.knownUsage), knownBuckets: byId(input.knownBuckets), mappings: byId(input.mappings),
     sourceReviews: [...input.sourceReviews].sort((a, b) => a.batchId.localeCompare(b.batchId)) };
   if (!AI_SUPPORTED_RULE_VERSIONS.includes(input.ruleVersion)) throw new Error("Unsupported rule version.");
-  const separateUsageUnits = input.ruleVersion === AI_CONNECTED_RULE_VERSION;
+  const multiProvider = input.ruleVersion === AI_MULTI_PROVIDER_RULE_VERSION;
+  const separateUsageUnits = input.ruleVersion !== AI_INTEGRITY_RULE_VERSION;
   const asOf = aiTimestamp(input.asOf);
   if (!Number.isInteger(input.lagHours) || input.lagHours < 0 || input.lagHours > 720) throw new Error("Choose a consolidation lag between 0 and 720 hours.");
   const batchOf = (kind: ScanBatch["sourceKind"]) => {
@@ -107,14 +109,25 @@ export function reconcileAiIntegrity(input: AiScanInput) {
     if (rows.length !== 1) throw new Error("Select exactly one batch from each of the three sources.");
     return rows[0];
   };
-  const providerBatch = batchOf("PROVIDER_REPORT");
+  const providerBatches = input.batches.filter(batch => batch.sourceKind === "PROVIDER_REPORT");
+  if (!providerBatches.length || providerBatches.length > (multiProvider ? 3 : 1)) throw new Error("Select one to three provider reports within the supported rule version.");
+  const providerBatch = providerBatches[0];
   const ledgerBatch = batchOf("INTERNAL_LEDGER");
   const revenueBatch = batchOf("STRIPE_REVENUE");
-  if (input.batches.length !== 3 || new Set(input.batches.map((b) => b.id)).size !== 3) throw new Error("Three distinct source batches required.");
+  if (input.batches.length !== 2 + providerBatches.length || new Set(input.batches.map((b) => b.id)).size !== input.batches.length) throw new Error("Select distinct Stripe, ledger and provider batches.");
   const start = aiTimestamp(providerBatch.windowStart), end = aiTimestamp(providerBatch.windowEnd);
   if (start >= end) throw new Error("Invalid scan window.");
   if (input.buckets.length > 2000 || input.usage.length > 25000 || input.knownUsage.length > 25000 || input.knownBuckets.length > 25000) throw new Error("Internal scan evidence limit exceeded.");
-  for (const [batch, rows] of [[providerBatch, input.buckets], [ledgerBatch, input.usage], [revenueBatch, input.revenue]] as const) {
+  if (input.buckets.some(bucket => !providerBatches.some(batch => batch.id === bucket.importBatchId))) throw new Error("Provider records are outside the selected source batches.");
+  if (multiProvider) {
+    const owners = new Map<string,string>();
+    for (const bucket of input.buckets) {
+      const provider = providerKey(bucket.provider), existing = owners.get(provider);
+      if (existing && existing !== bucket.importBatchId) throw new Error("Select one complete original report per provider; repeated provider sources cannot be combined.");
+      owners.set(provider,bucket.importBatchId);
+    }
+  }
+  for (const [batch, rows] of [...providerBatches.map(batch => [batch, input.buckets.filter(row => row.importBatchId === batch.id)] as const), [ledgerBatch, input.usage], [revenueBatch, input.revenue]] as const) {
     if (aiTimestamp(batch.windowStart) !== start || aiTimestamp(batch.windowEnd) !== end) throw new Error("All selected source windows must describe the same UTC interval.");
     if (batch.duplicateCount || batch.insertedCount !== batch.rowCount || rows.length !== batch.insertedCount || !rows.length
       || rows.some((row) => row.importBatchId !== batch.id) || new Set(rows.map(identityKey)).size !== rows.length) {
@@ -124,7 +137,7 @@ export function reconcileAiIntegrity(input: AiScanInput) {
   const suppressions: Suppression[] = [];
   const suppress = (scope: string, code: string, recordIds: string[] = []) => suppressions.push({ scope, code, recordIds: [...recordIds].sort() });
   const ready = new Map<string, boolean>();
-  if (input.sourceReviews.length !== 3 || new Set(input.sourceReviews.map((r) => r.batchId)).size !== 3) throw new Error("Review closure for each selected source.");
+  if (input.sourceReviews.length !== input.batches.length || new Set(input.sourceReviews.map((r) => r.batchId)).size !== input.batches.length) throw new Error("Review closure for each selected source.");
   for (const batch of input.batches) {
     const review = input.sourceReviews.find((r) => r.batchId === batch.id);
     if (!review) throw new Error("Missing source closure review.");
@@ -136,16 +149,16 @@ export function reconcileAiIntegrity(input: AiScanInput) {
     if (Number(batch.dataQualityJson.rejectedRows ?? 0) > 0) suppress(batch.id, "IMPORT_EXCLUDED_ROWS");
   }
   const ledgerComplete = ready.get(ledgerBatch.id) && !Number(ledgerBatch.dataQualityJson.rejectedRows ?? 0);
-  const providerComplete = ready.get(providerBatch.id) && !Number(providerBatch.dataQualityJson.rejectedRows ?? 0);
+  const providerComplete = (batchId: string) => ready.get(batchId) && !Number(providerBatches.find(batch => batch.id === batchId)?.dataQualityJson.rejectedRows ?? 0);
   const providerConflicts = conflictingIds([...input.knownBuckets, ...input.buckets]);
   const usageConflicts = conflictingIds([...input.knownUsage, ...input.usage]);
   const excludedCost = new Set<string>();
   for (const bucket of input.buckets) {
     let code: string | null = null;
-    if (!ready.get(providerBatch.id)) code = "SOURCE_OPEN_OR_CONSOLIDATION_LAG";
+    if (!ready.get(bucket.importBatchId)) code = "SOURCE_OPEN_OR_CONSOLIDATION_LAG";
     else if (providerConflicts.has(identityKey(bucket))) code = "CONFLICTING_PROVIDER_RECORD_VERSION";
     else if (bucket.reportedAt && (aiTimestamp(bucket.reportedAt) < aiTimestamp(bucket.windowEnd) + input.lagHours * 3600000
-      || aiTimestamp(bucket.reportedAt) > aiTimestamp(input.sourceReviews.find((r) => r.batchId === providerBatch.id)!.exportedAt))) code = "PROVIDER_BUCKET_NOT_FINAL";
+      || aiTimestamp(bucket.reportedAt) > aiTimestamp(input.sourceReviews.find((r) => r.batchId === bucket.importBatchId)!.exportedAt))) code = "PROVIDER_BUCKET_NOT_FINAL";
     if (code) { excludedCost.add(bucket.id); suppress(bucket.id, code, [bucket.id]); }
   }
   const usageForCoverage = (rows: ScanUsage[]) => rows.map((row) => ({ ...row, occurredAt: new Date(row.occurredAt) }));
@@ -198,7 +211,7 @@ export function reconcileAiIntegrity(input: AiScanInput) {
       && (!separateUsageUnits || !bucket.usageUnit || u.unit === bucket.usageUnit)
       && aiTimestamp(u.occurredAt) >= aiTimestamp(bucket.windowStart) && aiTimestamp(u.occurredAt) < aiTimestamp(bucket.windowEnd));
     let reason: string | null = null;
-    if (!ledgerComplete || !providerComplete) reason = "SOURCE_INCOMPLETE_FOR_USAGE_COMPARISON";
+    if (!ledgerComplete || !providerComplete(bucket.importBatchId)) reason = "SOURCE_INCOMPLETE_FOR_USAGE_COMPARISON";
     else if (input.usage.some((u) => !u.provider)) reason = "LEDGER_PROVIDER_DIMENSION_INCOMPLETE";
     else if (excludedCost.has(bucket.id)) reason = "PROVIDER_EVIDENCE_NOT_FINAL_OR_CONFLICTED";
     else if (aiTimestamp(bucket.windowStart) < start || aiTimestamp(bucket.windowEnd) > end) reason = "OUTSIDE_SELECTED_WINDOW";
@@ -239,7 +252,8 @@ export function reconcileAiIntegrity(input: AiScanInput) {
       sourceAgeHours: input.sourceReviews.map((r) => ({ batchId: r.batchId, hours: (asOf - aiTimestamp(r.exportedAt)) / 3600000 })),
       imports: input.batches.map((b) => ({ batchId: b.id, quality: b.dataQualityJson })),
       revenueTreatment: "Evidence context only; refunds, credits, subscriptions and revenue are not summed or used to infer margin or leakage.",
-      valueTreatment: "Cost grouped by provider/currency. Usage deltas have no monetary value. No combined at-risk total." } };
+      valueTreatment: "Cost grouped by provider/currency. Usage deltas have no monetary value. No combined at-risk total.",
+      ...(multiProvider ? { providerSources: providerBatches.map(batch => ({ batchId: batch.id, providers: [...new Set(input.buckets.filter(bucket => bucket.importBatchId === batch.id).map(bucket => bucket.provider))].sort(), scope: batch.dataQualityJson.sourceEvidence ?? batch.dataQualityJson, completeness: "SELECTED_SOURCE_SCOPE_ONLY" })), uncoveredLedgerProviders: [...new Set(input.usage.map(row => row.provider).filter(provider => provider && !input.buckets.some(bucket => providerKey(bucket.provider) === providerKey(provider))))].sort(), accountWideCoverage: "UNKNOWN_UNCONNECTED_OR_UNREPORTED_ACTIVITY_IS_NOT_ZERO" } : {}) } };
 }
 
 export type AiScanResult = ReturnType<typeof reconcileAiIntegrity>;
