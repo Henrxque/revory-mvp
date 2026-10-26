@@ -7,7 +7,7 @@ import { prisma } from "@/db/prisma";
 import { canonicalAiJson } from "@/domain/ai-integrity/contracts";
 import { assertConnectedReportAccess, CONNECTED_LEDGER_MODE, CONNECTED_REPORT_MODE, isAiConnectedReportsEnabled } from "./connected-report-access";
 import { aiConnectedScanOrderWhere, aiScanEligibleOrderWhere, isAiIntegrityExperienceEnabled, isAiIntegrityRemoteSyntheticPreviewEnabled } from "./experience";
-import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_SUPPORTED_RULE_VERSIONS, aiDigest, aiTimestamp, reconcileAiIntegrity,
+import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_MULTI_PROVIDER_RULE_VERSION, AI_SUPPORTED_RULE_VERSIONS, aiDigest, aiTimestamp, reconcileAiIntegrity,
   type AiScanInput, type AiScanResult, type ScanBucket, type ScanUsage, type SourceClosureReview } from "@/domain/ai-integrity/reconciliation";
 
 export type RunAiScanRequest = {
@@ -27,7 +27,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
   if (process.env.NODE_ENV === "production" && !isAiIntegrityRemoteSyntheticPreviewEnabled() && !isAiCommercialRuntimeEnabled()) throw new Error("Internal scan is unavailable in production.");
   const connected = request.connectedReportAuthorized === true && request.syntheticDataConfirmed === false;
   if (connected ? !isAiConnectedReportsEnabled() : request.syntheticDataConfirmed !== true || request.connectedReportAuthorized === true) throw new Error("Confirm synthetic data or supported connected source authorization.");
-  if (!request.workspaceId || !request.actorUserId || request.batchIds.length !== 3 || new Set(request.batchIds).size !== 3) throw new Error("Three source batches and an authenticated actor are required.");
+  if (!request.workspaceId || !request.actorUserId || request.batchIds.length < 3 || request.batchIds.length > (connected ? 5 : 3) || new Set(request.batchIds).size !== request.batchIds.length) throw new Error("Three source batches and an authenticated actor are required.");
   if (aiTimestamp(request.asOf) > Date.now()) throw new Error("Analysis time cannot be in the future.");
   let raceKey: string | null = null;
   try {
@@ -50,7 +50,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
         select: { id: true, sourceKind: true, sourceSystem: true, windowStart: true, windowEnd: true, sourceTimezone: true,
           fileSha256: true, mappingSha256: true, rowCount: true, insertedCount: true, duplicateCount: true, dataQualityJson: true,
           sourcePromotion: { include: { sync: { include: { connection: true } } } } } });
-      if (batches.length !== 3) throw new Error("Source batch missing or unavailable in this workspace.");
+      if (batches.length !== request.batchIds.length) throw new Error("Source batch missing or unavailable in this workspace.");
       for (const batch of batches) {
         const mode = (batch.dataQualityJson as Record<string, unknown>)?.mode;
         if (connected) {
@@ -74,7 +74,7 @@ export async function runAiIntegrityScan(request: RunAiScanRequest, attempt = 0)
       ]);
       if ([usageRows, bucketRows, revenueRows, mappings].some((rows) => rows.length > MAX_ROWS)) throw new Error("Workspace evidence limit exceeded; narrow intake before running this internal scan.");
       const knownUsage = json<ScanUsage[]>(usageRows), knownBuckets = json<ScanBucket[]>(bucketRows);
-      const input: AiScanInput = { ruleVersion: connected ? AI_CONNECTED_RULE_VERSION : AI_INTEGRITY_RULE_VERSION, workspaceId: request.workspaceId,
+      const input: AiScanInput = { ruleVersion: connected ? (batches.some(batch => batch.sourcePromotion && !["STRIPE", "OPENAI"].includes(batch.sourcePromotion.sync.connection.provider)) || batches.length > 3 ? AI_MULTI_PROVIDER_RULE_VERSION : AI_CONNECTED_RULE_VERSION) : AI_INTEGRITY_RULE_VERSION, workspaceId: request.workspaceId,
         asOf: new Date(request.asOf).toISOString(), lagHours: request.lagHours,
         sourceReviews: [...request.sourceReviews].sort((a, b) => a.batchId.localeCompare(b.batchId)).map((r) => {
           const source = connected ? batches.find((batch) => batch.id === r.batchId)?.sourcePromotion?.sync.artifactJson as unknown as { fetchedAt?: string } | undefined : undefined;

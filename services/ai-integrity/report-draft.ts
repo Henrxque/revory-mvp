@@ -3,13 +3,13 @@ import { prisma } from "@/db/prisma";
 import { assertConnectedReportAccess, CONNECTED_LEDGER_MODE, CONNECTED_REPORT_MODE } from "./connected-report-access";
 
 const sources = ["STRIPE_REVENUE", "INTERNAL_LEDGER", "PROVIDER_REPORT"] as const;
-export type ConnectedReportSetup = { selected: Partial<Record<typeof sources[number], string>>; timing: Partial<Record<typeof sources[number], { exportedAt: string; completeThrough: string }>>; lag: string; asOf: string };
+export type ConnectedReportSetup = { selected: Partial<Record<typeof sources[number], string>>; timing: Partial<Record<typeof sources[number], { exportedAt: string; completeThrough: string }>>; lag: string; asOf: string; providerBatchIds?: string[]; providerTiming?: Record<string, { exportedAt: string; completeThrough: string }> };
 export async function saveConnectedReportDraft(workspaceId: string, actorUserId: string, raw: unknown) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid report setup.");
   const { revision, setup, ...extra } = raw as Record<string, unknown>;
   if (Object.keys(extra).length || !Number.isSafeInteger(revision) || Number(revision) < 0 || !setup || typeof setup !== "object" || Array.isArray(setup)) throw new Error("Invalid report setup revision.");
   const data = setup as Record<string, unknown>;
-  if (Object.keys(data).some((name) => !["selected", "timing", "lag", "asOf"].includes(name)) || typeof data.lag !== "string" || !/^(|[0-9]{1,3})$/.test(data.lag) || (data.lag !== "" && Number(data.lag) > 720) || typeof data.asOf !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(data.asOf)) throw new Error("Invalid report setup fields.");
+  if (Object.keys(data).some((name) => !["selected", "timing", "lag", "asOf", "providerBatchIds", "providerTiming"].includes(name)) || typeof data.lag !== "string" || !/^(|[0-9]{1,3})$/.test(data.lag) || (data.lag !== "" && Number(data.lag) > 720) || typeof data.asOf !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(data.asOf)) throw new Error("Invalid report setup fields.");
   const selected = data.selected, timing = data.timing;
   for (const value of [selected, timing]) if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some((name) => !sources.includes(name as typeof sources[number]))) throw new Error("Invalid source setup.");
   const clean: ConnectedReportSetup = { selected: {}, timing: {}, lag: data.lag, asOf: data.asOf };
@@ -24,10 +24,25 @@ export async function saveConnectedReportDraft(workspaceId: string, actorUserId:
       clean.timing[source] = { exportedAt: entry.exportedAt as string, completeThrough: entry.completeThrough as string };
     }
   }
+  if (data.providerBatchIds !== undefined || data.providerTiming !== undefined) {
+    const ids = data.providerBatchIds, dates = data.providerTiming;
+    if (!Array.isArray(ids) || !ids.length || ids.length > 3 || new Set(ids).size !== ids.length || ids.some(id => typeof id !== "string" || !/^[A-Za-z0-9_-]{1,160}$/.test(id)) || !ids.includes(clean.selected.PROVIDER_REPORT)
+      || !dates || typeof dates !== "object" || Array.isArray(dates) || Object.keys(dates).some(id => !ids.includes(id))) throw new Error("Invalid provider source selection.");
+    clean.providerBatchIds = ids as string[]; clean.providerTiming = {};
+    for (const [id,rawDate] of Object.entries(dates)) {
+      if (!rawDate || typeof rawDate !== "object" || Array.isArray(rawDate) || Object.keys(rawDate).some(key => !["exportedAt","completeThrough"].includes(key))) throw new Error("Invalid provider timing.");
+      const date = rawDate as Record<string,unknown>;
+      for (const value of [date.exportedAt,date.completeThrough]) if (typeof value !== "string" || !/^(|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?)$/.test(value)) throw new Error("Invalid provider date.");
+      clean.providerTiming[id] = { exportedAt: date.exportedAt as string, completeThrough: date.completeThrough as string };
+    }
+  }
   return prisma.$transaction(async (tx) => {
     await assertConnectedReportAccess(tx, workspaceId, actorUserId);
     for (const source of sources) if (clean.selected[source]) {
       if (!await tx.aiIntegrityImportBatch.findFirst({ where: { id: clean.selected[source], workspaceId, sourceKind: source, dataQualityJson: { path: ["mode"], equals: source === "INTERNAL_LEDGER" ? CONNECTED_LEDGER_MODE : CONNECTED_REPORT_MODE } }, select: { id: true } })) throw new Error("Selected source is unavailable in this workspace.");
+    }
+    for (const id of clean.providerBatchIds ?? []) {
+      if (!await tx.aiIntegrityImportBatch.findFirst({ where: { id,workspaceId,sourceKind:"PROVIDER_REPORT",dataQualityJson:{path:["mode"],equals:CONNECTED_REPORT_MODE} },select:{id:true} })) throw new Error("Provider evidence is unavailable in this workspace.");
     }
     const previous = await tx.aiIntegrityReportDraft.findUnique({ where: { workspaceId } });
     if ((previous?.revision ?? 0) !== revision) throw new Error("Report setup changed in another tab. Reload before saving.");

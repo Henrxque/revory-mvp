@@ -1,4 +1,5 @@
 import "server-only";
+import { validConnectedProviderSet } from "@/domain/ai-integrity/provider-registry";
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
@@ -53,11 +54,12 @@ export async function configureMonitor(workspaceId: string, actorUserId: string,
     const existing = await tx.aiIntegrityMonitorState.findUnique({ where: stateKey(workspaceId, "SCHEDULE") });
     if (existing) throw new Error("Pause the existing schedule. Renew consent using its next period to preserve history.");
     const connections = await tx.aiIntegritySourceConnection.findMany({ where: { workspaceId, mode: "CUSTOMER_API_PREVIEW", status: "ACTIVE", credential: { isNot: null } }, select: { id: true, generation: true, provider: true } });
-    if (connections.length !== 2 || !connections.some(c => c.provider === "STRIPE") || !connections.some(c => c.provider === "OPENAI")) throw new Error("Connect both Stripe and OpenAI first.");
+    if (!validConnectedProviderSet(connections.map(connection => connection.provider))) throw new Error("Connect Stripe and at least one supported AI provider first.");
+    if (connections.some(connection => connection.provider === "GEMINI") && input.lagHours < 48) throw new Error("Google billing evidence requires at least 48 hours of consolidation; review any additional source delay.");
     const projectLinks = await confirmedProjectLinks(tx, workspaceId);
     const config: MonitorSchedule = { projectLinks, actorUserId, nextStart: start.toISOString(), periodDays: input.periodDays, lagHours: input.lagHours, consentUntil: until.toISOString(), emailEnabled: input.emailEnabled, minimumUsageDelta, connections: connections.map(({ id, generation }) => ({ id, generation })) };
     const schedule = await tx.aiIntegrityMonitorState.create({ data: { workspaceId, kind: "SCHEDULE", key: "primary", status: "ACTIVE", dataJson: json(config) } });
-    await audit(tx, workspaceId, actorUserId, "AI_RECURRING_CONSENT_GRANTED", { scheduleId: schedule.id, ...config, policy: "recurring-consent/v1", scope: "Stripe invoices created in period; OpenAI completions Usage/Costs. Paginated scope is not account-wide completeness. Existing mapping validity is unchanged." });
+    await audit(tx, workspaceId, actorUserId, "AI_RECURRING_CONSENT_GRANTED", { scheduleId: schedule.id, ...config, policy: "recurring-consent/v1", scope: "Stripe invoices plus the explicitly listed AI provider connections. Each connector retains its usage/cost limits. Paginated scope is not account-wide completeness. Existing mapping validity is unchanged." });
     return { id: schedule.id };
   });
 }
@@ -73,8 +75,9 @@ export async function changeMonitorStatus(workspaceId: string, actorUserId: stri
         if (until <= utc(config.nextStart) || until.valueOf() > Date.now() + 90 * DAY) throw new Error("Invalid recurring consent expiry.");
         config.consentUntil = until.toISOString();
       }
-      const connections = await tx.aiIntegritySourceConnection.findMany({ where: { workspaceId, mode: "CUSTOMER_API_PREVIEW", status: "ACTIVE", credential: { isNot: null } }, select: { id: true, generation: true } });
-      if (connections.length !== 2) throw new Error("Reconnect the authorized sources first.");
+      const connections = await tx.aiIntegritySourceConnection.findMany({ where: { workspaceId, mode: "CUSTOMER_API_PREVIEW", status: "ACTIVE", credential: { isNot: null } }, select: { id: true, generation: true, provider: true } });
+      if (!validConnectedProviderSet(connections.map(connection => connection.provider))) throw new Error("Reconnect the authorized sources first.");
+      if (connections.some(connection => connection.provider === "GEMINI")) config.lagHours = Math.max(48,config.lagHours);
       config.connections = connections;
       config.projectLinks = await confirmedProjectLinks(tx, workspaceId);
     }
@@ -196,7 +199,7 @@ export async function executeMonitorRun(runId: string, transport?: (provider: st
     await prisma.$transaction(tx => monitorRunAuthorized(tx, workspaceId, runId, config.actorUserId, leaseToken));
     if (!await hasCurrentAccountLegalAcceptance(config.actorUserId)) throw new Error("Current terms required.");
     if (Date.parse(data.end) + config.lagHours * 3600000 > Date.now() || !data.ledgerBatchId) throw new Error("Ledger or consolidation lag not ready.");
-    let providerBatchId: string | undefined;
+    const providerBatchIds: string[] = [];
     const batchIds = [data.ledgerBatchId], sourceReviews = [{ batchId: data.ledgerBatchId, exportedAt: data.exportedAt!, completeThrough: data.completeThrough! }];
     for (const source of config.connections) {
       const connection = await prisma.aiIntegritySourceConnection.findFirstOrThrow({ where: { id: source.id, workspaceId } });
@@ -215,7 +218,7 @@ export async function executeMonitorRun(runId: string, transport?: (provider: st
       const prepared = await promoteAiCustomerSource(workspaceId, config.actorUserId, read.syncId);
       const sync = await prisma.aiIntegritySourceSync.findFirstOrThrow({ where: { id: read.syncId, workspaceId } });
       batchIds.push(prepared.batchId);
-      if (connection.provider === "OPENAI") providerBatchId = prepared.batchId;
+      if (connection.provider !== "STRIPE") providerBatchIds.push(prepared.batchId);
       const artifact = sync.artifactJson as { fetchedAt?: string };
       sourceReviews.push({ batchId: prepared.batchId, exportedAt: artifact.fetchedAt!, completeThrough: data.end });
     }
@@ -223,7 +226,10 @@ export async function executeMonitorRun(runId: string, transport?: (provider: st
     // temporal validity. Each new period is corroborated by the current ledger.
     for (const link of config.projectLinks ?? []) {
       const original = await prisma.aiIntegrityMapping.findFirst({ where: { id: link.mappingId, workspaceId, status: "CONFIRMED" } });
-      if (!original || !providerBatchId) continue;
+      if (!original) continue;
+      const providerEvidence = await prisma.aiIntegrityProviderBucket.findMany({ where: { workspaceId, importBatchId: { in: providerBatchIds }, projectId: link.projectId, organizationId: link.organizationId, provider: { equals: link.provider, mode: "insensitive" } }, select: { importBatchId: true }, distinct: ["importBatchId"] });
+      if (providerEvidence.length !== 1) continue;
+      const providerBatchId = providerEvidence[0].importBatchId;
       const existing = await prisma.aiIntegrityMapping.findFirst({ where: { workspaceId, kind: "PROVIDER_PROJECT", externalId: original.externalId, validFrom: new Date(data.start), validUntil: new Date(data.end) } });
       if (existing) continue;
       const observed = await prisma.aiIntegrityUsageRecord.count({ where: { workspaceId, importBatchId: data.ledgerBatchId, internalCustomerExternalId: link.customerId, providerProjectId: link.projectId, provider: { equals: link.provider, mode: "insensitive" } } });

@@ -102,7 +102,7 @@ export function AiIntegrityImportPanel({ syntheticSamples = false, connectedLedg
   const inputClass = "min-h-11 w-full rounded-xl border border-[color:var(--border-strong)] bg-[color:var(--background-card)] px-3 text-sm text-[color:var(--foreground)] outline-none focus:border-[color:var(--accent)]";
   return <section className="rev-shell-panel rounded-[28px] p-5 md:p-7">
     <h2 className="text-lg font-semibold">{connectedLedger ? "Upload your product usage" : "Which data are you adding?"}</h2>
-    <p className="mt-2 mb-5 text-sm leading-7 text-[color:var(--text-muted)]">{connectedLedger ? "Stripe and OpenAI come from your saved API reads. Upload only the internal usage file from your SaaS for the same period." : "Choose one source, then review the file before saving it. Repeat for each of the three sources."}</p>
+    <p className="mt-2 mb-5 text-sm leading-7 text-[color:var(--text-muted)]">{connectedLedger ? "Stripe and AI-provider evidence come from your saved API reads. Upload only the internal usage file from your SaaS for the same period." : "Choose one source, then review the file before saving it. Repeat for each of the three sources."}</p>
     <div className="grid gap-4 md:grid-cols-2">
       <label className="space-y-2 text-sm font-semibold text-[color:var(--text-muted)]">Data source
         <select className={inputClass} disabled={busy || connectedLedger} value={sourceKind} onChange={(event) => { const kind = event.target.value as SourceKind; setSourceKind(kind); setFile(null); if (fileInput.current) fileInput.current.value = ""; setSourceSystem(kind === "STRIPE_REVENUE" ? "stripe-export" : kind === "INTERNAL_LEDGER" ? "internal-ledger" : "provider-report"); resetReview(); }}>

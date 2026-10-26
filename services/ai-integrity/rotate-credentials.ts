@@ -1,4 +1,5 @@
 import "server-only";
+import { customerProvider } from "@/domain/ai-integrity/provider-registry";
 import { prisma } from "@/db/prisma";
 import { openSourceCredential, sealSourceCredential, isSourceCredentialStorageConfigured, type SourceCredentialScope } from "./credential-vault";
 
@@ -15,7 +16,7 @@ export async function rewrapSourceCredentials(options: { apply?: boolean; limit?
   let rotated = 0, conflicts = 0;
   for (const row of rows) {
     const provider = row.connection.provider;
-    if (provider !== "OPENAI" && provider !== "STRIPE") throw new Error("Unsupported credential scope.");
+    if (!customerProvider(provider)) throw new Error("Unsupported credential scope.");
     const scope: SourceCredentialScope = { workspaceId: row.workspaceId, connectionId: row.connectionId, provider, generation: row.connection.generation };
     const plaintext = openSourceCredential(row, scope);
     const sealed = sealSourceCredential(plaintext, scope);

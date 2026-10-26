@@ -1,4 +1,5 @@
 import "server-only";
+import { validConnectedProviderSet } from "@/domain/ai-integrity/provider-registry";
 import { isAiCommercialRuntimeEnabled, monitorLiveMode } from "./commercial-runtime";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/db/prisma";
@@ -47,7 +48,7 @@ export async function monitorRunAuthorized(tx: Prisma.TransactionClient, workspa
   const config = schedule?.dataJson as unknown as MonitorSchedule | undefined;
   if (!config || config.actorUserId !== actorUserId || new Date(config.consentUntil) < new Date(data.end)) throw new Error("Recurring consent expired or was revoked.");
   const connections = await tx.aiIntegritySourceConnection.findMany({ where: { workspaceId, id: { in: config.connections.map(c => c.id) }, status: "ACTIVE", credential: { isNot: null } } });
-  if (connections.length !== 2 || config.connections.some(c => !connections.some(active => active.id === c.id && active.generation === c.generation))) throw new Error("A source was revoked or replaced. Review recurring consent.");
+  if ((!validConnectedProviderSet(connections.map(connection => connection.provider)) || connections.length !== config.connections.length) || config.connections.some(c => !connections.some(active => active.id === c.id && active.generation === c.generation))) throw new Error("A source was revoked or replaced. Review recurring consent.");
   const links = config.projectLinks ?? [];
   if (await tx.aiIntegrityMapping.count({ where: { workspaceId, id: { in: links.map(link => link.mappingId) }, status: "CONFIRMED" } }) !== links.length) throw new Error("Customer links changed. Review recurring consent.");
   return { run, data, schedule: schedule!, config };

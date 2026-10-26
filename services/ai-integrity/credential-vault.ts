@@ -1,7 +1,8 @@
 import "server-only";
+import { customerProvider, type AiCustomerProvider } from "@/domain/ai-integrity/provider-registry";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
-export type SourceCredentialScope = { workspaceId: string; connectionId: string; provider: "OPENAI" | "STRIPE"; generation: number };
+export type SourceCredentialScope = { workspaceId: string; connectionId: string; provider: AiCustomerProvider; generation: number };
 export type SealedSourceCredential = { keyVersion: string; iv: string; authTag: string; ciphertext: string };
 const VERSION = /^[a-zA-Z0-9_-]{1,40}$/;
 const base64 = (text: string, length?: number) => {
@@ -28,12 +29,12 @@ export function isSourceCredentialStorageConfigured() {
 }
 
 function associatedData(scope: SourceCredentialScope, keyVersion: string) {
-  if (!scope.workspaceId || !scope.connectionId || !["OPENAI", "STRIPE"].includes(scope.provider) || !Number.isSafeInteger(scope.generation) || scope.generation < 1) throw new Error("Invalid source credential scope.");
+  if (!scope.workspaceId || !scope.connectionId || !customerProvider(scope.provider) || !Number.isSafeInteger(scope.generation) || scope.generation < 1) throw new Error("Invalid source credential scope.");
   return Buffer.from(JSON.stringify(["revory-source-credential/v1", keyVersion, scope.workspaceId, scope.connectionId, scope.provider, scope.generation]), "utf8");
 }
 
 export function sealSourceCredential(secret: string, scope: SourceCredentialScope): SealedSourceCredential {
-  if (typeof secret !== "string" || secret.length < 16 || secret.length > 512 || /\s/.test(secret)) throw new Error("Invalid source credential.");
+  if (typeof secret !== "string" || secret.length < 16 || secret.length > (scope.provider === "GEMINI" ? 16000 : 512) || (scope.provider !== "GEMINI" && /\s/.test(secret))) throw new Error("Invalid source credential.");
   const { active, keys } = keyring();
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", keys.get(active)!, iv);
@@ -46,12 +47,12 @@ export function openSourceCredential(envelope: SealedSourceCredential, scope: So
   try {
     const { keys } = keyring();
     const key = keys.get(envelope.keyVersion);
-    if (!key || envelope.ciphertext.length > 1024) throw new Error();
+    if (!key || envelope.ciphertext.length > (scope.provider === "GEMINI" ? 24000 : 1024)) throw new Error();
     const decipher = createDecipheriv("aes-256-gcm", key, base64(envelope.iv, 12));
     decipher.setAAD(associatedData(scope, envelope.keyVersion));
     decipher.setAuthTag(base64(envelope.authTag, 16));
     const value = Buffer.concat([decipher.update(base64(envelope.ciphertext)), decipher.final()]).toString("utf8");
-    if (value.length < 16 || value.length > 512 || /\s/.test(value)) throw new Error();
+    if (value.length < 16 || value.length > (scope.provider === "GEMINI" ? 16000 : 512) || (scope.provider !== "GEMINI" && /\s/.test(value))) throw new Error();
     return value;
   } catch { throw new Error("Source credential could not be opened."); }
 }

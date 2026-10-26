@@ -7,10 +7,10 @@ export const AI_OPENAI_SOURCE_MODE = "CONTROLLED_OPENAI_READ";
 export const AI_OPENAI_SOURCE_VERSION = "connected-sources/openai-api-v1";
 export const AI_SOURCE_PROVIDERS = ["STRIPE", "OPENAI"] as const;
 export type AiSourceProvider = typeof AI_SOURCE_PROVIDERS[number];
-export type AiSourceRead = { method: "GET"; origin: "https://api.stripe.com" | "https://api.openai.com"; path: string; query: Record<string, string | string[]> };
+export type AiSourceRead = { method: "GET" | "POST"; origin: "https://api.stripe.com" | "https://api.openai.com" | "https://api.anthropic.com" | "https://monitoring.googleapis.com" | "https://bigquery.googleapis.com" | "https://cloudresourcemanager.googleapis.com"; path: string; query: Record<string, string | string[]>; body?: Record<string, unknown> };
 // The domain accepts a bounded transport; HTTP and credentials stay server-side.
 export type AiSourceTransport = (read: AiSourceRead) => Promise<unknown>;
-export type AiSourceChannel = { channel: "stripe-invoices" | "openai-usage" | "openai-costs"; batch: AiIntegrityBatchInput | null; rowCount: number };
+export type AiSourceChannel = { channel: "stripe-invoices" | "openai-usage" | "openai-costs" | "anthropic-usage" | "anthropic-costs" | "gemini-usage" | "gemini-costs"; batch: AiIntegrityBatchInput | null; rowCount: number; scope?: string };
 
 const digest = (value: unknown) => createHash("sha256").update(canonicalAiJson(value)).digest("hex");
 function object(value: unknown): Record<string, unknown> {
@@ -49,6 +49,12 @@ export function aiSourceIncrementalStart(start: string, end: string, coverageSta
   return end <= completeThrough ? null : completeThrough;
 }
 export function assertAiSourceRead(read: AiSourceRead) {
+  if (["/v1/organizations/me", "/v1/organizations/usage_report/messages", "/v1/organizations/cost_report"].includes(read.path)) {
+    const allowed = read.path.endsWith("/me") ? [] : ["starting_at", "ending_at", "bucket_width", "group_by[]", "limit", "page"];
+    if (read.origin !== "https://api.anthropic.com" || read.method !== "GET" || Object.keys(read.query).some(key => !allowed.includes(key))) throw new Error("Only allowlisted Anthropic report reads are supported.");
+    return;
+  }
+
   const expected = read.path === "/v1/invoices" ? "https://api.stripe.com" : ["/v1/organization/usage/completions", "/v1/organization/costs"].includes(read.path) ? "https://api.openai.com" : null;
   if (read.method !== "GET" || read.origin !== expected) throw new Error("Only the allowlisted read endpoints are supported.");
   const keys = read.path === "/v1/invoices" ? ["created[gte]", "created[lt]", "limit", "starting_after"] : ["start_time", "end_time", "bucket_width", "group_by", "limit", "page"];

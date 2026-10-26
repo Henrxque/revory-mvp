@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   if ((await checkRateLimit({ key: `ai-customer-source:${context.workspace.id}:${context.user.id}`, limit: 8, windowMs: 600000 })).limited) return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429, headers });
   try {
     if (!request.headers.get("content-type")?.startsWith("application/json")) throw new Error();
-    const raw: unknown = JSON.parse(await readAiBoundedText(request, 8192));
+    const raw: unknown = JSON.parse(await readAiBoundedText(request, 20000));
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error();
     const { action, ...input } = raw as Record<string, unknown>;
     if ((action === "REGISTER" || action === "SYNC" || action === "PREPARE") && !(await hasCurrentAccountLegalAcceptance(context.user.id))) return NextResponse.json({ error: "Review the current account terms before connecting a source." }, { status: 403, headers });
@@ -39,6 +39,6 @@ export async function POST(request: Request) {
     }
     throw new Error();
   } catch {
-    return NextResponse.json({ error: "The connection action could not be completed. Check the credential type, consent period and confirmed test purchase. A read retry can use the same request key; interrupted reads become retryable after 15 minutes." }, { status: 400, headers });
+    return NextResponse.json({ error: "The connection action could not be completed. Check the credential type, consent period and confirmed purchase. A read retry can use the same request key; interrupted reads become retryable after 15 minutes." }, { status: 400, headers });
   }
 }

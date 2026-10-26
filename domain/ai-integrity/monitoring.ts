@@ -1,5 +1,5 @@
 import { canonicalAiJson } from "./contracts";
-import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, aiDecimal, aiDecimalString, aiDigest, aiTimestamp, reconcileAiIntegrity, type AiScanInput, type AiScanResult } from "./reconciliation";
+import { AI_INTEGRITY_RULE_VERSION, AI_CONNECTED_RULE_VERSION, AI_MULTI_PROVIDER_RULE_VERSION, aiDecimal, aiDecimalString, aiDigest, aiTimestamp, reconcileAiIntegrity, type AiScanInput, type AiScanResult } from "./reconciliation";
 
 export const AI_MONITOR_VERSION = "ai-monitor/rehearsal-v1";
 export const AI_MONITOR_MODE = "SYNTHETIC_REHEARSAL";
@@ -23,7 +23,7 @@ function usageIdentity(input: AiScanInput, row: Record<string, unknown>) {
 function sourceShape(input: AiScanInput) {
   const start = aiTimestamp(input.batches[0].windowStart);
   return {
-    sources: input.batches.map((b) => [b.sourceKind, b.sourceSystem, b.sourceTimezone]).sort((a, b) => canonicalAiJson(a).localeCompare(canonicalAiJson(b))),
+    sources: input.batches.map((b) => [b.sourceKind, b.sourceSystem, b.sourceTimezone, ...(input.ruleVersion === AI_MULTI_PROVIDER_RULE_VERSION ? [(b.dataQualityJson.sourceEvidence as { channels?: Array<{channel:string;limits:string}> } | undefined)?.channels?.map(channel => ({channel:channel.channel,limits:channel.limits})) ?? null] : [])]).sort((a, b) => canonicalAiJson(a).localeCompare(canonicalAiJson(b))),
     buckets: input.buckets.map((b) => [normalizedProvider(b.provider), b.organizationId, b.projectId, b.model,
       b.costBasis, b.costCurrency, b.usageUnit, b.adjustmentKind,
       aiTimestamp(b.windowStart) - start, aiTimestamp(b.windowEnd) - start]).sort((a, b) => canonicalAiJson(a).localeCompare(canonicalAiJson(b))),
@@ -52,13 +52,15 @@ function signals(input: AiScanInput, result: AiScanResult) {
 
 export function compareAiIntegrityPeriods(baseline: AiScanInput, current: AiScanInput, connected = false) {
   if (baseline.workspaceId !== current.workspaceId) throw new Error("Reports must belong to the same workspace.");
-  const ruleVersion = connected ? AI_CONNECTED_RULE_VERSION : AI_INTEGRITY_RULE_VERSION;
-  if (baseline.ruleVersion !== ruleVersion || current.ruleVersion !== ruleVersion) throw new Error("Unsupported monitoring rule version.");
+  const ruleVersion = current.ruleVersion;
+  const supported = connected ? [AI_CONNECTED_RULE_VERSION, AI_MULTI_PROVIDER_RULE_VERSION] : [AI_INTEGRITY_RULE_VERSION];
+  if (!supported.includes(baseline.ruleVersion) || !supported.includes(current.ruleVersion)) throw new Error("Unsupported monitoring rule version.");
   const before = reconcileAiIntegrity(baseline), after = reconcileAiIntegrity(current);
   const from = aiTimestamp(before.windowStart), through = aiTimestamp(before.windowEnd);
   const nextFrom = aiTimestamp(after.windowStart), nextThrough = aiTimestamp(after.windowEnd);
   let limit: string | null = null;
-  if (through !== nextFrom || through - from !== nextThrough - nextFrom) limit = "ADJACENT_EQUAL_DURATION_WINDOWS_REQUIRED";
+  if (baseline.ruleVersion !== current.ruleVersion) limit = "RULE_VERSION_CHANGED";
+  else if (through !== nextFrom || through - from !== nextThrough - nextFrom) limit = "ADJACENT_EQUAL_DURATION_WINDOWS_REQUIRED";
   else if (baseline.lagHours !== current.lagHours) limit = "CONSOLIDATION_LAG_CHANGED";
   else if (canonicalAiJson(sourceShape(baseline)) !== canonicalAiJson(sourceShape(current))) limit = "SOURCE_OR_BUCKET_SCOPE_CHANGED";
   else if ([baseline, current].some((input) => input.batches.some((b) => Number(b.dataQualityJson.rejectedRows ?? 0) > 0))) limit = "EXCLUDED_SOURCE_ROWS";
