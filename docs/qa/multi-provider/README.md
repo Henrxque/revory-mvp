@@ -37,3 +37,7 @@ The database harness creates and drops its own randomly named database. The brow
 Nonempty official account payloads and independent export equivalence for Anthropic, Gemini Developer API and Vertex; remote isolated migration/staging; real permissions, lag, IAM and credential rotation checks; reviewed privacy disclosures; explicit publication authority. See the [release gate](../../operations/REVORY_MULTI_PROVIDER_VALIDATION_AND_RELEASE.md).
 
 Gemini Developer API usage is output-only when its documented metric exists. Missing usage remains unknown. Google billing export provenance/completeness is owner-reviewed, billing may lag beyond 48h, and credits/adjustments can suppress cost attribution. No comprehensive margin or recovered-money claim follows from these fixtures.
+
+## Automatic remote Preview
+
+The Git integration attempted Preview `dpl_4CKHxDJ8PHwTyL7p9PFYxjQNmth2` for implementation commit `412ae37`. It stopped at the existing deployment guard in `scripts/vercel-build.mjs:28`: `DATABASE_URL is required before a Vercel deployment can verify and apply Prisma migrations.` No remote migration ran. The local production build passed; remote staging remains unavailable until an isolated database and branch-specific environment are reviewed/configured. The guard was preserved and no secrets were changed to bypass it. [Sanitized evidence](remote-preview.json).
